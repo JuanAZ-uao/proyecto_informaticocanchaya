@@ -25,7 +25,7 @@ async function registrar({ nombre, correo, telefono, password }) {
   const usuario = await usuarioRepository.crear({ nombre, correo, telefono, passwordHash });
 
   return {
-    id: usuario._id,
+    id: usuario.id,
     nombre: usuario.nombre,
     correo: usuario.correo,
   };
@@ -42,12 +42,12 @@ async function iniciarSesion({ correo, password }) {
     throw new ErrorDeAplicacion('Correo o contraseña incorrectos', 401);
   }
 
-  const token = generarToken({ sub: usuario._id.toString() });
+  const token = generarToken({ sub: usuario.id });
 
   return {
     token,
     usuario: {
-      id: usuario._id,
+      id: usuario.id,
       nombre: usuario.nombre,
       correo: usuario.correo,
     },
@@ -62,13 +62,13 @@ async function solicitarRecuperacion({ correo, urlBaseFrontend }) {
     return;
   }
 
-  await passwordResetRepository.invalidarPendientesDeUsuario(usuario._id);
+  await passwordResetRepository.invalidarPendientesDeUsuario(usuario.id);
 
   const tokenPlano = generarTokenPlano();
   const tokenHash = hashearToken(tokenPlano);
   const expiresAt = new Date(Date.now() + env.passwordResetTokenExpiresMin * 60 * 1000);
 
-  await passwordResetRepository.crear({ usuario: usuario._id, tokenHash, expiresAt });
+  await passwordResetRepository.crear({ usuario: usuario.id, tokenHash, expiresAt });
 
   const enlaceRestablecimiento = `${urlBaseFrontend}/restablecer-password?token=${tokenPlano}`;
   await enviarCorreoRecuperacion({ para: usuario.correo, enlaceRestablecimiento });
@@ -83,8 +83,8 @@ async function restablecerPassword({ token, nuevaPassword }) {
   }
 
   const passwordHash = await bcrypt.hash(nuevaPassword, SALT_ROUNDS);
-  await usuarioRepository.actualizarPassword(registro.usuario, passwordHash);
-  await passwordResetRepository.marcarUsado(registro._id);
+  await usuarioRepository.actualizarPassword(registro.usuarioId, passwordHash);
+  await passwordResetRepository.marcarUsado(registro.id);
 }
 
 module.exports = {

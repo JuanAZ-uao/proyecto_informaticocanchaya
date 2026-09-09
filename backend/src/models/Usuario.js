@@ -1,30 +1,17 @@
-const mongoose = require('mongoose');
+const TABLA = 'usuarios';
 
-const usuarioSchema = new mongoose.Schema(
-  {
-    nombre: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    correo: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-    telefono: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    passwordHash: {
-      type: String,
-      required: true,
-    },
-  },
-  { timestamps: true }
-);
+function aDominio(fila) {
+  if (!fila) return null;
 
-module.exports = mongoose.model('Usuario', usuarioSchema);
+  return {
+    id: fila.id,
+    nombre: fila.nombre,
+    correo: fila.correo,
+    telefono: fila.telefono,
+    passwordHash: fila.password_hash,
+    createdAt: fila.created_at,
+    updatedAt: fila.updated_at,
+  };
+}
+
+module.exports = { TABLA, aDominio };

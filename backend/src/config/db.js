@@ -1,20 +1,23 @@
-const mongoose = require('mongoose');
+const { Pool } = require('pg');
 const env = require('./env');
 
-async function connectDB() {
-  mongoose.set('strictQuery', true);
+const requiereSsl = /sslmode=require|neon\.tech|supabase\.co|render\.com|railway\.app/.test(env.databaseUrl);
 
-  try {
-    await mongoose.connect(env.mongodbUri);
-    console.log(`[DB] Conectado a MongoDB (${mongoose.connection.name})`);
-  } catch (error) {
-    console.error('[DB] Error al conectar a MongoDB:', error.message);
+const pool = new Pool({
+  connectionString: env.databaseUrl,
+  ssl: requiereSsl ? { rejectUnauthorized: false } : false,
+});
+
+pool.on('error', (error) => {
+  console.error('[DB] Error inesperado en el pool de PostgreSQL:', error.message);
+});
+
+pool
+  .query('SELECT 1')
+  .then(() => console.log('[DB] Conectado a PostgreSQL'))
+  .catch((error) => {
+    console.error('[DB] Error al conectar a PostgreSQL:', error.message);
     process.exit(1);
-  }
-
-  mongoose.connection.on('disconnected', () => {
-    console.warn('[DB] Conexión a MongoDB perdida');
   });
-}
 
-module.exports = connectDB;
+module.exports = pool;

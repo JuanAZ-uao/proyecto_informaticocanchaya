@@ -170,21 +170,20 @@ Tablero Jira del equipo: espacio CanchaYaUAO — proyecto PIG1. El docente Jorge
 
 ## Implementación técnica (Sprint 1)
 
-> Nota: el Sprint Planning original contemplaba PostgreSQL para el modelado de datos; la implementación final de este repositorio usa **MongoDB** (base de datos no relacional) por decisión del equipo.
-
-Arquitectura por capas en frontend y backend, ambos en JavaScript.
+Arquitectura por capas en frontend y backend, ambos en JavaScript. Base de datos relacional: **PostgreSQL**, según lo planteado por el equipo en la exposición de arquitectura.
 
 El repositorio contiene dos proyectos npm independientes, `backend/` y `frontend/`, cada uno con su propio `package.json`. No hay un `package.json` en la raíz: entra a cada carpeta para instalar dependencias y correrlos (ver comandos más abajo en cada sección).
 
 ### Backend — `backend/`
 
-Node.js + Express, arquitectura por capas, MongoDB (Mongoose) como base de datos.
+Node.js + Express, arquitectura por capas, PostgreSQL (driver `pg`, SQL parametrizado) como base de datos.
 
 ```
 backend/src/
-├── config/        # variables de entorno y conexión a MongoDB
-├── models/        # esquemas Mongoose (Usuario, Cancha, PasswordResetToken)
-├── repositories/  # acceso a datos
+├── config/        # variables de entorno y conexión (pool de PostgreSQL)
+├── db/            # esquema SQL (schema.sql) y script de migración
+├── models/        # mapeo fila SQL -> objeto de dominio (Usuario, Cancha, PasswordResetToken)
+├── repositories/  # acceso a datos (consultas SQL)
 ├── services/      # lógica de negocio (auth, canchas, email)
 ├── controllers/   # manejadores de rutas
 ├── routes/        # definición de endpoints
@@ -192,6 +191,8 @@ backend/src/
 ├── utils/         # JWT, política de contraseñas, tokens de recuperación
 └── seed/          # datos semilla de canchas
 ```
+
+**Tablas:** `usuarios`, `canchas`, `password_reset_tokens` (ver [backend/src/db/schema.sql](backend/src/db/schema.sql)).
 
 **Endpoints:**
 
@@ -203,13 +204,14 @@ backend/src/
 | POST | `/api/auth/restablecer-password` | Restablecer contraseña con token (US-03) | No |
 | GET | `/api/canchas` | Listado de canchas disponibles (US-04) | Sí (JWT) |
 
-**Configuración:** copiar `backend/.env.example` a `backend/.env` y completar `MONGODB_URI`, `JWT_SECRET` y (opcionalmente) credenciales SMTP para el envío real de correos de recuperación. Sin SMTP configurado, el enlace de recuperación se imprime en la consola del servidor (modo desarrollo).
+**Configuración:** copiar `backend/.env.example` a `backend/.env` y completar `DATABASE_URL` (cadena de conexión de tu instancia PostgreSQL, ej. Neon/Supabase/Railway o una instalación local), `JWT_SECRET` y (opcionalmente) credenciales SMTP para el envío real de correos de recuperación. Sin SMTP configurado, el enlace de recuperación se imprime en la consola del servidor (modo desarrollo).
 
 **Comandos:**
 
 ```bash
 cd backend
 npm install
+npm run migrate        # crea las tablas (usuarios, canchas, password_reset_tokens)
 npm run seed:canchas   # carga canchas de ejemplo
 npm run dev            # http://localhost:4000
 ```

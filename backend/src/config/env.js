@@ -3,7 +3,7 @@ require('dotenv').config();
 const env = {
   port: process.env.PORT || 4000,
   nodeEnv: process.env.NODE_ENV || 'development',
-  mongodbUri: process.env.MONGODB_URI,
+  databaseUrl: process.env.DATABASE_URL,
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '1d',
   passwordResetTokenExpiresMin: Number(process.env.PASSWORD_RESET_TOKEN_EXPIRES_MIN || 30),
@@ -17,8 +17,8 @@ const env = {
   },
 };
 
-if (!env.mongodbUri) {
-  throw new Error('Falta la variable de entorno MONGODB_URI');
+if (!env.databaseUrl) {
+  throw new Error('Falta la variable de entorno DATABASE_URL');
 }
 
 if (!env.jwtSecret) {

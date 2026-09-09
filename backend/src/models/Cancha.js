@@ -1,23 +1,16 @@
-const mongoose = require('mongoose');
+const TABLA = 'canchas';
 
-const canchaSchema = new mongoose.Schema(
-  {
-    nombre: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    direccion: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    disponible: {
-      type: Boolean,
-      default: true,
-    },
-  },
-  { timestamps: true }
-);
+function aDominio(fila) {
+  if (!fila) return null;
 
-module.exports = mongoose.model('Cancha', canchaSchema);
+  return {
+    id: fila.id,
+    nombre: fila.nombre,
+    direccion: fila.direccion,
+    disponible: fila.disponible,
+    createdAt: fila.created_at,
+    updatedAt: fila.updated_at,
+  };
+}
+
+module.exports = { TABLA, aDominio };

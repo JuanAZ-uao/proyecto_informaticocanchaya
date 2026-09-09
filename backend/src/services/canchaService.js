@@ -4,7 +4,7 @@ async function listarCanchasDisponibles() {
   const canchas = await canchaRepository.listarDisponibles();
 
   return canchas.map((cancha) => ({
-    id: cancha._id,
+    id: cancha.id,
     nombre: cancha.nombre,
     direccion: cancha.direccion,
   }));

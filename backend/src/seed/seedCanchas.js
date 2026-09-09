@@ -1,6 +1,5 @@
-const mongoose = require('mongoose');
-const connectDB = require('../config/db');
-const Cancha = require('../models/Cancha');
+const pool = require('../config/db');
+const canchaRepository = require('../repositories/canchaRepository');
 
 const canchasSemilla = [
   { nombre: 'Cancha Los Cerros', direccion: 'Cra 15 # 45-20, Cali', disponible: true },
@@ -11,13 +10,11 @@ const canchasSemilla = [
 ];
 
 async function ejecutarSeed() {
-  await connectDB();
-
-  await Cancha.deleteMany({});
-  await Cancha.insertMany(canchasSemilla);
+  await canchaRepository.eliminarTodas();
+  await canchaRepository.crearMuchas(canchasSemilla);
 
   console.log(`[SEED] Se insertaron ${canchasSemilla.length} canchas de ejemplo`);
-  await mongoose.disconnect();
+  await pool.end();
   process.exit(0);
 }
 
