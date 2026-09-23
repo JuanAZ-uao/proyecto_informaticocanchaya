@@ -178,6 +178,17 @@ main.contenido.ancho {
   gap: 1rem;
 }
 
+a.tarjeta-cancha {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.15s ease-in-out;
+}
+
+a.tarjeta-cancha:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 .tarjeta-cancha h3 {
   margin: 0 0 0.4rem;
   font-size: 1.05rem;
@@ -187,6 +198,52 @@ main.contenido.ancho {
   margin: 0;
   color: #52606d;
   font-size: 0.9rem;
+}
+
+.enlace-volver {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: var(--color-primario);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.detalle-direccion {
+  color: #52606d;
+  margin: 0 0 0.5rem;
+}
+
+.detalle-costo {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 0 0 1.5rem;
+}
+
+.subtitulo {
+  font-size: 1.1rem;
+  margin: 0 0 0.75rem;
+}
+
+.lista-horarios {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lista-horarios li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--color-fondo);
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.dia-horario {
+  font-weight: 600;
 }
 
 .estado-carga,

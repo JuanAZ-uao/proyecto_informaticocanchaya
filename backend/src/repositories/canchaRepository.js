@@ -9,6 +9,11 @@ async function listarDisponibles() {
   return rows.map(Cancha.aDominio);
 }
 
+async function obtenerPorId(id) {
+  const { rows } = await pool.query('SELECT * FROM canchas WHERE id = $1', [id]);
+  return Cancha.aDominio(rows[0]);
+}
+
 async function crearMuchas(canchas) {
   const cliente = await pool.connect();
 
@@ -18,10 +23,10 @@ async function crearMuchas(canchas) {
     const insertadas = [];
     for (const cancha of canchas) {
       const { rows } = await cliente.query(
-        `INSERT INTO canchas (nombre, direccion, disponible)
-         VALUES ($1, $2, $3)
+        `INSERT INTO canchas (nombre, direccion, disponible, costo_hora)
+         VALUES ($1, $2, $3, $4)
          RETURNING *`,
-        [cancha.nombre, cancha.direccion, cancha.disponible ?? true]
+        [cancha.nombre, cancha.direccion, cancha.disponible ?? true, cancha.costoHora ?? 0]
       );
       insertadas.push(rows[0]);
     }
@@ -47,6 +52,7 @@ async function contar() {
 
 module.exports = {
   listarDisponibles,
+  obtenerPorId,
   crearMuchas,
   eliminarTodas,
   contar,

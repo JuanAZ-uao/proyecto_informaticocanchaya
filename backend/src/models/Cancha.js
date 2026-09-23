@@ -8,6 +8,7 @@ function aDominio(fila) {
     nombre: fila.nombre,
     direccion: fila.direccion,
     disponible: fila.disponible,
+    costoHora: Number(fila.costo_hora),
     createdAt: fila.created_at,
     updatedAt: fila.updated_at,
   };

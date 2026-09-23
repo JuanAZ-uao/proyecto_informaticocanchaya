@@ -5,15 +5,9 @@ const { generarToken } = require('../utils/jwt');
 const { generarTokenPlano, hashearToken } = require('../utils/resetToken');
 const { enviarCorreoRecuperacion } = require('./emailService');
 const env = require('../config/env');
+const ErrorDeAplicacion = require('../utils/ErrorDeAplicacion');
 
 const SALT_ROUNDS = 10;
-
-class ErrorDeAplicacion extends Error {
-  constructor(mensaje, statusCode = 400) {
-    super(mensaje);
-    this.statusCode = statusCode;
-  }
-}
 
 async function registrar({ nombre, correo, telefono, password }) {
   const existente = await usuarioRepository.buscarPorCorreo(correo);
