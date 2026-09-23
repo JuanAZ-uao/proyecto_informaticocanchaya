@@ -246,6 +246,61 @@ a.tarjeta-cancha:hover {
   font-weight: 600;
 }
 
+.campo-fecha {
+  max-width: 220px;
+  margin: 1rem 0;
+}
+
+.campo-fecha input {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.grid-bloques {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.bloque-horario {
+  padding: 0.55rem 0.4rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 6px;
+  background-color: white;
+  color: var(--color-texto);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+.bloque-horario:hover {
+  border-color: var(--color-primario);
+}
+
+.bloque-horario.seleccionado {
+  background-color: var(--color-primario);
+  border-color: var(--color-primario);
+  color: white;
+}
+
+.acciones-reserva {
+  margin-top: 1rem;
+}
+
+.resumen-reserva {
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  background-color: var(--color-fondo);
+  border-radius: 8px;
+}
+
+.resumen-reserva p {
+  margin: 0.3rem 0;
+}
+
 .estado-carga,
 .estado-vacio {
   text-align: center;
