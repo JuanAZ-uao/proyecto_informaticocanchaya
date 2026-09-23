@@ -1,0 +1,54 @@
+﻿name: CI
+
+on:
+  pull_request:
+    branches: [main, develop, sprint_2]
+  push:
+    branches: ["feature/**", "fix/**"]
+
+jobs:
+  backend:
+    name: Backend - instalación y pruebas
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Ejecutar pruebas
+        run: npm test --if-present
+
+  frontend:
+    name: Frontend - instalación y build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Compilar (build)
+        run: npm run build --if-present
