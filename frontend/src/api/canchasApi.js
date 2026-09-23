@@ -7,6 +7,15 @@ export function obtenerCanchas(filtros = {}) {
   if (filtros.precioMin) params.precioMin = filtros.precioMin;
   if (filtros.precioMax) params.precioMax = filtros.precioMax;
   if (filtros.fecha) params.fecha = filtros.fecha;
+  if (filtros.hora) params.hora = filtros.hora;
 
   return axiosClient.get('/canchas', { params });
+}
+
+export function obtenerCanchaPorId(id) {
+  return axiosClient.get(`/canchas/${id}`);
+}
+
+export function obtenerBloquesOcupados(id, fecha) {
+  return axiosClient.get(`/canchas/${id}/reservas`, { params: { fecha } });
 }

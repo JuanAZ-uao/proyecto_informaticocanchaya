@@ -6,6 +6,7 @@ import LoginPage from '../pages/LoginPage';
 import ForgotPasswordPage from '../pages/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/ResetPasswordPage';
 import CanchasListPage from '../pages/CanchasListPage';
+import CanchaDetallePage from '../pages/CanchaDetallePage';
 
 export default function AppRouter() {
   const location = useLocation();
@@ -26,6 +27,14 @@ export default function AppRouter() {
             element={
               <ProtectedRoute>
                 <CanchasListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/canchas/:id"
+            element={
+              <ProtectedRoute>
+                <CanchaDetallePage />
               </ProtectedRoute>
             }
           />

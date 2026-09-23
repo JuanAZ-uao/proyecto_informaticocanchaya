@@ -5,10 +5,11 @@ export default function FiltroCanchas({ onFiltrar }) {
   const [precioMin, setPrecioMin] = useState('');
   const [precioMax, setPrecioMax] = useState('');
   const [fecha, setFecha] = useState('');
+  const [hora, setHora] = useState('');
 
   function manejarSubmit(evento) {
     evento.preventDefault();
-    onFiltrar({ zona, precioMin, precioMax, fecha });
+    onFiltrar({ zona, precioMin, precioMax, fecha, hora });
   }
 
   function limpiarFiltros() {
@@ -16,6 +17,7 @@ export default function FiltroCanchas({ onFiltrar }) {
     setPrecioMin('');
     setPrecioMax('');
     setFecha('');
+    setHora('');
     onFiltrar({});
   }
 
@@ -61,6 +63,17 @@ export default function FiltroCanchas({ onFiltrar }) {
           type="date"
           value={fecha}
           onChange={(evento) => setFecha(evento.target.value)}
+        />
+      </div>
+
+      <div className="campo">
+        <label htmlFor="hora">Hora</label>
+        <input
+          id="hora"
+          type="time"
+          step="3600"
+          value={hora}
+          onChange={(evento) => setHora(evento.target.value)}
         />
       </div>
 
