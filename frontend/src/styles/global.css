@@ -263,3 +263,39 @@ a.tarjeta-cancha:hover {
     border-radius: 8px;
   }
 }
+
+.formulario-filtro {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.formulario-filtro .campo {
+  flex: 1 1 160px;
+}
+
+.fila-botones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.boton-secundario {
+  background-color: white;
+  color: var(--color-primario);
+  border: 1px solid var(--color-primario);
+  border-radius: 6px;
+  padding: 0.7rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.boton-secundario:hover {
+  background-color: var(--color-fondo);
+}
+
+.cancha-precio {
+  font-weight: 600;
+  color: var(--color-primario-oscuro);
+}

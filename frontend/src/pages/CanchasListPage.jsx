@@ -3,18 +3,22 @@ import { obtenerCanchas } from '../api/canchasApi';
 import extraerMensajeError from '../api/extraerMensajeError';
 import Alerta from '../components/common/Alerta';
 import CanchaCard from '../components/canchas/CanchaCard';
+import FiltroCanchas from '../components/canchas/FiltroCanchas';
 
 export default function CanchasListPage() {
   const [canchas, setCanchas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
+  const [filtros, setFiltros] = useState({});
 
   useEffect(() => {
     let activo = true;
 
     async function cargarCanchas() {
+      setCargando(true);
+      setError('');
       try {
-        const { data } = await obtenerCanchas();
+        const { data } = await obtenerCanchas(filtros);
         if (activo) setCanchas(data.canchas);
       } catch (err) {
         if (activo) setError(extraerMensajeError(err, 'No fue posible cargar el listado de canchas'));
@@ -27,18 +31,23 @@ export default function CanchasListPage() {
     return () => {
       activo = false;
     };
-  }, []);
+  }, [filtros]);
 
   return (
     <div>
       <h1 className="titulo-pagina">Canchas disponibles</h1>
+
+      <FiltroCanchas onFiltrar={setFiltros} />
+      <p className="texto-ayuda">
+        La fecha se valida, pero la disponibilidad exacta por horario se habilitará junto con el motor de reservas (US-07 / US-08).
+      </p>
 
       <Alerta mensaje={error} />
 
       {cargando && <p className="estado-carga">Cargando canchas...</p>}
 
       {!cargando && !error && canchas.length === 0 && (
-        <p className="estado-vacio">No hay canchas disponibles por el momento.</p>
+        <p className="estado-vacio">No hay canchas disponibles con esos filtros.</p>
       )}
 
       {!cargando && canchas.length > 0 && (

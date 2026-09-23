@@ -2,13 +2,15 @@ const canchaRepository = require('../repositories/canchaRepository');
 const horarioRepository = require('../repositories/horarioRepository');
 const ErrorDeAplicacion = require('../utils/ErrorDeAplicacion');
 
-async function listarCanchasDisponibles() {
-  const canchas = await canchaRepository.listarDisponibles();
+async function listarCanchasDisponibles(filtros = {}) {
+  const canchas = await canchaRepository.listarDisponibles(filtros);
 
   return canchas.map((cancha) => ({
     id: cancha.id,
     nombre: cancha.nombre,
     direccion: cancha.direccion,
+    zona: cancha.zona,
+    costoHora: Number(cancha.costoHora),
   }));
 }
 

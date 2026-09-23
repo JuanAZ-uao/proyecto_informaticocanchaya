@@ -1,9 +1,28 @@
 const pool = require('../config/db');
 const Cancha = require('../models/Cancha');
 
-async function listarDisponibles() {
+async function listarDisponibles(filtros = {}) {
+  const condiciones = ['disponible = true'];
+  const valores = [];
+
+  if (filtros.zona) {
+    valores.push(`%${filtros.zona}%`);
+    condiciones.push(`zona ILIKE $${valores.length}`);
+  }
+
+  if (filtros.precioMin !== null && filtros.precioMin !== undefined) {
+    valores.push(filtros.precioMin);
+    condiciones.push(`costo_hora >= $${valores.length}`);
+  }
+
+  if (filtros.precioMax !== null && filtros.precioMax !== undefined) {
+    valores.push(filtros.precioMax);
+    condiciones.push(`costo_hora <= $${valores.length}`);
+  }
+
   const { rows } = await pool.query(
-    'SELECT * FROM canchas WHERE disponible = true ORDER BY nombre ASC'
+    `SELECT * FROM canchas WHERE ${condiciones.join(' AND ')} ORDER BY nombre ASC`,
+    valores
   );
 
   return rows.map(Cancha.aDominio);
@@ -23,10 +42,10 @@ async function crearMuchas(canchas) {
     const insertadas = [];
     for (const cancha of canchas) {
       const { rows } = await cliente.query(
-        `INSERT INTO canchas (nombre, direccion, disponible, costo_hora)
-         VALUES ($1, $2, $3, $4)
+        `INSERT INTO canchas (nombre, direccion, zona, disponible, costo_hora)
+         VALUES ($1, $2, $3, $4, $5)
          RETURNING *`,
-        [cancha.nombre, cancha.direccion, cancha.disponible ?? true, cancha.costoHora ?? 0]
+        [cancha.nombre, cancha.direccion, cancha.zona ?? 'Sin zona', cancha.disponible ?? true, cancha.costoHora ?? 0]
       );
       insertadas.push(rows[0]);
     }
