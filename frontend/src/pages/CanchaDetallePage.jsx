@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { obtenerCanchaPorId } from '../api/canchasApi';
+import { obtenerBloquesOcupados, obtenerCanchaPorId } from '../api/canchasApi';
 import extraerMensajeError from '../api/extraerMensajeError';
 import Alerta from '../components/common/Alerta';
 
@@ -63,9 +63,11 @@ export default function CanchaDetallePage() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
 
-  const [fecha, setFecha] = useState('');
+  const [fecha, setFecha] = useState(obtenerFechaMinima());
   const [bloqueSeleccionado, setBloqueSeleccionado] = useState(null);
   const [reservaIniciada, setReservaIniciada] = useState(false);
+  const [bloquesOcupados, setBloquesOcupados] = useState([]);
+  const [mensajeValidacion, setMensajeValidacion] = useState('');
 
   useEffect(() => {
     let activo = true;
@@ -87,6 +89,34 @@ export default function CanchaDetallePage() {
     };
   }, [id]);
 
+  useEffect(() => {
+    let activo = true;
+
+    async function cargarOcupados() {
+      if (!fecha) {
+        setBloquesOcupados([]);
+        return;
+      }
+
+      try {
+        const { data } = await obtenerBloquesOcupados(id, fecha);
+        if (activo) setBloquesOcupados(data.ocupados);
+      } catch {
+        if (activo) setBloquesOcupados([]);
+      }
+    }
+
+    cargarOcupados();
+    return () => {
+      activo = false;
+    };
+  }, [id, fecha]);
+
+  const bloquesOcupadosSet = useMemo(
+    () => new Set(bloquesOcupados.map((ocupado) => formatearHora(ocupado.horaInicio))),
+    [bloquesOcupados]
+  );
+
   const horarioDelDia = useMemo(() => {
     if (!cancha || !fecha) return null;
     const diaSemana = new Date(`${fecha}T00:00:00`).getDay();
@@ -102,11 +132,28 @@ export default function CanchaDetallePage() {
     setFecha(evento.target.value);
     setBloqueSeleccionado(null);
     setReservaIniciada(false);
+    setMensajeValidacion('');
   }
 
   function manejarSeleccionBloque(bloque) {
     setBloqueSeleccionado(bloque);
     setReservaIniciada(false);
+    setMensajeValidacion('');
+  }
+
+  function manejarIniciarReserva() {
+    if (!fecha) {
+      setMensajeValidacion('Selecciona una fecha antes de continuar.');
+      return;
+    }
+
+    if (!bloqueSeleccionado) {
+      setMensajeValidacion('Selecciona un bloque horario disponible antes de continuar.');
+      return;
+    }
+
+    setMensajeValidacion('');
+    setReservaIniciada(true);
   }
 
   return (
@@ -127,6 +174,48 @@ export default function CanchaDetallePage() {
 
           <h2 className="subtitulo">Horarios disponibles</h2>
 
+          <div className="campo campo-fecha">
+            <label htmlFor="fecha-reserva">Fecha</label>
+            <input
+              id="fecha-reserva"
+              type="date"
+              min={obtenerFechaMinima()}
+              value={fecha}
+              onChange={manejarCambioFecha}
+            />
+          </div>
+
+          {!horarioDelDia && (
+            <p className="estado-vacio">La cancha no tiene horarios disponibles para el día seleccionado.</p>
+          )}
+
+          {horarioDelDia && (
+            <div className="grid-bloques">
+              {bloquesDisponibles.map((bloque) => {
+                const seleccionado = bloqueSeleccionado?.horaInicio === bloque.horaInicio;
+                const ocupado = bloquesOcupadosSet.has(bloque.horaInicio);
+                const claseBloque = ['bloque-horario', seleccionado ? 'seleccionado' : '', ocupado ? 'ocupado' : '']
+                  .filter(Boolean)
+                  .join(' ');
+                return (
+                  <button
+                    key={bloque.horaInicio}
+                    type="button"
+                    className={claseBloque}
+                    disabled={ocupado}
+                    aria-disabled={ocupado}
+                    onClick={() => manejarSeleccionBloque(bloque)}
+                  >
+                    {bloque.horaInicio} - {bloque.horaFin}
+                    {ocupado && <span className="etiqueta-ocupado"> · Ocupado</span>}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          <h2 className="subtitulo">Horario semanal</h2>
+
           {cancha.horarios.length === 0 && (
             <p className="estado-vacio">Esta cancha aún no tiene horarios configurados.</p>
           )}
@@ -144,46 +233,12 @@ export default function CanchaDetallePage() {
             </ul>
           )}
 
-          <h2 className="subtitulo">Elige fecha y hora para reservar</h2>
-
-          <div className="campo campo-fecha">
-            <label htmlFor="fecha-reserva">Fecha</label>
-            <input
-              id="fecha-reserva"
-              type="date"
-              min={obtenerFechaMinima()}
-              value={fecha}
-              onChange={manejarCambioFecha}
-            />
-          </div>
-
-          {fecha && !horarioDelDia && (
-            <p className="estado-vacio">La cancha no tiene horarios disponibles para el día seleccionado.</p>
-          )}
-
-          {horarioDelDia && (
-            <div className="grid-bloques">
-              {bloquesDisponibles.map((bloque) => {
-                const seleccionado = bloqueSeleccionado?.horaInicio === bloque.horaInicio;
-                return (
-                  <button
-                    key={bloque.horaInicio}
-                    type="button"
-                    className={`bloque-horario ${seleccionado ? 'seleccionado' : ''}`}
-                    onClick={() => manejarSeleccionBloque(bloque)}
-                  >
-                    {bloque.horaInicio} - {bloque.horaFin}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {bloqueSeleccionado && !reservaIniciada && (
+          {!reservaIniciada && (
             <div className="acciones-reserva">
-              <button type="button" className="boton-primario" onClick={() => setReservaIniciada(true)}>
+              <button type="button" className="boton-primario" onClick={manejarIniciarReserva}>
                 Iniciar reserva
               </button>
+              <Alerta mensaje={mensajeValidacion} />
             </div>
           )}
 

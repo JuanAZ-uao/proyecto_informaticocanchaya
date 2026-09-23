@@ -4,6 +4,16 @@ const obtenerDetalleValidators = [
   param('id').isUUID().withMessage('El id de la cancha no es válido'),
 ];
 
+const listarOcupadosValidators = [
+  param('id').isUUID().withMessage('El id de la cancha no es válido'),
+  query('fecha')
+    .notEmpty()
+    .withMessage('fecha es obligatoria')
+    .bail()
+    .isISO8601()
+    .withMessage('fecha debe tener formato ISO (YYYY-MM-DD)'),
+];
+
 const filtrarCanchasValidators = [
   query('zona').optional().trim().notEmpty().withMessage('La zona no puede estar vacía'),
   query('precioMin')
@@ -20,4 +30,4 @@ const filtrarCanchasValidators = [
     .withMessage('fecha debe tener formato ISO (YYYY-MM-DD)'),
 ];
 
-module.exports = { obtenerDetalleValidators, filtrarCanchasValidators };
+module.exports = { obtenerDetalleValidators, filtrarCanchasValidators, listarOcupadosValidators };

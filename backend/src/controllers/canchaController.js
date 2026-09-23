@@ -8,8 +8,6 @@ async function listar(req, res, next) {
       zona: zona || null,
       precioMin: precioMin !== undefined ? Number(precioMin) : null,
       precioMax: precioMax !== undefined ? Number(precioMax) : null,
-      // La fecha se valida por formato (US-06), pero aún no filtra disponibilidad real:
-      // eso depende del motor de reservas (EPIC-03 / US-07 y US-08), todavía en construcción.
       fecha: fecha || null,
     };
 
@@ -29,4 +27,13 @@ async function obtenerDetalle(req, res, next) {
   }
 }
 
-module.exports = { listar, obtenerDetalle };
+async function listarOcupados(req, res, next) {
+  try {
+    const ocupados = await canchaService.listarBloquesOcupados(req.params.id, req.query.fecha);
+    return res.status(200).json({ ocupados });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+module.exports = { listar, obtenerDetalle, listarOcupados };

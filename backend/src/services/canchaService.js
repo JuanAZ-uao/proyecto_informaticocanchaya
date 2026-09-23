@@ -1,5 +1,6 @@
 const canchaRepository = require('../repositories/canchaRepository');
 const horarioRepository = require('../repositories/horarioRepository');
+const reservaRepository = require('../repositories/reservaRepository');
 const ErrorDeAplicacion = require('../utils/ErrorDeAplicacion');
 
 async function listarCanchasDisponibles(filtros = {}) {
@@ -35,4 +36,18 @@ async function obtenerDetalleCancha(id) {
   };
 }
 
-module.exports = { listarCanchasDisponibles, obtenerDetalleCancha };
+async function listarBloquesOcupados(canchaId, fecha) {
+  const cancha = await canchaRepository.obtenerPorId(canchaId);
+  if (!cancha) {
+    throw new ErrorDeAplicacion('Cancha no encontrada', 404);
+  }
+
+  const reservas = await reservaRepository.listarPorCanchaYFecha(canchaId, fecha);
+
+  return reservas.map((reserva) => ({
+    horaInicio: reserva.horaInicio,
+    horaFin: reserva.horaFin,
+  }));
+}
+
+module.exports = { listarCanchasDisponibles, obtenerDetalleCancha, listarBloquesOcupados };

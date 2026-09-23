@@ -39,7 +39,7 @@ export default function CanchasListPage() {
 
       <FiltroCanchas onFiltrar={setFiltros} />
       <p className="texto-ayuda">
-        La fecha se valida, pero la disponibilidad exacta por horario se habilitará junto con el motor de reservas (US-07 / US-08).
+        El filtro de fecha muestra canchas con horario ese día de la semana; los bloques disponibles se confirman en el detalle de cada cancha.
       </p>
 
       <Alerta mensaje={error} />

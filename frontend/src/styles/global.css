@@ -286,8 +286,29 @@ a.tarjeta-cancha:hover {
   color: white;
 }
 
+.bloque-horario.ocupado,
+.bloque-horario:disabled {
+  background-color: var(--color-fondo);
+  border-color: var(--color-borde);
+  color: #9aa5b1;
+  cursor: not-allowed;
+}
+
+.bloque-horario.ocupado:hover {
+  border-color: var(--color-borde);
+}
+
+.etiqueta-ocupado {
+  display: block;
+  font-size: 0.7rem;
+}
+
 .acciones-reserva {
   margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-start;
 }
 
 .resumen-reserva {

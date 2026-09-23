@@ -14,3 +14,7 @@ export function obtenerCanchas(filtros = {}) {
 export function obtenerCanchaPorId(id) {
   return axiosClient.get(`/canchas/${id}`);
 }
+
+export function obtenerBloquesOcupados(id, fecha) {
+  return axiosClient.get(`/canchas/${id}/reservas`, { params: { fecha } });
+}

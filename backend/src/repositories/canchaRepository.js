@@ -20,6 +20,20 @@ async function listarDisponibles(filtros = {}) {
     condiciones.push(`costo_hora <= $${valores.length}`);
   }
 
+  if (filtros.fecha) {
+    valores.push(filtros.fecha);
+    const posicionFecha = valores.length;
+    condiciones.push(`EXISTS (
+      SELECT 1 FROM horarios_disponibles h
+      WHERE h.cancha_id = canchas.id
+        AND h.dia_semana = EXTRACT(DOW FROM $${posicionFecha}::date)
+        AND (
+          SELECT COUNT(*) FROM reservas r
+          WHERE r.cancha_id = canchas.id AND r.fecha = $${posicionFecha}::date
+        ) < FLOOR(EXTRACT(EPOCH FROM (h.hora_fin - h.hora_inicio)) / 3600)
+    )`);
+  }
+
   const { rows } = await pool.query(
     `SELECT * FROM canchas WHERE ${condiciones.join(' AND ')} ORDER BY nombre ASC`,
     valores
