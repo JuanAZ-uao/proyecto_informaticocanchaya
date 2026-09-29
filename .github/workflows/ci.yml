@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main, develop, sprint_2, sprint_3]
   push:
-    branches: ["feature/**", "fix/**"]
+    branches: ["feature/**", "fix/**", "sprint_3"]
 
 jobs:
   backend:
