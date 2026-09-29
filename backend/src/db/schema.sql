@@ -42,11 +42,29 @@ CREATE TABLE IF NOT EXISTS reservas (
   fecha DATE NOT NULL,
   hora_inicio TIME NOT NULL,
   hora_fin TIME NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CONSTRAINT uq_reservas_cancha_fecha_hora UNIQUE (cancha_id, fecha, hora_inicio)
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX IF NOT EXISTS idx_reservas_cancha_fecha ON reservas (cancha_id, fecha);
+
+ALTER TABLE reservas ADD COLUMN IF NOT EXISTS estado TEXT NOT NULL DEFAULT 'activa';
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_reservas_estado') THEN
+    ALTER TABLE reservas ADD CONSTRAINT chk_reservas_estado CHECK (estado IN ('activa', 'cancelada'));
+  END IF;
+END $$;
+
+-- Antes de exigir unicidad solo entre reservas activas, se elimina la restricción
+-- única "a secas" (bloqueaba reutilizar la franja incluso después de cancelar).
+ALTER TABLE reservas DROP CONSTRAINT IF EXISTS uq_reservas_cancha_fecha_hora;
+
+-- Restricción real a nivel de base de datos: nunca puede haber dos reservas
+-- activas para la misma cancha/fecha/hora, sin importar la concurrencia.
+CREATE UNIQUE INDEX IF NOT EXISTS uq_reservas_activa_cancha_fecha_hora
+  ON reservas (cancha_id, fecha, hora_inicio)
+  WHERE estado = 'activa';
 
 CREATE TABLE IF NOT EXISTS password_reset_tokens (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

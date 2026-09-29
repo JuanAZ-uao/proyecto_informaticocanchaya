@@ -21,6 +21,7 @@ router.get(
   validate,
   canchaController.listarOcupados
 );
+<<<<<<< HEAD
 router.get(
   '/:id/disponibilidad',
   authMiddleware,
@@ -28,12 +29,18 @@ router.get(
   validate,
   canchaController.listarOcupados
 );
+=======
+>>>>>>> origin/US-09/Bloqueo_reserva_duplicada
 router.post(
   '/:id/reservas',
   authMiddleware,
   crearReservaValidators,
   validate,
+<<<<<<< HEAD
   reservaController.confirmar
+=======
+  reservaController.crear
+>>>>>>> origin/US-09/Bloqueo_reserva_duplicada
 );
 
 module.exports = router;

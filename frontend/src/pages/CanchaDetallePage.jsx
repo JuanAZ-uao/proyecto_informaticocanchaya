@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+<<<<<<< HEAD
 import { confirmarReserva, obtenerBloquesOcupados, obtenerCanchaPorId } from '../api/canchasApi';
+=======
+import { crearReserva, obtenerBloquesOcupados, obtenerCanchaPorId } from '../api/canchasApi';
+>>>>>>> origin/US-09/Bloqueo_reserva_duplicada
 import extraerMensajeError from '../api/extraerMensajeError';
 import Alerta from '../components/common/Alerta';
 
@@ -69,6 +73,11 @@ export default function CanchaDetallePage() {
   const [bloquesOcupados, setBloquesOcupados] = useState([]);
   const [mensajeValidacion, setMensajeValidacion] = useState('');
   const [confirmando, setConfirmando] = useState(false);
+<<<<<<< HEAD
+=======
+  const [errorReserva, setErrorReserva] = useState('');
+  const [reservaConfirmada, setReservaConfirmada] = useState(null);
+>>>>>>> origin/US-09/Bloqueo_reserva_duplicada
 
   useEffect(() => {
     let activo = true;
@@ -89,6 +98,20 @@ export default function CanchaDetallePage() {
       activo = false;
     };
   }, [id]);
+
+  async function recargarOcupados(fechaConsulta) {
+    if (!fechaConsulta) {
+      setBloquesOcupados([]);
+      return;
+    }
+
+    try {
+      const { data } = await obtenerBloquesOcupados(id, fechaConsulta);
+      setBloquesOcupados(data.ocupados);
+    } catch {
+      setBloquesOcupados([]);
+    }
+  }
 
   useEffect(() => {
     let activo = true;
@@ -134,12 +157,16 @@ export default function CanchaDetallePage() {
     setBloqueSeleccionado(null);
     setReservaIniciada(false);
     setMensajeValidacion('');
+    setErrorReserva('');
+    setReservaConfirmada(null);
   }
 
   function manejarSeleccionBloque(bloque) {
     setBloqueSeleccionado(bloque);
     setReservaIniciada(false);
     setMensajeValidacion('');
+    setErrorReserva('');
+    setReservaConfirmada(null);
   }
 
   function manejarIniciarReserva() {
@@ -158,6 +185,7 @@ export default function CanchaDetallePage() {
   }
 
   async function manejarConfirmarReserva() {
+<<<<<<< HEAD
     if (!bloqueSeleccionado) return;
 
     setConfirmando(true);
@@ -165,10 +193,20 @@ export default function CanchaDetallePage() {
 
     try {
       await confirmarReserva(id, {
+=======
+    if (!bloqueSeleccionado || confirmando) return;
+
+    setConfirmando(true);
+    setErrorReserva('');
+
+    try {
+      const { data } = await crearReserva(id, {
+>>>>>>> origin/US-09/Bloqueo_reserva_duplicada
         fecha,
         horaInicio: bloqueSeleccionado.horaInicio,
         horaFin: bloqueSeleccionado.horaFin,
       });
+<<<<<<< HEAD
       setMensajeValidacion('¡Reserva confirmada con éxito!');
       setReservaIniciada(false);
       setBloqueSeleccionado(null);
@@ -184,6 +222,20 @@ export default function CanchaDetallePage() {
       } else {
         setMensajeValidacion(extraerMensajeError(err, 'No fue posible confirmar la reserva'));
       }
+=======
+
+      setReservaConfirmada(data.reserva);
+      setReservaIniciada(false);
+      setBloqueSeleccionado(null);
+      await recargarOcupados(fecha);
+    } catch (err) {
+      setErrorReserva(
+        extraerMensajeError(err, 'No fue posible confirmar la reserva. Intenta nuevamente.')
+      );
+      setReservaIniciada(false);
+      setBloqueSeleccionado(null);
+      await recargarOcupados(fecha);
+>>>>>>> origin/US-09/Bloqueo_reserva_duplicada
     } finally {
       setConfirmando(false);
     }
@@ -266,12 +318,19 @@ export default function CanchaDetallePage() {
             </ul>
           )}
 
-          {!reservaIniciada && (
+          {reservaConfirmada && (
+            <div className="resumen-reserva">
+              <Alerta tipo="exito" mensaje="¡Tu reserva quedó confirmada! Nadie más podrá reservar esta franja." />
+            </div>
+          )}
+
+          {!reservaIniciada && !reservaConfirmada && (
             <div className="acciones-reserva">
               <button type="button" className="boton-primario" onClick={manejarIniciarReserva}>
                 Iniciar reserva
               </button>
               <Alerta mensaje={mensajeValidacion} />
+              <Alerta mensaje={errorReserva} />
             </div>
           )}
 
@@ -290,6 +349,7 @@ export default function CanchaDetallePage() {
               <p>
                 <strong>Costo estimado:</strong> {formateadorMoneda.format(cancha.costoHora)}
               </p>
+<<<<<<< HEAD
               <button
                 type="button"
                 className="boton-primario"
@@ -300,6 +360,20 @@ export default function CanchaDetallePage() {
               </button>
 
               <Alerta mensaje={mensajeValidacion} />
+=======
+              <div className="acciones-reserva">
+                <button
+                  type="button"
+                  className="boton-primario"
+                  onClick={manejarConfirmarReserva}
+                  disabled={confirmando}
+                  aria-disabled={confirmando}
+                >
+                  {confirmando ? 'Confirmando...' : 'Confirmar reserva'}
+                </button>
+                <Alerta mensaje={errorReserva} />
+              </div>
+>>>>>>> origin/US-09/Bloqueo_reserva_duplicada
             </div>
           )}
         </div>
