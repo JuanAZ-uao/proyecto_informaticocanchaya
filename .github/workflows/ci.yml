@@ -2,7 +2,7 @@
 
 on:
   pull_request:
-    branches: [main, develop, sprint_2]
+    branches: [main, develop, sprint_2, sprint_3]
   push:
     branches: ["feature/**", "fix/**"]
 

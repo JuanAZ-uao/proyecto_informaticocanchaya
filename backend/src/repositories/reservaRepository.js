@@ -1,9 +1,11 @@
-const pool = require('../config/db');
+﻿const pool = require('../config/db');
 const Reserva = require('../models/Reserva');
 
 async function listarPorCanchaYFecha(canchaId, fecha) {
   const { rows } = await pool.query(
-    `SELECT * FROM reservas WHERE cancha_id = $1 AND fecha = $2 ORDER BY hora_inicio ASC`,
+    `SELECT * FROM reservas
+     WHERE cancha_id = $1 AND fecha = $2 AND estado = 'confirmada'
+     ORDER BY hora_inicio ASC`,
     [canchaId, fecha]
   );
 

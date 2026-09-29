@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { obtenerBloquesOcupados, obtenerCanchaPorId } from '../api/canchasApi';
+import { confirmarReserva, obtenerBloquesOcupados, obtenerCanchaPorId } from '../api/canchasApi';
 import extraerMensajeError from '../api/extraerMensajeError';
 import Alerta from '../components/common/Alerta';
 
@@ -68,6 +68,7 @@ export default function CanchaDetallePage() {
   const [reservaIniciada, setReservaIniciada] = useState(false);
   const [bloquesOcupados, setBloquesOcupados] = useState([]);
   const [mensajeValidacion, setMensajeValidacion] = useState('');
+  const [confirmando, setConfirmando] = useState(false);
 
   useEffect(() => {
     let activo = true;
@@ -154,6 +155,38 @@ export default function CanchaDetallePage() {
 
     setMensajeValidacion('');
     setReservaIniciada(true);
+  }
+
+  async function manejarConfirmarReserva() {
+    if (!bloqueSeleccionado) return;
+
+    setConfirmando(true);
+    setMensajeValidacion('');
+
+    try {
+      await confirmarReserva(id, {
+        fecha,
+        horaInicio: bloqueSeleccionado.horaInicio,
+        horaFin: bloqueSeleccionado.horaFin,
+      });
+      setMensajeValidacion('¡Reserva confirmada con éxito!');
+      setReservaIniciada(false);
+      setBloqueSeleccionado(null);
+      const { data } = await obtenerBloquesOcupados(id, fecha);
+      setBloquesOcupados(data.ocupados);
+    } catch (err) {
+      if (err.response?.status === 409) {
+        setMensajeValidacion(extraerMensajeError(err, 'El horario ya no está disponible'));
+        setReservaIniciada(false);
+        setBloqueSeleccionado(null);
+        const { data } = await obtenerBloquesOcupados(id, fecha);
+        setBloquesOcupados(data.ocupados);
+      } else {
+        setMensajeValidacion(extraerMensajeError(err, 'No fue posible confirmar la reserva'));
+      }
+    } finally {
+      setConfirmando(false);
+    }
   }
 
   return (
@@ -257,10 +290,16 @@ export default function CanchaDetallePage() {
               <p>
                 <strong>Costo estimado:</strong> {formateadorMoneda.format(cancha.costoHora)}
               </p>
-              <p className="texto-ayuda">
-                Este es el primer paso del proceso de reserva. La confirmación y el pago se habilitarán en una
-                próxima entrega.
-              </p>
+              <button
+                type="button"
+                className="boton-primario"
+                onClick={manejarConfirmarReserva}
+                disabled={confirmando}
+              >
+                {confirmando ? 'Confirmando...' : 'Confirmar reserva'}
+              </button>
+
+              <Alerta mensaje={mensajeValidacion} />
             </div>
           )}
         </div>

@@ -1,4 +1,4 @@
-const TABLA = 'reservas';
+﻿const TABLA = 'reservas';
 
 function aDominio(fila) {
   if (!fila) return null;
@@ -10,6 +10,7 @@ function aDominio(fila) {
     fecha: fila.fecha,
     horaInicio: fila.hora_inicio,
     horaFin: fila.hora_fin,
+    estado: fila.estado,
     createdAt: fila.created_at,
   };
 }

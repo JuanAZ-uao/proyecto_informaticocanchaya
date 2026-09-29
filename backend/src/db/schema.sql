@@ -59,3 +59,11 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
 
 CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_token_hash ON password_reset_tokens (token_hash);
 CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_usuario_id ON password_reset_tokens (usuario_id);
+
+ALTER TABLE reservas ADD COLUMN IF NOT EXISTS estado TEXT NOT NULL DEFAULT 'confirmada';
+
+ALTER TABLE reservas DROP CONSTRAINT IF EXISTS uq_reservas_cancha_fecha_hora;
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_reservas_activa_cancha_fecha_hora
+  ON reservas (cancha_id, fecha, hora_inicio)
+  WHERE estado = 'confirmada';
