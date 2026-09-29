@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const canchaController = require('../controllers/canchaController');
 const reservaController = require('../controllers/reservaController');
+const temporizadorController = require('../controllers/temporizadorController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const validate = require('../middlewares/validate');
 const {
@@ -34,6 +35,13 @@ router.post(
   crearReservaValidators,
   validate,
   reservaController.crear
+);
+router.post(
+  '/:id/temporizador/completar',
+  authMiddleware,
+  obtenerDetalleValidators,
+  validate,
+  temporizadorController.completarPanel
 );
 
 module.exports = router;

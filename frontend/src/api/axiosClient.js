@@ -14,4 +14,25 @@ axiosClient.interceptors.request.use((config) => {
   return config;
 });
 
+let redirigiendoPorSesionExpirada = false;
+
+axiosClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const esRutaAuth = error.config?.url?.startsWith('/auth');
+    const estabaAutenticado = Boolean(localStorage.getItem('canchaya_token'));
+
+    if (error.response?.status === 401 && !esRutaAuth && estabaAutenticado && !redirigiendoPorSesionExpirada) {
+      redirigiendoPorSesionExpirada = true;
+      localStorage.removeItem('canchaya_token');
+      localStorage.removeItem('canchaya_usuario');
+
+      const rutaActual = window.location.pathname + window.location.search;
+      window.location.assign(`/login?redirect=${encodeURIComponent(rutaActual)}`);
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 export default axiosClient;

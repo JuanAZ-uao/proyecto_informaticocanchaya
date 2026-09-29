@@ -15,6 +15,9 @@ export default function LoginPage() {
   const location = useLocation();
 
   const registroExitoso = location.state?.registroExitoso;
+  const parametros = new URLSearchParams(location.search);
+  const redirectParam = parametros.get('redirect');
+  const redirectDestino = redirectParam?.startsWith('/') ? redirectParam : null;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -24,7 +27,7 @@ export default function LoginPage() {
     try {
       const { data } = await iniciarSesion({ correo, password });
       login(data.token, data.usuario);
-      navigate('/canchas');
+      navigate(redirectDestino || '/canchas', { replace: true });
     } catch (err) {
       setError(extraerMensajeError(err, 'No fue posible iniciar sesión'));
     } finally {

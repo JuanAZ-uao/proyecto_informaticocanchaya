@@ -375,3 +375,27 @@ a.tarjeta-cancha:hover {
   font-weight: 600;
   color: var(--color-primario-oscuro);
 }
+
+.temporizador-reserva {
+  margin: 0 0 1rem;
+  padding: 0.6rem 0.85rem;
+  background-color: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.temporizador-expirado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  background-color: #fdecea;
+  border-color: #f5c6cb;
+  color: var(--color-error);
+}
+
+.temporizador-expirado p {
+  margin: 0;
+}

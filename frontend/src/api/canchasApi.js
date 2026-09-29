@@ -22,3 +22,7 @@ export function obtenerBloquesOcupados(id, fecha) {
 export function crearReserva(id, { fecha, horaInicio, horaFin }) {
   return axiosClient.post(`/canchas/${id}/reservas`, { fecha, horaInicio, horaFin });
 }
+
+export function entrarPanelReserva(id) {
+  return axiosClient.post(`/canchas/${id}/temporizador/completar`);
+}

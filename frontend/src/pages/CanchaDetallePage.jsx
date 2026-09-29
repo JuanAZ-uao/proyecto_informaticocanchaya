@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { crearReserva, obtenerBloquesOcupados, obtenerCanchaPorId } from '../api/canchasApi';
+import { crearReserva, entrarPanelReserva, obtenerBloquesOcupados, obtenerCanchaPorId } from '../api/canchasApi';
 import extraerMensajeError from '../api/extraerMensajeError';
 import Alerta from '../components/common/Alerta';
+import TemporizadorReserva from '../components/canchas/TemporizadorReserva';
+import useAuth from '../hooks/useAuth';
+import useTemporizadorReserva from '../hooks/useTemporizadorReserva';
 
 const NOMBRES_DIA = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 const DURACION_BLOQUE_MIN = 60;
@@ -57,8 +60,42 @@ function obtenerFechaMinima() {
   return new Date(hoy - offset).toISOString().slice(0, 10);
 }
 
+function claveFlujo(canchaId) {
+  return `canchaya_flujo_reserva_${canchaId}`;
+}
+
+function leerFlujoGuardado(canchaId) {
+  try {
+    const guardado = sessionStorage.getItem(claveFlujo(canchaId));
+    return guardado ? JSON.parse(guardado) : null;
+  } catch {
+    return null;
+  }
+}
+
+function guardarFlujo(canchaId, flujo) {
+  try {
+    sessionStorage.setItem(claveFlujo(canchaId), JSON.stringify(flujo));
+  } catch {
+    // El almacenamiento de sesión es solo una comodidad: si falla, el flujo sigue funcionando en memoria.
+  }
+}
+
+function borrarFlujoGuardado(canchaId) {
+  try {
+    sessionStorage.removeItem(claveFlujo(canchaId));
+  } catch {
+    // no-op
+  }
+}
+
 export default function CanchaDetallePage() {
   const { id } = useParams();
+  const { usuario, token } = useAuth();
+  const { expiresAt, expirado: expiradoSocket, reiniciar } = useTemporizadorReserva(id, token);
+  const [expiradoServidor, setExpiradoServidor] = useState(false);
+  const [entrandoPanel, setEntrandoPanel] = useState(false);
+  const expiradoCombinado = expiradoSocket || expiradoServidor;
   const [cancha, setCancha] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
@@ -67,10 +104,31 @@ export default function CanchaDetallePage() {
   const [bloqueSeleccionado, setBloqueSeleccionado] = useState(null);
   const [reservaIniciada, setReservaIniciada] = useState(false);
   const [bloquesOcupados, setBloquesOcupados] = useState([]);
+  const [cargandoOcupados, setCargandoOcupados] = useState(false);
+  const [errorOcupados, setErrorOcupados] = useState('');
   const [mensajeValidacion, setMensajeValidacion] = useState('');
   const [confirmando, setConfirmando] = useState(false);
   const [errorReserva, setErrorReserva] = useState('');
   const [reservaConfirmada, setReservaConfirmada] = useState(null);
+
+  useEffect(() => {
+    const flujoGuardado = leerFlujoGuardado(id);
+    if (flujoGuardado) {
+      setFecha(flujoGuardado.fecha || obtenerFechaMinima());
+      setBloqueSeleccionado(flujoGuardado.bloqueSeleccionado || null);
+      setReservaIniciada(Boolean(flujoGuardado.reservaIniciada));
+    } else {
+      setFecha(obtenerFechaMinima());
+      setBloqueSeleccionado(null);
+      setReservaIniciada(false);
+    }
+    setReservaConfirmada(null);
+  }, [id]);
+
+  useEffect(() => {
+    if (!cancha) return;
+    guardarFlujo(id, { fecha, bloqueSeleccionado, reservaIniciada });
+  }, [id, cancha, fecha, bloqueSeleccionado, reservaIniciada]);
 
   useEffect(() => {
     let activo = true;
@@ -101,8 +159,10 @@ export default function CanchaDetallePage() {
     try {
       const { data } = await obtenerBloquesOcupados(id, fechaConsulta);
       setBloquesOcupados(data.ocupados);
-    } catch {
+      setErrorOcupados('');
+    } catch (err) {
       setBloquesOcupados([]);
+      setErrorOcupados(extraerMensajeError(err, 'No fue posible actualizar la disponibilidad'));
     }
   }
 
@@ -115,11 +175,19 @@ export default function CanchaDetallePage() {
         return;
       }
 
+      setCargandoOcupados(true);
+      setErrorOcupados('');
+
       try {
         const { data } = await obtenerBloquesOcupados(id, fecha);
         if (activo) setBloquesOcupados(data.ocupados);
-      } catch {
-        if (activo) setBloquesOcupados([]);
+      } catch (err) {
+        if (activo) {
+          setBloquesOcupados([]);
+          setErrorOcupados(extraerMensajeError(err, 'No fue posible consultar la disponibilidad'));
+        }
+      } finally {
+        if (activo) setCargandoOcupados(false);
       }
     }
 
@@ -162,7 +230,7 @@ export default function CanchaDetallePage() {
     setReservaConfirmada(null);
   }
 
-  function manejarIniciarReserva() {
+  async function manejarIniciarReserva() {
     if (!fecha) {
       setMensajeValidacion('Selecciona una fecha antes de continuar.');
       return;
@@ -173,8 +241,38 @@ export default function CanchaDetallePage() {
       return;
     }
 
+    if (expiradoCombinado) {
+      setMensajeValidacion('Tu tiempo para reservar expiró. Reinicia el temporizador para continuar.');
+      return;
+    }
+
     setMensajeValidacion('');
-    setReservaIniciada(true);
+    setEntrandoPanel(true);
+
+    try {
+      await entrarPanelReserva(id);
+      setReservaIniciada(true);
+    } catch (err) {
+      if (err.response?.status === 409 || err.response?.status === 403) {
+        setExpiradoServidor(true);
+      }
+      setMensajeValidacion(
+        extraerMensajeError(err, 'No fue posible continuar con la reserva. Intenta nuevamente.')
+      );
+    } finally {
+      setEntrandoPanel(false);
+    }
+  }
+
+  function manejarVolverASeleccion() {
+    setReservaIniciada(false);
+    setErrorReserva('');
+  }
+
+  function manejarReiniciarTemporizador() {
+    reiniciar();
+    setExpiradoServidor(false);
+    setMensajeValidacion('');
   }
 
   async function manejarConfirmarReserva() {
@@ -193,6 +291,7 @@ export default function CanchaDetallePage() {
       setReservaConfirmada(data.reserva);
       setReservaIniciada(false);
       setBloqueSeleccionado(null);
+      borrarFlujoGuardado(id);
       await recargarOcupados(fecha);
     } catch (err) {
       setErrorReserva(
@@ -222,6 +321,12 @@ export default function CanchaDetallePage() {
           <p className="detalle-direccion">{cancha.direccion}</p>
           <p className="detalle-costo">{formateadorMoneda.format(cancha.costoHora)} / hora</p>
 
+          <TemporizadorReserva
+            expiresAt={expiresAt}
+            expirado={expiradoCombinado}
+            onReiniciar={manejarReiniciarTemporizador}
+          />
+
           <h2 className="subtitulo">Horarios disponibles</h2>
 
           <div className="campo campo-fecha">
@@ -232,8 +337,12 @@ export default function CanchaDetallePage() {
               min={obtenerFechaMinima()}
               value={fecha}
               onChange={manejarCambioFecha}
+              disabled={expiradoCombinado}
             />
           </div>
+
+          {cargandoOcupados && <p className="estado-carga">Consultando disponibilidad...</p>}
+          <Alerta mensaje={errorOcupados} />
 
           {!horarioDelDia && (
             <p className="estado-vacio">La cancha no tiene horarios disponibles para el día seleccionado.</p>
@@ -244,6 +353,7 @@ export default function CanchaDetallePage() {
               {bloquesDisponibles.map((bloque) => {
                 const seleccionado = bloqueSeleccionado?.horaInicio === bloque.horaInicio;
                 const ocupado = bloquesOcupadosSet.has(bloque.horaInicio);
+                const bloqueado = ocupado || expiradoCombinado;
                 const claseBloque = ['bloque-horario', seleccionado ? 'seleccionado' : '', ocupado ? 'ocupado' : '']
                   .filter(Boolean)
                   .join(' ');
@@ -252,8 +362,8 @@ export default function CanchaDetallePage() {
                     key={bloque.horaInicio}
                     type="button"
                     className={claseBloque}
-                    disabled={ocupado}
-                    aria-disabled={ocupado}
+                    disabled={bloqueado}
+                    aria-disabled={bloqueado}
                     onClick={() => manejarSeleccionBloque(bloque)}
                   >
                     {bloque.horaInicio} - {bloque.horaFin}
@@ -295,10 +405,10 @@ export default function CanchaDetallePage() {
                 type="button"
                 className="boton-primario"
                 onClick={manejarIniciarReserva}
-                disabled={!fecha || !bloqueSeleccionado}
-                aria-disabled={!fecha || !bloqueSeleccionado}
+                disabled={!fecha || !bloqueSeleccionado || expiradoCombinado || entrandoPanel}
+                aria-disabled={!fecha || !bloqueSeleccionado || expiradoCombinado || entrandoPanel}
               >
-                Iniciar reserva
+                {entrandoPanel ? 'Verificando...' : 'Iniciar reserva'}
               </button>
               <Alerta mensaje={mensajeValidacion} />
               <Alerta mensaje={errorReserva} />
@@ -308,6 +418,11 @@ export default function CanchaDetallePage() {
           {reservaIniciada && bloqueSeleccionado && (
             <div className="resumen-reserva">
               <h2 className="subtitulo">Resumen de tu selección</h2>
+              {usuario && (
+                <p className="texto-ayuda">
+                  Reservando como <strong>{usuario.nombre}</strong> ({usuario.correo})
+                </p>
+              )}
               <p>
                 <strong>Cancha:</strong> {cancha.nombre}
               </p>
@@ -321,15 +436,25 @@ export default function CanchaDetallePage() {
                 <strong>Costo estimado:</strong> {formateadorMoneda.format(cancha.costoHora)}
               </p>
               <div className="acciones-reserva">
-                <button
-                  type="button"
-                  className="boton-primario"
-                  onClick={manejarConfirmarReserva}
-                  disabled={confirmando}
-                  aria-disabled={confirmando}
-                >
-                  {confirmando ? 'Confirmando...' : 'Confirmar reserva'}
-                </button>
+                <div className="fila-botones">
+                  <button
+                    type="button"
+                    className="boton-secundario"
+                    onClick={manejarVolverASeleccion}
+                    disabled={confirmando}
+                  >
+                    &larr; Cambiar horario
+                  </button>
+                  <button
+                    type="button"
+                    className="boton-primario"
+                    onClick={manejarConfirmarReserva}
+                    disabled={confirmando}
+                    aria-disabled={confirmando}
+                  >
+                    {confirmando ? 'Confirmando...' : 'Confirmar reserva'}
+                  </button>
+                </div>
                 <Alerta mensaje={errorReserva} />
               </div>
             </div>
