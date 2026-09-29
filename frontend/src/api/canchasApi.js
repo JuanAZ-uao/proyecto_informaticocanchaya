@@ -18,3 +18,7 @@ export function obtenerCanchaPorId(id) {
 export function obtenerBloquesOcupados(id, fecha) {
   return axiosClient.get(`/canchas/${id}/reservas`, { params: { fecha } });
 }
+
+export function crearReserva(id, { fecha, horaInicio, horaFin }) {
+  return axiosClient.post(`/canchas/${id}/reservas`, { fecha, horaInicio, horaFin });
+}

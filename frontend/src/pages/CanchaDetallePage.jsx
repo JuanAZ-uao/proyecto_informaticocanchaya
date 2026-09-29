@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { obtenerBloquesOcupados, obtenerCanchaPorId } from '../api/canchasApi';
+import { crearReserva, obtenerBloquesOcupados, obtenerCanchaPorId } from '../api/canchasApi';
 import extraerMensajeError from '../api/extraerMensajeError';
 import Alerta from '../components/common/Alerta';
 
@@ -68,6 +68,9 @@ export default function CanchaDetallePage() {
   const [reservaIniciada, setReservaIniciada] = useState(false);
   const [bloquesOcupados, setBloquesOcupados] = useState([]);
   const [mensajeValidacion, setMensajeValidacion] = useState('');
+  const [confirmando, setConfirmando] = useState(false);
+  const [errorReserva, setErrorReserva] = useState('');
+  const [reservaConfirmada, setReservaConfirmada] = useState(null);
 
   useEffect(() => {
     let activo = true;
@@ -88,6 +91,20 @@ export default function CanchaDetallePage() {
       activo = false;
     };
   }, [id]);
+
+  async function recargarOcupados(fechaConsulta) {
+    if (!fechaConsulta) {
+      setBloquesOcupados([]);
+      return;
+    }
+
+    try {
+      const { data } = await obtenerBloquesOcupados(id, fechaConsulta);
+      setBloquesOcupados(data.ocupados);
+    } catch {
+      setBloquesOcupados([]);
+    }
+  }
 
   useEffect(() => {
     let activo = true;
@@ -133,12 +150,16 @@ export default function CanchaDetallePage() {
     setBloqueSeleccionado(null);
     setReservaIniciada(false);
     setMensajeValidacion('');
+    setErrorReserva('');
+    setReservaConfirmada(null);
   }
 
   function manejarSeleccionBloque(bloque) {
     setBloqueSeleccionado(bloque);
     setReservaIniciada(false);
     setMensajeValidacion('');
+    setErrorReserva('');
+    setReservaConfirmada(null);
   }
 
   function manejarIniciarReserva() {
@@ -154,6 +175,35 @@ export default function CanchaDetallePage() {
 
     setMensajeValidacion('');
     setReservaIniciada(true);
+  }
+
+  async function manejarConfirmarReserva() {
+    if (!bloqueSeleccionado || confirmando) return;
+
+    setConfirmando(true);
+    setErrorReserva('');
+
+    try {
+      const { data } = await crearReserva(id, {
+        fecha,
+        horaInicio: bloqueSeleccionado.horaInicio,
+        horaFin: bloqueSeleccionado.horaFin,
+      });
+
+      setReservaConfirmada(data.reserva);
+      setReservaIniciada(false);
+      setBloqueSeleccionado(null);
+      await recargarOcupados(fecha);
+    } catch (err) {
+      setErrorReserva(
+        extraerMensajeError(err, 'No fue posible confirmar la reserva. Intenta nuevamente.')
+      );
+      setReservaIniciada(false);
+      setBloqueSeleccionado(null);
+      await recargarOcupados(fecha);
+    } finally {
+      setConfirmando(false);
+    }
   }
 
   return (
@@ -233,12 +283,19 @@ export default function CanchaDetallePage() {
             </ul>
           )}
 
-          {!reservaIniciada && (
+          {reservaConfirmada && (
+            <div className="resumen-reserva">
+              <Alerta tipo="exito" mensaje="¡Tu reserva quedó confirmada! Nadie más podrá reservar esta franja." />
+            </div>
+          )}
+
+          {!reservaIniciada && !reservaConfirmada && (
             <div className="acciones-reserva">
               <button type="button" className="boton-primario" onClick={manejarIniciarReserva}>
                 Iniciar reserva
               </button>
               <Alerta mensaje={mensajeValidacion} />
+              <Alerta mensaje={errorReserva} />
             </div>
           )}
 
@@ -257,10 +314,18 @@ export default function CanchaDetallePage() {
               <p>
                 <strong>Costo estimado:</strong> {formateadorMoneda.format(cancha.costoHora)}
               </p>
-              <p className="texto-ayuda">
-                Este es el primer paso del proceso de reserva. La confirmación y el pago se habilitarán en una
-                próxima entrega.
-              </p>
+              <div className="acciones-reserva">
+                <button
+                  type="button"
+                  className="boton-primario"
+                  onClick={manejarConfirmarReserva}
+                  disabled={confirmando}
+                  aria-disabled={confirmando}
+                >
+                  {confirmando ? 'Confirmando...' : 'Confirmar reserva'}
+                </button>
+                <Alerta mensaje={errorReserva} />
+              </div>
             </div>
           )}
         </div>
