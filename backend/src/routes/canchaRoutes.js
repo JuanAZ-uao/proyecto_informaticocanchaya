@@ -1,4 +1,4 @@
-﻿const { Router } = require('express');
+const { Router } = require('express');
 const canchaController = require('../controllers/canchaController');
 const reservaController = require('../controllers/reservaController');
 const authMiddleware = require('../middlewares/authMiddleware');
@@ -21,7 +21,6 @@ router.get(
   validate,
   canchaController.listarOcupados
 );
-<<<<<<< HEAD
 router.get(
   '/:id/disponibilidad',
   authMiddleware,
@@ -29,18 +28,12 @@ router.get(
   validate,
   canchaController.listarOcupados
 );
-=======
->>>>>>> origin/US-09/Bloqueo_reserva_duplicada
 router.post(
   '/:id/reservas',
   authMiddleware,
   crearReservaValidators,
   validate,
-<<<<<<< HEAD
-  reservaController.confirmar
-=======
   reservaController.crear
->>>>>>> origin/US-09/Bloqueo_reserva_duplicada
 );
 
 module.exports = router;

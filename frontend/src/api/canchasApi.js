@@ -16,13 +16,9 @@ export function obtenerCanchaPorId(id) {
 }
 
 export function obtenerBloquesOcupados(id, fecha) {
-  return axiosClient.get(`/canchas/${id}/reservas`, { params: { fecha } });
+  return axiosClient.get(`/canchas/${id}/disponibilidad`, { params: { fecha } });
 }
 
-<<<<<<< HEAD
-export function confirmarReserva(id, { fecha, horaInicio, horaFin }) {
-=======
 export function crearReserva(id, { fecha, horaInicio, horaFin }) {
->>>>>>> origin/US-09/Bloqueo_reserva_duplicada
   return axiosClient.post(`/canchas/${id}/reservas`, { fecha, horaInicio, horaFin });
 }

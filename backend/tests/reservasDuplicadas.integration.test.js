@@ -79,7 +79,7 @@ if (!tieneEntorno) {
       const rechazada = respuesta1.status === 201 ? respuesta2 : respuesta1;
 
       expect(ganadora.body.reserva).toBeDefined();
-      expect(rechazada.body.mensaje).toMatch(/ya fue reservado/i);
+      expect(rechazada.body.mensaje).toMatch(/no está disponible/i);
 
       const { rows } = await pool.query(
         `SELECT * FROM reservas WHERE cancha_id = $1 AND fecha = $2 AND hora_inicio = $3 AND estado = 'activa'`,

@@ -52,7 +52,7 @@ describe('reservaService.crearReserva', () => {
 
     await expect(reservaService.crearReserva(datosReserva)).rejects.toMatchObject({
       statusCode: 409,
-      message: expect.stringMatching(/ya fue reservado/i),
+      message: expect.stringMatching(/no está disponible/i),
     });
   });
 

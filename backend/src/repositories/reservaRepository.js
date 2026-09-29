@@ -3,13 +3,7 @@ const Reserva = require('../models/Reserva');
 
 async function listarPorCanchaYFecha(canchaId, fecha) {
   const { rows } = await pool.query(
-<<<<<<< HEAD
-    `SELECT * FROM reservas
-     WHERE cancha_id = $1 AND fecha = $2 AND estado = 'confirmada'
-     ORDER BY hora_inicio ASC`,
-=======
     `SELECT * FROM reservas WHERE cancha_id = $1 AND fecha = $2 AND estado = 'activa' ORDER BY hora_inicio ASC`,
->>>>>>> origin/US-09/Bloqueo_reserva_duplicada
     [canchaId, fecha]
   );
 
