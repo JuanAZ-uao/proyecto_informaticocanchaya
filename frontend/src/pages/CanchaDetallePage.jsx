@@ -3,18 +3,21 @@ import { Link, useParams } from 'react-router-dom';
 import { crearReserva, entrarPanelReserva, obtenerBloquesOcupados, obtenerCanchaPorId } from '../api/canchasApi';
 import extraerMensajeError from '../api/extraerMensajeError';
 import Alerta from '../components/common/Alerta';
+import Icono from '../components/common/Icono';
 import TemporizadorReserva from '../components/canchas/TemporizadorReserva';
 import useAuth from '../hooks/useAuth';
 import useTemporizadorReserva from '../hooks/useTemporizadorReserva';
+import iconoServicio from '../utils/iconoServicio';
+import { formateadorMoneda } from '../utils/formato';
+import { esBloquePasado, obtenerFechaHoyColombia } from '../utils/fechaHora';
 
 const NOMBRES_DIA = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const ORDEN_SEMANA = [1, 2, 3, 4, 5, 6, 0];
 const DURACION_BLOQUE_MIN = 60;
-
-const formateadorMoneda = new Intl.NumberFormat('es-CO', {
-  style: 'currency',
-  currency: 'COP',
-  maximumFractionDigits: 0,
-});
+const INTERVALO_RELOJ_MS = 30000;
+const MENSAJE_BLOQUE_PASADO = 'Ese horario ya pasó. Elige otro bloque disponible.';
+const DESCRIPCION_POR_DEFECTO =
+  'Cancha de grama sintética lista para tu partido. Reserva tu franja en línea y llega directo a jugar.';
 
 const formateadorFecha = new Intl.DateTimeFormat('es-CO', {
   weekday: 'long',
@@ -55,9 +58,7 @@ function generarBloques(horaInicio, horaFin) {
 }
 
 function obtenerFechaMinima() {
-  const hoy = new Date();
-  const offset = hoy.getTimezoneOffset() * 60000;
-  return new Date(hoy - offset).toISOString().slice(0, 10);
+  return obtenerFechaHoyColombia();
 }
 
 function claveFlujo(canchaId) {
@@ -94,6 +95,7 @@ export default function CanchaDetallePage() {
   const { usuario, token } = useAuth();
   const { expiresAt, expirado: expiradoSocket, reiniciar } = useTemporizadorReserva(id, token);
   const [expiradoServidor, setExpiradoServidor] = useState(false);
+  const [panelCompletado, setPanelCompletado] = useState(false);
   const [entrandoPanel, setEntrandoPanel] = useState(false);
   const expiradoCombinado = expiradoSocket || expiradoServidor;
   const [cancha, setCancha] = useState(null);
@@ -110,10 +112,17 @@ export default function CanchaDetallePage() {
   const [confirmando, setConfirmando] = useState(false);
   const [errorReserva, setErrorReserva] = useState('');
   const [reservaConfirmada, setReservaConfirmada] = useState(null);
+  const [ahora, setAhora] = useState(() => Date.now());
+
+  // Reloj local para que los bloques de hoy pasen a "No disponible" a medida que avanza la hora.
+  useEffect(() => {
+    const intervalo = setInterval(() => setAhora(Date.now()), INTERVALO_RELOJ_MS);
+    return () => clearInterval(intervalo);
+  }, []);
 
   useEffect(() => {
     const flujoGuardado = leerFlujoGuardado(id);
-    if (flujoGuardado) {
+    if (flujoGuardado && flujoGuardado.fecha >= obtenerFechaMinima()) {
       setFecha(flujoGuardado.fecha || obtenerFechaMinima());
       setBloqueSeleccionado(flujoGuardado.bloqueSeleccionado || null);
       setReservaIniciada(Boolean(flujoGuardado.reservaIniciada));
@@ -123,6 +132,7 @@ export default function CanchaDetallePage() {
       setReservaIniciada(false);
     }
     setReservaConfirmada(null);
+    setPanelCompletado(false);
   }, [id]);
 
   useEffect(() => {
@@ -213,6 +223,24 @@ export default function CanchaDetallePage() {
     return generarBloques(horarioDelDia.horaInicio, horarioDelDia.horaFin);
   }, [horarioDelDia]);
 
+  const horariosOrdenados = useMemo(() => {
+    if (!cancha) return [];
+    return ORDEN_SEMANA.map((dia) => cancha.horarios.find((horario) => horario.diaSemana === dia)).filter(Boolean);
+  }, [cancha]);
+
+  const diaHoy = new Date().getDay();
+  const libresDelDia = bloquesDisponibles.filter(
+    (bloque) => !bloquesOcupadosSet.has(bloque.horaInicio) && !esBloquePasado(fecha, bloque.horaInicio, ahora)
+  ).length;
+
+  useEffect(() => {
+    if (bloqueSeleccionado && esBloquePasado(fecha, bloqueSeleccionado.horaInicio, ahora)) {
+      setBloqueSeleccionado(null);
+      setReservaIniciada(false);
+      setMensajeValidacion(MENSAJE_BLOQUE_PASADO);
+    }
+  }, [fecha, bloqueSeleccionado, ahora]);
+
   function manejarCambioFecha(evento) {
     setFecha(evento.target.value);
     setBloqueSeleccionado(null);
@@ -246,15 +274,27 @@ export default function CanchaDetallePage() {
       return;
     }
 
+    if (esBloquePasado(fecha, bloqueSeleccionado.horaInicio)) {
+      setAhora(Date.now());
+      setBloqueSeleccionado(null);
+      setMensajeValidacion(MENSAJE_BLOQUE_PASADO);
+      return;
+    }
+
     setMensajeValidacion('');
     setEntrandoPanel(true);
 
     try {
-      await entrarPanelReserva(id);
+      await entrarPanelReserva(id, { fecha, horaInicio: bloqueSeleccionado.horaInicio });
+      setPanelCompletado(true);
       setReservaIniciada(true);
     } catch (err) {
       if (err.response?.status === 409 || err.response?.status === 403) {
         setExpiradoServidor(true);
+      }
+      if (err.response?.status === 400) {
+        setAhora(Date.now());
+        setBloqueSeleccionado(null);
       }
       setMensajeValidacion(
         extraerMensajeError(err, 'No fue posible continuar con la reserva. Intenta nuevamente.')
@@ -272,6 +312,7 @@ export default function CanchaDetallePage() {
   function manejarReiniciarTemporizador() {
     reiniciar();
     setExpiradoServidor(false);
+    setPanelCompletado(false);
     setMensajeValidacion('');
   }
 
@@ -305,32 +346,138 @@ export default function CanchaDetallePage() {
     }
   }
 
+  if (cargando) {
+    return (
+      <div className="detalle-cargando" aria-busy="true">
+        <div className="esqueleto detalle-hero-esqueleto" />
+        <div className="contenedor">
+          <p className="estado-carga">Cargando cancha...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!cancha) {
+    return (
+      <div className="contenedor seccion-espaciada">
+        <Link to="/canchas" className="enlace-volver enlace-volver-oscuro">
+          <Icono nombre="flechaIzquierda" tamano={16} /> Todas las canchas
+        </Link>
+        <Alerta mensaje={error || 'No encontramos esta cancha.'} />
+      </div>
+    );
+  }
+
+  const servicios = cancha.servicios ?? [];
+
   return (
-    <div>
-      <Link to="/canchas" className="enlace-volver">
-        &larr; Volver al listado
-      </Link>
+    <div className="pagina-detalle">
+      <section className="detalle-hero">
+        {cancha.imagenUrl ? (
+          <img className="detalle-hero-foto" src={cancha.imagenUrl} alt={`Foto de ${cancha.nombre}`} />
+        ) : (
+          <div className="detalle-hero-foto media-placeholder" />
+        )}
+        <div className="detalle-hero-velo" />
 
-      <Alerta mensaje={error} />
+        <div className="contenedor detalle-hero-contenido">
+          <Link to="/canchas" className="enlace-volver">
+            <Icono nombre="flechaIzquierda" tamano={16} /> Todas las canchas
+          </Link>
 
-      {cargando && <p className="estado-carga">Cargando cancha...</p>}
+          <div className="detalle-hero-fila">
+            <div>
+              <div className="detalle-insignias">
+                {cancha.tipo && <span className="insignia insignia-acento">{cancha.tipo}</span>}
+                {cancha.zona && (
+                  <span className="insignia insignia-vidrio">
+                    <Icono nombre="pin" tamano={13} /> Zona {cancha.zona}
+                  </span>
+                )}
+              </div>
+              <h1 className="titulo-pagina detalle-titulo">{cancha.nombre}</h1>
+              <p className="detalle-direccion">
+                <Icono nombre="pin" tamano={16} /> {cancha.direccion}
+              </p>
+            </div>
 
-      {!cargando && cancha && (
-        <div className="tarjeta detalle-cancha">
-          <h1 className="titulo-pagina">{cancha.nombre}</h1>
-          <p className="detalle-direccion">{cancha.direccion}</p>
-          <p className="detalle-costo">{formateadorMoneda.format(cancha.costoHora)} / hora</p>
+            <div className="detalle-precio">
+              <span>Desde</span>
+              <strong>{formateadorMoneda.format(cancha.costoHora)}</strong>
+              <span>por hora</span>
+            </div>
+          </div>
+        </div>
+
+        {cancha.imagenCredito && (
+          <p className="credito-foto">
+            <Icono nombre="camara" tamano={12} /> {cancha.imagenCredito}
+          </p>
+        )}
+      </section>
+
+      <div className="contenedor detalle-cuerpo">
+        <div className="detalle-info">
+          <section className="bloque-info">
+            <h2 className="seccion-titulo">Sobre esta cancha</h2>
+            <p className="detalle-descripcion">{cancha.descripcion || DESCRIPCION_POR_DEFECTO}</p>
+          </section>
+
+          {servicios.length > 0 && (
+            <section className="bloque-info">
+              <h2 className="seccion-titulo">Lo que incluye</h2>
+              <ul className="grid-servicios">
+                {servicios.map((servicio) => (
+                  <li key={servicio} className="servicio">
+                    <span className="servicio-icono">
+                      <Icono nombre={iconoServicio(servicio)} tamano={20} />
+                    </span>
+                    {servicio}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <section className="bloque-info">
+            <h2 className="seccion-titulo">Horario semanal</h2>
+            {horariosOrdenados.length === 0 ? (
+              <p className="estado-vacio">Esta cancha aún no tiene horarios configurados.</p>
+            ) : (
+              <ul className="lista-horarios">
+                {horariosOrdenados.map((horario) => (
+                  <li key={horario.diaSemana} className={horario.diaSemana === diaHoy ? 'hoy' : ''}>
+                    <span className="dia-horario">
+                      {NOMBRES_DIA[horario.diaSemana]}
+                      {horario.diaSemana === diaHoy && <span className="etiqueta-hoy">Hoy</span>}
+                    </span>
+                    <span>
+                      {formatearHora(horario.horaInicio)} – {formatearHora(horario.horaFin)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+
+        <aside className="tarjeta-reserva" aria-label="Reservar esta cancha">
+          <div className="tarjeta-reserva-encabezado">
+            <h2>Reserva tu turno</h2>
+            <p>Bloques de 1 hora · {formateadorMoneda.format(cancha.costoHora)}</p>
+          </div>
 
           <TemporizadorReserva
             expiresAt={expiresAt}
             expirado={expiradoCombinado}
+            completado={panelCompletado && !expiradoCombinado}
             onReiniciar={manejarReiniciarTemporizador}
           />
 
-          <h2 className="subtitulo">Horarios disponibles</h2>
-
           <div className="campo campo-fecha">
-            <label htmlFor="fecha-reserva">Fecha</label>
+            <label htmlFor="fecha-reserva">
+              <Icono nombre="calendario" tamano={14} /> Fecha
+            </label>
             <input
               id="fecha-reserva"
               type="date"
@@ -341,61 +488,77 @@ export default function CanchaDetallePage() {
             />
           </div>
 
-          {cargandoOcupados && <p className="estado-carga">Consultando disponibilidad...</p>}
+          {cargandoOcupados && <p className="estado-carga estado-carga-compacto">Consultando disponibilidad...</p>}
           <Alerta mensaje={errorOcupados} />
 
           {!horarioDelDia && (
-            <p className="estado-vacio">La cancha no tiene horarios disponibles para el día seleccionado.</p>
+            <p className="estado-vacio estado-vacio-compacto">
+              La cancha no tiene horarios disponibles para el día seleccionado.
+            </p>
           )}
 
           {horarioDelDia && (
-            <div className="grid-bloques">
-              {bloquesDisponibles.map((bloque) => {
-                const seleccionado = bloqueSeleccionado?.horaInicio === bloque.horaInicio;
-                const ocupado = bloquesOcupadosSet.has(bloque.horaInicio);
-                const bloqueado = ocupado || expiradoCombinado;
-                const claseBloque = ['bloque-horario', seleccionado ? 'seleccionado' : '', ocupado ? 'ocupado' : '']
-                  .filter(Boolean)
-                  .join(' ');
-                return (
-                  <button
-                    key={bloque.horaInicio}
-                    type="button"
-                    className={claseBloque}
-                    disabled={bloqueado}
-                    aria-disabled={bloqueado}
-                    onClick={() => manejarSeleccionBloque(bloque)}
-                  >
-                    {bloque.horaInicio} - {bloque.horaFin}
-                    {ocupado && <span className="etiqueta-ocupado"> · No disponible</span>}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          <h2 className="subtitulo">Horario semanal</h2>
-
-          {cancha.horarios.length === 0 && (
-            <p className="estado-vacio">Esta cancha aún no tiene horarios configurados.</p>
-          )}
-
-          {cancha.horarios.length > 0 && (
-            <ul className="lista-horarios">
-              {cancha.horarios.map((horario, indice) => (
-                <li key={indice}>
-                  <span className="dia-horario">{NOMBRES_DIA[horario.diaSemana]}</span>
-                  <span>
-                    {formatearHora(horario.horaInicio)} - {formatearHora(horario.horaFin)}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <>
+              <div className="bloques-encabezado">
+                <span>
+                  <strong>{libresDelDia}</strong> {libresDelDia === 1 ? 'bloque libre' : 'bloques libres'}
+                </span>
+                <span className="leyenda">
+                  <span className="leyenda-item leyenda-libre">Libre</span>
+                  <span className="leyenda-item leyenda-ocupado">Ocupado</span>
+                </span>
+              </div>
+              <div className="grid-bloques">
+                {bloquesDisponibles.map((bloque) => {
+                  const seleccionado = bloqueSeleccionado?.horaInicio === bloque.horaInicio;
+                  const ocupado =
+                    bloquesOcupadosSet.has(bloque.horaInicio) || esBloquePasado(fecha, bloque.horaInicio, ahora);
+                  const bloqueado = ocupado || expiradoCombinado;
+                  const claseBloque = [
+                    'bloque-horario',
+                    seleccionado ? 'seleccionado' : '',
+                    ocupado ? 'ocupado' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ');
+                  return (
+                    <button
+                      key={bloque.horaInicio}
+                      type="button"
+                      className={claseBloque}
+                      disabled={bloqueado}
+                      aria-disabled={bloqueado}
+                      aria-pressed={seleccionado}
+                      onClick={() => manejarSeleccionBloque(bloque)}
+                    >
+                      {bloque.horaInicio} - {bloque.horaFin}
+                      {ocupado && <span className="etiqueta-ocupado"> · No disponible</span>}
+                    </button>
+                  );
+                })}
+              </div>
+              {libresDelDia === 0 && bloquesDisponibles.length > 0 && !cargandoOcupados && (
+                <p className="estado-vacio estado-vacio-compacto">
+                  No quedan bloques libres para este día. Elige otra fecha.
+                </p>
+              )}
+            </>
           )}
 
           {reservaConfirmada && (
-            <div className="resumen-reserva">
-              <Alerta tipo="exito" mensaje="¡Tu reserva quedó confirmada! Nadie más podrá reservar esta franja." />
+            <div className="reserva-exitosa" role="status">
+              <span className="reserva-exitosa-icono">
+                <Icono nombre="check" tamano={28} grosor={3} />
+              </span>
+              <h3>¡Reserva confirmada!</h3>
+              <p>
+                {formateadorFecha.format(new Date(`${fecha}T00:00:00`))} ·{' '}
+                {formatearHora(reservaConfirmada.horaInicio)} – {formatearHora(reservaConfirmada.horaFin)}
+              </p>
+              <p className="reserva-exitosa-nota">Tu franja quedó bloqueada: nadie más podrá reservarla.</p>
+              <button type="button" className="boton-fantasma boton-bloque" onClick={() => setReservaConfirmada(null)}>
+                Reservar otro horario
+              </button>
             </div>
           )}
 
@@ -403,13 +566,16 @@ export default function CanchaDetallePage() {
             <div className="acciones-reserva">
               <button
                 type="button"
-                className="boton-primario"
+                className="boton-acento boton-bloque boton-grande"
                 onClick={manejarIniciarReserva}
                 disabled={!fecha || !bloqueSeleccionado || expiradoCombinado || entrandoPanel}
                 aria-disabled={!fecha || !bloqueSeleccionado || expiradoCombinado || entrandoPanel}
               >
                 {entrandoPanel ? 'Verificando...' : 'Iniciar reserva'}
               </button>
+              {!bloqueSeleccionado && libresDelDia > 0 && !mensajeValidacion && !errorReserva && (
+                <p className="texto-ayuda texto-centrado">Elige un bloque libre para continuar.</p>
+              )}
               <Alerta mensaje={mensajeValidacion} />
               <Alerta mensaje={errorReserva} />
             </div>
@@ -417,50 +583,56 @@ export default function CanchaDetallePage() {
 
           {reservaIniciada && bloqueSeleccionado && (
             <div className="resumen-reserva">
-              <h2 className="subtitulo">Resumen de tu selección</h2>
+              <h3 className="resumen-titulo">Resumen de tu selección</h3>
               {usuario && (
-                <p className="texto-ayuda">
+                <p className="resumen-usuario">
                   Reservando como <strong>{usuario.nombre}</strong> ({usuario.correo})
                 </p>
               )}
-              <p>
-                <strong>Cancha:</strong> {cancha.nombre}
-              </p>
-              <p>
-                <strong>Fecha:</strong> {formateadorFecha.format(new Date(`${fecha}T00:00:00`))}
-              </p>
-              <p>
-                <strong>Horario:</strong> {bloqueSeleccionado.horaInicio} - {bloqueSeleccionado.horaFin}
-              </p>
-              <p>
-                <strong>Costo estimado:</strong> {formateadorMoneda.format(cancha.costoHora)}
-              </p>
-              <div className="acciones-reserva">
-                <div className="fila-botones">
-                  <button
-                    type="button"
-                    className="boton-secundario"
-                    onClick={manejarVolverASeleccion}
-                    disabled={confirmando}
-                  >
-                    &larr; Cambiar horario
-                  </button>
-                  <button
-                    type="button"
-                    className="boton-primario"
-                    onClick={manejarConfirmarReserva}
-                    disabled={confirmando}
-                    aria-disabled={confirmando}
-                  >
-                    {confirmando ? 'Confirmando...' : 'Confirmar reserva'}
-                  </button>
+              <dl className="resumen-lista">
+                <div>
+                  <dt>Cancha</dt>
+                  <dd>{cancha.nombre}</dd>
                 </div>
+                <div>
+                  <dt>Fecha</dt>
+                  <dd>{formateadorFecha.format(new Date(`${fecha}T00:00:00`))}</dd>
+                </div>
+                <div>
+                  <dt>Horario</dt>
+                  <dd>
+                    {bloqueSeleccionado.horaInicio} - {bloqueSeleccionado.horaFin}
+                  </dd>
+                </div>
+                <div className="resumen-total">
+                  <dt>Costo estimado</dt>
+                  <dd>{formateadorMoneda.format(cancha.costoHora)}</dd>
+                </div>
+              </dl>
+              <div className="acciones-reserva">
+                <button
+                  type="button"
+                  className="boton-acento boton-bloque boton-grande"
+                  onClick={manejarConfirmarReserva}
+                  disabled={confirmando}
+                  aria-disabled={confirmando}
+                >
+                  {confirmando ? 'Confirmando...' : 'Confirmar reserva'}
+                </button>
+                <button
+                  type="button"
+                  className="boton-fantasma boton-bloque"
+                  onClick={manejarVolverASeleccion}
+                  disabled={confirmando}
+                >
+                  <Icono nombre="flechaIzquierda" tamano={16} /> Cambiar horario
+                </button>
                 <Alerta mensaje={errorReserva} />
               </div>
             </div>
           )}
-        </div>
-      )}
+        </aside>
+      </div>
     </div>
   );
 }

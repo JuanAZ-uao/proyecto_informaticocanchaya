@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { restablecerPassword } from '../api/authApi';
 import extraerMensajeError from '../api/extraerMensajeError';
 import Alerta from '../components/common/Alerta';
+import AuthLayout from '../components/layout/AuthLayout';
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
@@ -36,19 +37,17 @@ export default function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <div className="tarjeta">
-        <h1 className="titulo-pagina">Restablecer contraseña</h1>
+      <AuthLayout titulo="Restablecer contraseña">
         <Alerta mensaje="El enlace de recuperación no es válido. Solicita uno nuevo." />
         <p className="enlace-secundario">
           <Link to="/olvide-password">Solicitar nuevo enlace</Link>
         </p>
-      </div>
+      </AuthLayout>
     );
   }
 
   return (
-    <div className="tarjeta">
-      <h1 className="titulo-pagina">Restablecer contraseña</h1>
+    <AuthLayout titulo="Restablecer contraseña" subtitulo="Elige una contraseña nueva para tu cuenta.">
       <form className="formulario" onSubmit={handleSubmit}>
         <Alerta mensaje={error} />
 
@@ -81,10 +80,10 @@ export default function ResetPasswordPage() {
           />
         </div>
 
-        <button className="boton-primario" type="submit" disabled={cargando}>
+        <button className="boton-acento boton-bloque" type="submit" disabled={cargando}>
           {cargando ? 'Actualizando...' : 'Actualizar contraseña'}
         </button>
       </form>
-    </div>
+    </AuthLayout>
   );
 }

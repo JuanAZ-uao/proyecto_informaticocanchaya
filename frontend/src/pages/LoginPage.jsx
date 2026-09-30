@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { iniciarSesion } from '../api/authApi';
 import extraerMensajeError from '../api/extraerMensajeError';
 import Alerta from '../components/common/Alerta';
+import AuthLayout from '../components/layout/AuthLayout';
 import useAuth from '../hooks/useAuth';
 
 export default function LoginPage() {
@@ -36,8 +37,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="tarjeta">
-      <h1 className="titulo-pagina">Iniciar sesión</h1>
+    <AuthLayout titulo="Bienvenido de vuelta" subtitulo="Ingresa para reservar tu próxima cancha.">
       <form className="formulario" onSubmit={handleSubmit}>
         {registroExitoso && (
           <Alerta tipo="exito" mensaje="Cuenta creada correctamente. Ahora inicia sesión." />
@@ -53,11 +53,17 @@ export default function LoginPage() {
             value={correo}
             onChange={(e) => setCorreo(e.target.value)}
             autoComplete="email"
+            placeholder="tu@correo.com"
           />
         </div>
 
         <div className="campo">
-          <label htmlFor="password">Contraseña</label>
+          <div className="campo-etiqueta-fila">
+            <label htmlFor="password">Contraseña</label>
+            <Link to="/olvide-password" className="enlace-sutil">
+              ¿La olvidaste?
+            </Link>
+          </div>
           <input
             id="password"
             type="password"
@@ -68,17 +74,14 @@ export default function LoginPage() {
           />
         </div>
 
-        <button className="boton-primario" type="submit" disabled={cargando}>
+        <button className="boton-acento boton-bloque" type="submit" disabled={cargando}>
           {cargando ? 'Ingresando...' : 'Ingresar'}
         </button>
 
         <p className="enlace-secundario">
-          <Link to="/olvide-password">¿Olvidaste tu contraseña?</Link>
-        </p>
-        <p className="enlace-secundario">
-          ¿No tienes cuenta? <Link to="/registro">Regístrate</Link>
+          ¿No tienes cuenta? <Link to="/registro">Regístrate gratis</Link>
         </p>
       </form>
-    </div>
+    </AuthLayout>
   );
 }

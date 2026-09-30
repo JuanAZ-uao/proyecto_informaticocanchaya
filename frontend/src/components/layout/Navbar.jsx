@@ -1,5 +1,15 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
+import Icono from '../common/Icono';
+
+function obtenerIniciales(nombre = '') {
+  return nombre
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((parte) => parte[0].toUpperCase())
+    .join('');
+}
 
 export default function Navbar() {
   const { estaAutenticado, usuario, logout } = useAuth();
@@ -12,25 +22,45 @@ export default function Navbar() {
 
   return (
     <header className="navbar">
-      <Link to="/" style={{ fontWeight: 700, fontSize: '1.1rem' }}>
-        CanchaYa
-      </Link>
-      <nav className="navbar-links">
-        {estaAutenticado ? (
-          <>
-            <Link to="/canchas">Canchas</Link>
-            <span>Hola, {usuario?.nombre}</span>
-            <button type="button" onClick={handleLogout}>
-              Cerrar sesión
-            </button>
-          </>
-        ) : (
-          <>
-            <Link to="/login">Iniciar sesión</Link>
-            <Link to="/registro">Registrarme</Link>
-          </>
-        )}
-      </nav>
+      <div className="navbar-interior">
+        <Link to="/" className="marca" aria-label="CanchaYa, ir al inicio">
+          <span className="marca-logo">
+            <Icono nombre="balon" tamano={20} />
+          </span>
+          <span className="marca-texto">
+            Cancha<span>Ya</span>
+          </span>
+        </Link>
+
+        <nav className="navbar-links" aria-label="Principal">
+          {estaAutenticado ? (
+            <>
+              <NavLink to="/canchas" className="navbar-enlace">
+                Canchas
+              </NavLink>
+              <span className="navbar-usuario" title={usuario?.correo}>
+                <span className="avatar" aria-hidden="true">
+                  {obtenerIniciales(usuario?.nombre)}
+                </span>
+                <span className="navbar-nombre">{usuario?.nombre?.split(' ')[0]}</span>
+              </span>
+              <button type="button" className="navbar-salir" onClick={handleLogout}>
+                <Icono nombre="salir" tamano={16} />
+                <span>Salir</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <NavLink to="/login" className="navbar-enlace navbar-enlace-opcional">
+                Iniciar sesión
+              </NavLink>
+              <Link to="/registro" className="boton-acento boton-compacto">
+                Crear cuenta
+              </Link>
+            </>
+          )}
+        </nav>
+      </div>
     </header>
   );
 }

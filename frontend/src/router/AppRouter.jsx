@@ -1,5 +1,6 @@
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
+import Footer from '../components/layout/Footer';
 import ProtectedRoute from '../components/layout/ProtectedRoute';
 import RegisterPage from '../pages/RegisterPage';
 import LoginPage from '../pages/LoginPage';
@@ -9,13 +10,10 @@ import CanchasListPage from '../pages/CanchasListPage';
 import CanchaDetallePage from '../pages/CanchaDetallePage';
 
 export default function AppRouter() {
-  const location = useLocation();
-  const esVistaAncha = location.pathname === '/canchas';
-
   return (
     <div className="contenedor-app">
       <Navbar />
-      <main className={`contenido ${esVistaAncha ? 'ancho' : ''}`}>
+      <main className="contenido">
         <Routes>
           <Route path="/" element={<Navigate to="/canchas" replace />} />
           <Route path="/registro" element={<RegisterPage />} />
@@ -41,6 +39,7 @@ export default function AppRouter() {
           <Route path="*" element={<Navigate to="/canchas" replace />} />
         </Routes>
       </main>
+      <Footer />
     </div>
   );
 }

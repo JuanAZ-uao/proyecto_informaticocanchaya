@@ -56,10 +56,22 @@ async function crearMuchas(canchas) {
     const insertadas = [];
     for (const cancha of canchas) {
       const { rows } = await cliente.query(
-        `INSERT INTO canchas (nombre, direccion, zona, disponible, costo_hora)
-         VALUES ($1, $2, $3, $4, $5)
+        `INSERT INTO canchas
+           (nombre, direccion, zona, disponible, costo_hora, imagen_url, imagen_credito, descripcion, tipo, servicios)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
          RETURNING *`,
-        [cancha.nombre, cancha.direccion, cancha.zona ?? 'Sin zona', cancha.disponible ?? true, cancha.costoHora ?? 0]
+        [
+          cancha.nombre,
+          cancha.direccion,
+          cancha.zona ?? 'Sin zona',
+          cancha.disponible ?? true,
+          cancha.costoHora ?? 0,
+          cancha.imagenUrl ?? null,
+          cancha.imagenCredito ?? null,
+          cancha.descripcion ?? null,
+          cancha.tipo ?? null,
+          cancha.servicios ?? [],
+        ]
       );
       insertadas.push(rows[0]);
     }
@@ -72,6 +84,16 @@ async function crearMuchas(canchas) {
   } finally {
     cliente.release();
   }
+}
+
+async function actualizarPresentacionPorNombre(nombre, { imagenUrl, imagenCredito, descripcion, tipo, servicios }) {
+  const { rowCount } = await pool.query(
+    `UPDATE canchas
+     SET imagen_url = $1, imagen_credito = $2, descripcion = $3, tipo = $4, servicios = $5, updated_at = now()
+     WHERE nombre = $6`,
+    [imagenUrl, imagenCredito, descripcion, tipo, servicios, nombre]
+  );
+  return rowCount;
 }
 
 async function eliminarTodas() {
@@ -87,6 +109,7 @@ module.exports = {
   listarDisponibles,
   obtenerPorId,
   crearMuchas,
+  actualizarPresentacionPorNombre,
   eliminarTodas,
   contar,
 };

@@ -12,6 +12,9 @@ async function listarCanchasDisponibles(filtros = {}) {
     direccion: cancha.direccion,
     zona: cancha.zona,
     costoHora: Number(cancha.costoHora),
+    imagenUrl: cancha.imagenUrl,
+    tipo: cancha.tipo,
+    servicios: cancha.servicios,
   }));
 }
 
@@ -27,7 +30,13 @@ async function obtenerDetalleCancha(id) {
     id: cancha.id,
     nombre: cancha.nombre,
     direccion: cancha.direccion,
+    zona: cancha.zona,
     costoHora: cancha.costoHora,
+    imagenUrl: cancha.imagenUrl,
+    imagenCredito: cancha.imagenCredito,
+    descripcion: cancha.descripcion,
+    tipo: cancha.tipo,
+    servicios: cancha.servicios,
     horarios: horarios.map((horario) => ({
       diaSemana: horario.diaSemana,
       horaInicio: horario.horaInicio,

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { solicitarRecuperacion } from '../api/authApi';
 import extraerMensajeError from '../api/extraerMensajeError';
 import Alerta from '../components/common/Alerta';
+import AuthLayout from '../components/layout/AuthLayout';
 
 export default function ForgotPasswordPage() {
   const [correo, setCorreo] = useState('');
@@ -27,8 +28,10 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="tarjeta">
-      <h1 className="titulo-pagina">Recuperar contraseña</h1>
+    <AuthLayout
+      titulo="Recuperar contraseña"
+      subtitulo="Te enviaremos un enlace a tu correo para crear una nueva."
+    >
       <form className="formulario" onSubmit={handleSubmit}>
         <Alerta mensaje={error} />
         <Alerta tipo="exito" mensaje={mensaje} />
@@ -45,7 +48,7 @@ export default function ForgotPasswordPage() {
           />
         </div>
 
-        <button className="boton-primario" type="submit" disabled={cargando}>
+        <button className="boton-acento boton-bloque" type="submit" disabled={cargando}>
           {cargando ? 'Enviando...' : 'Enviar enlace de recuperación'}
         </button>
 
@@ -53,6 +56,6 @@ export default function ForgotPasswordPage() {
           <Link to="/login">Volver a iniciar sesión</Link>
         </p>
       </form>
-    </div>
+    </AuthLayout>
   );
 }

@@ -9,7 +9,10 @@ const {
   filtrarCanchasValidators,
   listarOcupadosValidators,
 } = require('../utils/validators/canchaValidators');
-const { crearReservaValidators } = require('../utils/validators/reservaValidators');
+const {
+  crearReservaValidators,
+  completarPanelValidators,
+} = require('../utils/validators/reservaValidators');
 
 const router = Router();
 
@@ -39,7 +42,7 @@ router.post(
 router.post(
   '/:id/temporizador/completar',
   authMiddleware,
-  obtenerDetalleValidators,
+  completarPanelValidators,
   validate,
   temporizadorController.completarPanel
 );

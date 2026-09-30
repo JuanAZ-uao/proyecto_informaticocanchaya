@@ -1,11 +1,15 @@
 const reservaRepository = require('../repositories/reservaRepository');
 const canchaRepository = require('../repositories/canchaRepository');
 const ErrorDeAplicacion = require('../utils/ErrorDeAplicacion');
+const { esMomentoPasado } = require('../utils/fechaHora');
 
 const CODIGO_VIOLACION_UNICA = '23505';
+const MENSAJE_HORA_PASADA = 'No se pueden reservar fechas u horas pasadas';
 
-function combinarFechaHora(fecha, hora) {
-  return new Date(`${fecha}T${hora}:00`);
+function validarQueNoSeaPasado(fecha, horaInicio) {
+  if (esMomentoPasado(fecha, horaInicio)) {
+    throw new ErrorDeAplicacion(MENSAJE_HORA_PASADA, 400);
+  }
 }
 
 async function crearReserva({ canchaId, usuarioId, fecha, horaInicio, horaFin }) {
@@ -14,10 +18,7 @@ async function crearReserva({ canchaId, usuarioId, fecha, horaInicio, horaFin })
     throw new ErrorDeAplicacion('Cancha no encontrada', 404);
   }
 
-  const momentoSolicitado = combinarFechaHora(fecha, horaInicio);
-  if (Number.isNaN(momentoSolicitado.getTime()) || momentoSolicitado.getTime() <= Date.now()) {
-    throw new ErrorDeAplicacion('No se pueden reservar fechas u horas pasadas', 400);
-  }
+  validarQueNoSeaPasado(fecha, horaInicio);
 
   if (horaFin <= horaInicio) {
     throw new ErrorDeAplicacion('horaFin debe ser posterior a horaInicio', 400);
@@ -51,4 +52,4 @@ async function cancelarReserva(id, usuarioId) {
   return reservaRepository.cancelar(id, usuarioId);
 }
 
-module.exports = { crearReserva, cancelarReserva };
+module.exports = { crearReserva, cancelarReserva, validarQueNoSeaPasado };

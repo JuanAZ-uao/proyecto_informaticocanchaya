@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { registrarUsuario } from '../api/authApi';
 import extraerMensajeError from '../api/extraerMensajeError';
 import Alerta from '../components/common/Alerta';
+import AuthLayout from '../components/layout/AuthLayout';
 
 const valoresIniciales = { nombre: '', correo: '', telefono: '', password: '' };
 
@@ -32,8 +33,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="tarjeta">
-      <h1 className="titulo-pagina">Crear cuenta</h1>
+    <AuthLayout titulo="Crea tu cuenta" subtitulo="Es gratis y en menos de un minuto estás reservando.">
       <form className="formulario" onSubmit={handleSubmit}>
         <Alerta mensaje={error} />
 
@@ -50,30 +50,32 @@ export default function RegisterPage() {
           />
         </div>
 
-        <div className="campo">
-          <label htmlFor="correo">Correo electrónico</label>
-          <input
-            id="correo"
-            name="correo"
-            type="email"
-            required
-            value={form.correo}
-            onChange={handleChange}
-            autoComplete="email"
-          />
-        </div>
+        <div className="fila-campos">
+          <div className="campo">
+            <label htmlFor="correo">Correo electrónico</label>
+            <input
+              id="correo"
+              name="correo"
+              type="email"
+              required
+              value={form.correo}
+              onChange={handleChange}
+              autoComplete="email"
+            />
+          </div>
 
-        <div className="campo">
-          <label htmlFor="telefono">Teléfono</label>
-          <input
-            id="telefono"
-            name="telefono"
-            type="tel"
-            required
-            value={form.telefono}
-            onChange={handleChange}
-            autoComplete="tel"
-          />
+          <div className="campo">
+            <label htmlFor="telefono">Teléfono</label>
+            <input
+              id="telefono"
+              name="telefono"
+              type="tel"
+              required
+              value={form.telefono}
+              onChange={handleChange}
+              autoComplete="tel"
+            />
+          </div>
         </div>
 
         <div className="campo">
@@ -93,7 +95,7 @@ export default function RegisterPage() {
           <span className="texto-ayuda">Mínimo 8 caracteres, con al menos una letra y un número.</span>
         </div>
 
-        <button className="boton-primario" type="submit" disabled={cargando}>
+        <button className="boton-acento boton-bloque" type="submit" disabled={cargando}>
           {cargando ? 'Creando cuenta...' : 'Registrarme'}
         </button>
 
@@ -101,6 +103,6 @@ export default function RegisterPage() {
           ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
         </p>
       </form>
-    </div>
+    </AuthLayout>
   );
 }

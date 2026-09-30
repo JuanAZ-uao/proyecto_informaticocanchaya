@@ -23,6 +23,6 @@ export function crearReserva(id, { fecha, horaInicio, horaFin }) {
   return axiosClient.post(`/canchas/${id}/reservas`, { fecha, horaInicio, horaFin });
 }
 
-export function entrarPanelReserva(id) {
-  return axiosClient.post(`/canchas/${id}/temporizador/completar`);
+export function entrarPanelReserva(id, { fecha, horaInicio }) {
+  return axiosClient.post(`/canchas/${id}/temporizador/completar`, { fecha, horaInicio });
 }
