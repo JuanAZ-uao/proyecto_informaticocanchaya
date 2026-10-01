@@ -8,6 +8,7 @@ import ForgotPasswordPage from '../pages/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/ResetPasswordPage';
 import CanchasListPage from '../pages/CanchasListPage';
 import CanchaDetallePage from '../pages/CanchaDetallePage';
+import MisReservasPage from '../pages/MisReservasPage';
 
 export default function AppRouter() {
   return (
@@ -33,6 +34,14 @@ export default function AppRouter() {
             element={
               <ProtectedRoute>
                 <CanchaDetallePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mis-reservas"
+            element={
+              <ProtectedRoute>
+                <MisReservasPage />
               </ProtectedRoute>
             }
           />

@@ -28,6 +28,6 @@ const cancelarReservaValidators = [
   param('id').isUUID().withMessage('El id de la reserva no es válido'),
 ];
 
-const completarPanelValidators = crearReservaValidators.slice(0, 3);
+const completarPanelValidators = crearReservaValidators;
 
 module.exports = { crearReservaValidators, cancelarReservaValidators, completarPanelValidators };

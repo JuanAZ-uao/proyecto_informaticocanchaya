@@ -27,4 +27,13 @@ async function cancelar(req, res, next) {
   }
 }
 
-module.exports = { crear, cancelar };
+async function listarMias(req, res, next) {
+  try {
+    const reservas = await reservaService.listarReservasDeUsuario(req.usuarioId);
+    return res.status(200).json({ reservas });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+module.exports = { crear, cancelar, listarMias };

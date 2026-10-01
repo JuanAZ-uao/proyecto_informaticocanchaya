@@ -76,6 +76,12 @@ export default function TemporizadorReserva({ expiresAt, expirado, completado, o
       >
         <span style={{ width: `${porcentaje}%` }} />
       </div>
+      {urgente && (
+        <p className="temporizador-aviso" role="alert">
+          <Icono nombre="alerta" tamano={15} /> ¡Quedan menos de 30 segundos! Al terminar, la franja que elegiste se
+          libera para otros usuarios.
+        </p>
+      )}
     </div>
   );
 }
