@@ -4,7 +4,8 @@ on:
   pull_request:
     branches: [main, develop, "sprint_*"]
   push:
-    branches: [main, develop, "sprint_*", "feature/**", "fix/**"]
+    # Ramas de trabajo del equipo: feature/..., fix/..., qa/... y las de historias US-XX...
+    branches: [main, develop, "sprint_*", "feature/**", "fix/**", "qa/**", "US-**"]
 
 concurrency:
   group: ci-${{ github.ref }}
