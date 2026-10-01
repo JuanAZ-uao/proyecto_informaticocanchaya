@@ -1,0 +1,66 @@
+# Entorno local completo de CanchaYa: Postgres + API + frontend.
+# Puertos por defecto distintos a los de desarrollo (4000 / 5173) para que ambos convivan:
+#   frontend -> http://localhost:8080   API -> http://localhost:4100/api
+# Variables: ver .env.example en la raíz (JWT_SECRET es obligatoria).
+name: canchaya
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: canchaya
+      POSTGRES_USER: canchaya
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-canchaya}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U canchaya -d canchaya"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    ports:
+      - "${BACKEND_PORT:-4100}:4000"
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://canchaya:${POSTGRES_PASSWORD:-canchaya}@db:5432/canchaya
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en el archivo .env de la raiz o en el entorno}
+      CORS_ORIGIN: http://localhost:${FRONTEND_PORT:-8080}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4000/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:${BACKEND_PORT:-4100}/api
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  db-data:

@@ -52,24 +52,27 @@ CREATE TABLE IF NOT EXISTS reservas (
 
 CREATE INDEX IF NOT EXISTS idx_reservas_cancha_fecha ON reservas (cancha_id, fecha);
 
-ALTER TABLE reservas ADD COLUMN IF NOT EXISTS estado TEXT NOT NULL DEFAULT 'activa';
+ALTER TABLE reservas ADD COLUMN IF NOT EXISTS estado TEXT NOT NULL DEFAULT 'confirmada';
 
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_reservas_estado') THEN
-    ALTER TABLE reservas ADD CONSTRAINT chk_reservas_estado CHECK (estado IN ('activa', 'cancelada'));
-  END IF;
-END $$;
+-- US-11: toda reserva creada queda "confirmada". Las reservas guardadas antes con el
+-- estado 'activa' (US-08/US-09) equivalen a confirmadas y se migran.
+ALTER TABLE reservas ALTER COLUMN estado SET DEFAULT 'confirmada';
+ALTER TABLE reservas DROP CONSTRAINT IF EXISTS chk_reservas_estado;
+UPDATE reservas SET estado = 'confirmada' WHERE estado = 'activa';
+ALTER TABLE reservas ADD CONSTRAINT chk_reservas_estado CHECK (estado IN ('confirmada', 'cancelada'));
 
--- Antes de exigir unicidad solo entre reservas activas, se elimina la restricción
+-- Antes de exigir unicidad solo entre reservas vigentes, se elimina la restricción
 -- única "a secas" (bloqueaba reutilizar la franja incluso después de cancelar).
 ALTER TABLE reservas DROP CONSTRAINT IF EXISTS uq_reservas_cancha_fecha_hora;
+DROP INDEX IF EXISTS uq_reservas_activa_cancha_fecha_hora;
 
 -- Restricción real a nivel de base de datos: nunca puede haber dos reservas
--- activas para la misma cancha/fecha/hora, sin importar la concurrencia.
-CREATE UNIQUE INDEX IF NOT EXISTS uq_reservas_activa_cancha_fecha_hora
+-- confirmadas para la misma cancha/fecha/hora, sin importar la concurrencia.
+CREATE UNIQUE INDEX IF NOT EXISTS uq_reservas_confirmada_cancha_fecha_hora
   ON reservas (cancha_id, fecha, hora_inicio)
-  WHERE estado = 'activa';
+  WHERE estado = 'confirmada';
+
+CREATE INDEX IF NOT EXISTS idx_reservas_usuario_fecha ON reservas (usuario_id, fecha DESC);
 
 CREATE TABLE IF NOT EXISTS password_reset_tokens (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -82,3 +85,32 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
 
 CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_token_hash ON password_reset_tokens (token_hash);
 CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_usuario_id ON password_reset_tokens (usuario_id);
+
+-- US-18: sesiones del temporizador (US-17) persistidas para sobrevivir a un reinicio
+-- del servidor. Una sesión por usuario y cancha.
+CREATE TABLE IF NOT EXISTS sesiones_reserva (
+  usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  cancha_id UUID NOT NULL REFERENCES canchas(id) ON DELETE CASCADE,
+  expires_at TIMESTAMPTZ NOT NULL,
+  estado TEXT NOT NULL DEFAULT 'activo' CHECK (estado IN ('activo', 'completado')),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (usuario_id, cancha_id)
+);
+
+-- US-18: retención temporal de una franja mientras el usuario completa su reserva.
+-- uq_retenciones_franja: una franja solo puede estar retenida por un usuario a la vez.
+-- uq_retenciones_usuario_cancha: un usuario retiene como máximo una franja por cancha.
+CREATE TABLE IF NOT EXISTS retenciones (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  cancha_id UUID NOT NULL REFERENCES canchas(id) ON DELETE CASCADE,
+  fecha DATE NOT NULL,
+  hora_inicio TIME NOT NULL,
+  hora_fin TIME NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT uq_retenciones_franja UNIQUE (cancha_id, fecha, hora_inicio),
+  CONSTRAINT uq_retenciones_usuario_cancha UNIQUE (usuario_id, cancha_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_retenciones_expires_at ON retenciones (expires_at);

@@ -1,0 +1,134 @@
+name: CI/CD
+
+on:
+  pull_request:
+    branches: [main, develop, "sprint_*"]
+  push:
+    branches: [main, develop, "sprint_*", "feature/**", "fix/**"]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend - lint y pruebas
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    # Postgres desechable: así la prueba de concurrencia de US-09 corre de verdad en CI
+    # (sin DATABASE_URL se omitiría).
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: canchaya_test
+          POSTGRES_USER: canchaya
+          POSTGRES_PASSWORD: canchaya
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U canchaya -d canchaya_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://canchaya:canchaya@localhost:5432/canchaya_test
+      JWT_SECRET: secreto-solo-para-ci
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint --if-present
+      - name: Aplicar esquema a la base de pruebas
+        run: npm run migrate
+      - run: npm test
+
+  frontend:
+    name: Frontend - lint y build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  docker:
+    name: Docker - build y smoke test
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    env:
+      JWT_SECRET: secreto-solo-para-ci
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Construir y levantar servicios
+        run: docker compose up -d --build --wait --wait-timeout 180
+
+      - name: Smoke test
+        run: bash scripts/smoke-test.sh
+
+      # US-18: prueba de carga con 100 sockets. La base de este job es desechable, así que
+      # se cargan ahí las canchas de ejemplo (el seed borra las canchas existentes).
+      - name: Cargar canchas de ejemplo en la base temporal
+        run: docker compose exec -T backend node src/seed/seedCanchas.js
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Prueba de carga de sockets (100 conexiones)
+        working-directory: backend
+        run: |
+          npm ci
+          npm run test:carga
+        env:
+          API_URL: http://localhost:4100/api
+          CLIENTES: "100"
+
+      - name: Logs de los servicios
+        if: failure()
+        run: docker compose logs
+
+      - name: Bajar servicios
+        if: always()
+        run: docker compose down -v
+
+  deploy-local:
+    name: Desplegar en entorno local
+    needs: docker
+    # Rama de despliegue actual: sprint_4 (cambiarla aquí cuando avance el proyecto).
+    # Solo en push, nunca en pull_request, para que código de un PR no se ejecute
+    # en la máquina del runner.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/sprint_4'
+    runs-on: self-hosted
+    env:
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Desplegar con Docker Compose
+        run: docker compose up -d --build --wait --wait-timeout 180
+
+      - name: Limpiar imágenes antiguas
+        run: docker image prune -f

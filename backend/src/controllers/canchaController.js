@@ -1,4 +1,5 @@
 const canchaService = require('../services/canchaService');
+const retencionService = require('../services/retencionService');
 
 async function listar(req, res, next) {
   try {
@@ -29,8 +30,11 @@ async function obtenerDetalle(req, res, next) {
 
 async function listarOcupados(req, res, next) {
   try {
-    const ocupados = await canchaService.listarBloquesOcupados(req.params.id, req.query.fecha);
-    return res.status(200).json({ ocupados });
+    const [ocupados, retenidos] = await Promise.all([
+      canchaService.listarBloquesOcupados(req.params.id, req.query.fecha),
+      retencionService.listarRetenidasPorOtros(req.params.id, req.query.fecha, req.usuarioId),
+    ]);
+    return res.status(200).json({ ocupados, retenidos });
   } catch (error) {
     return next(error);
   }

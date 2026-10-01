@@ -5,10 +5,11 @@ import extraerMensajeError from '../api/extraerMensajeError';
 import Alerta from '../components/common/Alerta';
 import Icono from '../components/common/Icono';
 import TemporizadorReserva from '../components/canchas/TemporizadorReserva';
+import ConfirmacionReserva from '../components/canchas/ConfirmacionReserva';
 import useAuth from '../hooks/useAuth';
 import useTemporizadorReserva from '../hooks/useTemporizadorReserva';
 import iconoServicio from '../utils/iconoServicio';
-import { formateadorMoneda } from '../utils/formato';
+import { formateadorMoneda, formatearFechaLarga, formatearHora } from '../utils/formato';
 import { esBloquePasado, obtenerFechaHoyColombia } from '../utils/fechaHora';
 
 const NOMBRES_DIA = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -18,17 +19,6 @@ const INTERVALO_RELOJ_MS = 30000;
 const MENSAJE_BLOQUE_PASADO = 'Ese horario ya pasó. Elige otro bloque disponible.';
 const DESCRIPCION_POR_DEFECTO =
   'Cancha de grama sintética lista para tu partido. Reserva tu franja en línea y llega directo a jugar.';
-
-const formateadorFecha = new Intl.DateTimeFormat('es-CO', {
-  weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-});
-
-function formatearHora(hora) {
-  return hora?.slice(0, 5) ?? hora;
-}
 
 function aMinutos(hora) {
   const [horas, minutos] = hora.split(':').map(Number);
@@ -59,6 +49,10 @@ function generarBloques(horaInicio, horaFin) {
 
 function obtenerFechaMinima() {
   return obtenerFechaHoyColombia();
+}
+
+function horasRetenidas(retenidos = []) {
+  return retenidos.map((retenido) => formatearHora(retenido.horaInicio));
 }
 
 function claveFlujo(canchaId) {
@@ -93,7 +87,16 @@ function borrarFlujoGuardado(canchaId) {
 export default function CanchaDetallePage() {
   const { id } = useParams();
   const { usuario, token } = useAuth();
-  const { expiresAt, expirado: expiradoSocket, reiniciar } = useTemporizadorReserva(id, token);
+  const {
+    expiresAt,
+    expirado: expiradoSocket,
+    reiniciar,
+    retenerFranja,
+    liberarFranja,
+  } = useTemporizadorReserva(id, token, {
+    onSesionIniciada: manejarSesionIniciada,
+    onCambioDisponibilidad: manejarCambioDisponibilidad,
+  });
   const [expiradoServidor, setExpiradoServidor] = useState(false);
   const [panelCompletado, setPanelCompletado] = useState(false);
   const [entrandoPanel, setEntrandoPanel] = useState(false);
@@ -106,6 +109,9 @@ export default function CanchaDetallePage() {
   const [bloqueSeleccionado, setBloqueSeleccionado] = useState(null);
   const [reservaIniciada, setReservaIniciada] = useState(false);
   const [bloquesOcupados, setBloquesOcupados] = useState([]);
+  // US-18: franjas que otros usuarios tienen retenidas ("En proceso de reserva") en la fecha elegida.
+  const [bloquesRetenidos, setBloquesRetenidos] = useState([]);
+  const [reteniendo, setReteniendo] = useState(null);
   const [cargandoOcupados, setCargandoOcupados] = useState(false);
   const [errorOcupados, setErrorOcupados] = useState('');
   const [mensajeValidacion, setMensajeValidacion] = useState('');
@@ -169,9 +175,11 @@ export default function CanchaDetallePage() {
     try {
       const { data } = await obtenerBloquesOcupados(id, fechaConsulta);
       setBloquesOcupados(data.ocupados);
+      setBloquesRetenidos(horasRetenidas(data.retenidos));
       setErrorOcupados('');
     } catch (err) {
       setBloquesOcupados([]);
+      setBloquesRetenidos([]);
       setErrorOcupados(extraerMensajeError(err, 'No fue posible actualizar la disponibilidad'));
     }
   }
@@ -190,10 +198,14 @@ export default function CanchaDetallePage() {
 
       try {
         const { data } = await obtenerBloquesOcupados(id, fecha);
-        if (activo) setBloquesOcupados(data.ocupados);
+        if (activo) {
+          setBloquesOcupados(data.ocupados);
+          setBloquesRetenidos(horasRetenidas(data.retenidos));
+        }
       } catch (err) {
         if (activo) {
           setBloquesOcupados([]);
+          setBloquesRetenidos([]);
           setErrorOcupados(extraerMensajeError(err, 'No fue posible consultar la disponibilidad'));
         }
       } finally {
@@ -211,6 +223,8 @@ export default function CanchaDetallePage() {
     () => new Set(bloquesOcupados.map((ocupado) => formatearHora(ocupado.horaInicio))),
     [bloquesOcupados]
   );
+
+  const bloquesRetenidosSet = useMemo(() => new Set(bloquesRetenidos), [bloquesRetenidos]);
 
   const horarioDelDia = useMemo(() => {
     if (!cancha || !fecha) return null;
@@ -230,7 +244,10 @@ export default function CanchaDetallePage() {
 
   const diaHoy = new Date().getDay();
   const libresDelDia = bloquesDisponibles.filter(
-    (bloque) => !bloquesOcupadosSet.has(bloque.horaInicio) && !esBloquePasado(fecha, bloque.horaInicio, ahora)
+    (bloque) =>
+      !bloquesOcupadosSet.has(bloque.horaInicio) &&
+      !bloquesRetenidosSet.has(bloque.horaInicio) &&
+      !esBloquePasado(fecha, bloque.horaInicio, ahora)
   ).length;
 
   useEffect(() => {
@@ -241,21 +258,93 @@ export default function CanchaDetallePage() {
     }
   }, [fecha, bloqueSeleccionado, ahora]);
 
+  function marcarRetenido(hora) {
+    setBloquesRetenidos((previos) => (previos.includes(hora) ? previos : [...previos, hora]));
+  }
+
+  // US-18: cambios que llegan por socket desde otros usuarios que miran esta cancha.
+  function manejarCambioDisponibilidad(tipo, franja) {
+    if (franja.fecha !== fecha) return;
+    const hora = franja.horaInicio;
+
+    if (tipo === 'retenida') {
+      marcarRetenido(hora);
+    } else if (tipo === 'reservada') {
+      setBloquesRetenidos((previos) => previos.filter((h) => h !== hora));
+      setBloquesOcupados((previos) =>
+        previos.some((o) => formatearHora(o.horaInicio) === hora)
+          ? previos
+          : [...previos, { horaInicio: hora, horaFin: franja.horaFin }]
+      );
+    } else if (tipo === 'liberada') {
+      // Puede venir de una retención que terminó o de una reserva cancelada: se consulta el estado real.
+      setBloquesRetenidos((previos) => previos.filter((h) => h !== hora));
+      recargarOcupados(fecha);
+    }
+  }
+
+  function manejarRechazoRetencion(errorRetencion, bloque) {
+    const codigo = errorRetencion?.codigo;
+    if (codigo === 'FRANJA_RETENIDA') marcarRetenido(bloque.horaInicio);
+    if (codigo === 'FRANJA_OCUPADA') recargarOcupados(fecha);
+    if (codigo === 'SESION_EXPIRADA') setExpiradoServidor(true);
+    if (codigo === 'HORA_PASADA') setAhora(Date.now());
+    setMensajeValidacion(errorRetencion?.mensaje || 'No fue posible apartar esta franja. Intenta con otra.');
+  }
+
+  // Al (re)conectar el socket, por ejemplo tras recargar la página o un reinicio del servidor,
+  // se vuelve a retener la franja que el usuario ya tenía elegida.
+  async function manejarSesionIniciada() {
+    if (!bloqueSeleccionado || reservaConfirmada) return;
+
+    const bloque = bloqueSeleccionado;
+    const respuesta = await retenerFranja({ fecha, horaInicio: bloque.horaInicio, horaFin: bloque.horaFin });
+    if (!respuesta?.ok) {
+      setBloqueSeleccionado(null);
+      setReservaIniciada(false);
+      manejarRechazoRetencion(respuesta?.error, bloque);
+    }
+  }
+
   function manejarCambioFecha(evento) {
+    if (bloqueSeleccionado) liberarFranja();
     setFecha(evento.target.value);
     setBloqueSeleccionado(null);
+    setBloquesRetenidos([]);
     setReservaIniciada(false);
     setMensajeValidacion('');
     setErrorReserva('');
     setReservaConfirmada(null);
   }
 
-  function manejarSeleccionBloque(bloque) {
-    setBloqueSeleccionado(bloque);
-    setReservaIniciada(false);
+  // US-18: elegir un bloque lo retiene en el servidor; solo se marca como elegido si el
+  // servidor lo confirma. Al elegir otro, el servidor libera el anterior.
+  async function manejarSeleccionBloque(bloque) {
+    if (reteniendo || bloqueSeleccionado?.horaInicio === bloque.horaInicio) return;
+
     setMensajeValidacion('');
     setErrorReserva('');
     setReservaConfirmada(null);
+    setReteniendo(bloque.horaInicio);
+
+    const respuesta = await retenerFranja({ fecha, horaInicio: bloque.horaInicio, horaFin: bloque.horaFin });
+    setReteniendo(null);
+
+    if (respuesta?.ok) {
+      setBloqueSeleccionado(bloque);
+      setReservaIniciada(false);
+      return;
+    }
+
+    manejarRechazoRetencion(respuesta?.error, bloque);
+  }
+
+  function manejarCancelarSeleccion() {
+    liberarFranja();
+    setBloqueSeleccionado(null);
+    setReservaIniciada(false);
+    setErrorReserva('');
+    setMensajeValidacion('');
   }
 
   async function manejarIniciarReserva() {
@@ -285,14 +374,23 @@ export default function CanchaDetallePage() {
     setEntrandoPanel(true);
 
     try {
-      await entrarPanelReserva(id, { fecha, horaInicio: bloqueSeleccionado.horaInicio });
+      await entrarPanelReserva(id, {
+        fecha,
+        horaInicio: bloqueSeleccionado.horaInicio,
+        horaFin: bloqueSeleccionado.horaFin,
+      });
       setPanelCompletado(true);
       setReservaIniciada(true);
     } catch (err) {
-      if (err.response?.status === 409 || err.response?.status === 403) {
+      const { status, data } = err.response ?? {};
+      if (data?.codigo === 'FRANJA_RETENIDA' || data?.codigo === 'FRANJA_OCUPADA') {
+        if (data.codigo === 'FRANJA_RETENIDA') marcarRetenido(bloqueSeleccionado.horaInicio);
+        setBloqueSeleccionado(null);
+        recargarOcupados(fecha);
+      } else if (status === 409 || status === 403) {
         setExpiradoServidor(true);
       }
-      if (err.response?.status === 400) {
+      if (status === 400) {
         setAhora(Date.now());
         setBloqueSeleccionado(null);
       }
@@ -314,6 +412,13 @@ export default function CanchaDetallePage() {
     setExpiradoServidor(false);
     setPanelCompletado(false);
     setMensajeValidacion('');
+  }
+
+  // Tras confirmar, el temporizador quedó completado: otra reserva arranca una sesión nueva.
+  function manejarHacerOtraReserva() {
+    setReservaConfirmada(null);
+    setErrorReserva('');
+    manejarReiniciarTemporizador();
   }
 
   async function manejarConfirmarReserva() {
@@ -467,102 +572,101 @@ export default function CanchaDetallePage() {
             <p>Bloques de 1 hora · {formateadorMoneda.format(cancha.costoHora)}</p>
           </div>
 
-          <TemporizadorReserva
-            expiresAt={expiresAt}
-            expirado={expiradoCombinado}
-            completado={panelCompletado && !expiradoCombinado}
-            onReiniciar={manejarReiniciarTemporizador}
-          />
-
-          <div className="campo campo-fecha">
-            <label htmlFor="fecha-reserva">
-              <Icono nombre="calendario" tamano={14} /> Fecha
-            </label>
-            <input
-              id="fecha-reserva"
-              type="date"
-              min={obtenerFechaMinima()}
-              value={fecha}
-              onChange={manejarCambioFecha}
-              disabled={expiradoCombinado}
-            />
-          </div>
-
-          {cargandoOcupados && <p className="estado-carga estado-carga-compacto">Consultando disponibilidad...</p>}
-          <Alerta mensaje={errorOcupados} />
-
-          {!horarioDelDia && (
-            <p className="estado-vacio estado-vacio-compacto">
-              La cancha no tiene horarios disponibles para el día seleccionado.
-            </p>
-          )}
-
-          {horarioDelDia && (
+          {reservaConfirmada ? (
+            <ConfirmacionReserva reserva={reservaConfirmada} onHacerOtraReserva={manejarHacerOtraReserva} />
+          ) : (
             <>
-              <div className="bloques-encabezado">
-                <span>
-                  <strong>{libresDelDia}</strong> {libresDelDia === 1 ? 'bloque libre' : 'bloques libres'}
-                </span>
-                <span className="leyenda">
-                  <span className="leyenda-item leyenda-libre">Libre</span>
-                  <span className="leyenda-item leyenda-ocupado">Ocupado</span>
-                </span>
+              <TemporizadorReserva
+                expiresAt={expiresAt}
+                expirado={expiradoCombinado}
+                completado={panelCompletado && !expiradoCombinado}
+                onReiniciar={manejarReiniciarTemporizador}
+              />
+
+              <div className="campo campo-fecha">
+                <label htmlFor="fecha-reserva">
+                  <Icono nombre="calendario" tamano={14} /> Fecha
+                </label>
+                <input
+                  id="fecha-reserva"
+                  type="date"
+                  min={obtenerFechaMinima()}
+                  value={fecha}
+                  onChange={manejarCambioFecha}
+                  disabled={expiradoCombinado}
+                />
               </div>
-              <div className="grid-bloques">
-                {bloquesDisponibles.map((bloque) => {
-                  const seleccionado = bloqueSeleccionado?.horaInicio === bloque.horaInicio;
-                  const ocupado =
-                    bloquesOcupadosSet.has(bloque.horaInicio) || esBloquePasado(fecha, bloque.horaInicio, ahora);
-                  const bloqueado = ocupado || expiradoCombinado;
-                  const claseBloque = [
-                    'bloque-horario',
-                    seleccionado ? 'seleccionado' : '',
-                    ocupado ? 'ocupado' : '',
-                  ]
-                    .filter(Boolean)
-                    .join(' ');
-                  return (
-                    <button
-                      key={bloque.horaInicio}
-                      type="button"
-                      className={claseBloque}
-                      disabled={bloqueado}
-                      aria-disabled={bloqueado}
-                      aria-pressed={seleccionado}
-                      onClick={() => manejarSeleccionBloque(bloque)}
-                    >
-                      {bloque.horaInicio} - {bloque.horaFin}
-                      {ocupado && <span className="etiqueta-ocupado"> · No disponible</span>}
-                    </button>
-                  );
-                })}
-              </div>
-              {libresDelDia === 0 && bloquesDisponibles.length > 0 && !cargandoOcupados && (
+
+              {cargandoOcupados && <p className="estado-carga estado-carga-compacto">Consultando disponibilidad...</p>}
+              <Alerta mensaje={errorOcupados} />
+
+              {!horarioDelDia && (
                 <p className="estado-vacio estado-vacio-compacto">
-                  No quedan bloques libres para este día. Elige otra fecha.
+                  La cancha no tiene horarios disponibles para el día seleccionado.
                 </p>
               )}
+
+              {horarioDelDia && (
+                <>
+                  <div className="bloques-encabezado">
+                    <span>
+                      <strong>{libresDelDia}</strong> {libresDelDia === 1 ? 'bloque libre' : 'bloques libres'}
+                    </span>
+                    <span className="leyenda">
+                      <span className="leyenda-item leyenda-libre">Libre</span>
+                      <span className="leyenda-item leyenda-retenido">En proceso</span>
+                      <span className="leyenda-item leyenda-ocupado">Ocupado</span>
+                    </span>
+                  </div>
+                  <div className="grid-bloques">
+                    {bloquesDisponibles.map((bloque) => {
+                      const seleccionado = bloqueSeleccionado?.horaInicio === bloque.horaInicio;
+                      const ocupado =
+                        bloquesOcupadosSet.has(bloque.horaInicio) || esBloquePasado(fecha, bloque.horaInicio, ahora);
+                      const retenido = !ocupado && !seleccionado && bloquesRetenidosSet.has(bloque.horaInicio);
+                      const bloqueado = ocupado || retenido || expiradoCombinado;
+                      const claseBloque = [
+                        'bloque-horario',
+                        seleccionado ? 'seleccionado' : '',
+                        ocupado ? 'ocupado' : '',
+                        retenido ? 'retenido' : '',
+                        reteniendo === bloque.horaInicio ? 'reteniendo' : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ');
+                      return (
+                        <button
+                          key={bloque.horaInicio}
+                          type="button"
+                          className={claseBloque}
+                          disabled={bloqueado}
+                          aria-disabled={bloqueado}
+                          aria-pressed={seleccionado}
+                          aria-busy={reteniendo === bloque.horaInicio}
+                          onClick={() => manejarSeleccionBloque(bloque)}
+                        >
+                          {bloque.horaInicio} - {bloque.horaFin}
+                          {ocupado && <span className="etiqueta-ocupado"> · No disponible</span>}
+                          {retenido && <span className="etiqueta-retenido"> · En proceso de reserva</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {bloqueSeleccionado && !reservaIniciada && (
+                    <p className="nota-retencion" role="status">
+                      <Icono nombre="escudo" tamano={15} /> Apartamos las {bloqueSeleccionado.horaInicio} para ti
+                      mientras completas la reserva.
+                    </p>
+                  )}
+                  {libresDelDia === 0 && bloquesDisponibles.length > 0 && !cargandoOcupados && (
+                    <p className="estado-vacio estado-vacio-compacto">
+                      No quedan bloques libres para este día. Elige otra fecha.
+                    </p>
+                  )}
             </>
           )}
 
-          {reservaConfirmada && (
-            <div className="reserva-exitosa" role="status">
-              <span className="reserva-exitosa-icono">
-                <Icono nombre="check" tamano={28} grosor={3} />
-              </span>
-              <h3>¡Reserva confirmada!</h3>
-              <p>
-                {formateadorFecha.format(new Date(`${fecha}T00:00:00`))} ·{' '}
-                {formatearHora(reservaConfirmada.horaInicio)} – {formatearHora(reservaConfirmada.horaFin)}
-              </p>
-              <p className="reserva-exitosa-nota">Tu franja quedó bloqueada: nadie más podrá reservarla.</p>
-              <button type="button" className="boton-fantasma boton-bloque" onClick={() => setReservaConfirmada(null)}>
-                Reservar otro horario
-              </button>
-            </div>
-          )}
-
-          {!reservaIniciada && !reservaConfirmada && (
+          {!reservaIniciada && (
             <div className="acciones-reserva">
               <button
                 type="button"
@@ -596,7 +700,7 @@ export default function CanchaDetallePage() {
                 </div>
                 <div>
                   <dt>Fecha</dt>
-                  <dd>{formateadorFecha.format(new Date(`${fecha}T00:00:00`))}</dd>
+                  <dd>{formatearFechaLarga(fecha)}</dd>
                 </div>
                 <div>
                   <dt>Horario</dt>
@@ -627,9 +731,19 @@ export default function CanchaDetallePage() {
                 >
                   <Icono nombre="flechaIzquierda" tamano={16} /> Cambiar horario
                 </button>
+                <button
+                  type="button"
+                  className="enlace-cancelar"
+                  onClick={manejarCancelarSeleccion}
+                  disabled={confirmando}
+                >
+                  Cancelar y liberar la franja
+                </button>
                 <Alerta mensaje={errorReserva} />
               </div>
             </div>
+          )}
+            </>
           )}
         </aside>
       </div>

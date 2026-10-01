@@ -21,7 +21,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className="navbar">
+    <header className={estaAutenticado ? 'navbar navbar-autenticado' : 'navbar'}>
       <div className="navbar-interior">
         <Link to="/" className="marca" aria-label="CanchaYa, ir al inicio">
           <span className="marca-logo">
@@ -37,6 +37,9 @@ export default function Navbar() {
             <>
               <NavLink to="/canchas" className="navbar-enlace">
                 Canchas
+              </NavLink>
+              <NavLink to="/mis-reservas" className="navbar-enlace">
+                Mis reservas
               </NavLink>
               <span className="navbar-usuario" title={usuario?.correo}>
                 <span className="avatar" aria-hidden="true">

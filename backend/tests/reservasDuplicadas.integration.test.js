@@ -1,6 +1,6 @@
 // Prueba de integración real: dispara dos peticiones HTTP simultáneas contra la
 // base de datos de Neon (Postgres) para comprobar que el índice único parcial
-// (cancha_id, fecha, hora_inicio) WHERE estado = 'activa' impide duplicados
+// (cancha_id, fecha, hora_inicio) WHERE estado = 'confirmada' impide duplicados
 // incluso cuando dos usuarios reservan la misma franja al mismo tiempo.
 //
 // Requiere DATABASE_URL y JWT_SECRET (las mismas variables que usa la app),
@@ -82,7 +82,7 @@ if (!tieneEntorno) {
       expect(rechazada.body.mensaje).toMatch(/no está disponible/i);
 
       const { rows } = await pool.query(
-        `SELECT * FROM reservas WHERE cancha_id = $1 AND fecha = $2 AND hora_inicio = $3 AND estado = 'activa'`,
+        `SELECT * FROM reservas WHERE cancha_id = $1 AND fecha = $2 AND hora_inicio = $3 AND estado = 'confirmada'`,
         [canchaId, fecha, horaInicio]
       );
       expect(rows).toHaveLength(1);
@@ -90,7 +90,7 @@ if (!tieneEntorno) {
 
     it('al cancelar la reserva ganadora, la franja queda libre y se puede volver a reservar', async () => {
       const { rows } = await pool.query(
-        `SELECT id FROM reservas WHERE cancha_id = $1 AND fecha = $2 AND hora_inicio = $3 AND estado = 'activa'`,
+        `SELECT id FROM reservas WHERE cancha_id = $1 AND fecha = $2 AND hora_inicio = $3 AND estado = 'confirmada'`,
         [canchaId, fecha, horaInicio]
       );
       const reservaId = rows[0].id;
@@ -129,7 +129,45 @@ if (!tieneEntorno) {
         [canchaId, cuerpo.fecha, cuerpo.horaInicio]
       );
       expect(rows).toHaveLength(1);
-      expect(rows[0].estado).toBe('activa');
+      expect(rows[0].estado).toBe('confirmada');
+    });
+
+    it('US-11: confirma con 201 y devuelve id, código, cancha, fecha, hora y estado "confirmada"', async () => {
+      const cuerpo = { fecha: '2099-12-29', horaInicio: '18:00', horaFin: '19:00' };
+
+      const respuesta = await request(app)
+        .post(`/api/canchas/${canchaId}/reservas`)
+        .set('Authorization', `Bearer ${token1}`)
+        .send(cuerpo);
+
+      expect(respuesta.status).toBe(201);
+      expect(respuesta.body.reserva).toMatchObject({
+        id: expect.any(String),
+        codigo: expect.stringMatching(/^CY-[0-9A-F]{8}$/),
+        cancha: { id: canchaId, nombre: expect.any(String) },
+        fecha: cuerpo.fecha,
+        horaInicio: '18:00:00',
+        horaFin: '19:00:00',
+        estado: 'confirmada',
+      });
+    });
+
+    it('US-11: la reserva confirmada aparece de inmediato en el historial del usuario', async () => {
+      const respuesta = await request(app).get('/api/reservas/mias').set('Authorization', `Bearer ${token1}`);
+
+      expect(respuesta.status).toBe(200);
+      const reserva = respuesta.body.reservas.find((r) => r.fecha === '2099-12-29' && r.horaInicio === '18:00:00');
+      expect(reserva).toMatchObject({ estado: 'confirmada', cancha: { id: canchaId } });
+    });
+
+    it('US-11: sin token no se puede confirmar ni consultar el historial (401)', async () => {
+      const confirmar = await request(app)
+        .post(`/api/canchas/${canchaId}/reservas`)
+        .send({ fecha: '2099-12-28', horaInicio: '18:00', horaFin: '19:00' });
+      const historial = await request(app).get('/api/reservas/mias');
+
+      expect(confirmar.status).toBe(401);
+      expect(historial.status).toBe(401);
     });
   });
 }

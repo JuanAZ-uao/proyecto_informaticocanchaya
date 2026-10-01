@@ -39,4 +39,32 @@ async function enviarCorreoRecuperacion({ para, enlaceRestablecimiento }) {
   });
 }
 
-module.exports = { enviarCorreoRecuperacion };
+async function enviarCorreoConfirmacionReserva({ para, nombre, reserva }) {
+  const horario = `${reserva.horaInicio.slice(0, 5)} - ${reserva.horaFin.slice(0, 5)}`;
+  const asunto = `CanchaYa - Reserva confirmada ${reserva.codigo}`;
+  const html = `
+    <p>Hola ${nombre}, tu reserva quedó confirmada.</p>
+    <ul>
+      <li><strong>Código:</strong> ${reserva.codigo}</li>
+      <li><strong>Cancha:</strong> ${reserva.cancha.nombre} (${reserva.cancha.direccion})</li>
+      <li><strong>Fecha:</strong> ${reserva.fecha}</li>
+      <li><strong>Hora:</strong> ${horario}</li>
+      <li><strong>Estado:</strong> confirmada</li>
+    </ul>
+    <p>Puedes consultarla en la sección "Mis reservas" de CanchaYa.</p>
+  `;
+
+  if (!transportador) {
+    console.log(`[EMAIL] SMTP no configurado. Confirmación de reserva (modo desarrollo) para ${para}: ${reserva.codigo} · ${reserva.cancha.nombre} · ${reserva.fecha} ${horario}`);
+    return { simulado: true };
+  }
+
+  return transportador.sendMail({
+    from: env.smtp.from,
+    to: para,
+    subject: asunto,
+    html,
+  });
+}
+
+module.exports = { enviarCorreoRecuperacion, enviarCorreoConfirmacionReserva };

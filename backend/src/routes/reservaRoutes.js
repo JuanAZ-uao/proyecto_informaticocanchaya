@@ -6,6 +6,8 @@ const { cancelarReservaValidators } = require('../utils/validators/reservaValida
 
 const router = Router();
 
+router.get('/mias', authMiddleware, reservaController.listarMias);
+
 router.patch(
   '/:id/cancelar',
   authMiddleware,
