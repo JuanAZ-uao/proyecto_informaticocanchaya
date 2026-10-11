@@ -14,6 +14,8 @@ const EVENTOS_DISPONIBILIDAD = {
 export default function useTemporizadorReserva(canchaId, token, { onSesionIniciada, onCambioDisponibilidad } = {}) {
   const [expiresAt, setExpiresAt] = useState(null);
   const [expirado, setExpirado] = useState(false);
+  // Diferencia entre la hora del servidor y la del navegador: la cuenta regresiva se calcula con la del servidor.
+  const [desfaseMs, setDesfaseMs] = useState(0);
   const socketRef = useRef(null);
   const manejadoresRef = useRef({});
   manejadoresRef.current = { onSesionIniciada, onCambioDisponibilidad };
@@ -31,13 +33,15 @@ export default function useTemporizadorReserva(canchaId, token, { onSesionInicia
     socketRef.current = socket;
 
     // También llega al reconectar (p. ej. tras un reinicio del servidor), con el mismo expiresAt.
-    socket.on('temporizador:inicio', ({ expiresAt: nuevoExpiresAt, estado }) => {
+    socket.on('temporizador:inicio', ({ expiresAt: nuevoExpiresAt, estado, ahora }) => {
+      if (ahora) setDesfaseMs(ahora - Date.now());
       setExpiresAt(nuevoExpiresAt);
       setExpirado(estado === 'expirado');
       manejadoresRef.current.onSesionIniciada?.();
     });
 
-    socket.on('temporizador:sync', ({ expiresAt: nuevoExpiresAt }) => {
+    socket.on('temporizador:sync', ({ expiresAt: nuevoExpiresAt, ahora }) => {
+      if (ahora) setDesfaseMs(ahora - Date.now());
       setExpiresAt(nuevoExpiresAt);
     });
 
@@ -59,8 +63,9 @@ export default function useTemporizadorReserva(canchaId, token, { onSesionInicia
     const socket = socketRef.current;
     if (!socket) return;
 
-    socket.emit('temporizador:reiniciar', null, ({ expiresAt: nuevoExpiresAt } = {}) => {
+    socket.emit('temporizador:reiniciar', null, ({ expiresAt: nuevoExpiresAt, ahora } = {}) => {
       if (!nuevoExpiresAt) return;
+      if (ahora) setDesfaseMs(ahora - Date.now());
       setExpiresAt(nuevoExpiresAt);
       setExpirado(false);
     });
@@ -89,5 +94,5 @@ export default function useTemporizadorReserva(canchaId, token, { onSesionInicia
     socketRef.current?.emit('retencion:liberar', null, () => {});
   }
 
-  return { expiresAt, expirado, reiniciar, retenerFranja, liberarFranja };
+  return { expiresAt, expirado, desfaseMs, reiniciar, retenerFranja, liberarFranja };
 }

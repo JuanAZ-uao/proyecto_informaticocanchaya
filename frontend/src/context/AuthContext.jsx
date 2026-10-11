@@ -11,12 +11,15 @@ export function AuthProvider({ children }) {
     const guardado = localStorage.getItem(USUARIO_KEY);
     return guardado ? JSON.parse(guardado) : null;
   });
+  // true cuando el usuario cerró la sesión a propósito (no cuando venció): no hay que volver a la ruta anterior al iniciar sesión.
+  const [cerroSesion, setCerroSesion] = useState(false);
 
   function login(nuevoToken, nuevoUsuario) {
     localStorage.setItem(TOKEN_KEY, nuevoToken);
     localStorage.setItem(USUARIO_KEY, JSON.stringify(nuevoUsuario));
     setToken(nuevoToken);
     setUsuario(nuevoUsuario);
+    setCerroSesion(false);
   }
 
   function logout() {
@@ -24,6 +27,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(USUARIO_KEY);
     setToken(null);
     setUsuario(null);
+    setCerroSesion(true);
   }
 
   const value = useMemo(
@@ -31,10 +35,11 @@ export function AuthProvider({ children }) {
       token,
       usuario,
       estaAutenticado: Boolean(token),
+      cerroSesion,
       login,
       logout,
     }),
-    [token, usuario]
+    [token, usuario, cerroSesion]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

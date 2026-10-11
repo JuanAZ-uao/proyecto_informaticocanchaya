@@ -374,7 +374,7 @@ npm run dev   # http://localhost:5173
 
 ### US-19 · Contenedorización con Docker
 
-- [backend/Dockerfile](backend/Dockerfile): imagen Node 20 Alpine que aplica el esquema de la base al arrancar y luego inicia la API.
+- [backend/Dockerfile](backend/Dockerfile): imagen Node 22 Alpine que aplica el esquema de la base al arrancar y luego inicia la API.
 - [frontend/Dockerfile](frontend/Dockerfile): compila la app con Vite y la sirve con nginx. [frontend/nginx.conf](frontend/nginx.conf) redirige las rutas de React Router (por ejemplo `/canchas/:id`) a `index.html`.
 - [docker-compose.yml](docker-compose.yml): levanta tres servicios con healthcheck y los arranca en orden (`db` → `backend` → `frontend`).
   - `db`: PostgreSQL 16, en un contenedor propio y separado de Neon.
@@ -413,3 +413,18 @@ El pipeline está en [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml).
 - Smoke test contra Docker: todas las verificaciones pasaron.
 - Prueba en navegador sobre `http://localhost:8080`: registro, login, listado con fotos, temporizador por socket y reserva confirmada, sin errores de consola.
 - Job de backend simulado con un Postgres temporal: 25/25 pruebas, incluida la de concurrencia.
+
+### Pruebas de QA (plan, ejecución y resultados)
+
+El plan de pruebas y los resultados están en [docs/testing/](docs/testing/), como documentos Word:
+
+| Documento | Contenido |
+|---|---|
+| [01_Plan_de_Pruebas_QA.docx](docs/testing/01_Plan_de_Pruebas_QA.docx) | Alcance, estrategia, entorno, criterios de salida y matriz de trazabilidad HU/criterio ↔ caso |
+| [02_Resultados_Pruebas_Funcionales.docx](docs/testing/02_Resultados_Pruebas_Funcionales.docx) | 61 casos de API y sockets por historia de usuario + 72 pruebas Jest |
+| [03_Resultados_Pruebas_No_Funcionales.docx](docs/testing/03_Resultados_Pruebas_No_Funcionales.docx) | 21 casos: rendimiento, carga, seguridad, accesibilidad, compatibilidad, fiabilidad y mantenibilidad |
+| [04_Resultados_Pruebas_E2E.docx](docs/testing/04_Resultados_Pruebas_E2E.docx) | 22 flujos en navegador con capturas |
+| [05_Resultados_Smoke_Docker.docx](docs/testing/05_Resultados_Smoke_Docker.docx) | 21 casos de Docker, smoke test y análisis del pipeline |
+| [06_Informe_Resumen_QA_y_Defectos.docx](docs/testing/06_Informe_Resumen_QA_y_Defectos.docx) | Conclusiones, veredicto frente a los criterios de salida y detalle de los defectos |
+
+La ejecución inicial detectó 10 defectos (estaban en la carpeta [ejecucion-1-inicial](docs/testing/ejecucion-1-inicial/)); se corrigieron y la regresión completa quedó con 0 casos fallidos. Cada caso documenta la historia de usuario y el criterio que cubre, los pasos, el resultado esperado, el obtenido (incluidos los errores que el sistema debe devolver) y la evidencia. Los scripts que ejecutan las pruebas están en [qa/](qa/README.md) y corren sobre un entorno Docker aislado, sin tocar la base de Neon.

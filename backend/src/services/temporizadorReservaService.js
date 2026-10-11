@@ -4,6 +4,9 @@ const sesionRepository = require('../repositories/sesionReservaRepository');
 
 const DURACION_MS = 180000;
 const INTERVALO_SYNC_MS = 5000;
+// Tras cerrarse la última conexión del usuario, la sesión se cancela solo si no reconecta en este lapso
+// (una caída breve de red no debe perder el tiempo restante).
+const GRACIA_DESCONEXION_MS = 10000;
 
 // La fuente de verdad de cada sesión es la tabla sesiones_reserva (US-18: sobrevive a
 // un reinicio del servidor). En memoria solo viven los timers y los sockets conectados.
@@ -16,6 +19,7 @@ function clave(usuarioId, canchaId) {
 
 function detenerTimers(sesion) {
   clearTimeout(sesion.timeoutExpiracion);
+  clearTimeout(sesion.graciaDesconexion);
   clearInterval(sesion.intervaloSync);
 }
 
@@ -83,7 +87,12 @@ function obtenerSesion(usuarioId, canchaId) {
 
 function registrarSocket(usuarioId, canchaId, socketId) {
   const sesion = sesiones.get(clave(usuarioId, canchaId));
-  if (sesion) sesion.sockets.add(socketId);
+  if (!sesion) return;
+
+  sesion.sockets.add(socketId);
+  // El usuario volvió dentro del lapso de gracia: la sesión continúa con el mismo expiresAt.
+  clearTimeout(sesion.graciaDesconexion);
+  sesion.graciaDesconexion = null;
 }
 
 async function quitarSocket(usuarioId, canchaId, socketId) {
@@ -91,9 +100,14 @@ async function quitarSocket(usuarioId, canchaId, socketId) {
   if (!sesion) return;
 
   sesion.sockets.delete(socketId);
-  if (sesion.sockets.size === 0) {
-    await cancelarSesion(usuarioId, canchaId, 'salio');
-  }
+  if (sesion.sockets.size > 0 || sesion.graciaDesconexion) return;
+
+  sesion.graciaDesconexion = setTimeout(() => {
+    sesion.graciaDesconexion = null;
+    if (sesion.sockets.size === 0) {
+      cancelarSesion(usuarioId, canchaId, 'salio').catch(registrarError('No se pudo cancelar la sesión al salir'));
+    }
+  }, GRACIA_DESCONEXION_MS);
 }
 
 async function cancelarSesion(usuarioId, canchaId, motivo = 'cancelada') {
@@ -160,6 +174,7 @@ async function restaurarSesiones() {
 
 module.exports = {
   DURACION_MS,
+  GRACIA_DESCONEXION_MS,
   iniciarOTomarSesion,
   obtenerSesion,
   registrarSocket,

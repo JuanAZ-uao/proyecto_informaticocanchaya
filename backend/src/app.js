@@ -3,9 +3,11 @@ const cors = require('cors');
 const routes = require('./routes');
 const errorHandler = require('./middlewares/errorHandler');
 const verificarOrigen = require('./config/corsOrigin');
+const { rechazarOrigenNoPermitido } = verificarOrigen;
 
 const app = express();
 
+app.use(rechazarOrigenNoPermitido);
 app.use(cors({ origin: verificarOrigen }));
 app.use(express.json());
 

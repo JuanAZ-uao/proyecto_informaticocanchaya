@@ -74,6 +74,19 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_reservas_confirmada_cancha_fecha_hora
 
 CREATE INDEX IF NOT EXISTS idx_reservas_usuario_fecha ON reservas (usuario_id, fecha DESC);
 
+-- US-09: además del índice único por hora de inicio, ninguna reserva confirmada puede solaparse
+-- con otra de la misma cancha (defensa en profundidad frente a franjas que no sean de 1 hora).
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'ex_reservas_sin_solape') THEN
+    ALTER TABLE reservas ADD CONSTRAINT ex_reservas_sin_solape
+      EXCLUDE USING gist (cancha_id WITH =, tsrange((fecha + hora_inicio), (fecha + hora_fin)) WITH &&)
+      WHERE (estado = 'confirmada');
+  END IF;
+END $$;
+
 CREATE TABLE IF NOT EXISTS password_reset_tokens (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,

@@ -11,7 +11,7 @@ function formatearMMSS(ms) {
   return `${minutos}:${segundos}`;
 }
 
-export default function TemporizadorReserva({ expiresAt, expirado, completado, onReiniciar }) {
+export default function TemporizadorReserva({ expiresAt, expirado, completado, onReiniciar, desfaseMs = 0 }) {
   const [ahora, setAhora] = useState(Date.now());
 
   useEffect(() => {
@@ -54,7 +54,8 @@ export default function TemporizadorReserva({ expiresAt, expirado, completado, o
     );
   }
 
-  const restanteMs = Math.max(0, expiresAt - ahora);
+  // Se usa la hora del servidor (hora local + desfase), no la del reloj del navegador.
+  const restanteMs = Math.max(0, expiresAt - (ahora + desfaseMs));
   const porcentaje = Math.min(100, (restanteMs / DURACION_SESION_MS) * 100);
   const urgente = restanteMs <= UMBRAL_URGENCIA_MS;
 

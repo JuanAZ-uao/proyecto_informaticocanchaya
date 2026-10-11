@@ -1,5 +1,6 @@
 jest.mock('../src/repositories/canchaRepository');
 jest.mock('../src/repositories/reservaRepository');
+jest.mock('../src/repositories/horarioRepository');
 jest.mock('../src/repositories/usuarioRepository', () => ({ buscarPorId: jest.fn() }));
 jest.mock('../src/services/emailService', () => ({ enviarCorreoConfirmacionReserva: jest.fn() }));
 jest.mock('../src/repositories/sesionReservaRepository');
@@ -12,6 +13,7 @@ jest.mock('../src/services/retencionService', () => ({
 const canchaRepository = require('../src/repositories/canchaRepository');
 const reservaRepository = require('../src/repositories/reservaRepository');
 const usuarioRepository = require('../src/repositories/usuarioRepository');
+const horarioRepository = require('../src/repositories/horarioRepository');
 const emailService = require('../src/services/emailService');
 const temporizadorService = require('../src/services/temporizadorReservaService');
 const retencionService = require('../src/services/retencionService');
@@ -21,6 +23,9 @@ const esperarTareasPendientes = () => new Promise((resolve) => setImmediate(reso
 
 const CANCHA_ID = 'cancha-1';
 const USUARIO_ID = 'usuario-1';
+// Fecha lejana fija: nunca vence (no depende de la fecha en que se ejecuten las pruebas).
+const FECHA_FUTURA = '2099-12-31';
+const HORARIO_DIARIO = [0, 1, 2, 3, 4, 5, 6].map((diaSemana) => ({ diaSemana, horaInicio: '06:00:00', horaFin: '22:00:00' }));
 
 describe('reservaService.crearReserva', () => {
   beforeEach(() => {
@@ -30,6 +35,7 @@ describe('reservaService.crearReserva', () => {
     emailService.enviarCorreoConfirmacionReserva.mockResolvedValue({ simulado: true });
     retencionService.verificarDisponibleParaReservar.mockResolvedValue(undefined);
     retencionService.convertirEnReserva.mockResolvedValue(undefined);
+    horarioRepository.listarPorCancha.mockResolvedValue(HORARIO_DIARIO);
   });
 
   it('US-18: rechaza con 409 si otro usuario tiene la franja retenida, sin crear la reserva', async () => {
@@ -53,7 +59,7 @@ describe('reservaService.crearReserva', () => {
   const datosReserva = {
     canchaId: CANCHA_ID,
     usuarioId: USUARIO_ID,
-    fecha: '2026-10-01',
+    fecha: FECHA_FUTURA,
     horaInicio: '08:00',
     horaFin: '09:00',
   };
@@ -136,6 +142,39 @@ describe('reservaService.crearReserva', () => {
       reservaService.crearReserva({ ...datosReserva, horaFin: '08:00' })
     ).rejects.toMatchObject({ statusCode: 400 });
     expect(reservaRepository.crear).not.toHaveBeenCalled();
+  });
+
+  it('DEF-03: rechaza con 400 FUERA_DE_HORARIO una reserva fuera del horario de la cancha, sin guardarla', async () => {
+    await expect(
+      reservaService.crearReserva({ ...datosReserva, horaInicio: '03:00', horaFin: '04:00' })
+    ).rejects.toMatchObject({ statusCode: 400, codigo: 'FUERA_DE_HORARIO' });
+    expect(reservaRepository.crear).not.toHaveBeenCalled();
+  });
+
+  it('DEF-03: rechaza un día en que la cancha no tiene horario', async () => {
+    horarioRepository.listarPorCancha.mockResolvedValue([]);
+
+    await expect(reservaService.crearReserva(datosReserva)).rejects.toMatchObject({ codigo: 'FUERA_DE_HORARIO' });
+  });
+
+  it('DEF-04: rechaza con 400 las franjas que no son de exactamente 1 hora (evita solapes)', async () => {
+    for (const [horaInicio, horaFin] of [['10:00', '12:00'], ['10:30', '11:30'], ['10:00', '10:30']]) {
+      await expect(
+        reservaService.crearReserva({ ...datosReserva, horaInicio, horaFin })
+      ).rejects.toMatchObject({ statusCode: 400, codigo: expect.stringMatching(/BLOQUE_INVALIDO|FUERA_DE_HORARIO/) });
+    }
+    expect(reservaRepository.crear).not.toHaveBeenCalled();
+  });
+
+  it('DEF-04: la restricción de exclusión de Postgres (23P01, franjas solapadas) también se traduce en un 409 amigable', async () => {
+    const errorPostgres = new Error('conflicting key value violates exclusion constraint');
+    errorPostgres.code = '23P01';
+    reservaRepository.crear.mockRejectedValue(errorPostgres);
+
+    await expect(reservaService.crearReserva(datosReserva)).rejects.toMatchObject({
+      statusCode: 409,
+      message: 'El horario ya no está disponible',
+    });
   });
 
   it('convierte la violación de índice único de Postgres (23505) en un 409 amigable', async () => {

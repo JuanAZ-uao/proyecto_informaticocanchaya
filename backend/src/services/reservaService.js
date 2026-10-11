@@ -4,10 +4,12 @@ const usuarioRepository = require('../repositories/usuarioRepository');
 const emailService = require('./emailService');
 const temporizadorService = require('./temporizadorReservaService');
 const retencionService = require('./retencionService');
+const { validarFranjaEnHorario } = require('./horarioReservaService');
 const ErrorDeAplicacion = require('../utils/ErrorDeAplicacion');
 const { esMomentoPasado } = require('../utils/fechaHora');
 
-const CODIGO_VIOLACION_UNICA = '23505';
+// 23505: índice único (misma franja). 23P01: restricción de exclusión (franjas que se solapan).
+const CODIGOS_FRANJA_OCUPADA = ['23505', '23P01'];
 const MENSAJE_HORA_PASADA = 'No se pueden reservar fechas u horas pasadas';
 
 function validarQueNoSeaPasado(fecha, horaInicio) {
@@ -28,6 +30,8 @@ async function crearReserva({ canchaId, usuarioId, fecha, horaInicio, horaFin })
     throw new ErrorDeAplicacion('horaFin debe ser posterior a horaInicio', 400);
   }
 
+  await validarFranjaEnHorario(canchaId, { fecha, horaInicio, horaFin });
+
   // US-18: si otro usuario tiene la franja retenida, no se le puede quitar.
   await retencionService.verificarDisponibleParaReservar(usuarioId, canchaId, fecha, horaInicio);
 
@@ -35,7 +39,7 @@ async function crearReserva({ canchaId, usuarioId, fecha, horaInicio, horaFin })
   try {
     reserva = await reservaRepository.crear({ canchaId, usuarioId, fecha, horaInicio, horaFin });
   } catch (error) {
-    if (error.code === CODIGO_VIOLACION_UNICA) {
+    if (CODIGOS_FRANJA_OCUPADA.includes(error.code)) {
       throw new ErrorDeAplicacion('El horario ya no está disponible', 409);
     }
 
