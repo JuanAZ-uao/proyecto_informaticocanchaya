@@ -100,4 +100,37 @@ async function cancelarReserva(id, usuarioId) {
   return cancelada;
 }
 
-module.exports = { crearReserva, cancelarReserva, listarReservasDeUsuario, validarQueNoSeaPasado };
+
+const RESERVAS_POR_PAGINA = 10;
+const MAXIMO_POR_PAGINA = 50;
+
+async function listarMisReservas({
+  usuarioId,
+  periodo = 'proximas',
+  estado = null,
+  pagina = 1,
+  limite = RESERVAS_POR_PAGINA,
+}) {
+  const limiteSeguro = Math.min(Math.max(limite, 1), MAXIMO_POR_PAGINA);
+  const paginaSegura = Math.max(pagina, 1);
+
+  const { reservas, total } = await reservaRepository.listarPorUsuario({
+    usuarioId,
+    periodo,
+    estado,
+    limite: limiteSeguro,
+    offset: (paginaSegura - 1) * limiteSeguro,
+  });
+
+  return {
+    reservas,
+    paginacion: {
+      pagina: paginaSegura,
+      limite: limiteSeguro,
+      total,
+      totalPaginas: Math.max(1, Math.ceil(total / limiteSeguro)),
+    },
+  };
+}
+
+module.exports = { crearReserva, cancelarReserva, listarReservasDeUsuario, validarQueNoSeaPasado, listarMisReservas };
