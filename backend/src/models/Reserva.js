@@ -32,4 +32,21 @@ function aDominio(fila) {
   };
 }
 
-module.exports = { TABLA, aDominio, codigoReserva, formatearFecha };
+
+function aHistorial(fila) {
+  if (!fila) return null;
+
+  return {
+    id: fila.id,
+    canchaId: fila.cancha_id,
+    canchaNombre: fila.cancha_nombre,
+    canchaDireccion: fila.cancha_direccion,
+    fecha: fila.fecha_texto,
+    horaInicio: fila.hora_inicio_texto,
+    horaFin: fila.hora_fin_texto,
+    estado: fila.estado_visible,
+    createdAt: fila.created_at,
+  };
+}
+
+module.exports = { TABLA, aDominio, codigoReserva, formatearFecha, aHistorial };

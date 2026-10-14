@@ -3,3 +3,6 @@ dist/
 .env
 npm-debug.log*
 *.log
+.scannerwork/
+report-task.txt
+.sonar_lock

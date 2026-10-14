@@ -1,4 +1,5 @@
 const { param, body } = require('express-validator');
+const { query } = require('express-validator');
 
 const HORA_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -30,4 +31,26 @@ const cancelarReservaValidators = [
 
 const completarPanelValidators = crearReservaValidators;
 
-module.exports = { crearReservaValidators, cancelarReservaValidators, completarPanelValidators };
+
+const listarMisReservasValidators = [
+  query('periodo')
+    .optional()
+    .isIn(['proximas', 'pasadas'])
+    .withMessage("periodo debe ser 'proximas' o 'pasadas'"),
+  query('estado')
+    .optional()
+    .isIn(['confirmada', 'cancelada', 'completada'])
+    .withMessage("estado debe ser 'confirmada', 'cancelada' o 'completada'"),
+  query('pagina')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('pagina debe ser un entero mayor o igual a 1')
+    .toInt(),
+  query('limite')
+    .optional()
+    .isInt({ min: 1, max: 50 })
+    .withMessage('limite debe ser un entero entre 1 y 50')
+    .toInt(),
+];
+
+module.exports = { crearReservaValidators, cancelarReservaValidators, completarPanelValidators, listarMisReservasValidators };

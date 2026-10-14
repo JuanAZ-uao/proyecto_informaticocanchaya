@@ -59,7 +59,11 @@ describe('reservaService.crearReserva', () => {
   const datosReserva = {
     canchaId: CANCHA_ID,
     usuarioId: USUARIO_ID,
+
     fecha: fechaFutura,
+
+    fecha: '2099-12-31',
+
     horaInicio: '08:00',
     horaFin: '09:00',
   };
