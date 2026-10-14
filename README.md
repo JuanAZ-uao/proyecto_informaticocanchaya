@@ -524,6 +524,7 @@ El pipeline está en [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml).
 | Backend - lint y pruebas | `npm ci`, lint si existe el script, aplica el esquema a un Postgres temporal y corre `npm test`. La prueba de concurrencia de US-09 se ejecuta con base de datos real. |
 | Frontend - lint y build | `npm ci`, `npm run lint` (ESLint sobre `.js` y `.jsx`) y `npm run build`. |
 | Docker - build y smoke test | Construye las imágenes, levanta todo con `docker compose` y ejecuta [scripts/smoke-test.sh](scripts/smoke-test.sh): health, frontend, rutas SPA, CORS, 401 sin token, registro, login y listado de canchas. Después corre la prueba de carga de sockets con 100 conexiones (US-18). |
+| SonarQube Quality Gate | Analiza backend y frontend con la cobertura de Jest y espera el resultado del Quality Gate. Necesita la variable `SONAR_HOST_URL` y el secreto `SONAR_TOKEN`. Si el servidor no responde (por ejemplo, un túnel de ngrok apagado) o faltan esos datos, el análisis se omite con un aviso y el pipeline continúa. |
 | Desplegar en entorno local | Solo en push a `sprint_4` (rama de despliegue actual), en un self-hosted runner: `docker compose up -d --build`. |
 
 ### Evidencias

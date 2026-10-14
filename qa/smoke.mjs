@@ -312,6 +312,7 @@ if (fase === '1') {
       c.verifica(JSON.stringify(q).includes('sonarqube-scan-action') && /SONAR_TOKEN/.test(JSON.stringify(q)), 'Usa sonarqube-scan-action con SONAR_TOKEN tomado de secretos');
       c.verifica(JSON.stringify(wf.jobs.docker.needs).includes('quality-gate'), 'La construcción de Docker espera al Quality Gate');
       c.verifica(/lcov\.info/.test(JSON.stringify(wf.jobs.backend)), 'El job de backend publica el reporte lcov de cobertura');
+      c.verifica(q.steps.some((x) => x.id === 'sonar' && /api\/server\/version/.test(x.run ?? '') && /omitir/.test(x.run ?? '')) && q.steps.filter((x) => /sonar\.outputs\.disponible/.test(x.if ?? '')).length >= 3, 'Si el servidor de SonarQube no responde, el análisis se omite con un aviso en lugar de fallar el pipeline');
     }
   );
 

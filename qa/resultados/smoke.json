@@ -2,7 +2,7 @@
   "clave": "smoke",
   "titulo": "Smoke test de Docker y pipeline",
   "inicio": "2026-10-14T05:48:22.539Z",
-  "fin": "2026-10-14T06:04:57.713Z",
+  "fin": "2026-10-14T06:45:31.629Z",
   "casos": [
     {
       "tipo": "Smoke test",
@@ -615,7 +615,7 @@
       ],
       "esperado": "Jobs backend, frontend, quality-gate, docker y deploy-local; el despliegue solo corre en push a sprint_4 con runner self-hosted; los secretos vienen de \"secrets.*\"; no hay .env en el repositorio.",
       "estado": "APROBADA",
-      "duracionMs": 830,
+      "duracionMs": 266,
       "resultado": [
         {
           "ok": true,
@@ -659,7 +659,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:51:44.100Z"
+      "ejecutadaEn": "2026-10-14T06:45:31.612Z"
     },
     {
       "tipo": "Smoke test",
@@ -865,7 +865,7 @@
       ],
       "esperado": "El archivo define proyecto, fuentes del backend y frontend, exclusiones y la ruta del lcov; el job quality-gate depende de backend y frontend, descarga el lcov y espera el Quality Gate; Docker depende de quality-gate.",
       "estado": "APROBADA",
-      "duracionMs": 23,
+      "duracionMs": 7,
       "resultado": [
         {
           "ok": true,
@@ -894,10 +894,14 @@
         {
           "ok": true,
           "texto": "El job de backend publica el reporte lcov de cobertura"
+        },
+        {
+          "ok": true,
+          "texto": "Si el servidor de SonarQube no responde, el análisis se omite con un aviso en lugar de fallar el pipeline"
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:52:07.000Z"
+      "ejecutadaEn": "2026-10-14T06:45:31.626Z"
     },
     {
       "tipo": "Smoke test",
