@@ -50,7 +50,25 @@ jobs:
       - run: npm run lint --if-present
       - name: Aplicar esquema a la base de pruebas
         run: npm run migrate
-      - run: npm test
+      - name: Pruebas con cobertura
+        run: |
+          mkdir -p reports
+          npm test -- --coverage --ci --json --outputFile=reports/jest-results.json
+
+      - name: Empaquetar reportes
+        if: always()
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/artifacts/backend-reports"
+          cp coverage/lcov.info "$GITHUB_WORKSPACE/artifacts/backend-reports/lcov.info"
+          cp reports/jest-results.json "$GITHUB_WORKSPACE/artifacts/backend-reports/jest-results.json"
+
+      - name: Publicar reportes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-reports
+          if-no-files-found: error
+          path: artifacts/backend-reports/
 
   frontend:
     name: Frontend - lint y build
@@ -71,9 +89,45 @@ jobs:
       - run: npm run lint
       - run: npm run build
 
+  quality-gate:
+    name: SonarQube Quality Gate
+    needs: [backend, frontend]
+    if: always() && needs.backend.result == 'success' && needs.frontend.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: backend-reports
+          path: artifacts-descarga/backend-reports
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Alinear el LCOV con la raíz
+        run: |
+          mkdir -p backend/coverage frontend/coverage
+          cp artifacts-descarga/backend-reports/lcov.info backend/coverage/lcov.info
+          node scripts/ci/prefijar-lcov.mjs backend/coverage/lcov.info backend/coverage/lcov.sonar.info backend/
+          printf 'TN:\nend_of_record\n' > frontend/coverage/lcov.sonar.info
+
+      - name: Análisis y espera del Quality Gate
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.qualitygate.wait=true
+            -Dsonar.qualitygate.timeout=300
+
   docker:
     name: Docker - build y smoke test
-    needs: [backend, frontend]
+    needs: [backend, frontend, quality-gate]
     runs-on: ubuntu-latest
     env:
       JWT_SECRET: secreto-solo-para-ci
@@ -120,7 +174,7 @@ jobs:
     # Rama de despliegue actual: sprint_4 (cambiarla aquí cuando avance el proyecto).
     # Solo en push, nunca en pull_request, para que código de un PR no se ejecute
     # en la máquina del runner.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/sprint_4'
+    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/sprint_4'
     runs-on: self-hosted
     env:
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
