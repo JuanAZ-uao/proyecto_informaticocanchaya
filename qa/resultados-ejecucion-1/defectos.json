@@ -1,0 +1,101 @@
+[
+  {
+    "id": "DEF-01", "severidad": "Alta", "estado": "Abierto",
+    "titulo": "Pruebas unitarias con una fecha fija que ya venció: el job de backend del pipeline falla",
+    "hu": "US-20 (pipeline) · US-08 CA-6", "casos": ["JEST"],
+    "descripcion": "backend/tests/reservaService.test.js usa la fecha fija 2026-10-01 como si fuera una fecha futura. Desde el 1 de octubre de 2026 a las 08:00 (hora de Colombia) esa fecha ya es pasada y el servicio la rechaza correctamente con \"No se pueden reservar fechas u horas pasadas\". El fallo no está en el producto sino en los datos de la prueba, pero hace que `npm test` termine en rojo y bloquee el job \"Backend - lint y pruebas\" (y con él los jobs Docker y de despliegue).",
+    "pasos": ["Ejecutar `npm test` en la carpeta backend con una base PostgreSQL disponible (fecha del sistema posterior al 1-oct-2026).", "Revisar las pruebas de reservaService.test.js."],
+    "esperado": "Las 51 pruebas pasan en cualquier fecha.",
+    "obtenido": "10 de 51 pruebas fallan (todas de reservaService.test.js › crearReserva) con \"No se pueden reservar fechas u horas pasadas\".",
+    "impacto": "El pipeline de CI/CD queda en rojo en cada push y no se puede desplegar. Cualquier cambio futuro quedaría sin validación automática hasta corregirlo.",
+    "recomendacion": "Reemplazar la fecha fija por una calculada (por ejemplo, una fecha lejana como 2099-12-31 o la de mañana en hora de Colombia) en los datos de prueba de reservaService.test.js y revisar que ninguna otra prueba dependa de la fecha actual."
+  },
+  {
+    "id": "DEF-02", "severidad": "Alta", "estado": "Abierto",
+    "titulo": "Dependencias de producción del backend con vulnerabilidades conocidas (1 crítica, 1 alta, 2 moderadas)",
+    "hu": "US-20 (CI/CD) · RNF-03 (seguridad)", "casos": ["NF-13"],
+    "descripcion": "`npm audit --omit=dev` en el backend reporta: proxy-addr (crítica, suplantación de IP), nodemailer ≤ 10.0.5 (alta, varias inyecciones SMTP y de cabeceras) y qs/express (moderada, denegación de servicio). En el frontend hay 2 moderadas en react-router. En el uso actual la explotabilidad es limitada (la API no configura \"trust proxy\" y el SMTP no está configurado), pero el criterio de salida exige 0 vulnerabilidades altas o críticas.",
+    "pasos": ["En backend, ejecutar `npm audit --omit=dev`.", "En frontend, ejecutar `npm audit --omit=dev`."],
+    "esperado": "Sin vulnerabilidades altas ni críticas en dependencias de producción.",
+    "obtenido": "Backend: 1 crítica, 1 alta, 2 moderadas. Frontend: 2 moderadas.",
+    "impacto": "Riesgo de seguridad al desplegar fuera del entorno local, sobre todo cuando se configure el envío real de correos (nodemailer).",
+    "recomendacion": "Ejecutar `npm audit fix` en el backend (corrige proxy-addr y qs sin cambios incompatibles) y planificar la actualización de nodemailer a una versión corregida (cambio mayor; revisar el envío de correos) y de react-router-dom en el frontend. Volver a ejecutar las pruebas después de actualizar."
+  },
+  {
+    "id": "DEF-03", "severidad": "Media", "estado": "Abierto",
+    "titulo": "La API acepta reservas fuera del horario de atención de la cancha",
+    "hu": "US-08 · CA-8", "casos": ["F-08-07"],
+    "descripcion": "El backend no compara la reserva con la tabla de horarios de la cancha. La interfaz solo ofrece bloques dentro del horario, pero cualquier cliente que llame directamente a la API puede reservar a cualquier hora (por ejemplo, 03:00) o en un día en que la cancha no atiende. El criterio exige que la validación se haga siempre en el backend.",
+    "pasos": ["Consultar el horario de una cancha (07:00–20:00).", "Enviar POST /api/canchas/:id/reservas con horaInicio 03:00 y horaFin 04:00 en una fecha futura."],
+    "esperado": "400 o 409: la cancha no atiende a esa hora.",
+    "obtenido": "201 Created: la reserva se guardó.",
+    "impacto": "Se pueden crear reservas imposibles de cumplir y se bloquean franjas que no existen; solo es posible por la API directa.",
+    "recomendacion": "En crearReserva (y en retenerFranja) validar que la franja esté contenida en el horario del día de la semana de la cancha, usando la fecha en hora de Colombia."
+  },
+  {
+    "id": "DEF-04", "severidad": "Media", "estado": "Abierto",
+    "titulo": "La API acepta franjas solapadas en la misma cancha",
+    "hu": "US-09 · CA-1 y CA-2 · US-08 CA-8", "casos": ["F-08-08"],
+    "descripcion": "El índice único parcial solo impide dos reservas con la misma hora de inicio. Una reserva 10:00–12:00 no bloquea 11:00–12:00 ni 10:30–11:30. La interfaz solo genera bloques de 1 hora alineados, por lo que el problema aparece solo con llamadas directas a la API, pero el criterio de US-09 es que \"nunca se generen reservas duplicadas\" para la misma cancha, día y hora.",
+    "pasos": ["Reservar 10:00–12:00 en una cancha y fecha.", "Reservar 11:00–12:00 en la misma cancha y fecha.", "Reservar 10:30–11:30."],
+    "esperado": "409 en los dos últimos intentos.",
+    "obtenido": "201 en ambos: quedan 3 reservas confirmadas que se solapan.",
+    "impacto": "Posible doble reserva real de la cancha por la API directa; la restricción de la base de datos no protege ese caso.",
+    "recomendacion": "Exigir bloques de 1 hora alineados (horaFin = horaInicio + 1 h y minutos en 00) y, como defensa en profundidad, una restricción de exclusión en PostgreSQL (EXCLUDE USING gist con rangos de tiempo, extensión btree_gist) para reservas confirmadas."
+  },
+  {
+    "id": "DEF-05", "severidad": "Media", "estado": "Abierto",
+    "titulo": "Al reconectar el socket no se recupera el tiempo restante: se inicia una sesión nueva de 3 minutos",
+    "hu": "US-17 · CA-11 (y CA-10)", "casos": ["F-17-09"],
+    "descripcion": "Cuando se cierra la última conexión del usuario en una cancha, el servidor cancela la sesión de inmediato (criterio CA-10). Si la conexión se cae por un instante y se reconecta, ya no hay sesión que retomar y el servidor crea una nueva de 180 s, por lo que el cliente no \"recupera el tiempo restante\" (CA-11). Los dos criterios son parcialmente contradictorios y la implementación solo cumple el primero.",
+    "pasos": ["Conectar el socket y anotar expiresAt.", "Cortar la conexión (pérdida de red) y reconectar 2 s después con el mismo token.", "Comparar el expiresAt recibido."],
+    "esperado": "El expiresAt al reconectar es el mismo que antes del corte.",
+    "obtenido": "expiresAt nuevo, 2,0 s posterior al original: se creó una sesión nueva de 180 s.",
+    "impacto": "Una caída breve de red le regala al usuario un temporizador completo y le libera la franja retenida (el frontend la vuelve a pedir al reconectar). No impide reservar, pero el tiempo mostrado no refleja la sesión original.",
+    "recomendacion": "Dar un período de gracia (por ejemplo 10 a 15 s) antes de cancelar la sesión cuando se cierra el último socket; si el usuario reconecta dentro de ese lapso se retoma el mismo expiresAt."
+  },
+  {
+    "id": "DEF-06", "severidad": "Media", "estado": "Abierto",
+    "titulo": "La cuenta regresiva depende del reloj del navegador, no del servidor",
+    "hu": "US-17 · CA-3 y CA-4", "casos": ["E2E-15"],
+    "descripcion": "El frontend calcula el tiempo restante como expiresAt (hora del servidor) menos Date.now() (hora del equipo del usuario). La sincronización cada 5 s reenvía el mismo expiresAt absoluto, por lo que no corrige desfases del reloj local. El criterio pide una cuenta regresiva calculada a partir de la hora del servidor, no del reloj local.",
+    "pasos": ["Abrir el navegador con el reloj local adelantado 2 minutos.", "Entrar al detalle de una cancha y esperar 6 s."],
+    "esperado": "El temporizador muestra ≈ 03:00 (hora del servidor).",
+    "obtenido": "Muestra 00:52: la cuenta regresiva está desfasada 2 minutos.",
+    "impacto": "Un usuario con la hora del equipo mal configurada ve un tiempo incorrecto (o \"Tu tiempo expiró\" de inmediato), aunque el servidor siga validando bien su sesión.",
+    "recomendacion": "Enviar en temporizador:inicio y temporizador:sync la hora actual del servidor (serverNow) o el tiempo restante en milisegundos, y calcular en el cliente el desfase (serverNow − Date.now()) para ajustar la cuenta regresiva."
+  },
+  {
+    "id": "DEF-07", "severidad": "Media", "estado": "Abierto",
+    "titulo": "No hay límite de intentos de inicio de sesión",
+    "hu": "US-02 · seguridad (RNF-03)", "casos": ["NF-12"],
+    "descripcion": "La API permite intentos ilimitados de inicio de sesión contra una misma cuenta, sin retrasos ni bloqueos, lo que facilita ataques de fuerza bruta o de relleno de credenciales.",
+    "pasos": ["Enviar 40 inicios de sesión con contraseña incorrecta contra la misma cuenta.", "Iniciar sesión con la contraseña correcta."],
+    "esperado": "Después de varios fallos, la API limita (429) o bloquea temporalmente.",
+    "obtenido": "Los 40 intentos respondieron 401 sin ninguna limitación y el inicio de sesión correcto posterior respondió 200.",
+    "impacto": "Una contraseña débil puede adivinarse por fuerza bruta.",
+    "recomendacion": "Agregar express-rate-limit (por IP y por correo) en /api/auth/login y /api/auth/olvide-password."
+  },
+  {
+    "id": "DEF-08", "severidad": "Baja", "estado": "Abierto",
+    "titulo": "Un origen no permitido por CORS recibe un error 500 y deja un error en el log",
+    "hu": "RNF-03 (seguridad)", "casos": ["NF-11"],
+    "descripcion": "La función de verificación de CORS rechaza los orígenes ajenos con un Error, que el manejador de errores convierte en un 500 \"Error interno del servidor\" y registra como error del servidor. El navegador igualmente bloquea la respuesta (no se envía Access-Control-Allow-Origin), así que no hay fuga de datos, pero el estado y el log son engañosos.",
+    "pasos": ["Enviar GET /api/health con la cabecera Origin: http://sitio-malicioso.example."],
+    "esperado": "Respuesta sin Access-Control-Allow-Origin y con un estado de rechazo (403), sin error 500.",
+    "obtenido": "HTTP 500 {\"mensaje\":\"Error interno del servidor\"} y un [ERROR] en el log del backend.",
+    "impacto": "Ruido en los logs y diagnóstico confuso; sin impacto de seguridad directo.",
+    "recomendacion": "Rechazar con un ErrorDeAplicacion de estado 403 y mensaje \"Origen no permitido\" (o simplemente no habilitar CORS para ese origen)."
+  },
+  {
+    "id": "DEF-09", "severidad": "Baja", "estado": "Abierto",
+    "titulo": "retencion:solicitar con un payload nulo responde ERROR_INTERNO en lugar de DATOS_INVALIDOS",
+    "hu": "US-18 · CA-1 y CA-9 (errores documentados)", "casos": ["F-18-08"],
+    "descripcion": "validarFranja usa un valor por defecto en la desestructuración, que solo aplica a undefined; si el cliente envía null el servicio lanza un TypeError, el socket responde ERROR_INTERNO y se registra un error. El código DATOS_INVALIDOS documentado no se devuelve en este caso.",
+    "pasos": ["Conectar un socket autenticado.", "Emitir retencion:solicitar con payload null."],
+    "esperado": "ack {ok:false, error:{codigo:\"DATOS_INVALIDOS\"}}.",
+    "obtenido": "ack {ok:false, error:{codigo:\"ERROR_INTERNO\", mensaje:\"Error interno del servidor\"}}.",
+    "impacto": "Un mensaje malformado de un cliente produce un error interno registrado; sin efecto sobre otros usuarios.",
+    "recomendacion": "En validarFranja tratar cualquier valor no objeto (null incluido) como DATOS_INVALIDOS antes de desestructurar."
+  }
+]

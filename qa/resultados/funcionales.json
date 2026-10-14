@@ -1,0 +1,2691 @@
+{
+  "clave": "funcionales",
+  "titulo": "Pruebas funcionales (API REST y Socket.IO)",
+  "inicio": "2026-10-11T19:47:41.419Z",
+  "fin": "2026-10-11T19:50:57.717Z",
+  "casos": [
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-01-01",
+      "hu": "US-01",
+      "ca": [
+        1
+      ],
+      "grupo": "US-01",
+      "titulo": "Registro con datos válidos",
+      "objetivo": "Verificar que un visitante puede crear su cuenta y que la respuesta no expone datos sensibles.",
+      "datos": "nombre, correo único, teléfono 3001234567 y contraseña \"Password123!\".",
+      "pasos": [
+        "POST /api/auth/registro con los 4 datos válidos.",
+        "Revisar el código de estado y el cuerpo."
+      ],
+      "esperado": "201 Created con mensaje \"Cuenta creada correctamente\" y el usuario (id, nombre, correo) sin contraseña ni hash.",
+      "estado": "APROBADA",
+      "duracionMs": 332,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Responde 201 Created → HTTP 201"
+        },
+        {
+          "ok": true,
+          "texto": "Mensaje de confirmación correcto → Cuenta creada correctamente"
+        },
+        {
+          "ok": true,
+          "texto": "Devuelve el usuario con id y correo"
+        },
+        {
+          "ok": true,
+          "texto": "La respuesta no contiene contraseña ni hash"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:47:42.648Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-01-02",
+      "hu": "US-01",
+      "ca": [
+        2
+      ],
+      "grupo": "US-01",
+      "titulo": "Registro con correo ya existente (caso de error)",
+      "objetivo": "Verificar que no se crea una cuenta duplicada.",
+      "datos": "Correo de un usuario ya registrado.",
+      "pasos": [
+        "Registrar un usuario.",
+        "Intentar registrar otro con el mismo correo.",
+        "Contar los usuarios con ese correo en la base."
+      ],
+      "esperado": "409 Conflict con el mensaje \"El correo ya está registrado\"; solo existe 1 fila con ese correo.",
+      "estado": "APROBADA",
+      "duracionMs": 962,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Responde 409 Conflict → HTTP 409"
+        },
+        {
+          "ok": true,
+          "texto": "Mensaje claro → El correo ya está registrado"
+        },
+        {
+          "ok": true,
+          "texto": "No se creó una cuenta duplicada (1 fila en la base)"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:47:43.612Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-01-03",
+      "hu": "US-01",
+      "ca": [
+        3
+      ],
+      "grupo": "US-01",
+      "titulo": "Validaciones del registro (campos vacíos y contraseña débil)",
+      "objetivo": "Verificar que el backend valida siempre los datos aunque el frontend ya lo haga.",
+      "pasos": [
+        "POST con todos los campos vacíos.",
+        "POST con contraseña de 5 caracteres.",
+        "POST con contraseña solo de letras.",
+        "POST con correo mal formado."
+      ],
+      "esperado": "Cada intento responde 400 con \"Error de validación\" y la lista de campos con su mensaje; no se crea ningún usuario.",
+      "estado": "APROBADA",
+      "duracionMs": 402,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Campos vacíos: 400 y errores en [nombre, correo, telefono, password] → HTTP 400, campos nombre, correo, telefono, password"
+        },
+        {
+          "ok": true,
+          "texto": "Contraseña corta: 400 y errores en [password] → HTTP 400, campos password"
+        },
+        {
+          "ok": true,
+          "texto": "Contraseña sin número: 400 y errores en [password] → HTTP 400, campos password"
+        },
+        {
+          "ok": true,
+          "texto": "Correo inválido: 400 y errores en [correo] → HTTP 400, campos correo"
+        },
+        {
+          "ok": true,
+          "texto": "Ninguno de los intentos inválidos creó un usuario"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:47:44.015Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-01-04",
+      "hu": "US-01",
+      "ca": [
+        4
+      ],
+      "grupo": "US-01",
+      "titulo": "La contraseña se almacena cifrada con bcrypt (RNF-03)",
+      "objetivo": "Verificar directamente en la base de datos que no se guarda la contraseña en texto plano.",
+      "pasos": [
+        "Registrar un usuario.",
+        "Consultar password_hash en la tabla usuarios."
+      ],
+      "esperado": "El valor es un hash bcrypt ($2a/$2b, 60 caracteres) distinto de la contraseña ingresada.",
+      "estado": "APROBADA",
+      "duracionMs": 848,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "password_hash es un hash bcrypt (prefijo $2?$10$, 60 caracteres) → $2a$10$… (60 caracteres)"
+        },
+        {
+          "ok": true,
+          "texto": "No contiene la contraseña en texto plano"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:47:44.863Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-02-01",
+      "hu": "US-02",
+      "ca": [
+        1
+      ],
+      "grupo": "US-02",
+      "titulo": "Inicio de sesión con credenciales correctas",
+      "objetivo": "Verificar que se emite un JWT válido y se devuelven los datos del usuario.",
+      "pasos": [
+        "POST /api/auth/login con correo y contraseña correctos.",
+        "Decodificar el token."
+      ],
+      "esperado": "200 con token JWT (sub = id del usuario, con expiración) y usuario {id, nombre, correo}.",
+      "estado": "APROBADA",
+      "duracionMs": 139,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Responde 200 con token → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "El token identifica al usuario (sub) y tiene expiración → exp − iat = 24 h"
+        },
+        {
+          "ok": true,
+          "texto": "Devuelve el usuario sin datos sensibles"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:47:45.002Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-02-02",
+      "hu": "US-02",
+      "ca": [
+        2
+      ],
+      "grupo": "US-02",
+      "titulo": "Credenciales incorrectas: mensaje genérico (caso de error)",
+      "objetivo": "Verificar que el mensaje no revela si el correo existe o si falló la contraseña.",
+      "pasos": [
+        "Login con contraseña incorrecta de un correo existente.",
+        "Login con un correo que no existe.",
+        "Comparar ambas respuestas."
+      ],
+      "esperado": "Ambas responden 401 con exactamente el mismo mensaje \"Correo o contraseña incorrectos\".",
+      "estado": "APROBADA",
+      "duracionMs": 131,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Ambos casos responden 401 → 401 / 401"
+        },
+        {
+          "ok": true,
+          "texto": "El mensaje es genérico e idéntico en ambos casos → Correo o contraseña incorrectos"
+        },
+        {
+          "ok": true,
+          "texto": "No se emite token"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:47:45.134Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-02-03",
+      "hu": "US-02",
+      "ca": [
+        3,
+        4
+      ],
+      "grupo": "US-02",
+      "titulo": "Acceso a rutas protegidas con y sin token",
+      "objetivo": "Verificar que el token válido da acceso y que la ausencia o invalidez de token se rechaza con 401.",
+      "pasos": [
+        "GET /api/canchas con token válido.",
+        "GET /api/canchas sin token.",
+        "GET /api/canchas con token alterado.",
+        "GET /api/canchas con un esquema de autorización distinto de Bearer."
+      ],
+      "esperado": "200 con token válido; 401 en los otros tres casos, con mensaje claro.",
+      "estado": "APROBADA",
+      "duracionMs": 12,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Con token válido: 200 → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "Sin token: 401 \"No autenticado\" → HTTP 401"
+        },
+        {
+          "ok": true,
+          "texto": "Token alterado: 401 → HTTP 401 — Token inválido o expirado"
+        },
+        {
+          "ok": true,
+          "texto": "Esquema distinto de Bearer: 401 → HTTP 401"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:47:45.147Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-03-01",
+      "hu": "US-03",
+      "ca": [
+        1,
+        4
+      ],
+      "grupo": "US-03",
+      "titulo": "Solicitud de recuperación: mensaje neutro y envío del enlace",
+      "objetivo": "Verificar que se genera el enlace para un correo registrado y que la respuesta no revela si el correo existe.",
+      "datos": "Un correo registrado y otro no registrado. SMTP no configurado: el enlace se imprime en el log del servidor (modo desarrollo).",
+      "pasos": [
+        "POST /api/auth/olvide-password con un correo registrado.",
+        "POST con un correo no registrado.",
+        "Comparar las respuestas.",
+        "Buscar el enlace en el log del backend."
+      ],
+      "esperado": "200 con el mismo mensaje neutro en ambos casos; solo el correo registrado genera un enlace con token en el log.",
+      "estado": "APROBADA",
+      "duracionMs": 4539,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Ambas solicitudes responden 200 → 200 / 200"
+        },
+        {
+          "ok": true,
+          "texto": "El mensaje es idéntico (neutro) → Si el correo está registrado, recibirás un enlace de recuperación"
+        },
+        {
+          "ok": true,
+          "texto": "Se generó el enlace de restablecimiento con token → http://localhost:8380/restablecer-password?token=…"
+        },
+        {
+          "ok": true,
+          "texto": "Para el correo no registrado no se generó ningún enlace"
+        },
+        {
+          "ok": true,
+          "texto": "Se guardó un único token pendiente (almacenado como hash) → 1 token(s)"
+        },
+        {
+          "ok": true,
+          "texto": "El token en la base está hasheado: no coincide con el del enlace"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:47:49.686Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-03-02",
+      "hu": "US-03",
+      "ca": [
+        2,
+        3
+      ],
+      "grupo": "US-03",
+      "titulo": "Restablecer la contraseña y reutilización del enlace",
+      "objetivo": "Verificar el cambio de contraseña con el token, que la contraseña antigua deja de servir y que el enlace no se puede reutilizar.",
+      "pasos": [
+        "Solicitar la recuperación y tomar el token del log.",
+        "POST /api/auth/restablecer-password con una contraseña débil.",
+        "POST con una contraseña válida.",
+        "Iniciar sesión con la contraseña nueva y con la antigua.",
+        "Reutilizar el mismo token.",
+        "Usar un token inventado."
+      ],
+      "esperado": "400 con la contraseña débil; 200 con la válida; login OK solo con la nueva; 400 al reutilizar el enlace y con un token inventado.",
+      "estado": "APROBADA",
+      "duracionMs": 2538,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Se obtuvo el token del enlace"
+        },
+        {
+          "ok": true,
+          "texto": "Contraseña débil: 400 → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "Contraseña válida: 200 \"Contraseña actualizada correctamente\" → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "Inicia sesión con la contraseña nueva → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "La contraseña anterior ya no sirve → HTTP 401"
+        },
+        {
+          "ok": true,
+          "texto": "El enlace usado se rechaza: 400 \"inválido o ha expirado\" → El enlace de recuperación es inválido o ha expirado"
+        },
+        {
+          "ok": true,
+          "texto": "Un token inventado se rechaza: 400 → HTTP 400"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:47:52.225Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-03-03",
+      "hu": "US-03",
+      "ca": [
+        3
+      ],
+      "grupo": "US-03",
+      "titulo": "Un enlace nuevo invalida el anterior; enlace vencido",
+      "objetivo": "Verificar que solo el último enlace de recuperación es válido y que un enlace vencido se rechaza.",
+      "pasos": [
+        "Solicitar la recuperación dos veces y tomar ambos tokens.",
+        "Intentar usar el primero.",
+        "Forzar el vencimiento del segundo en la base.",
+        "Intentar usar el segundo."
+      ],
+      "esperado": "El primer token se rechaza (400); el segundo, ya vencido, también se rechaza (400).",
+      "estado": "APROBADA",
+      "duracionMs": 6134,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Cada solicitud genera un token distinto"
+        },
+        {
+          "ok": true,
+          "texto": "El primer enlace quedó invalidado: 400 → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "El enlace vencido se rechaza: 400 → HTTP 400"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:47:58.360Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-04-01",
+      "hu": "US-04",
+      "ca": [
+        1
+      ],
+      "grupo": "US-04",
+      "titulo": "Listado de canchas con nombre y dirección",
+      "objetivo": "Verificar el listado para un usuario autenticado y su contenido.",
+      "pasos": [
+        "GET /api/canchas con token.",
+        "Revisar los campos de cada cancha."
+      ],
+      "esperado": "200 con las 5 canchas de ejemplo; cada una con id, nombre, dirección, zona, costoHora, tipo y foto.",
+      "estado": "APROBADA",
+      "duracionMs": 7,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Responde 200 con 5 canchas → HTTP 200, 5 canchas"
+        },
+        {
+          "ok": true,
+          "texto": "Cada cancha trae id, nombre, dirección, zona, costo, tipo y foto"
+        },
+        {
+          "ok": null,
+          "texto": "Canchas: Cancha El Bosque, Cancha La Rivera, Cancha Los Cerros, Cancha San Fernando, Cancha Santa Mónica"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:47:58.368Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-04-02",
+      "hu": "US-04",
+      "ca": [
+        1
+      ],
+      "grupo": "US-04",
+      "titulo": "El listado exige autenticación",
+      "objetivo": "Verificar que sin token no se puede ver el catálogo.",
+      "pasos": [
+        "GET /api/canchas sin token."
+      ],
+      "esperado": "401 \"No autenticado\".",
+      "estado": "APROBADA",
+      "duracionMs": 6,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Responde 401 → HTTP 401"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:47:58.375Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-05-01",
+      "hu": "US-05",
+      "ca": [
+        1
+      ],
+      "grupo": "US-05",
+      "titulo": "Detalle de cancha con horarios por día",
+      "objetivo": "Verificar el contenido del detalle.",
+      "pasos": [
+        "GET /api/canchas/:id para una cancha.",
+        "Revisar los campos y los horarios."
+      ],
+      "esperado": "200 con nombre, dirección, zona, costo, descripción, servicios y horarios por día (diaSemana 0-6, horaInicio < horaFin).",
+      "estado": "APROBADA",
+      "duracionMs": 9,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Responde 200 con la cancha pedida → Cancha El Bosque"
+        },
+        {
+          "ok": true,
+          "texto": "Incluye dirección, zona, costo, descripción y servicios"
+        },
+        {
+          "ok": true,
+          "texto": "Tiene horario para los 7 días de la semana → 7 registros"
+        },
+        {
+          "ok": true,
+          "texto": "Todos los horarios son coherentes (inicio < fin) → 07:00:00–20:00:00"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:47:58.385Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-05-02",
+      "hu": "US-05",
+      "ca": [
+        2,
+        3
+      ],
+      "grupo": "US-05",
+      "titulo": "Detalle: sin token, id inválido y cancha inexistente (casos de error)",
+      "objetivo": "Verificar el manejo de errores del detalle.",
+      "pasos": [
+        "GET sin token.",
+        "GET con id \"abc\".",
+        "GET con un UUID válido que no existe."
+      ],
+      "esperado": "401, 400 y 404 respectivamente, con mensajes claros.",
+      "estado": "APROBADA",
+      "duracionMs": 21,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Sin token: 401 → HTTP 401"
+        },
+        {
+          "ok": true,
+          "texto": "Id inválido: 400 → HTTP 400 — El id de la cancha no es válido"
+        },
+        {
+          "ok": true,
+          "texto": "Cancha inexistente: 404 \"Cancha no encontrada\" → HTTP 404"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:47:58.407Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-06-01",
+      "hu": "US-06",
+      "ca": [
+        1,
+        2,
+        3
+      ],
+      "grupo": "US-06",
+      "titulo": "Filtros por zona y por precio",
+      "objetivo": "Verificar que cada filtro, solo o combinado, reduce el listado correctamente y que un filtro sin coincidencias devuelve una lista vacía.",
+      "pasos": [
+        "Listar sin filtros y tomar una zona y los precios.",
+        "Filtrar por zona.",
+        "Filtrar por precioMin y precioMax.",
+        "Combinar zona y precio.",
+        "Filtrar por una zona que no existe."
+      ],
+      "esperado": "Cada filtro devuelve solo las canchas que lo cumplen; sin coincidencias → 200 con lista vacía.",
+      "estado": "APROBADA",
+      "duracionMs": 53,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Filtro por zona \"Oeste\": 1 resultado(s), todos de esa zona"
+        },
+        {
+          "ok": true,
+          "texto": "precioMin=75000: 3 resultado(s), todos con costo ≥ 75000"
+        },
+        {
+          "ok": true,
+          "texto": "precioMax=75000: 3 resultado(s), todos con costo ≤ 75000"
+        },
+        {
+          "ok": true,
+          "texto": "Rango exacto 65000–65000: 1 resultado(s)"
+        },
+        {
+          "ok": true,
+          "texto": "Zona inexistente: 200 con lista vacía → HTTP 200, 0 resultados"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:47:58.461Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-06-02",
+      "hu": "US-06",
+      "ca": [
+        4
+      ],
+      "grupo": "US-06",
+      "titulo": "Valores de filtro inválidos (casos de error)",
+      "objetivo": "Verificar que los filtros mal formados se rechazan con 400.",
+      "pasos": [
+        "precioMin=-5.",
+        "precioMax=abc.",
+        "fecha=31-12-2026 (formato incorrecto).",
+        "zona vacía."
+      ],
+      "esperado": "Cada petición responde 400 con el campo y el motivo.",
+      "estado": "APROBADA",
+      "duracionMs": 12,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "precioMin=-5 → 400 con error en \"precioMin\" → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "precioMax=abc → 400 con error en \"precioMax\" → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "fecha=31-12-2026 → 400 con error en \"fecha\" → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "zona=%20 → 400 con error en \"zona\" → HTTP 400"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:47:58.475Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-06-03",
+      "hu": "US-06",
+      "hus": [
+        "US-06",
+        "US-07"
+      ],
+      "ca": {
+        "US-06": [
+          1
+        ],
+        "US-07": [
+          3
+        ]
+      },
+      "grupo": "US-06",
+      "titulo": "Filtro por fecha: solo canchas con horario ese día",
+      "objetivo": "Verificar que filtrar por fecha considera el horario de atención del día de la semana.",
+      "pasos": [
+        "Quitar el horario de un día en una cancha (en la base de pruebas).",
+        "Filtrar por una fecha que cae en ese día de la semana.",
+        "Restaurar el horario."
+      ],
+      "esperado": "La cancha sin horario ese día no aparece; las demás sí.",
+      "estado": "APROBADA",
+      "duracionMs": 3088,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Con horario completo aparecen las 5 canchas → 5 canchas"
+        },
+        {
+          "ok": true,
+          "texto": "Sin horario ese día, la cancha no se lista; las otras 4 sí → 4 canchas"
+        },
+        {
+          "ok": true,
+          "texto": "El detalle tampoco ofrece horario ese día (no hay bloques que reservar)"
+        },
+        {
+          "ok": true,
+          "texto": "Tras restaurar el horario vuelven las 5 canchas → 5 canchas"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:01.564Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-08-01",
+      "hu": "US-08",
+      "ca": [
+        1
+      ],
+      "grupo": "US-08",
+      "titulo": "Consulta de disponibilidad por cancha y fecha",
+      "objetivo": "Verificar que GET /api/canchas/{id}/disponibilidad devuelve las franjas ocupadas de la fecha.",
+      "pasos": [
+        "Consultar la disponibilidad de una fecha sin reservas.",
+        "Crear una reserva 10:00–11:00.",
+        "Consultar de nuevo.",
+        "Consultar otra fecha."
+      ],
+      "esperado": "Antes: lista vacía. Después: la franja 10:00–11:00 aparece como ocupada. Otra fecha: sigue vacía.",
+      "estado": "APROBADA",
+      "duracionMs": 65,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Fecha sin reservas: 200 y lista de ocupados vacía → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "Otro usuario ve la franja 10:00–11:00 como ocupada → [{\"horaInicio\":\"10:00:00\",\"horaFin\":\"11:00:00\"}]"
+        },
+        {
+          "ok": true,
+          "texto": "Otra fecha sigue libre"
+        },
+        {
+          "ok": true,
+          "texto": "La misma fecha en otra cancha sigue libre"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:01.632Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-08-02",
+      "hu": "US-08",
+      "ca": [
+        4
+      ],
+      "grupo": "US-08",
+      "titulo": "Reservar una franja ya ocupada: 409 con mensaje exacto (caso de error)",
+      "objetivo": "Verificar el rechazo cuando la franja se ocupó entre la selección y la confirmación.",
+      "pasos": [
+        "El usuario A reserva una franja.",
+        "El usuario B intenta reservar la misma franja."
+      ],
+      "esperado": "409 Conflict con el mensaje \"El horario ya no está disponible\"; no se crea una segunda reserva.",
+      "estado": "APROBADA",
+      "duracionMs": 1285,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "A obtiene 201 → HTTP 201"
+        },
+        {
+          "ok": true,
+          "texto": "B recibe 409 Conflict → HTTP 409"
+        },
+        {
+          "ok": true,
+          "texto": "El mensaje es exactamente \"El horario ya no está disponible\" → El horario ya no está disponible"
+        },
+        {
+          "ok": true,
+          "texto": "En la base hay una sola reserva para la franja"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:02.918Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-08-03",
+      "hu": "US-08",
+      "hus": [
+        "US-08",
+        "US-09"
+      ],
+      "ca": {
+        "US-08": [
+          5
+        ],
+        "US-09": [
+          4
+        ]
+      },
+      "grupo": "US-08",
+      "titulo": "Cancelar una reserva libera la franja",
+      "objetivo": "Verificar que la franja vuelve a estar disponible y que se puede reservar sin violar la restricción única.",
+      "pasos": [
+        "A reserva una franja.",
+        "A cancela la reserva (PATCH /api/reservas/:id/cancelar).",
+        "Consultar la disponibilidad.",
+        "B reserva la misma franja."
+      ],
+      "esperado": "Cancelar responde 200 con estado \"cancelada\"; la franja deja de aparecer ocupada; B obtiene 201; en la base quedan 1 cancelada y 1 confirmada.",
+      "estado": "APROBADA",
+      "duracionMs": 874,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Cancelar responde 200 con estado \"cancelada\" → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "La franja vuelve a aparecer disponible"
+        },
+        {
+          "ok": true,
+          "texto": "B puede reservar la misma franja (201) → HTTP 201"
+        },
+        {
+          "ok": true,
+          "texto": "La base conserva la cancelada y la nueva confirmada (sin violar el índice único)"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:03.795Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-08-04",
+      "hu": "US-08",
+      "ca": [
+        6
+      ],
+      "grupo": "US-08",
+      "titulo": "No se aceptan fechas ni horas pasadas (caso de error)",
+      "objetivo": "Verificar que el backend rechaza reservas en el pasado, aunque el frontend ya lo impida.",
+      "pasos": [
+        "Reservar con una fecha de ayer.",
+        "Reservar hoy a las 00:00 (hora ya pasada).",
+        "Reservar con una fecha muy antigua."
+      ],
+      "esperado": "Las tres peticiones responden 400 con \"No se pueden reservar fechas u horas pasadas\".",
+      "estado": "APROBADA",
+      "duracionMs": 712,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Fecha de ayer: 400 \"No se pueden reservar fechas u horas pasadas\" → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "Hoy a las 00:00: 400 \"No se pueden reservar fechas u horas pasadas\" → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "Fecha de 2020: 400 \"No se pueden reservar fechas u horas pasadas\" → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "No se guardó ninguna reserva en el pasado"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:04.511Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-08-05",
+      "hu": "US-08",
+      "hus": [
+        "US-08",
+        "US-11"
+      ],
+      "ca": {
+        "US-08": [
+          7
+        ],
+        "US-11": [
+          9
+        ]
+      },
+      "grupo": "US-08",
+      "titulo": "Solo usuarios autenticados: sin token o token inválido → 401",
+      "objetivo": "Verificar la autenticación en todos los endpoints del motor de reservas, incluidos tokens vencidos y firmados con otro secreto.",
+      "pasos": [
+        "Llamar a disponibilidad, crear reserva, historial, cancelar y completar panel sin token.",
+        "Repetir con un token vencido.",
+        "Repetir con un token firmado con otro secreto.",
+        "Repetir con un token \"alg: none\"."
+      ],
+      "esperado": "401 en todos los casos.",
+      "estado": "APROBADA",
+      "duracionMs": 82,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "sin token: los 5 endpoints responden 401 → 401, 401, 401, 401, 401"
+        },
+        {
+          "ok": true,
+          "texto": "token vencido: los 5 endpoints responden 401 → 401, 401, 401, 401, 401"
+        },
+        {
+          "ok": true,
+          "texto": "firmado con otro secreto: los 5 endpoints responden 401 → 401, 401, 401, 401, 401"
+        },
+        {
+          "ok": true,
+          "texto": "alg:none: los 5 endpoints responden 401 → 401, 401, 401, 401, 401"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:04.594Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-08-06",
+      "hu": "US-08",
+      "ca": [
+        8
+      ],
+      "grupo": "US-08",
+      "titulo": "Validación en el backend de los datos de la reserva (casos de error)",
+      "objetivo": "Verificar que el backend valida todo por sí mismo, sin depender del frontend.",
+      "pasos": [
+        "horaFin igual a horaInicio y horaFin anterior.",
+        "Formato de hora inválido (\"25:00\", \"9:00\").",
+        "Fecha con formato inválido.",
+        "Cuerpo vacío.",
+        "Cancha con id mal formado y cancha inexistente."
+      ],
+      "esperado": "400 con el detalle del campo en cada caso de datos; 404 \"Cancha no encontrada\" para el UUID inexistente.",
+      "estado": "APROBADA",
+      "duracionMs": 49,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "horaFin = horaInicio: 400 → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "horaFin < horaInicio: 400 → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "hora 25:00: 400 → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "hora sin cero inicial: 400 → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "fecha inválida: 400 → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "cuerpo vacío: 400 → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "Id de cancha mal formado: 400 → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "Cancha inexistente: 404 \"Cancha no encontrada\" → HTTP 404"
+        },
+        {
+          "ok": true,
+          "texto": "Disponibilidad sin fecha: 400 → HTTP 400"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:04.646Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-08-07",
+      "hu": "US-08",
+      "ca": [
+        8
+      ],
+      "grupo": "US-08",
+      "titulo": "Reserva fuera del horario de atención de la cancha",
+      "objetivo": "Verificar que el backend rechaza reservas en horas en las que la cancha no atiende (no solo el frontend, que solo ofrece bloques dentro del horario).",
+      "datos": "Reserva solicitada: 03:00–04:00, fuera del horario registrado de la cancha (07:00–20:00).",
+      "pasos": [
+        "Consultar el horario de la cancha.",
+        "Enviar una reserva a las 03:00–04:00 directamente a la API."
+      ],
+      "esperado": "El backend debe rechazarla (400 o 409) porque la cancha no atiende a esa hora.",
+      "estado": "APROBADA",
+      "duracionMs": 1141,
+      "resultado": [
+        {
+          "ok": null,
+          "texto": "Horario registrado: 07:00–20:00"
+        },
+        {
+          "ok": true,
+          "texto": "La reserva fuera de horario se rechaza (400/409) → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "El error trae el código FUERA_DE_HORARIO y un mensaje claro → FUERA_DE_HORARIO — La cancha no atiende en ese horario"
+        },
+        {
+          "ok": true,
+          "texto": "No se guardó ninguna reserva"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:05.787Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-08-08",
+      "hu": "US-09",
+      "hus": [
+        "US-08",
+        "US-09"
+      ],
+      "ca": {
+        "US-08": [
+          8
+        ],
+        "US-09": [
+          1,
+          2
+        ]
+      },
+      "grupo": "US-08",
+      "titulo": "Franjas solapadas en la misma cancha",
+      "objetivo": "Verificar que no se puede reservar una franja que se traslapa con otra ya confirmada (p. ej. 10:30–11:30 sobre 10:00–11:00, o un bloque de 2 horas), ni por la API ni directamente en la base de datos.",
+      "datos": "Reserva existente 10:00–11:00; intentos 10:30–11:30 y 10:00–12:00; INSERT directo en SQL de 10:30–11:30.",
+      "pasos": [
+        "Reservar 10:00–11:00.",
+        "Intentar reservar 10:30–11:30.",
+        "Intentar reservar 10:00–12:00.",
+        "Intentar insertar directamente en la base una reserva confirmada 10:30–11:30."
+      ],
+      "esperado": "Los dos intentos por la API se rechazan (400 o 409); el INSERT directo falla por la restricción de exclusión (ex_reservas_sin_solape); queda una sola reserva.",
+      "estado": "APROBADA",
+      "duracionMs": 1653,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Reserva base 10:00–11:00 creada → HTTP 201"
+        },
+        {
+          "ok": true,
+          "texto": "10:30–11:30 (solapada) se rechaza → HTTP 400 — FUERA_DE_HORARIO La cancha no atiende en ese horario"
+        },
+        {
+          "ok": true,
+          "texto": "10:00–12:00 (bloque de 2 horas que contiene a la reserva) se rechaza → HTTP 400 — BLOQUE_INVALIDO"
+        },
+        {
+          "ok": true,
+          "texto": "La base de datos rechaza el solape aunque se inserte directamente (restricción de exclusión) → ERROR:  conflicting key value violates exclusion constraint \"ex_reservas_sin_solape\""
+        },
+        {
+          "ok": true,
+          "texto": "Queda una sola reserva confirmada para esa cancha y fecha"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:07.441Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-08-09",
+      "hu": "US-08",
+      "ca": [
+        5
+      ],
+      "grupo": "US-08",
+      "titulo": "Cancelación: reserva ajena, inexistente y ya cancelada (casos de error)",
+      "objetivo": "Verificar las reglas de autorización y estado al cancelar.",
+      "pasos": [
+        "B intenta cancelar la reserva de A.",
+        "Cancelar un id inexistente.",
+        "Cancelar con un id mal formado.",
+        "A cancela su reserva dos veces."
+      ],
+      "esperado": "403 al cancelar una reserva ajena; 404 si no existe; 400 con id mal formado; 409 al cancelar una ya cancelada.",
+      "estado": "APROBADA",
+      "duracionMs": 744,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Cancelar una reserva ajena: 403 → HTTP 403 — No tienes permiso para cancelar esta reserva"
+        },
+        {
+          "ok": true,
+          "texto": "La reserva ajena sigue confirmada"
+        },
+        {
+          "ok": true,
+          "texto": "Reserva inexistente: 404 → HTTP 404"
+        },
+        {
+          "ok": true,
+          "texto": "Id mal formado: 400 → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "La primera cancelación del dueño: 200 → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "Cancelar de nuevo: 409 \"ya estaba cancelada\" → HTTP 409 — Esta reserva ya estaba cancelada"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:08.186Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "Base de datos",
+      "prioridad": "Alta",
+      "id": "F-09-01",
+      "hu": "US-09",
+      "ca": [
+        1
+      ],
+      "grupo": "US-09",
+      "titulo": "Restricción única parcial en la base de datos",
+      "objetivo": "Verificar que el bloqueo existe en PostgreSQL y no depende solo del código de la aplicación.",
+      "pasos": [
+        "Crear una reserva por la API.",
+        "Insertar directamente en la base (SQL) una segunda reserva confirmada para la misma cancha/fecha/hora.",
+        "Insertar directamente una reserva en estado \"cancelada\" para la misma franja."
+      ],
+      "esperado": "El INSERT confirmado falla con \"unique constraint uq_reservas_confirmada_cancha_fecha_hora\"; el INSERT cancelado sí se permite (índice parcial).",
+      "estado": "APROBADA",
+      "duracionMs": 2890,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "El INSERT duplicado confirmado lo rechaza la base de datos → ERROR:  duplicate key value violates unique constraint \"uq_reservas_confirmada_cancha_fecha_hora\""
+        },
+        {
+          "ok": true,
+          "texto": "Un INSERT en estado \"cancelada\" sí se permite (el índice es parcial)"
+        }
+      ],
+      "evidencias": [
+        {
+          "titulo": "Definición del índice",
+          "texto": "CREATE UNIQUE INDEX uq_reservas_confirmada_cancha_fecha_hora ON public.reservas USING btree (cancha_id, fecha, hora_inicio) WHERE (estado = 'confirmada'::text)"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:48:11.079Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-09-02",
+      "hu": "US-09",
+      "ca": [
+        2,
+        5
+      ],
+      "grupo": "US-09",
+      "titulo": "Dos usuarios reservan la misma franja al mismo tiempo",
+      "objetivo": "Verificar con dos peticiones realmente simultáneas que solo se crea una reserva y la otra recibe un mensaje claro.",
+      "pasos": [
+        "Enviar dos POST /reservas en paralelo (Promise.all) de usuarios distintos para la misma franja.",
+        "Revisar los códigos y mensajes.",
+        "Contar las filas en la base."
+      ],
+      "esperado": "Un 201 y un 409 con \"El horario ya no está disponible\", sin textos técnicos; una sola fila en la base. Se repite 5 veces con franjas distintas.",
+      "estado": "APROBADA",
+      "duracionMs": 4742,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Las 5 repeticiones dan exactamente un 201 y un 409 → 201/409 · 201/409 · 201/409 · 201/409 · 201/409"
+        },
+        {
+          "ok": true,
+          "texto": "En cada repetición hay una sola fila en la base → 1 · 1 · 1 · 1 · 1"
+        },
+        {
+          "ok": true,
+          "texto": "El rechazado recibe el mensaje claro \"El horario ya no está disponible\""
+        },
+        {
+          "ok": true,
+          "texto": "El mensaje no contiene errores técnicos de la base → {\"mensaje\":\"El horario ya no está disponible\"}"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:15.824Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-09-03",
+      "hu": "US-09",
+      "hus": [
+        "US-09",
+        "US-11"
+      ],
+      "ca": {
+        "US-09": [
+          3
+        ],
+        "US-11": [
+          5
+        ]
+      },
+      "grupo": "US-09",
+      "titulo": "Reenvío / doble clic del mismo usuario",
+      "objetivo": "Verificar que un mismo usuario no puede reservar dos veces la misma franja, ni en paralelo ni en secuencia.",
+      "pasos": [
+        "El mismo usuario envía 2 POST idénticos en paralelo.",
+        "Luego un tercero en secuencia."
+      ],
+      "esperado": "Una sola reserva creada (201); los demás envíos responden 409; una sola fila en la base.",
+      "estado": "APROBADA",
+      "duracionMs": 914,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Dos envíos en paralelo: un 201 y un 409 → 201/409"
+        },
+        {
+          "ok": true,
+          "texto": "Un tercer envío posterior: 409 → HTTP 409"
+        },
+        {
+          "ok": true,
+          "texto": "Una sola reserva en la base"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:16.739Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST (concurrencia)",
+      "prioridad": "Alta",
+      "id": "F-09-04",
+      "hu": "US-09",
+      "ca": [
+        2,
+        6
+      ],
+      "grupo": "US-09",
+      "titulo": "25 usuarios compiten por la misma franja",
+      "objetivo": "Verificar que la restricción resiste una competencia amplia: solo una reserva y sin registros huérfanos.",
+      "datos": "25 usuarios nuevos; misma cancha, fecha y hora.",
+      "pasos": [
+        "Crear 25 usuarios.",
+        "Enviar las 25 reservas a la vez.",
+        "Contar respuestas y filas en la base."
+      ],
+      "esperado": "Exactamente 1 respuesta 201 y 24 respuestas 409; 1 sola fila para la franja y ninguna fila parcial.",
+      "estado": "APROBADA",
+      "duracionMs": 12760,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "1 petición creó la reserva (201) → 1"
+        },
+        {
+          "ok": true,
+          "texto": "24 peticiones recibieron 409 → 24"
+        },
+        {
+          "ok": true,
+          "texto": "Ninguna petición terminó en error 5xx ni sin respuesta → 0 errores 5xx"
+        },
+        {
+          "ok": true,
+          "texto": "Una sola fila en la base para la franja"
+        },
+        {
+          "ok": true,
+          "texto": "No hay reservas huérfanas (todas tienen usuario)"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:29.500Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-09-05",
+      "hu": "US-09",
+      "ca": [
+        6
+      ],
+      "grupo": "US-09",
+      "titulo": "Un intento duplicado no deja registros parciales",
+      "objetivo": "Verificar la atomicidad de la creación: tras un rechazo, la base queda igual que antes.",
+      "pasos": [
+        "Contar las filas de reservas.",
+        "Reservar una franja y repetirla 5 veces con usuarios distintos.",
+        "Contar de nuevo."
+      ],
+      "esperado": "El total de filas crece solo en 1 (la reserva ganadora).",
+      "estado": "APROBADA",
+      "duracionMs": 2755,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "El total de filas aumentó exactamente en 1 → 16 → 17"
+        },
+        {
+          "ok": true,
+          "texto": "Ninguna fila quedó en un estado intermedio"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:32.257Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-10-01",
+      "hu": "US-10",
+      "ca": [
+        3
+      ],
+      "grupo": "US-10",
+      "titulo": "Los datos del usuario se toman de la sesión",
+      "objetivo": "Verificar que la reserva no pide nombre ni correo y que no se puede reservar a nombre de otro usuario.",
+      "pasos": [
+        "Reservar enviando solo cancha, fecha y hora.",
+        "Reservar enviando además un usuarioId ajeno en el cuerpo."
+      ],
+      "esperado": "La reserva queda asociada al usuario del token; el usuarioId del cuerpo se ignora.",
+      "estado": "APROBADA",
+      "duracionMs": 984,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Se crea con solo cancha, fecha y hora, asociada al usuario del token → HTTP 201"
+        },
+        {
+          "ok": true,
+          "texto": "Un usuarioId enviado en el cuerpo se ignora: la reserva es de quien tiene el token → dueño ANA (correcto)"
+        },
+        {
+          "ok": true,
+          "texto": "Confirmado en la base de datos"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:33.243Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-11-01",
+      "hu": "US-11",
+      "ca": [
+        1
+      ],
+      "grupo": "US-11",
+      "titulo": "Confirmar: 201 con identificador, cancha, fecha, hora y estado",
+      "objetivo": "Verificar el contrato de la respuesta de confirmación.",
+      "pasos": [
+        "POST /api/canchas/:id/reservas con datos válidos.",
+        "Revisar el cuerpo.",
+        "Consultar el estado guardado en la base."
+      ],
+      "esperado": "201 con reserva {id, codigo CY-XXXXXXXX, cancha{id,nombre,direccion}, fecha, horaInicio, horaFin, estado \"confirmada\"}; en la base estado = confirmada.",
+      "estado": "APROBADA",
+      "duracionMs": 866,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Responde 201 Created → HTTP 201"
+        },
+        {
+          "ok": true,
+          "texto": "Incluye identificador (UUID) y código legible CY-XXXXXXXX → 87f8f756… / CY-87F8F756"
+        },
+        {
+          "ok": true,
+          "texto": "Incluye la cancha (id, nombre y dirección) → Cancha Los Cerros"
+        },
+        {
+          "ok": true,
+          "texto": "Incluye fecha y hora → 2100-11-07 10:00:00–11:00:00"
+        },
+        {
+          "ok": true,
+          "texto": "Estado \"confirmada\" → confirmada"
+        },
+        {
+          "ok": true,
+          "texto": "En la base de datos el estado guardado es \"confirmada\""
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:34.110Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-11-02",
+      "hu": "US-11",
+      "ca": [
+        3
+      ],
+      "grupo": "US-11",
+      "titulo": "Si falla la reserva no se informa éxito (casos de error)",
+      "objetivo": "Verificar que cada fallo responde con un error claro y sin el objeto \"reserva\" que el frontend interpretaría como éxito.",
+      "pasos": [
+        "Provocar un 409 (franja ocupada), un 400 (hora pasada), un 404 (cancha inexistente) y un 401.",
+        "Revisar el cuerpo de cada respuesta."
+      ],
+      "esperado": "Ninguna respuesta de error incluye \"reserva\"; todas traen \"mensaje\" claro sin detalles técnicos.",
+      "estado": "APROBADA",
+      "duracionMs": 65,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "409 franja ocupada: 409, sin \"reserva\" y con mensaje claro → El horario ya no está disponible"
+        },
+        {
+          "ok": true,
+          "texto": "400 hora pasada: 400, sin \"reserva\" y con mensaje claro → No se pueden reservar fechas u horas pasadas"
+        },
+        {
+          "ok": true,
+          "texto": "404 cancha inexistente: 404, sin \"reserva\" y con mensaje claro → Cancha no encontrada"
+        },
+        {
+          "ok": true,
+          "texto": "401 sin token: 401, sin \"reserva\" y con mensaje claro → No autenticado"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:34.177Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST (rendimiento)",
+      "prioridad": "Alta",
+      "id": "F-11-03",
+      "hu": "US-11",
+      "ca": [
+        4
+      ],
+      "grupo": "US-11",
+      "titulo": "Tiempo de respuesta de la confirmación (< 2 s)",
+      "objetivo": "Medir el tiempo que tarda el backend en confirmar una reserva en condiciones normales.",
+      "pasos": [
+        "Crear 15 reservas en secuencia, midiendo cada respuesta.",
+        "Calcular promedio, mediana, p95 y máximo."
+      ],
+      "esperado": "Todas las confirmaciones responden en menos de 2000 ms (objetivo del criterio); p95 por debajo de 1000 ms.",
+      "estado": "APROBADA",
+      "duracionMs": 741,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "El máximo es menor a 2000 ms → 38 ms"
+        },
+        {
+          "ok": true,
+          "texto": "El p95 es menor a 1000 ms → 38 ms"
+        },
+        {
+          "ok": null,
+          "texto": "15 confirmaciones · promedio 22 ms · mediana 19 ms · mínimo 13 ms · máximo 38 ms"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:34.920Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-11-04",
+      "hu": "US-11",
+      "ca": [
+        6
+      ],
+      "grupo": "US-11",
+      "titulo": "La reserva aparece de inmediato en el historial con estado \"confirmada\"",
+      "objetivo": "Verificar GET /api/reservas/mias justo después de confirmar, y que cada usuario solo ve las suyas.",
+      "pasos": [
+        "A crea dos reservas en fechas distintas.",
+        "GET /api/reservas/mias de A inmediatamente.",
+        "GET /api/reservas/mias de B (sin reservas).",
+        "A cancela una y consulta de nuevo."
+      ],
+      "esperado": "A ve ambas, ordenadas de la más reciente a la más antigua, con código, cancha, fecha, hora y estado; B ve lista vacía; la cancelada aparece como \"cancelada\".",
+      "estado": "APROBADA",
+      "duracionMs": 961,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "El historial muestra las 2 reservas de inmediato → 2 reservas"
+        },
+        {
+          "ok": true,
+          "texto": "Orden: la más reciente primero"
+        },
+        {
+          "ok": true,
+          "texto": "Cada ítem trae código, cancha y estado \"confirmada\" → CY-2BD273D2 · Cancha El Bosque"
+        },
+        {
+          "ok": true,
+          "texto": "Otro usuario NO ve estas reservas (aislamiento entre usuarios)"
+        },
+        {
+          "ok": true,
+          "texto": "La reserva cancelada aparece con estado \"cancelada\""
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:35.882Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-11-05",
+      "hu": "US-11",
+      "ca": [
+        10
+      ],
+      "grupo": "US-11",
+      "titulo": "Correo de confirmación: se envía sin bloquear la reserva",
+      "objetivo": "Verificar el envío del correo con el resumen (en modo desarrollo, sin SMTP) y que su fallo no impide confirmar.",
+      "datos": "SMTP sin configurar en el entorno Docker: el servicio imprime el correo simulado en el log.",
+      "pasos": [
+        "Confirmar una reserva.",
+        "Buscar en el log del backend el correo de confirmación.",
+        "Revisar que traiga el código, la cancha, la fecha y la hora."
+      ],
+      "esperado": "Aparece \"[EMAIL] … Confirmación de reserva\" con el mismo resumen. (El caso de fallo del correo se verifica con la prueba unitaria \"si el correo falla, la reserva igual queda confirmada\".)",
+      "notaQA": "No se probó el envío contra un servidor SMTP real porque no hay credenciales configuradas; solo el modo simulado y la prueba unitaria del fallo.",
+      "estado": "OBSERVACIÓN",
+      "duracionMs": 1815,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "La reserva se confirmó (201) → HTTP 201"
+        },
+        {
+          "ok": true,
+          "texto": "El log contiene el correo de confirmación de esa reserva → [EMAIL] SMTP no configurado. Confirmación de reserva (modo desarrollo) para mail.1791748115883.39@qa.local: CY-47B2ABC9 · Cancha Los Cerros · 2101-02-27 13:00 - 14:00"
+        },
+        {
+          "ok": true,
+          "texto": "El resumen incluye destinatario, cancha, fecha y hora"
+        },
+        {
+          "ok": "obs",
+          "texto": "El envío real por SMTP no se ejecutó (sin credenciales); queda cubierto solo en modo simulado."
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:37.698Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST + Socket.IO",
+      "prioridad": "Alta",
+      "id": "F-11-06",
+      "hu": "US-11",
+      "hus": [
+        "US-11",
+        "US-17"
+      ],
+      "ca": {
+        "US-11": [
+          7
+        ],
+        "US-17": [
+          6
+        ]
+      },
+      "grupo": "US-11",
+      "titulo": "Al confirmar, el temporizador se completa y deja de contar",
+      "objetivo": "Verificar que confirmar la reserva detiene la sincronización del temporizador y marca la sesión como completada.",
+      "pasos": [
+        "Conectar el socket del usuario (inicia el temporizador).",
+        "Confirmar la reserva por REST.",
+        "Esperar 7 s observando los eventos temporizador:sync.",
+        "Consultar la sesión en la base."
+      ],
+      "esperado": "Después de confirmar no llegan más eventos temporizador:sync y la sesión queda en estado \"completado\".",
+      "estado": "APROBADA",
+      "duracionMs": 13598,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "El socket se conecta y recibe temporizador:inicio"
+        },
+        {
+          "ok": true,
+          "texto": "Mientras corre, llegan eventos temporizador:sync"
+        },
+        {
+          "ok": true,
+          "texto": "La reserva se confirma → HTTP 201"
+        },
+        {
+          "ok": true,
+          "texto": "No llega ningún temporizador:sync tras confirmar (7 s de observación) → 0 eventos"
+        },
+        {
+          "ok": true,
+          "texto": "La sesión quedó \"completado\" en la base"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:51.297Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "Socket.IO",
+      "prioridad": "Alta",
+      "id": "F-17-01",
+      "hu": "US-17",
+      "ca": [
+        1
+      ],
+      "grupo": "US-17",
+      "titulo": "El servidor rechaza conexiones sin token válido (caso de error)",
+      "objetivo": "Verificar la autenticación del socket.",
+      "pasos": [
+        "Conectar sin token.",
+        "Conectar con un token inválido.",
+        "Conectar con un token vencido.",
+        "Conectar con un token de otro secreto.",
+        "Conectar con token válido."
+      ],
+      "esperado": "Las 4 primeras conexiones fallan con \"No autenticado\" o \"Token inválido o expirado\"; la última se acepta.",
+      "estado": "APROBADA",
+      "duracionMs": 73,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Sin token: rechazado con \"No autenticado\" → No autenticado"
+        },
+        {
+          "ok": true,
+          "texto": "Token inválido: rechazado con \"Token inválido o expirado\" → Token inválido o expirado"
+        },
+        {
+          "ok": true,
+          "texto": "Token vencido: rechazado → Token inválido o expirado"
+        },
+        {
+          "ok": true,
+          "texto": "Token firmado con otro secreto: rechazado → Token inválido o expirado"
+        },
+        {
+          "ok": true,
+          "texto": "Con token válido: conexión aceptada"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:51.373Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "Socket.IO",
+      "prioridad": "Alta",
+      "id": "F-17-02",
+      "hu": "US-17",
+      "ca": [
+        2
+      ],
+      "grupo": "US-17",
+      "titulo": "Al conectar se inicia un temporizador de 180 s con expiresAt",
+      "objetivo": "Verificar el evento de inicio y la duración de la sesión.",
+      "pasos": [
+        "Conectar con token válido.",
+        "Leer temporizador:inicio.",
+        "Comparar expiresAt con la hora actual.",
+        "Sin canchaId, conectar de nuevo."
+      ],
+      "esperado": "temporizador:inicio con expiresAt ≈ ahora + 180 s y estado \"activo\". Sin canchaId: evento temporizador:error y desconexión.",
+      "estado": "APROBADA",
+      "duracionMs": 1565,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Recibe temporizador:inicio con estado \"activo\""
+        },
+        {
+          "ok": true,
+          "texto": "expiresAt corresponde a 180 s desde el inicio → 180.0 s restantes (25 ms tras conectar)"
+        },
+        {
+          "ok": true,
+          "texto": "La sesión se guardó en la base (1 fila activa)"
+        },
+        {
+          "ok": true,
+          "texto": "Sin canchaId: error \"Falta el id de la cancha\" → Falta el id de la cancha"
+        },
+        {
+          "ok": true,
+          "texto": "Sin canchaId: el servidor cierra la conexión"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:48:52.941Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "Socket.IO",
+      "prioridad": "Alta",
+      "id": "F-17-03",
+      "hu": "US-17",
+      "ca": [
+        4
+      ],
+      "grupo": "US-17",
+      "titulo": "Sincronización periódica cada 5 s",
+      "objetivo": "Verificar que el servidor envía temporizador:sync con el mismo expiresAt cada 5 segundos.",
+      "pasos": [
+        "Conectar y observar 17 s.",
+        "Medir el intervalo entre eventos temporizador:sync."
+      ],
+      "esperado": "Al menos 3 eventos separados por 5 s (±0,5 s), todos con el mismo expiresAt del inicio.",
+      "estado": "APROBADA",
+      "duracionMs": 17389,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Llegan al menos 3 eventos en 17 s → 3 eventos"
+        },
+        {
+          "ok": true,
+          "texto": "El intervalo entre eventos es de 5 s → 5.00, 5.00 s"
+        },
+        {
+          "ok": true,
+          "texto": "Todos llevan el mismo expiresAt del servidor (sin desfases)"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:49:10.332Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST + Socket.IO",
+      "prioridad": "Alta",
+      "id": "F-17-04",
+      "hu": "US-17",
+      "ca": [
+        5,
+        6
+      ],
+      "grupo": "US-17",
+      "titulo": "Entrar al panel \"Iniciar reserva\" detiene el temporizador",
+      "objetivo": "Verificar que, dentro del tiempo, completar el panel marca la sesión como completada y detiene la sincronización.",
+      "pasos": [
+        "Conectar el socket.",
+        "POST /api/canchas/:id/temporizador/completar con la franja elegida.",
+        "Observar 7 s los eventos.",
+        "Repetir la llamada (reingreso al panel)."
+      ],
+      "esperado": "200 {estado:\"completado\"}; no llegan más temporizador:sync; la sesión queda \"completado\" en la base; el reingreso también responde 200.",
+      "estado": "APROBADA",
+      "duracionMs": 7836,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Responde 200 con estado \"completado\" → HTTP 200 {\"estado\":\"completado\"}"
+        },
+        {
+          "ok": true,
+          "texto": "El temporizador deja de sincronizar (7 s sin eventos)"
+        },
+        {
+          "ok": true,
+          "texto": "La sesión quedó \"completado\" en la base"
+        },
+        {
+          "ok": true,
+          "texto": "Reingresar al panel (Cambiar horario → Iniciar reserva) sigue respondiendo 200 → HTTP 200"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:49:18.171Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-17-05",
+      "hu": "US-17",
+      "ca": [
+        8
+      ],
+      "grupo": "US-17",
+      "titulo": "El backend rechaza el panel si no hay sesión vigente (caso de error)",
+      "objetivo": "Verificar que la validación del tiempo ocurre en el servidor aunque el frontend no la haga.",
+      "pasos": [
+        "Un usuario sin sesión de temporizador (nunca abrió el socket) llama a /temporizador/completar."
+      ],
+      "esperado": "409 con \"Tu tiempo para reservar expiró…\" y código SESION_EXPIRADA.",
+      "estado": "APROBADA",
+      "duracionMs": 216,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Responde 409 con el mensaje de sesión expirada → HTTP 409 — Tu tiempo para reservar expiró. Reinicia el temporizador para continuar."
+        },
+        {
+          "ok": true,
+          "texto": "Incluye el código SESION_EXPIRADA → SESION_EXPIRADA"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:49:18.388Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "Socket.IO",
+      "prioridad": "Alta",
+      "id": "F-17-07",
+      "hu": "US-17",
+      "ca": [
+        9
+      ],
+      "grupo": "US-17",
+      "titulo": "Una sola sesión por usuario y cancha (varias pestañas)",
+      "objetivo": "Verificar que abrir otra pestaña retoma el mismo expiresAt y que otra cancha tiene su propia sesión.",
+      "pasos": [
+        "Abrir el socket del usuario en una cancha.",
+        "Esperar 3 s y abrir una segunda conexión del mismo usuario en la misma cancha.",
+        "Abrir una tercera en otra cancha.",
+        "Contar filas en sesiones_reserva."
+      ],
+      "esperado": "Las dos primeras comparten el mismo expiresAt; la de otra cancha tiene uno distinto; hay 2 filas de sesión.",
+      "estado": "APROBADA",
+      "duracionMs": 4524,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "La segunda pestaña recibe el mismo expiresAt → 1791748338622 = 1791748338622"
+        },
+        {
+          "ok": true,
+          "texto": "En otra cancha la sesión es independiente (otro expiresAt) → +3.1 s"
+        },
+        {
+          "ok": true,
+          "texto": "Hay exactamente 2 sesiones (una por cancha)"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:49:22.913Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "Socket.IO",
+      "prioridad": "Alta",
+      "id": "F-17-08",
+      "hu": "US-17",
+      "ca": [
+        10
+      ],
+      "grupo": "US-17",
+      "titulo": "Al salir de la cancha se cancela el temporizador (tras un lapso de gracia de 10 s)",
+      "objetivo": "Verificar que cerrar todos los sockets cancela la sesión, que cerrar solo una pestaña no la afecta y que el servidor espera un lapso de gracia (10 s) antes de cancelar para tolerar caídas breves de red.",
+      "pasos": [
+        "Abrir dos pestañas (sockets) del usuario.",
+        "Cerrar una: la sesión debe seguir.",
+        "Cerrar la otra: la sesión sigue durante el lapso de gracia y luego se cancela.",
+        "Volver a entrar."
+      ],
+      "esperado": "Con una pestaña abierta la sesión sigue; al cerrar la última, durante los primeros segundos aún existe (gracia) y pasados ~10 s se elimina de la base; al volver a entrar se crea una sesión nueva de 180 s.",
+      "estado": "APROBADA",
+      "duracionMs": 15452,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Al cerrar una de dos pestañas la sesión sigue activa"
+        },
+        {
+          "ok": true,
+          "texto": "Al cerrar la última pestaña la sesión se conserva durante el lapso de gracia"
+        },
+        {
+          "ok": true,
+          "texto": "Pasado el lapso de gracia (≈ 10 s) la sesión se elimina → 12,5 s después de salir"
+        },
+        {
+          "ok": true,
+          "texto": "Ya no se puede entrar al panel sin sesión (409) → HTTP 409"
+        },
+        {
+          "ok": true,
+          "texto": "Al volver a entrar se crea una sesión nueva de 180 s → 180.0 s"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:49:38.366Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "Socket.IO",
+      "prioridad": "Alta",
+      "id": "F-17-09",
+      "hu": "US-17",
+      "ca": [
+        10,
+        11
+      ],
+      "grupo": "US-17",
+      "titulo": "Reconexión dentro de la ventana de 3 minutos recupera el tiempo restante",
+      "objetivo": "Verificar que, si el socket se corta y se reconecta pocos segundos después, el cliente recupera el tiempo restante de la MISMA sesión en vez de empezar una nueva.",
+      "datos": "Corte simulado cerrando el transporte; reconexión 2 s después.",
+      "pasos": [
+        "Conectar y registrar expiresAt.",
+        "Cortar la conexión (pérdida de red simulada).",
+        "Reconectar 2 s después con el mismo token.",
+        "Comparar el expiresAt recibido."
+      ],
+      "esperado": "El expiresAt recibido al reconectar es el mismo que antes del corte (se recupera el tiempo restante).",
+      "estado": "APROBADA",
+      "duracionMs": 13884,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Al reconectar se recupera el mismo expiresAt → antes 19:52:38.638 · después 19:52:38.638 (diferencia 0.0 s)"
+        },
+        {
+          "ok": true,
+          "texto": "Pasado el lapso de gracia la sesión sigue activa porque el usuario volvió (no se canceló)"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:49:52.251Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "Socket.IO",
+      "prioridad": "Alta",
+      "id": "F-17-11",
+      "hu": "US-17",
+      "ca": [
+        3,
+        4
+      ],
+      "grupo": "US-17",
+      "titulo": "Los eventos del temporizador incluyen la hora del servidor",
+      "objetivo": "Verificar que temporizador:inicio y temporizador:sync informan la hora actual del servidor (ahora), de modo que el cliente pueda calcular la cuenta regresiva sin depender de su reloj.",
+      "pasos": [
+        "Conectar el socket.",
+        "Leer temporizador:inicio y el primer temporizador:sync.",
+        "Comparar el campo \"ahora\" con la hora actual."
+      ],
+      "esperado": "Ambos eventos traen \"ahora\" (milisegundos) con una diferencia menor a 2 s respecto de la hora actual del equipo de pruebas.",
+      "estado": "APROBADA",
+      "duracionMs": 5558,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "temporizador:inicio incluye \"ahora\" → diferencia 1 ms"
+        },
+        {
+          "ok": true,
+          "texto": "temporizador:sync incluye \"ahora\" → diferencia 1 ms"
+        },
+        {
+          "ok": true,
+          "texto": "El ack de temporizador:reiniciar también incluye \"ahora\""
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:49:57.812Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "Socket.IO",
+      "prioridad": "Alta",
+      "id": "F-17-10",
+      "hu": "US-17",
+      "ca": [
+        7
+      ],
+      "grupo": "US-17",
+      "titulo": "Reiniciar el temporizador",
+      "objetivo": "Verificar temporizador:reiniciar: nueva sesión de 180 s para todas las pestañas del usuario.",
+      "pasos": [
+        "Abrir dos pestañas.",
+        "Emitir temporizador:reiniciar desde una, tras 4 s.",
+        "Revisar ack y eventos."
+      ],
+      "esperado": "El ack trae un nuevo expiresAt (≈ +180 s desde el reinicio) y ambas pestañas reciben temporizador:inicio con ese valor.",
+      "estado": "APROBADA",
+      "duracionMs": 5305,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "El ack trae un expiresAt posterior al original → +4.0 s"
+        },
+        {
+          "ok": true,
+          "texto": "Ambas pestañas reciben el nuevo temporizador:inicio"
+        },
+        {
+          "ok": true,
+          "texto": "Sigue habiendo una sola sesión"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:50:03.118Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "Socket.IO",
+      "prioridad": "Alta",
+      "id": "F-18-01",
+      "hu": "US-18",
+      "ca": [
+        1,
+        2
+      ],
+      "grupo": "US-18",
+      "titulo": "Retener una franja: confirmación al dueño y aviso en tiempo real a los demás",
+      "objetivo": "Verificar retencion:solicitar y los eventos que reciben el dueño y los demás usuarios de la cancha.",
+      "pasos": [
+        "A y B abren la misma cancha.",
+        "A emite retencion:solicitar con la franja elegida.",
+        "Revisar el ack y los eventos de A y de B.",
+        "Consultar la tabla retenciones."
+      ],
+      "esperado": "A recibe ack {ok:true} y retencion:confirmada con expiresAt = vencimiento de su sesión. B recibe disponibilidad:retenida con la franja (sin identificar a A). A no recibe disponibilidad:retenida de su propia retención. Hay 1 fila en retenciones.",
+      "estado": "APROBADA",
+      "duracionMs": 1069,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "A recibe el ack {ok:true} con la retención → {\"ok\":true,\"retencion\":{\"fecha\":\"2102-04-18\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\",\"expiresAt\":1791748383684}}"
+        },
+        {
+          "ok": true,
+          "texto": "La retención dura lo que le queda a la sesión (expiresAt de la sesión)"
+        },
+        {
+          "ok": true,
+          "texto": "A recibe el evento retencion:confirmada"
+        },
+        {
+          "ok": true,
+          "texto": "B recibe disponibilidad:retenida sin recargar → 0 ms después"
+        },
+        {
+          "ok": true,
+          "texto": "El aviso solo trae la franja: no revela quién la retiene → {\"canchaId\":\"0d6170dd-773a-475f-b65a-d822dd8f7477\",\"fecha\":\"2102-04-18\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\"}"
+        },
+        {
+          "ok": true,
+          "texto": "A no recibe el aviso de su propia retención"
+        },
+        {
+          "ok": true,
+          "texto": "Hay 1 fila en la tabla retenciones"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:50:04.189Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "Socket.IO",
+      "prioridad": "Alta",
+      "id": "F-18-02",
+      "hu": "US-18",
+      "ca": [
+        1,
+        2
+      ],
+      "grupo": "US-18",
+      "titulo": "Retener una franja ya retenida por otro: FRANJA_RETENIDA (caso de error)",
+      "objetivo": "Verificar que la franja retenida por un usuario no puede ser tomada por otro y que el error es claro.",
+      "pasos": [
+        "A retiene una franja.",
+        "B intenta retener la misma.",
+        "B intenta retener una franja distinta.",
+        "Consultar retenciones."
+      ],
+      "esperado": "B recibe {ok:false, error:{codigo:\"FRANJA_RETENIDA\", mensaje}}; con otra franja sí puede; en la base la franja tiene un único dueño.",
+      "estado": "APROBADA",
+      "duracionMs": 1157,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "B recibe FRANJA_RETENIDA → {\"codigo\":\"FRANJA_RETENIDA\",\"mensaje\":\"Otro usuario está reservando esta franja en este momento\"}"
+        },
+        {
+          "ok": true,
+          "texto": "El mensaje es comprensible para el usuario → Otro usuario está reservando esta franja en este momento"
+        },
+        {
+          "ok": true,
+          "texto": "B sí puede retener otra franja libre"
+        },
+        {
+          "ok": true,
+          "texto": "La franja 11:00 sigue siendo de A en la base"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:50:05.348Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "Socket.IO",
+      "prioridad": "Alta",
+      "id": "F-18-03",
+      "hu": "US-18",
+      "ca": [
+        3,
+        5
+      ],
+      "grupo": "US-18",
+      "titulo": "Una sola franja por usuario y cancha: al cambiar, se libera la anterior",
+      "objetivo": "Verificar la regla de una retención por usuario y cancha y el aviso de liberación a los demás.",
+      "pasos": [
+        "A retiene la franja 10:00.",
+        "A retiene la franja 11:00.",
+        "Revisar los eventos de B.",
+        "Consultar retenciones del usuario A."
+      ],
+      "esperado": "B recibe disponibilidad:liberada (10:00) y disponibilidad:retenida (11:00); A conserva una sola fila en la base (11:00).",
+      "estado": "APROBADA",
+      "duracionMs": 2392,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "B recibe disponibilidad:liberada de la franja anterior (10:00)"
+        },
+        {
+          "ok": true,
+          "texto": "B recibe disponibilidad:retenida de la nueva franja (11:00)"
+        },
+        {
+          "ok": true,
+          "texto": "A conserva una sola fila de retención → 11:00:00"
+        },
+        {
+          "ok": true,
+          "texto": "Volver a retener la misma franja (p. ej. al reconectar) responde ok"
+        },
+        {
+          "ok": true,
+          "texto": "Y no genera avisos duplicados a B"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:50:07.742Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "Socket.IO",
+      "prioridad": "Alta",
+      "id": "F-18-04",
+      "hu": "US-18",
+      "ca": [
+        3
+      ],
+      "grupo": "US-18",
+      "titulo": "Liberar la retención: botón \"Cancelar\", cambio de fecha o salida de la cancha",
+      "objetivo": "Verificar los motivos de liberación activados por el usuario.",
+      "pasos": [
+        "A retiene una franja y emite retencion:liberar.",
+        "A retiene otra y cierra su conexión (sale de la cancha).",
+        "Revisar los avisos a B y la tabla retenciones."
+      ],
+      "esperado": "Con retencion:liberar B recibe disponibilidad:liberada de inmediato; al salir de la cancha la recibe tras el lapso de gracia (≈ 10 s); en ambos casos la fila desaparece de retenciones.",
+      "estado": "APROBADA",
+      "duracionMs": 11969,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "retencion:liberar responde {ok:true}"
+        },
+        {
+          "ok": true,
+          "texto": "Por \"cancelar\": B recibe disponibilidad:liberada"
+        },
+        {
+          "ok": true,
+          "texto": "La fila desapareció de la tabla retenciones"
+        },
+        {
+          "ok": true,
+          "texto": "Por \"salir de la cancha\": B recibe disponibilidad:liberada (tras el lapso de gracia de 10 s)"
+        },
+        {
+          "ok": true,
+          "texto": "La retención se eliminó al salir"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:50:19.713Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST + Socket.IO",
+      "prioridad": "Alta",
+      "id": "F-18-05",
+      "hu": "US-18",
+      "hus": [
+        "US-18",
+        "US-09",
+        "US-11"
+      ],
+      "ca": {
+        "US-18": [
+          4
+        ],
+        "US-09": [
+          1
+        ],
+        "US-11": [
+          1
+        ]
+      },
+      "grupo": "US-18",
+      "titulo": "Al confirmar, la retención se convierte en reserva definitiva",
+      "objetivo": "Verificar el paso de retención a reserva, consistente con la restricción única de US-09.",
+      "pasos": [
+        "A retiene una franja y entra al panel (completar).",
+        "A confirma la reserva por REST.",
+        "Revisar el aviso a B y las tablas retenciones y reservas.",
+        "B intenta reservar la misma franja."
+      ],
+      "esperado": "B recibe disponibilidad:reservada (no liberada); la fila de retenciones desaparece; reservas tiene 1 fila \"confirmada\"; B recibe 409.",
+      "estado": "APROBADA",
+      "duracionMs": 4282,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "A entra al panel de confirmación (200) → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "Al entrar al panel la retención se extiende ~10 minutos para poder confirmar → 10.0 min"
+        },
+        {
+          "ok": true,
+          "texto": "A confirma la reserva (201) → HTTP 201"
+        },
+        {
+          "ok": true,
+          "texto": "B recibe disponibilidad:reservada en tiempo real"
+        },
+        {
+          "ok": true,
+          "texto": "B NO recibe \"liberada\" para esa franja (pasó directamente a reservada)"
+        },
+        {
+          "ok": true,
+          "texto": "La fila de retenciones desapareció"
+        },
+        {
+          "ok": true,
+          "texto": "La reserva quedó \"confirmada\" en la base"
+        },
+        {
+          "ok": true,
+          "texto": "B no puede reservar la franja ya reservada (409) → HTTP 409"
+        },
+        {
+          "ok": true,
+          "texto": "B tampoco puede retenerla: FRANJA_OCUPADA → {\"codigo\":\"FRANJA_OCUPADA\",\"mensaje\":\"El horario ya no está disponible\"}"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:50:23.997Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST + Socket.IO",
+      "prioridad": "Alta",
+      "id": "F-18-06",
+      "hu": "US-18",
+      "hus": [
+        "US-18",
+        "US-09"
+      ],
+      "ca": {
+        "US-18": [
+          2,
+          4
+        ],
+        "US-09": [
+          2
+        ]
+      },
+      "grupo": "US-18",
+      "titulo": "Reservar una franja retenida por otro usuario (caso de error) y vista REST de retenidos",
+      "objetivo": "Verificar que el servidor protege la retención incluso por la vía REST y que la disponibilidad informa las franjas retenidas de otros.",
+      "pasos": [
+        "A retiene una franja.",
+        "B intenta reservarla por POST /reservas y por /temporizador/completar.",
+        "Consultar /disponibilidad como B y como A."
+      ],
+      "esperado": "B recibe 409 FRANJA_RETENIDA en ambos; no se crea reserva; /disponibilidad de B incluye la franja en \"retenidos\", la de A no.",
+      "estado": "APROBADA",
+      "duracionMs": 1611,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "POST /reservas de B: 409 FRANJA_RETENIDA → HTTP 409 FRANJA_RETENIDA"
+        },
+        {
+          "ok": true,
+          "texto": "POST /temporizador/completar de B: 409 FRANJA_RETENIDA → HTTP 409 FRANJA_RETENIDA"
+        },
+        {
+          "ok": true,
+          "texto": "No se creó ninguna reserva"
+        },
+        {
+          "ok": true,
+          "texto": "La disponibilidad de B lista la franja como retenida → [{\"canchaId\":\"0d6170dd-773a-475f-b65a-d822dd8f7477\",\"fecha\":\"2102-02-16\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\"}]"
+        },
+        {
+          "ok": true,
+          "texto": "La disponibilidad de A (la dueña) no la lista como retenida por otro"
+        },
+        {
+          "ok": true,
+          "texto": "A, que la retiene, sí puede continuar y reservar"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:50:25.609Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST + Socket.IO",
+      "prioridad": "Alta",
+      "id": "F-18-07",
+      "hu": "US-18",
+      "ca": [
+        3
+      ],
+      "grupo": "US-18",
+      "titulo": "Cancelar una reserva avisa en tiempo real que la franja quedó libre",
+      "objetivo": "Verificar que al cancelar una reserva los demás usuarios reciben disponibilidad:liberada.",
+      "pasos": [
+        "A confirma una reserva; B está viendo la cancha.",
+        "A cancela la reserva por REST.",
+        "Revisar los eventos de B."
+      ],
+      "esperado": "B recibe disponibilidad:reservada al confirmar y disponibilidad:liberada al cancelar.",
+      "estado": "APROBADA",
+      "duracionMs": 687,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "B recibe disponibilidad:reservada"
+        },
+        {
+          "ok": true,
+          "texto": "B recibe disponibilidad:liberada al cancelar"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:50:26.297Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "Socket.IO",
+      "prioridad": "Alta",
+      "id": "F-18-08",
+      "hu": "US-18",
+      "ca": [
+        1
+      ],
+      "grupo": "US-18",
+      "titulo": "Errores de retencion:solicitar (casos de error)",
+      "objetivo": "Verificar los códigos de error documentados para solicitudes inválidas.",
+      "pasos": [
+        "Solicitar con payload vacío.",
+        "Solicitar con horaFin anterior a horaInicio.",
+        "Solicitar una hora pasada.",
+        "Solicitar una franja ya reservada."
+      ],
+      "esperado": "Respuestas {ok:false, error:{codigo}}: DATOS_INVALIDOS, DATOS_INVALIDOS, HORA_PASADA y FRANJA_OCUPADA.",
+      "estado": "APROBADA",
+      "duracionMs": 289,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Payload vacío → DATOS_INVALIDOS → {\"codigo\":\"DATOS_INVALIDOS\",\"mensaje\":\"La franja debe tener fecha (YYYY-MM-DD), horaInicio y horaFin (HH:mm)\"}"
+        },
+        {
+          "ok": true,
+          "texto": "horaFin anterior a horaInicio → DATOS_INVALIDOS → {\"codigo\":\"DATOS_INVALIDOS\",\"mensaje\":\"horaFin debe ser posterior a horaInicio\"}"
+        },
+        {
+          "ok": true,
+          "texto": "Hora pasada → HORA_PASADA → {\"codigo\":\"HORA_PASADA\",\"mensaje\":\"No se pueden reservar fechas u horas pasadas\"}"
+        },
+        {
+          "ok": true,
+          "texto": "Franja ya reservada → FRANJA_OCUPADA → {\"codigo\":\"FRANJA_OCUPADA\",\"mensaje\":\"El horario ya no está disponible\"}"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:50:26.588Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "Socket.IO (concurrencia)",
+      "prioridad": "Alta",
+      "id": "F-18-09",
+      "hu": "US-18",
+      "ca": [
+        2,
+        4
+      ],
+      "grupo": "US-18",
+      "titulo": "Diez usuarios retienen la misma franja a la vez",
+      "objetivo": "Verificar que la retención es atómica: solo uno la obtiene.",
+      "pasos": [
+        "Conectar 10 usuarios a la cancha.",
+        "Todos emiten retencion:solicitar para la misma franja simultáneamente.",
+        "Contar respuestas y filas."
+      ],
+      "esperado": "1 respuesta ok y 9 con FRANJA_RETENIDA; 1 fila en retenciones; los 9 perdedores reciben exactamente un aviso disponibilidad:retenida.",
+      "estado": "APROBADA",
+      "duracionMs": 5825,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "1 aceptada y 9 rechazadas con FRANJA_RETENIDA → 1 ok · 9 rechazadas"
+        },
+        {
+          "ok": true,
+          "texto": "Una sola fila en retenciones"
+        },
+        {
+          "ok": true,
+          "texto": "Los 9 perdedores reciben exactamente 1 aviso (sin pérdidas ni duplicados) → 111111111"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:50:32.416Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "Documentación",
+      "prioridad": "Alta",
+      "id": "F-18-10",
+      "hu": "US-18",
+      "ca": [
+        9
+      ],
+      "grupo": "US-18",
+      "titulo": "Los eventos del socket y sus errores están documentados",
+      "objetivo": "Verificar que todos los eventos y códigos de error que usa el código aparecen en docs/api/eventos-socket.md.",
+      "pasos": [
+        "Extraer los nombres de eventos y los códigos de error del código fuente.",
+        "Buscar cada uno en el documento."
+      ],
+      "esperado": "Todos los eventos (temporizador:*, retencion:*, disponibilidad:*) y códigos de error están documentados, con payload.",
+      "estado": "APROBADA",
+      "duracionMs": 2,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Se identificaron los eventos usados por el código → 11: temporizador:error, temporizador:reiniciar, temporizador:inicio, retencion:solicitar, retencion:confirmada, retencion:liberar, temporizador:sync, temporizador:expirado, disponibilidad:retenida, disponibilidad:liberada, disponibilidad:reservada"
+        },
+        {
+          "ok": true,
+          "texto": "Todos los eventos aparecen documentados → ninguno falta"
+        },
+        {
+          "ok": true,
+          "texto": "Todos los códigos de error aparecen documentados → DATOS_INVALIDOS, HORA_PASADA, SESION_EXPIRADA, FRANJA_OCUPADA, FRANJA_RETENIDA"
+        },
+        {
+          "ok": true,
+          "texto": "El documento tiene secciones de eventos del cliente, del servidor y de errores"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:50:32.432Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "Socket.IO + API (tiempo real: 180 s)",
+      "prioridad": "Alta",
+      "id": "F-17-06",
+      "hu": "US-17",
+      "hus": [
+        "US-17"
+      ],
+      "ca": [
+        7,
+        8
+      ],
+      "grupo": "US-17",
+      "titulo": "Expiración real a los 180 s: evento, rechazo del panel y limpieza",
+      "objetivo": "Dejar correr los 3 minutos completos y verificar el evento de expiración, el rechazo del backend y la limpieza de la sesión.",
+      "pasos": [
+        "Conectar y retener una franja.",
+        "Esperar 180 s reales sin hacer nada.",
+        "Verificar el evento temporizador:expirado.",
+        "Intentar entrar al panel (POST /temporizador/completar).",
+        "Consultar la base."
+      ],
+      "esperado": "El servidor emite temporizador:expirado en expiresAt (±2 s); el panel responde 409 SESION_EXPIRADA; la sesión se borra de la base.",
+      "estado": "APROBADA",
+      "duracionMs": 0,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "temporizador:expirado llega a la hora indicada por expiresAt (±2 s) → desfase -0.01 s"
+        },
+        {
+          "ok": true,
+          "texto": "Entrar al panel tras expirar: 409 SESION_EXPIRADA → HTTP 409 — Tu tiempo para reservar expiró. Reinicia el temporizador para continuar."
+        },
+        {
+          "ok": true,
+          "texto": "La sesión se eliminó de la base → 0 filas"
+        },
+        {
+          "ok": true,
+          "texto": "Durante los 180 s se recibieron sincronizaciones periódicas → 35 eventos temporizador:sync"
+        },
+        {
+          "ok": true,
+          "texto": "Retener una franja con la sesión vencida: SESION_EXPIRADA → {\"codigo\":\"SESION_EXPIRADA\",\"mensaje\":\"Tu tiempo para reservar expiró. Reinicia el temporizador para continuar.\"}"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:50:45.214Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "Socket.IO (tiempo real: 180 s)",
+      "prioridad": "Alta",
+      "id": "F-18-11",
+      "hu": "US-18",
+      "ca": [
+        3
+      ],
+      "grupo": "US-18",
+      "titulo": "La retención se libera cuando expira el temporizador",
+      "objetivo": "Verificar la liberación automática y el aviso a los demás al vencer la sesión.",
+      "pasos": [
+        "A retiene una franja; B observa.",
+        "Esperar 180 s.",
+        "Revisar el aviso a B y la tabla retenciones."
+      ],
+      "esperado": "B recibe disponibilidad:liberada al expirar la sesión de A; la fila de retenciones desaparece.",
+      "estado": "APROBADA",
+      "duracionMs": 1,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "B recibió disponibilidad:liberada de la franja de A → 0.00 s después del vencimiento"
+        },
+        {
+          "ok": true,
+          "texto": "La retención se eliminó de la base → 0 filas"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:50:45.217Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "Socket.IO + Docker",
+      "prioridad": "Alta",
+      "id": "F-18-12",
+      "hu": "US-18",
+      "hus": [
+        "US-18",
+        "US-17"
+      ],
+      "ca": {
+        "US-18": [
+          6
+        ],
+        "US-17": [
+          11
+        ]
+      },
+      "grupo": "US-18",
+      "titulo": "Persistencia: sesión y retención sobreviven al reinicio del servidor",
+      "objetivo": "Verificar que reiniciar el contenedor del backend con clientes conectados no pierde las sesiones ni las retenciones.",
+      "pasos": [
+        "A conecta, retiene una franja y se registra su expiresAt.",
+        "Reiniciar el backend (\"docker compose restart backend\") sin cerrar los sockets de los clientes.",
+        "Consultar la base y la API.",
+        "A reconecta; B intenta retener la misma franja.",
+        "Observar la sincronización del temporizador restaurado y entrar al panel."
+      ],
+      "esperado": "Sesión y retención siguen en la base; A recibe el MISMO expiresAt al reconectar; la franja sigue retenida para B (FRANJA_RETENIDA); el temporizador sigue sincronizando y A puede continuar.",
+      "estado": "APROBADA",
+      "duracionMs": 12498,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "A retiene la franja antes del reinicio"
+        },
+        {
+          "ok": true,
+          "texto": "Antes del reinicio: 1 sesión y 1 retención en la base → 1 y 1"
+        },
+        {
+          "ok": true,
+          "texto": "El backend vuelve a responder tras el reinicio → 6.0 s"
+        },
+        {
+          "ok": true,
+          "texto": "Al arrancar, el servidor restaura las sesiones guardadas → Sesiones de reserva restauradas: 2"
+        },
+        {
+          "ok": true,
+          "texto": "Después del reinicio la sesión y la retención siguen en la base → 1 y 1"
+        },
+        {
+          "ok": true,
+          "texto": "La API sigue informando la franja como retenida para los demás"
+        },
+        {
+          "ok": true,
+          "texto": "A reconecta y recibe el MISMO expiresAt (recupera el tiempo restante) → diferencia 0 ms"
+        },
+        {
+          "ok": true,
+          "texto": "B sigue sin poder retener la franja de A: FRANJA_RETENIDA → {\"codigo\":\"FRANJA_RETENIDA\",\"mensaje\":\"Otro usuario está reservando esta franja en este momento\"}"
+        },
+        {
+          "ok": true,
+          "texto": "El temporizador restaurado sigue sincronizando con el mismo expiresAt"
+        },
+        {
+          "ok": true,
+          "texto": "A puede continuar al panel de confirmación (200) → HTTP 200"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:50:57.717Z"
+    }
+  ]
+}

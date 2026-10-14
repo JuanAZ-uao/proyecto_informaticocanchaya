@@ -36,6 +36,27 @@ async function listarPorUsuario(usuarioId) {
   }));
 }
 
+// US-12: el mismo usuario no puede tener dos reservas confirmadas que se solapen en
+// el tiempo, aunque sean en canchas distintas (hora_inicio < finNueva Y hora_fin > inicioNueva).
+async function existeSolapadaDeUsuario(usuarioId, fecha, horaInicio, horaFin) {
+  const { rows } = await pool.query(
+    `SELECT 1 FROM reservas
+     WHERE usuario_id = $1 AND fecha = $2 AND estado = $5
+       AND hora_inicio < $4 AND hora_fin > $3
+     LIMIT 1`,
+    [usuarioId, fecha, horaInicio, horaFin, ESTADO_CONFIRMADA]
+  );
+  return rows.length > 0;
+}
+
+async function contarConfirmadasPorUsuario(usuarioId) {
+  const { rows } = await pool.query(
+    `SELECT COUNT(*)::int AS total FROM reservas WHERE usuario_id = $1 AND estado = $2`,
+    [usuarioId, ESTADO_CONFIRMADA]
+  );
+  return rows[0].total;
+}
+
 async function obtenerPorId(id) {
   const { rows } = await pool.query(`SELECT * FROM reservas WHERE id = $1`, [id]);
   return Reserva.aDominio(rows[0]);
@@ -76,4 +97,13 @@ async function cancelar(id, usuarioId) {
   return Reserva.aDominio(rows[0]);
 }
 
-module.exports = { listarPorCanchaYFecha, existeConfirmada, listarPorUsuario, obtenerPorId, crear, cancelar };
+module.exports = {
+  listarPorCanchaYFecha,
+  existeConfirmada,
+  existeSolapadaDeUsuario,
+  contarConfirmadasPorUsuario,
+  listarPorUsuario,
+  obtenerPorId,
+  crear,
+  cancelar,
+};

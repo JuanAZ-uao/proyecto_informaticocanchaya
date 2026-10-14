@@ -1,0 +1,946 @@
+{
+  "clave": "nofuncionales",
+  "titulo": "Pruebas no funcionales",
+  "inicio": "2026-10-11T18:54:39.884Z",
+  "fin": "2026-10-11T19:04:24.379Z",
+  "casos": [
+    {
+      "tipo": "No funcional",
+      "prioridad": "Alta",
+      "hu": "US-04",
+      "ca": [
+        3
+      ],
+      "id": "NF-01",
+      "grupo": "Rendimiento",
+      "rnf": "RNF-01",
+      "nivel": "API REST",
+      "titulo": "Tiempos de respuesta de la API (p95 < 2 s)",
+      "objetivo": "Medir la latencia de los endpoints principales en secuencia y comprobar el objetivo de RNF-01: menos de 2 s para el 95 % de las solicitudes.",
+      "datos": "Entorno Docker local sin carga; 60 solicitudes por endpoint (20 para el login por el costo de bcrypt).",
+      "pasos": [
+        "Ejecutar solicitudes secuenciales a GET /canchas, GET /canchas/:id, GET /disponibilidad, GET /reservas/mias y POST /auth/login.",
+        "Calcular p50, p95 y máximo de cada endpoint."
+      ],
+      "esperado": "El p95 de todos los endpoints es menor a 2000 ms (objetivo) y no hay errores 5xx.",
+      "estado": "APROBADA",
+      "duracionMs": 2844,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "GET /api/canchas: p95 6 ms (< 2000 ms), sin errores → p50 4 ms · máx 9 ms"
+        },
+        {
+          "ok": true,
+          "texto": "GET /api/canchas/:id: p95 6 ms (< 2000 ms), sin errores → p50 4 ms · máx 7 ms"
+        },
+        {
+          "ok": true,
+          "texto": "GET /api/canchas/:id/disponibilidad: p95 9 ms (< 2000 ms), sin errores → p50 4 ms · máx 15 ms"
+        },
+        {
+          "ok": true,
+          "texto": "GET /api/reservas/mias: p95 5 ms (< 2000 ms), sin errores → p50 3 ms · máx 5 ms"
+        },
+        {
+          "ok": true,
+          "texto": "POST /api/auth/login: p95 106 ms (< 2000 ms), sin errores → p50 92 ms · máx 110 ms"
+        }
+      ],
+      "evidencias": [
+        {
+          "titulo": "Latencias medidas",
+          "texto": "Endpoint\tn\tp50\tp95\tmáx\terrores 5xx\nGET /api/canchas\t60\t4 ms\t6 ms\t9 ms\t0\nGET /api/canchas/:id\t60\t4 ms\t6 ms\t7 ms\t0\nGET /api/canchas/:id/disponibilidad\t60\t4 ms\t9 ms\t15 ms\t0\nGET /api/reservas/mias\t60\t3 ms\t5 ms\t5 ms\t0\nPOST /api/auth/login\t20\t92 ms\t106 ms\t110 ms\t0"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T18:54:43.195Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Alta",
+      "hu": "US-04",
+      "ca": [
+        3
+      ],
+      "id": "NF-02",
+      "grupo": "Rendimiento",
+      "rnf": "RNF-01",
+      "nivel": "API REST (concurrencia)",
+      "titulo": "Latencia con 50 solicitudes concurrentes",
+      "objetivo": "Verificar que el listado de canchas mantiene tiempos aceptables con usuarios simultáneos.",
+      "datos": "4 rondas de 50 solicitudes simultáneas (200 en total) a GET /api/canchas.",
+      "pasos": [
+        "Lanzar 50 solicitudes en paralelo, 4 veces.",
+        "Calcular p50, p95, máximo y errores."
+      ],
+      "esperado": "p95 menor a 2000 ms y cero errores 5xx.",
+      "estado": "APROBADA",
+      "duracionMs": 498,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "200 solicitudes respondieron 200 OK → 0 con error"
+        },
+        {
+          "ok": true,
+          "texto": "p95 menor a 2000 ms → p50 71 ms · p95 140 ms · máx 179 ms"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:54:43.694Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Alta",
+      "hu": "US-04",
+      "ca": [
+        3
+      ],
+      "id": "NF-03",
+      "grupo": "Rendimiento",
+      "rnf": "RNF-01",
+      "nivel": "UI (Chromium)",
+      "titulo": "Tiempo de carga de las páginas principales",
+      "objetivo": "Medir cuánto tarda en estar usable el listado de canchas y el detalle (con temporizador) en el navegador.",
+      "datos": "8 cargas por página, caché del navegador vacía; red local.",
+      "pasos": [
+        "Abrir /canchas con sesión iniciada y medir hasta que aparecen las tarjetas.",
+        "Abrir el detalle y medir hasta que aparece el temporizador.",
+        "Leer las métricas de navegación (DOMContentLoaded y load)."
+      ],
+      "esperado": "El listado queda usable en menos de 2 s en el p95; el detalle (incluida la conexión del socket) en menos de 3 s.",
+      "estado": "APROBADA",
+      "duracionMs": 6974,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Listado usable en menos de 2 s (p95) → p50 166 ms · p95 330 ms · máx 330 ms"
+        },
+        {
+          "ok": true,
+          "texto": "Detalle con temporizador en menos de 3 s (p95) → p50 175 ms · p95 249 ms · máx 249 ms"
+        },
+        {
+          "ok": null,
+          "texto": "DOMContentLoaded del listado: mediana 20 ms"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:54:50.669Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Alta",
+      "hu": "NF",
+      "ca": [],
+      "id": "NF-04",
+      "grupo": "Rendimiento",
+      "rnf": "RNF-01",
+      "nivel": "Frontend (build)",
+      "titulo": "Tamaño del bundle del frontend",
+      "objetivo": "Verificar que la aplicación compilada es liviana para conexiones móviles.",
+      "pasos": [
+        "Listar los archivos de /assets servidos por nginx y medir su tamaño con y sin compresión gzip."
+      ],
+      "esperado": "El JavaScript principal pesa menos de 500 KB sin comprimir (menos de 150 KB con gzip) y el CSS menos de 60 KB.",
+      "estado": "OBSERVACIÓN",
+      "duracionMs": 27,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "JavaScript: < 500 KB (< 150 KB gzip) → 297 KB · 97 KB gzip"
+        },
+        {
+          "ok": true,
+          "texto": "CSS: < 60 KB → 28 KB · 6 KB gzip"
+        },
+        {
+          "ok": true,
+          "texto": "Cada foto de cancha pesa menos de 400 KB → máx 338 KB, total 1116 KB"
+        },
+        {
+          "ok": "obs",
+          "texto": "nginx sirve el JavaScript sin compresión gzip (content-encoding vacío): activar \"gzip on\" reduciría la transferencia."
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:54:50.697Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Alta",
+      "hu": "US-18",
+      "ca": [
+        8
+      ],
+      "id": "NF-05",
+      "grupo": "Carga y concurrencia",
+      "rnf": "US-18 CA-8",
+      "nivel": "Socket.IO (carga)",
+      "titulo": "Prueba de carga: 100 conexiones concurrentes sin pérdida de eventos ni reservas duplicadas",
+      "objetivo": "Ejecutar la prueba de carga del criterio de aceptación de US-18.",
+      "datos": "100 usuarios nuevos conectados a la misma cancha.",
+      "pasos": [
+        "Crear 100 usuarios y conectarlos por socket a la misma cancha.",
+        "Uno retiene la franja A; los 99 restantes deben recibir el aviso.",
+        "Los 99 compiten a la vez por la franja B (retención y luego reserva).",
+        "Verificar eventos recibidos y filas en la base."
+      ],
+      "esperado": "100/100 conexiones; 99/99 reciben cada aviso exactamente una vez; 1 retención y 1 reserva ganadoras; una sola fila en la base.",
+      "estado": "APROBADA",
+      "duracionMs": 22339,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "100/100 conexiones simultáneas recibieron su temporizador (476 ms)"
+        },
+        {
+          "ok": true,
+          "texto": "El primer cliente retiene la franja A y el servidor lo confirma"
+        },
+        {
+          "ok": true,
+          "texto": "Aviso \"franja A en proceso de reserva\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 422 ms)"
+        },
+        {
+          "ok": true,
+          "texto": "99 retenciones simultáneas de la franja B: 1 aceptada, 98 rechazadas con FRANJA_RETENIDA"
+        },
+        {
+          "ok": true,
+          "texto": "Aviso \"franja B en proceso de reserva\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 306 ms)"
+        },
+        {
+          "ok": true,
+          "texto": "99 reservas simultáneas de la franja B: 1 creada (201), 98 rechazadas (409)"
+        },
+        {
+          "ok": true,
+          "texto": "En la base quedó 1 reserva para la franja B (sin duplicados)"
+        },
+        {
+          "ok": true,
+          "texto": "Aviso \"franja B reservada\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 310 ms)"
+        },
+        {
+          "ok": true,
+          "texto": "Aviso \"franja A liberada\" al salir el usuario: 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 422 ms)"
+        },
+        {
+          "ok": true,
+          "texto": "La prueba termina con todas las verificaciones correctas → 9/9"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:55:13.037Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Media",
+      "hu": "US-18",
+      "ca": [
+        8
+      ],
+      "id": "NF-06",
+      "grupo": "Carga y concurrencia",
+      "rnf": "Estrés",
+      "nivel": "Socket.IO (estrés)",
+      "titulo": "Prueba de estrés: 250 conexiones concurrentes",
+      "objetivo": "Superar 2,5 veces la carga exigida para conocer el margen del servidor.",
+      "datos": "250 usuarios nuevos; misma cancha.",
+      "pasos": [
+        "Ejecutar la prueba de carga con CLIENTES=250.",
+        "Medir el consumo del contenedor del backend después."
+      ],
+      "esperado": "Todas las verificaciones correctas (sin eventos perdidos ni duplicados) con 250 clientes.",
+      "estado": "APROBADA",
+      "duracionMs": 53799,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Todas las verificaciones correctas con 250 clientes → 9/9"
+        },
+        {
+          "ok": null,
+          "texto": "Conexión de 250 clientes: 250/250 en 1331 ms"
+        },
+        {
+          "ok": null,
+          "texto": "Consumo del backend tras la prueba: canchaya-qa-backend-1 65.02MiB / 7.74GiB 5.80%"
+        }
+      ],
+      "evidencias": [
+        {
+          "titulo": "Salida de la prueba",
+          "texto": "Prueba de carga US-18 contra http://localhost:4300/api con 250 clientes\n[OK]    250/250 conexiones simultáneas recibieron su temporizador (1331 ms)\n[OK]    El primer cliente retiene la franja A y el servidor lo confirma\n[OK]    Aviso \"franja A en proceso de reserva\": 249/249 lo recibieron una vez (perdidos 0, duplicados 0, 425 ms)\n[OK]    249 retenciones simultáneas de la franja B: 1 aceptada, 248 rechazadas con FRANJA_RETENIDA\n[OK]    Aviso \"franja B en proceso de reserva\": 249/249 lo recibieron una vez (perdidos 0, duplicados 0, 302 ms)\n[OK]    249 reservas simultáneas de la franja B: 1 creada (201), 248 rechazadas (409)\n[OK]    En la base quedó 1 reserva para la franja B (sin duplicados)\n[OK]    Aviso \"franja B reservada\": 249/249 lo recibieron una vez (perdidos 0, duplicados 0, 315 ms)\n[OK]    Aviso \"franja A liberada\" al salir el usuario: 249/249 lo recibieron una vez (perdidos 0, duplicados 0, 417 ms)\n9/9 verificaciones correctas"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T18:56:06.836Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Alta",
+      "hu": "US-09",
+      "ca": [
+        2,
+        6
+      ],
+      "id": "NF-07",
+      "grupo": "Carga y concurrencia",
+      "rnf": "Integridad",
+      "nivel": "API REST (concurrencia)",
+      "titulo": "100 usuarios reservan a la vez: 10 franjas, 10 usuarios por franja",
+      "objetivo": "Verificar la integridad bajo contención alta y repartida: exactamente una reserva por franja.",
+      "datos": "100 usuarios nuevos; 10 franjas distintas de una misma fecha; cada franja recibe 10 intentos simultáneos.",
+      "pasos": [
+        "Crear 100 usuarios.",
+        "Lanzar las 100 peticiones de reserva al mismo tiempo.",
+        "Contar respuestas 201/409 y filas en la base."
+      ],
+      "esperado": "10 respuestas 201 (una por franja), 90 respuestas 409, ninguna 5xx; 10 filas confirmadas en la base.",
+      "estado": "APROBADA",
+      "duracionMs": 20717,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Se crearon exactamente 10 reservas (una por franja) → 10"
+        },
+        {
+          "ok": true,
+          "texto": "Las otras 90 recibieron 409 → 90"
+        },
+        {
+          "ok": true,
+          "texto": "Ninguna respuesta 5xx"
+        },
+        {
+          "ok": true,
+          "texto": "10 filas confirmadas en la base"
+        },
+        {
+          "ok": null,
+          "texto": "Las 100 peticiones simultáneas se resolvieron en 456 ms (p95 individual 434 ms)"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:56:27.554Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Alta",
+      "hu": "US-02",
+      "ca": [
+        3,
+        4
+      ],
+      "id": "NF-08",
+      "grupo": "Seguridad",
+      "rnf": "RNF-03",
+      "nivel": "API REST",
+      "titulo": "Seguridad del JWT y control de acceso entre usuarios",
+      "objetivo": "Verificar que el token no contiene datos sensibles, que no se puede manipular y que un usuario no accede a datos ajenos.",
+      "pasos": [
+        "Decodificar el JWT y revisar su contenido.",
+        "Modificar el identificador del payload sin volver a firmar.",
+        "Usar el token de A para ver el historial y cancelar reservas de B."
+      ],
+      "esperado": "El payload solo trae sub, iat y exp; el token manipulado se rechaza (401); A solo ve sus reservas y no puede cancelar las de B (403).",
+      "estado": "APROBADA",
+      "duracionMs": 202,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "El payload solo contiene sub, iat y exp (sin correo, nombre ni contraseña) → sub, iat, exp"
+        },
+        {
+          "ok": true,
+          "texto": "Vigencia del token: 24 horas → 24 h"
+        },
+        {
+          "ok": true,
+          "texto": "Un payload modificado con la firma original se rechaza (401) → HTTP 401"
+        },
+        {
+          "ok": true,
+          "texto": "A no puede cancelar la reserva de B (403) → HTTP 403"
+        },
+        {
+          "ok": true,
+          "texto": "El historial de A no incluye reservas de B"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:56:27.757Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Alta",
+      "hu": "NF",
+      "ca": [],
+      "id": "NF-09",
+      "grupo": "Seguridad",
+      "rnf": "Inyección / XSS",
+      "nivel": "API REST + UI",
+      "titulo": "Inyección SQL y XSS",
+      "objetivo": "Verificar que las entradas maliciosas no alteran la base de datos ni se ejecutan en el navegador.",
+      "datos": "Cargas útiles: ' OR '1'='1, '; DROP TABLE usuarios;--, <img src=x onerror=alert(1)>.",
+      "pasos": [
+        "Enviar cargas SQL en el correo del login, en los filtros del listado y en el id de la cancha.",
+        "Registrar un usuario cuyo nombre contiene HTML con un manejador onerror.",
+        "Iniciar sesión con ese usuario y revisar la interfaz."
+      ],
+      "esperado": "Ninguna respuesta 5xx ni datos adicionales; las tablas siguen existiendo; el nombre se muestra como texto y no se ejecuta ningún script.",
+      "estado": "APROBADA",
+      "duracionMs": 2594,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Login con correo \"' OR '1'='1\": 400 → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "Login con correo \"'; DROP TABLE usuarios\": 400 → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "Login con correo \"\" OR \"\"=\"\": 400 → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "Login con correo \"1; SELECT pg_sleep(5)-\": 400 → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "Filtro por zona con SQL: 200 y 0 resultados (no devuelve todo) → 0 resultados de 5"
+        },
+        {
+          "ok": true,
+          "texto": "Id de cancha con SQL: 400 inmediato (sin ejecutar pg_sleep) → HTTP 400 en 2 ms"
+        },
+        {
+          "ok": true,
+          "texto": "Las 7 tablas siguen existiendo"
+        },
+        {
+          "ok": true,
+          "texto": "Se acepta un nombre con HTML (se almacena como texto) → HTTP 201"
+        },
+        {
+          "ok": true,
+          "texto": "No se ejecutó ningún script (sin diálogo alert)"
+        },
+        {
+          "ok": true,
+          "texto": "El HTML del nombre no se interpretó como elemento → se muestra como texto: \"<img\""
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "NF-09-1.jpg",
+          "leyenda": "Barra de navegación con el nombre malicioso mostrado como texto"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T18:56:30.352Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Alta",
+      "hu": "NF",
+      "ca": [],
+      "id": "NF-10",
+      "grupo": "Seguridad",
+      "rnf": "Robustez de la API",
+      "nivel": "API REST",
+      "titulo": "Manejo de entradas anómalas y fugas de información",
+      "objetivo": "Verificar que las peticiones mal formadas se rechazan con errores controlados y sin revelar detalles internos.",
+      "pasos": [
+        "Enviar JSON mal formado.",
+        "Enviar un cuerpo de 300 KB.",
+        "Pedir una ruta inexistente.",
+        "Enviar un método no soportado.",
+        "Revisar que ningún error exponga trazas, rutas internas ni SQL."
+      ],
+      "esperado": "JSON inválido → 400; cuerpo excesivo → 413; ruta inexistente → 404 JSON; ningún mensaje contiene \"stack\", rutas del servidor o SQL.",
+      "estado": "APROBADA",
+      "duracionMs": 13,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "JSON mal formado: 400 → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "Cuerpo de 300 KB: 413 Payload Too Large → HTTP 413"
+        },
+        {
+          "ok": true,
+          "texto": "Ruta inexistente: 404 {\"mensaje\":\"Recurso no encontrado\"} → HTTP 404"
+        },
+        {
+          "ok": true,
+          "texto": "Método no soportado: 404/405 → HTTP 404"
+        },
+        {
+          "ok": true,
+          "texto": "Ningún error expone trazas, rutas internas ni SQL"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:56:30.366Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Alta",
+      "hu": "NF",
+      "ca": [],
+      "id": "NF-11",
+      "grupo": "Seguridad",
+      "rnf": "CORS y cabeceras",
+      "nivel": "API REST",
+      "titulo": "CORS y cabeceras de seguridad HTTP",
+      "objetivo": "Revisar la política de CORS en modo producción y las cabeceras de seguridad de la API y del frontend.",
+      "datos": "Backend con NODE_ENV=production y CORS_ORIGIN = origen del frontend.",
+      "pasos": [
+        "Consultar la API con el origen del frontend y con un origen ajeno.",
+        "Revisar las cabeceras de seguridad de la API y de nginx."
+      ],
+      "esperado": "El origen permitido recibe Access-Control-Allow-Origin; el ajeno NO la recibe y la respuesta no es un error 500; las cabeceras X-Content-Type-Options, X-Frame-Options y la ausencia de X-Powered-By son recomendables.",
+      "estado": "FALLIDA",
+      "duracionMs": 14,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Origen permitido: recibe Access-Control-Allow-Origin → http://localhost:8380"
+        },
+        {
+          "ok": true,
+          "texto": "Origen ajeno: no recibe Access-Control-Allow-Origin → sin cabecera"
+        },
+        {
+          "ok": false,
+          "texto": "Origen ajeno: la API no responde un error interno (500) → HTTP 500 — responde \"Error interno del servidor\" y registra un error en el log"
+        },
+        {
+          "ok": "obs",
+          "texto": "La API expone la cabecera \"X-Powered-By: Express\" (revela la tecnología); se recomienda deshabilitarla."
+        },
+        {
+          "ok": "obs",
+          "texto": "Faltan cabeceras de seguridad recomendadas: X-Content-Type-Options, X-Frame-Options, Content-Security-Policy, Strict-Transport-Security (se resuelven con el middleware \"helmet\" y la configuración de nginx)."
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:56:30.382Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Media",
+      "hu": "NF",
+      "ca": [],
+      "id": "NF-12",
+      "grupo": "Seguridad",
+      "rnf": "Fuerza bruta",
+      "nivel": "API REST",
+      "titulo": "Límite de intentos de inicio de sesión",
+      "objetivo": "Comprobar si la API frena los intentos repetidos de adivinar una contraseña.",
+      "datos": "40 intentos fallidos seguidos contra una misma cuenta.",
+      "pasos": [
+        "Enviar 40 inicios de sesión con contraseña incorrecta para el mismo correo.",
+        "Revisar si alguno responde 429 (Too Many Requests) o bloquea la cuenta."
+      ],
+      "esperado": "Después de varios intentos la API debería limitar o bloquear (429).",
+      "estado": "FALLIDA",
+      "duracionMs": 4111,
+      "resultado": [
+        {
+          "ok": false,
+          "texto": "La API limita los intentos (algún 429) → códigos: 401; después de 40 fallos el login correcto responde 200"
+        },
+        {
+          "ok": "obs",
+          "texto": "No existe limitación de intentos: es posible probar contraseñas sin restricción (riesgo de fuerza bruta). Se recomienda express-rate-limit en /api/auth/login."
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:56:34.493Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Alta",
+      "hu": "NF",
+      "ca": [],
+      "id": "NF-13",
+      "grupo": "Seguridad",
+      "rnf": "Secretos y dependencias",
+      "nivel": "Repositorio",
+      "titulo": "Secretos en el repositorio y vulnerabilidades de dependencias",
+      "objetivo": "Verificar que no hay credenciales versionadas y revisar las vulnerabilidades conocidas de las dependencias de producción.",
+      "pasos": [
+        "Buscar patrones de credenciales en los archivos versionados.",
+        "Ejecutar \"npm audit --omit=dev\" en backend y frontend."
+      ],
+      "esperado": "Sin credenciales en el repositorio y sin vulnerabilidades altas o críticas en dependencias de producción.",
+      "estado": "FALLIDA",
+      "duracionMs": 4054,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Ninguno de los 102 archivos versionados contiene credenciales → sin coincidencias"
+        },
+        {
+          "ok": "obs",
+          "texto": "El workflow de CI define la contraseña de una base PostgreSQL efímera (canchaya:canchaya@localhost) para el job de pruebas: es aceptable porque la base solo existe durante el job y no contiene datos reales, pero no debe reutilizarse en ningún otro entorno."
+        },
+        {
+          "ok": false,
+          "texto": "backend: sin vulnerabilidades altas ni críticas en producción → crítica 1 · alta 1 · moderada 2 · baja 0"
+        },
+        {
+          "ok": "obs",
+          "texto": "backend: 2 vulnerabilidades moderadas/bajas pendientes de revisión (npm audit)."
+        },
+        {
+          "ok": true,
+          "texto": "frontend: sin vulnerabilidades altas ni críticas en producción → crítica 0 · alta 0 · moderada 2 · baja 0"
+        },
+        {
+          "ok": "obs",
+          "texto": "frontend: 2 vulnerabilidades moderadas/bajas pendientes de revisión (npm audit)."
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:59:39.128Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Alta",
+      "hu": "NF",
+      "ca": [],
+      "id": "NF-14",
+      "grupo": "Usabilidad y accesibilidad",
+      "rnf": "WCAG 2.1 AA",
+      "nivel": "UI (axe-core)",
+      "titulo": "Auditoría automática de accesibilidad WCAG 2.1 AA",
+      "objetivo": "Detectar problemas de accesibilidad (contraste, etiquetas, nombres accesibles, estructura) en las pantallas principales.",
+      "datos": "axe-core con las reglas wcag2a, wcag2aa, wcag21a y wcag21aa; Chromium 1366×900.",
+      "pasos": [
+        "Abrir cada pantalla (login, registro, recuperación, listado, detalle y mis reservas).",
+        "Ejecutar axe-core en la página.",
+        "Contar las violaciones por impacto."
+      ],
+      "esperado": "Cero violaciones de impacto crítico o grave en todas las pantallas.",
+      "estado": "APROBADA",
+      "duracionMs": 13224,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Ninguna pantalla tiene violaciones de impacto crítico o grave → 0 violaciones críticas/graves"
+        }
+      ],
+      "evidencias": [
+        {
+          "titulo": "Violaciones por pantalla",
+          "texto": "Pantalla\tCrítico\tGrave\tModerado\tLeve\nLogin\t0\t0\t0\t0\nRegistro\t0\t0\t0\t0\nRecuperar contraseña\t0\t0\t0\t0\nListado de canchas\t0\t0\t0\t0\nDetalle de cancha\t0\t0\t0\t0\nMis reservas\t0\t0\t0\t0"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T18:56:52.693Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Alta",
+      "hu": "US-04",
+      "ca": [
+        4
+      ],
+      "id": "NF-15",
+      "grupo": "Usabilidad y accesibilidad",
+      "rnf": "RNF-05",
+      "nivel": "UI (Chromium)",
+      "titulo": "Diseño responsive entre 360 px y 1920 px",
+      "objetivo": "Verificar que ninguna pantalla se desborda ni oculta contenido esencial en los anchos soportados.",
+      "pasos": [
+        "Para cada ancho (360, 390, 768, 1024, 1366, 1920 px) abrir login, registro, listado, detalle y mis reservas.",
+        "Medir el desborde horizontal y comprobar que la barra de navegación y el contenido principal son visibles."
+      ],
+      "esperado": "Sin scroll horizontal en ninguna combinación de pantalla y ancho; contenido principal visible.",
+      "estado": "APROBADA",
+      "duracionMs": 37369,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Las 30 combinaciones de pantalla y ancho se ven correctamente → 0 con problemas"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "NF-15-Listado-360.jpg",
+          "leyenda": "Listado a 360 px de ancho"
+        },
+        {
+          "archivo": "NF-15-Listado-1920.jpg",
+          "leyenda": "Listado a 1920 px de ancho"
+        },
+        {
+          "archivo": "NF-15-Detalle-360.jpg",
+          "leyenda": "Detalle a 360 px de ancho"
+        },
+        {
+          "archivo": "NF-15-Detalle-1920.jpg",
+          "leyenda": "Detalle a 1920 px de ancho"
+        },
+        {
+          "titulo": "Resultado por pantalla y ancho",
+          "texto": "Pantalla\t360 px\t390 px\t768 px\t1024 px\t1366 px\t1920 px\nLogin\tOK\tOK\tOK\tOK\tOK\tOK\nRegistro\tOK\tOK\tOK\tOK\tOK\tOK\nListado\tOK\tOK\tOK\tOK\tOK\tOK\nDetalle\tOK\tOK\tOK\tOK\tOK\tOK\nMis reservas\tOK\tOK\tOK\tOK\tOK\tOK"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T18:57:30.063Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Media",
+      "hu": "NF",
+      "ca": [],
+      "id": "NF-16",
+      "grupo": "Usabilidad y accesibilidad",
+      "rnf": "Usabilidad",
+      "nivel": "UI (Chromium)",
+      "titulo": "Uso con teclado y foco visible",
+      "objetivo": "Verificar que el flujo principal puede usarse sin ratón y que el foco es visible.",
+      "pasos": [
+        "Con solo el teclado, pasar por el formulario de login (Tab) y enviarlo con Enter.",
+        "En el detalle, enfocar un bloque horario con Tab y seleccionarlo con Enter.",
+        "Revisar el estilo del foco en botones y campos."
+      ],
+      "esperado": "Se puede iniciar sesión y elegir un bloque solo con el teclado; los elementos enfocados tienen un indicador visible (outline).",
+      "estado": "OBSERVACIÓN",
+      "duracionMs": 2430,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Con Tab se llega al campo de correo del login → #correo tras 4 pulsaciones de Tab"
+        },
+        {
+          "ok": "obs",
+          "texto": "Hay 3 elementos enfocables (logo y enlaces de la barra) antes del formulario y no existe un enlace \"Saltar al contenido\"; para usuarios de teclado o lector de pantalla convendría agregarlo."
+        },
+        {
+          "ok": true,
+          "texto": "Inicio de sesión completado solo con teclado (Tab, texto, Enter) → primer foco: #correo tras 4 pulsaciones de Tab"
+        },
+        {
+          "ok": true,
+          "texto": "El campo enfocado muestra un indicador visible → outline: none 3px, sombra: rgba(21, 128, 61, 0.01) 0px 0px 0px 0.45"
+        },
+        {
+          "ok": true,
+          "texto": "Un bloque horario se selecciona solo con el teclado (Enter)"
+        },
+        {
+          "ok": true,
+          "texto": "Los bloques enfocados muestran un contorno visible → solid 3px"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:04:24.379Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Alta",
+      "hu": "NF",
+      "ca": [],
+      "id": "NF-17",
+      "grupo": "Compatibilidad",
+      "rnf": "Compatibilidad de navegadores",
+      "nivel": "UI (Chromium, Firefox, WebKit)",
+      "titulo": "Compatibilidad entre navegadores",
+      "objetivo": "Verificar que el recorrido básico (login → listado → detalle con temporizador) funciona en los tres motores de navegador.",
+      "pasos": [
+        "Para Chromium, Firefox y WebKit (Safari): iniciar sesión, abrir el listado y el detalle de una cancha y esperar el temporizador por socket.",
+        "Registrar el motor y la versión utilizados."
+      ],
+      "esperado": "El recorrido funciona en los tres motores, con las 5 canchas y el temporizador activo.",
+      "estado": "APROBADA",
+      "duracionMs": 15871,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Chromium 153.0.8010.12: login, 5 canchas y temporizador en marcha → 03:00 → 02:58"
+        },
+        {
+          "ok": true,
+          "texto": "Firefox 155.0: login, 5 canchas y temporizador en marcha → 02:59 → 02:57"
+        },
+        {
+          "ok": true,
+          "texto": "WebKit 26.6: login, 5 canchas y temporizador en marcha → 02:59 → 02:57"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:58:24.817Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Alta",
+      "hu": "US-19",
+      "ca": [
+        2
+      ],
+      "id": "NF-18",
+      "grupo": "Fiabilidad",
+      "rnf": "Recuperación",
+      "nivel": "Docker",
+      "titulo": "Caída y recuperación de la base de datos",
+      "objetivo": "Verificar que si la base de datos se cae la API responde con un error controlado (sin colgarse) y se recupera sola cuando la base vuelve, sin reiniciar el backend.",
+      "pasos": [
+        "Detener el contenedor de la base de datos.",
+        "Consultar la API y medir el tiempo de respuesta.",
+        "Volver a iniciar la base.",
+        "Consultar de nuevo hasta que responda."
+      ],
+      "esperado": "Con la base caída: error controlado (5xx con mensaje genérico) en menos de 10 s y sin exponer detalles; al volver la base, la API se recupera en menos de 60 s sin reiniciar el backend.",
+      "estado": "APROBADA",
+      "duracionMs": 5836,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Con la base caída la API responde en menos de 10 s (no se cuelga) → 3404 ms"
+        },
+        {
+          "ok": true,
+          "texto": "Responde un error controlado con mensaje genérico → HTTP 500 — {\"mensaje\":\"Error interno del servidor\"}"
+        },
+        {
+          "ok": true,
+          "texto": "El proceso del backend sigue vivo (/api/health responde 200) → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "Al volver la base, la API se recupera sin reiniciar el backend → 1.1 s"
+        },
+        {
+          "ok": true,
+          "texto": "Los datos siguen intactos tras la caída (5 canchas)"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:58:30.654Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Media",
+      "hu": "US-19",
+      "ca": [
+        3
+      ],
+      "id": "NF-19",
+      "grupo": "Fiabilidad",
+      "rnf": "Idempotencia",
+      "nivel": "Base de datos",
+      "titulo": "La migración del esquema es idempotente",
+      "objetivo": "Verificar que se puede aplicar el esquema repetidas veces sin errores ni pérdida de datos (el backend lo hace en cada arranque).",
+      "pasos": [
+        "Contar usuarios y reservas.",
+        "Ejecutar \"node src/db/migrate.js\" tres veces dentro del contenedor.",
+        "Volver a contar."
+      ],
+      "esperado": "Las tres ejecuciones terminan con código 0 y los datos no cambian.",
+      "estado": "APROBADA",
+      "duracionMs": 2490,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Las 3 ejecuciones terminan sin errores → 0, 0, 0"
+        },
+        {
+          "ok": true,
+          "texto": "Los datos no cambian → 770/72 → 770/72"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:58:33.145Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Alta",
+      "hu": "US-08",
+      "ca": [
+        6
+      ],
+      "id": "NF-20",
+      "grupo": "Fiabilidad",
+      "rnf": "Zona horaria",
+      "nivel": "API REST",
+      "titulo": "Las horas se interpretan en hora de Colombia, no en la del servidor",
+      "objetivo": "Verificar que la validación de \"hora pasada\" usa la hora de Colombia (UTC-5) aunque el contenedor corra en UTC.",
+      "datos": "Hora actual en Colombia: 13:58; el contenedor del backend usa UTC.",
+      "pasos": [
+        "Consultar la zona horaria del contenedor.",
+        "Reservar hoy una hora que ya pasó en Colombia pero que en UTC aún no.",
+        "Reservar hoy una hora futura en Colombia."
+      ],
+      "esperado": "La hora pasada en Colombia se rechaza (400); la hora futura en Colombia se acepta (201).",
+      "estado": "APROBADA",
+      "duracionMs": 294,
+      "resultado": [
+        {
+          "ok": null,
+          "texto": "Zona horaria del contenedor: UTC; hora en Colombia 13:58"
+        },
+        {
+          "ok": true,
+          "texto": "Hoy 12:00 (ya pasó en Colombia): 400 → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "Hoy 14:00 (futura en Colombia): 201 → HTTP 201"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:58:33.440Z"
+    },
+    {
+      "tipo": "No funcional",
+      "prioridad": "Media",
+      "hu": "NF",
+      "ca": [],
+      "id": "NF-21",
+      "grupo": "Mantenibilidad",
+      "rnf": "Calidad de código",
+      "nivel": "Código fuente",
+      "titulo": "Análisis estático (lint) y cobertura de pruebas automatizadas",
+      "objetivo": "Medir la calidad estática del frontend y la cobertura de pruebas del backend.",
+      "pasos": [
+        "Ejecutar \"npm run lint\" en el frontend.",
+        "Leer el resultado de cobertura de Jest del backend (suite jest.json)."
+      ],
+      "esperado": "Lint sin errores; cobertura de líneas de los servicios del backend de al menos 70 %.",
+      "estado": "OBSERVACIÓN",
+      "duracionMs": 17968,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "ESLint termina sin errores → 0 errores, 1 avisos"
+        },
+        {
+          "ok": "obs",
+          "texto": "ESLint reporta 1 aviso(s): 6:14  warning  Fast refresh only works when a file only exports components. Move your React context(s) to a separate file  react-refresh/only-export-components | ✖ 1 problem (0 errors, 1 warning)"
+        },
+        {
+          "ok": true,
+          "texto": "Cobertura de líneas de los servicios del backend ≥ 70 % → 74.0 % (194/262 líneas)"
+        },
+        {
+          "ok": null,
+          "texto": "Cobertura global del backend: líneas 51.67 % · sentencias 51.25 % · funciones 41.81 % · ramas 47.25 %"
+        }
+      ],
+      "evidencias": [
+        {
+          "titulo": "Cobertura por archivo (líneas)",
+          "texto": "src\\app.js\t86.66 %\t13/15\nsrc\\server.js\t0 %\t0/16\nsrc\\config\\corsOrigin.js\t62.5 %\t5/8\nsrc\\config\\db.js\t72.72 %\t8/11\nsrc\\config\\env.js\t71.42 %\t5/7\nsrc\\controllers\\authController.js\t8.69 %\t2/23\nsrc\\controllers\\canchaController.js\t17.64 %\t3/17\nsrc\\controllers\\reservaController.js\t86.66 %\t13/15\nsrc\\controllers\\temporizadorController.js\t28.57 %\t4/14\nsrc\\db\\migrate.js\t0 %\t0/12\nsrc\\middlewares\\authMiddleware.js\t90.9 %\t10/11\nsrc\\middlewares\\errorHandler.js\t80 %\t4/5\nsrc\\middlewares\\validate.js\t71.42 %\t5/7\nsrc\\models\\Cancha.js\t100 %\t4/4\nsrc\\models\\HorarioDisponible.js\t50 %\t2/4\nsrc\\models\\PasswordResetToken.js\t50 %\t2/4\nsrc\\models\\Reserva.js\t100 %\t10/10\nsrc\\models\\Retencion.js\t83.33 %\t5/6\nsrc\\models\\Usuario.js\t100 %\t4/4\nsrc\\repositories\\canchaRepository.js\t12.82 %\t5/39\nsrc\\repositories\\horarioRepository.js\t17.64 %\t3/17\nsrc\\repositories\\passwordResetRepository.js\t33.33 %\t3/9\nsrc\\repositories\\reservaRepository.js\t82.6 %\t19/23\nsrc\\repositories\\retencionRepository.js\t30.43 %\t7/23\nsrc\\repositories\\sesionReservaRepository.js\t15.38 %\t2/13\nsrc\\repositories\\usuarioRepository.js\t45.45 %\t5/11\nsrc\\routes\\authRoutes.js\t100 %\t10/10\nsrc\\routes\\canchaRoutes.js\t100 %\t16/16\nsrc\\routes\\index.js\t100 %\t9/9\nsrc\\routes\\reservaRoutes.js\t100 %\t9/9\nsrc\\seed\\catalogoCanchas.js\t0 %\t0/2\nsrc\\seed\\enriquecerCanchas.js\t0 %\t0/11\nsrc\\seed\\seedCanchas.js\t0 %\t0/20\nsrc\\seed\\seedReservas.js\t0 %\t0/27\nsrc\\services\\authService.js\t24.39 %\t10/41\nsrc\\services\\canchaService.js\t27.77 %\t5/18\nsrc\\services\\emailService.js\t57.14 %\t12/21\nsrc\\services\\reservaService.js\t89.36 %\t42/47\nsrc\\services\\retencionService.js\t88.7 %\t55/62\nsrc\\services\\temporizadorReservaService.js\t95.89 %\t70/73\nsrc\\sockets\\temporizadorSocket.js\t0 %\t0/74\nsrc\\utils\\ErrorDeAplicacion.js\t100 %\t4/4\nsrc\\utils\\fechaHora.js\t100 %\t5/5\nsrc\\utils\\jwt.js\t100 %\t5/5\nsrc\\utils\\passwordPolicy.js\t66.66 %\t2/3\nsrc\\utils\\resetToken.js\t50 %\t2/4\nsrc\\utils\\validators\\authValidators.js\t100 %\t7/7\nsrc\\utils\\validators\\canchaValidators.js\t100 %\t5/5\nsrc\\utils\\validators\\reservaValidators.js\t100 %\t6/6"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T18:58:51.409Z"
+    }
+  ]
+}

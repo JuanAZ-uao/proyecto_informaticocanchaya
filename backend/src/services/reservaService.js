@@ -6,9 +6,11 @@ const temporizadorService = require('./temporizadorReservaService');
 const retencionService = require('./retencionService');
 const ErrorDeAplicacion = require('../utils/ErrorDeAplicacion');
 const { esMomentoPasado } = require('../utils/fechaHora');
+const env = require('../config/env');
 
 const CODIGO_VIOLACION_UNICA = '23505';
 const MENSAJE_HORA_PASADA = 'No se pueden reservar fechas u horas pasadas';
+const MENSAJE_SOLAPE_USUARIO = 'Ya tienes una reserva en ese horario';
 
 function validarQueNoSeaPasado(fecha, horaInicio) {
   if (esMomentoPasado(fecha, horaInicio)) {
@@ -26,6 +28,21 @@ async function crearReserva({ canchaId, usuarioId, fecha, horaInicio, horaFin })
 
   if (horaFin <= horaInicio) {
     throw new ErrorDeAplicacion('horaFin debe ser posterior a horaInicio', 400);
+  }
+
+  // US-12: el usuario puede tener varias reservas activas (en cualquier cancha), pero
+  // no dos que se solapen en el tiempo, y hasta un máximo configurable de simultáneas.
+  if (await reservaRepository.existeSolapadaDeUsuario(usuarioId, fecha, horaInicio, horaFin)) {
+    throw new ErrorDeAplicacion(MENSAJE_SOLAPE_USUARIO, 409, 'RESERVA_SOLAPADA');
+  }
+
+  const totalActivas = await reservaRepository.contarConfirmadasPorUsuario(usuarioId);
+  if (totalActivas >= env.maxReservasActivasPorUsuario) {
+    throw new ErrorDeAplicacion(
+      `Ya tienes ${env.maxReservasActivasPorUsuario} reservas activas. Cancela alguna para poder reservar otra.`,
+      409,
+      'LIMITE_RESERVAS_ALCANZADO'
+    );
   }
 
   // US-18: si otro usuario tiene la franja retenida, no se le puede quitar.

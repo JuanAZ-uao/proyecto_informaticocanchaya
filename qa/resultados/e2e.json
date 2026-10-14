@@ -1,0 +1,1358 @@
+{
+  "clave": "e2e",
+  "titulo": "Pruebas End-to-End (navegador)",
+  "inicio": "2026-10-11T19:53:25.621Z",
+  "fin": "2026-10-11T20:07:14.737Z",
+  "casos": [
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-01",
+      "hu": "US-01",
+      "hus": [
+        "US-01",
+        "US-02",
+        "US-04"
+      ],
+      "ca": {
+        "US-01": [
+          1
+        ],
+        "US-02": [
+          1
+        ],
+        "US-04": [
+          1
+        ]
+      },
+      "grupo": "Autenticación",
+      "titulo": "Registro → inicio de sesión → listado de canchas",
+      "objetivo": "Recorrer la puerta de entrada de la aplicación como un visitante nuevo.",
+      "datos": "Laura Pérez QA, e2e.reg.1791748406942@qa.local, teléfono 3105550101.",
+      "pasos": [
+        "Abrir /registro y completar nombre, correo, teléfono y contraseña.",
+        "Enviar el formulario.",
+        "Verificar que redirige a /login con el aviso de cuenta creada.",
+        "Iniciar sesión con las mismas credenciales.",
+        "Verificar que se llega al listado de canchas y que las fotos cargan."
+      ],
+      "esperado": "La cuenta se crea y redirige a /login con el mensaje \"Cuenta creada correctamente. Ahora inicia sesión.\"; el login lleva a /canchas con 5 canchas, sus fotos cargadas y el nombre del usuario en la barra.",
+      "estado": "APROBADA",
+      "duracionMs": 10704,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Tras registrarse redirige a la pantalla de inicio de sesión → http://localhost:8380/login"
+        },
+        {
+          "ok": true,
+          "texto": "Muestra \"Cuenta creada correctamente. Ahora inicia sesión.\""
+        },
+        {
+          "ok": true,
+          "texto": "El inicio de sesión lleva al listado de canchas → http://localhost:8380/canchas"
+        },
+        {
+          "ok": true,
+          "texto": "El listado muestra las 5 canchas"
+        },
+        {
+          "ok": true,
+          "texto": "Las 5 fotos de las canchas cargan → 5/5"
+        },
+        {
+          "ok": true,
+          "texto": "La barra muestra el nombre del usuario (\"Laura\")"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-01-1.jpg",
+          "leyenda": "Formulario de registro completado"
+        },
+        {
+          "archivo": "E2E-01-2.jpg",
+          "leyenda": "Pantalla de login con el aviso de cuenta creada"
+        },
+        {
+          "archivo": "E2E-01-3.jpg",
+          "leyenda": "Listado de canchas tras iniciar sesión"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:53:37.647Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-02",
+      "hu": "US-01",
+      "ca": [
+        2,
+        3
+      ],
+      "grupo": "Autenticación",
+      "titulo": "Registro: validaciones y correo duplicado (casos de error)",
+      "objetivo": "Verificar los mensajes de error del formulario de registro y que no se crean cuentas inválidas.",
+      "pasos": [
+        "Enviar el formulario vacío.",
+        "Registrar con una contraseña sin números.",
+        "Registrar con el correo de una cuenta existente."
+      ],
+      "esperado": "El formulario vacío no se envía; la contraseña débil muestra el mensaje de la política; el correo duplicado muestra \"El correo ya está registrado\"; en los tres casos se permanece en /registro.",
+      "estado": "APROBADA",
+      "duracionMs": 4787,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Formulario vacío: no se envía y se permanece en /registro"
+        },
+        {
+          "ok": true,
+          "texto": "Contraseña débil: el navegador bloquea el envío (no se hace ninguna petición al servidor) → patrón no cumplido; ayuda: \"Mínimo 8 caracteres, incluyendo al menos una letra y un número\""
+        },
+        {
+          "ok": true,
+          "texto": "Se permanece en /registro"
+        },
+        {
+          "ok": true,
+          "texto": "Correo duplicado: permanece en /registro"
+        },
+        {
+          "ok": true,
+          "texto": "Muestra \"El correo ya está registrado\""
+        },
+        {
+          "ok": true,
+          "texto": "No se creó una cuenta duplicada en la base"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-02-1.jpg",
+          "leyenda": "Formulario vacío: validación del navegador"
+        },
+        {
+          "archivo": "E2E-02-2.jpg",
+          "leyenda": "Contraseña que no cumple la política: el formulario no se envía"
+        },
+        {
+          "archivo": "E2E-02-3.jpg",
+          "leyenda": "Error por correo duplicado"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:53:42.436Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-03",
+      "hu": "US-02",
+      "ca": [
+        2,
+        3,
+        4
+      ],
+      "grupo": "Autenticación",
+      "titulo": "Login fallido, rutas protegidas, persistencia de sesión y cierre de sesión",
+      "objetivo": "Verificar el acceso a rutas protegidas y el mensaje genérico de error.",
+      "pasos": [
+        "Abrir /canchas sin sesión.",
+        "Intentar iniciar sesión con contraseña incorrecta.",
+        "Iniciar sesión correctamente y recargar la página.",
+        "Pulsar \"Salir\" y volver a abrir /canchas."
+      ],
+      "esperado": "Sin sesión se redirige a /login; la contraseña incorrecta muestra \"Correo o contraseña incorrectos\"; la sesión sobrevive a la recarga; tras \"Salir\" se vuelve a pedir login.",
+      "estado": "APROBADA",
+      "duracionMs": 1788,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Sin sesión, /canchas redirige al login → http://localhost:8380/login?redirect=%2Fcanchas"
+        },
+        {
+          "ok": true,
+          "texto": "Credenciales incorrectas: mensaje genérico → Correo o contraseña incorrectos"
+        },
+        {
+          "ok": true,
+          "texto": "Tras recargar la página la sesión se mantiene"
+        },
+        {
+          "ok": true,
+          "texto": "Tras \"Salir\", /canchas vuelve a pedir login"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-03-1.jpg",
+          "leyenda": "Mensaje genérico de credenciales incorrectas"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T20:07:14.737Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-04",
+      "hu": "US-03",
+      "ca": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "grupo": "Autenticación",
+      "titulo": "Recuperación de contraseña de punta a punta",
+      "objetivo": "Recorrer la recuperación: solicitar, abrir el enlace, cambiar la contraseña y comprobar que el enlace no se reutiliza.",
+      "datos": "SMTP sin configurar: el enlace se toma del log del backend (modo desarrollo).",
+      "pasos": [
+        "Abrir /olvide-password y solicitar el enlace con un correo registrado y con uno no registrado.",
+        "Abrir el enlace del log.",
+        "Enviar contraseñas que no coinciden.",
+        "Definir una contraseña nueva válida.",
+        "Iniciar sesión con la nueva contraseña.",
+        "Reabrir el mismo enlace y volver a enviar."
+      ],
+      "esperado": "Mensaje neutro idéntico en ambos correos; \"Las contraseñas no coinciden\" con valores distintos; redirige a /login tras el cambio; el login con la nueva funciona; el enlace reutilizado se rechaza.",
+      "estado": "APROBADA",
+      "duracionMs": 8346,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "El mensaje es neutro e idéntico para un correo registrado y uno inexistente → Si el correo está registrado, recibirás un enlace de recuperación"
+        },
+        {
+          "ok": true,
+          "texto": "El backend generó el enlace de restablecimiento para el correo registrado"
+        },
+        {
+          "ok": true,
+          "texto": "Contraseñas distintas: \"Las contraseñas no coinciden\""
+        },
+        {
+          "ok": true,
+          "texto": "Tras cambiar la contraseña redirige a /login"
+        },
+        {
+          "ok": true,
+          "texto": "Inicia sesión con la contraseña nueva y llega al listado"
+        },
+        {
+          "ok": true,
+          "texto": "El enlace ya usado se rechaza: \"inválido o ha expirado\""
+        },
+        {
+          "ok": true,
+          "texto": "Sin token en la URL: \"El enlace de recuperación no es válido. Solicita uno nuevo.\""
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-04-1.jpg",
+          "leyenda": "Mensaje neutro tras solicitar la recuperación"
+        },
+        {
+          "archivo": "E2E-04-2.jpg",
+          "leyenda": "Error: las contraseñas no coinciden"
+        },
+        {
+          "archivo": "E2E-04-3.jpg",
+          "leyenda": "Enlace reutilizado rechazado"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:54:24.554Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-05",
+      "hu": "US-06",
+      "hus": [
+        "US-04",
+        "US-06"
+      ],
+      "ca": {
+        "US-04": [
+          1,
+          2
+        ],
+        "US-06": [
+          1,
+          2,
+          3
+        ]
+      },
+      "grupo": "Catálogo",
+      "titulo": "Listado, filtros y estado vacío",
+      "objetivo": "Verificar el listado, cada filtro, el botón Limpiar y el mensaje cuando no hay resultados.",
+      "pasos": [
+        "Abrir el listado y leer el contador.",
+        "Filtrar por una zona.",
+        "Filtrar por precio máximo bajo.",
+        "Filtrar por una zona inexistente.",
+        "Pulsar \"Limpiar\"."
+      ],
+      "esperado": "El contador coincide con las tarjetas; cada filtro reduce el listado; sin coincidencias aparece \"No encontramos canchas con esos filtros\"; \"Limpiar\" restaura las 5 canchas.",
+      "estado": "APROBADA",
+      "duracionMs": 5495,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "El contador indica \"5 canchas\""
+        },
+        {
+          "ok": true,
+          "texto": "Filtro por zona \"Oeste\": 1 resultado(s)"
+        },
+        {
+          "ok": true,
+          "texto": "\"Limpiar\" restaura las 5 canchas"
+        },
+        {
+          "ok": true,
+          "texto": "Filtro precio máx. 70000: 2 resultado(s), los esperados"
+        },
+        {
+          "ok": true,
+          "texto": "Sin coincidencias: \"No encontramos canchas con esos filtros\""
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-05-1.jpg",
+          "leyenda": "Listado completo con filtros"
+        },
+        {
+          "archivo": "E2E-05-2.jpg",
+          "leyenda": "Resultados filtrados por zona \"Oeste\""
+        },
+        {
+          "archivo": "E2E-05-3.jpg",
+          "leyenda": "Estado vacío del listado"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:54:30.541Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-06",
+      "hu": "US-05",
+      "ca": [
+        1
+      ],
+      "grupo": "Catálogo",
+      "titulo": "Detalle de la cancha: foto, descripción, servicios y horarios",
+      "objetivo": "Verificar el contenido comercial y la información de la ficha de una cancha.",
+      "pasos": [
+        "Desde el listado, hacer clic en una cancha.",
+        "Revisar la portada con foto y crédito, la descripción, los servicios y el horario semanal."
+      ],
+      "esperado": "La ficha muestra foto (cargada), crédito del autor, precio, descripción, servicios con íconos, horario de los 7 días con el día de hoy resaltado y la tarjeta de reserva.",
+      "estado": "APROBADA",
+      "duracionMs": 3718,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "La foto de portada carga → 800 px de ancho"
+        },
+        {
+          "ok": true,
+          "texto": "Muestra el crédito del autor de la foto → Foto: Reptonix · CC BY 3.0 · Wikimedia Commons"
+        },
+        {
+          "ok": true,
+          "texto": "Muestra la descripción comercial"
+        },
+        {
+          "ok": true,
+          "texto": "Lista los servicios → 5 servicios"
+        },
+        {
+          "ok": true,
+          "texto": "Muestra el horario de los 7 días → 7 filas"
+        },
+        {
+          "ok": true,
+          "texto": "Resalta el día de hoy con la etiqueta \"Hoy\""
+        },
+        {
+          "ok": true,
+          "texto": "Muestra el precio por hora"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-06-1.jpg",
+          "leyenda": "Portada y datos de la cancha"
+        },
+        {
+          "archivo": "E2E-06-2.jpg",
+          "leyenda": "Descripción, servicios, horario y tarjeta de reserva"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:54:34.261Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-07",
+      "hu": "US-07",
+      "hus": [
+        "US-07",
+        "US-08"
+      ],
+      "ca": {
+        "US-07": [
+          1,
+          2,
+          3
+        ],
+        "US-08": [
+          2,
+          3
+        ]
+      },
+      "grupo": "Catálogo",
+      "titulo": "Selección de fecha y bloques de 1 hora; día sin horario",
+      "objetivo": "Verificar que se ofrecen bloques de 1 hora dentro del horario, que \"Iniciar reserva\" se habilita solo con un bloque libre y que un día sin horario no ofrece bloques.",
+      "datos": "Se elimina temporalmente el horario de un día de una cancha en la base de pruebas.",
+      "pasos": [
+        "Abrir la cancha y elegir una fecha futura.",
+        "Revisar los bloques y el estado del botón.",
+        "Seleccionar un bloque.",
+        "Elegir una fecha cuyo día de la semana no tiene horario."
+      ],
+      "esperado": "16 bloques de 06:00 a 22:00; \"Iniciar reserva\" deshabilitado hasta elegir un bloque; en el día sin horario aparece \"La cancha no tiene horarios disponibles para el día seleccionado.\" y ningún bloque.",
+      "estado": "APROBADA",
+      "duracionMs": 21632,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Se ofrecen 16 bloques de 1 hora, de 06:00 a 22:00 → 16 bloques"
+        },
+        {
+          "ok": true,
+          "texto": "Indica \"16 bloques libres\""
+        },
+        {
+          "ok": true,
+          "texto": "Sin bloque elegido, \"Iniciar reserva\" está deshabilitado"
+        },
+        {
+          "ok": true,
+          "texto": "Con un bloque libre elegido, \"Iniciar reserva\" se habilita"
+        },
+        {
+          "ok": true,
+          "texto": "Día sin horario: \"La cancha no tiene horarios disponibles para el día seleccionado.\""
+        },
+        {
+          "ok": true,
+          "texto": "No se ofrece ningún bloque"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-07-1.jpg",
+          "leyenda": "Bloques disponibles y botón deshabilitado"
+        },
+        {
+          "archivo": "E2E-07-2.jpg",
+          "leyenda": "Día sin horario de atención"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:54:55.893Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-08",
+      "hu": "US-10",
+      "hus": [
+        "US-10",
+        "US-11"
+      ],
+      "ca": {
+        "US-10": [
+          1,
+          2,
+          3,
+          5
+        ],
+        "US-11": [
+          2,
+          4,
+          8
+        ]
+      },
+      "grupo": "Flujo de reserva",
+      "titulo": "Flujo completo cronometrado: cancha → fecha y hora → confirmar",
+      "objetivo": "Medir cuánto tarda y cuántos pasos requiere reservar una cancha de principio a fin, y verificar que no se piden datos que ya están en la sesión.",
+      "pasos": [
+        "Iniciar el cronómetro en el listado de canchas (usuario con sesión).",
+        "Paso 1: hacer clic en una cancha.",
+        "Paso 2: elegir la fecha y hacer clic en un bloque.",
+        "Paso 3: \"Iniciar reserva\" → revisar el resumen → \"Confirmar reserva\".",
+        "Detener el cronómetro al ver la pantalla de confirmación."
+      ],
+      "esperado": "El flujo se completa en 3 pasos y en menos de 2 minutos (objetivo); la ficha no pide nombre ni correo; el resumen muestra cancha, fecha, horario, costo y el usuario de la sesión.",
+      "estado": "APROBADA",
+      "duracionMs": 5592,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Paso 1: del listado al detalle con un solo clic → 0.3 s"
+        },
+        {
+          "ok": true,
+          "texto": "La ficha no pide nombre ni correo (sin campos de datos personales)"
+        },
+        {
+          "ok": true,
+          "texto": "El resumen muestra cancha, horario y costo → Resumen de tu selección | Reservando como E2EFLOW Usuario 7 (e2eflow.1791748495894.7@qa.local) | Cancha | Cancha La Rivera | Fecha | Miércoles, 14 de octubre de 2026 | Ho"
+        },
+        {
+          "ok": true,
+          "texto": "El resumen toma nombre y correo de la sesión → E2EFLOW Usuario 7 (e2eflow.1791748495894.7@qa.local)"
+        },
+        {
+          "ok": true,
+          "texto": "El flujo completo tarda menos de 2 minutos → 2.9 s"
+        },
+        {
+          "ok": true,
+          "texto": "Interacciones totales del usuario → 5: Clic en la cancha → Elegir fecha → Clic en el bloque → Clic en \"Iniciar reserva\" → Clic en \"Confirmar reserva\""
+        },
+        {
+          "ok": null,
+          "texto": "Pasos del flujo: (1) elegir la cancha, (2) elegir fecha y hora, (3) confirmar (resumen + botón). Total: 3 pasos."
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-08-1.jpg",
+          "leyenda": "Paso 2: fecha y bloques disponibles"
+        },
+        {
+          "archivo": "E2E-08-2.jpg",
+          "leyenda": "Paso 3: resumen antes de confirmar"
+        },
+        {
+          "archivo": "E2E-08-3.jpg",
+          "leyenda": "Pantalla de confirmación"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:55:01.486Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-09",
+      "hu": "US-10",
+      "ca": [
+        4
+      ],
+      "grupo": "Flujo de reserva",
+      "titulo": "Retroceder conserva cancha, fecha y hora",
+      "objetivo": "Verificar que \"Cambiar horario\" y recargar la página no pierden la selección.",
+      "pasos": [
+        "Elegir fecha y bloque e ir al resumen.",
+        "Pulsar \"Cambiar horario\".",
+        "Recargar la página.",
+        "Volver a pulsar \"Iniciar reserva\"."
+      ],
+      "esperado": "Tras \"Cambiar horario\" la fecha y el bloque siguen elegidos; tras recargar también (y se vuelve a apartar la franja); el reingreso al resumen funciona.",
+      "estado": "APROBADA",
+      "duracionMs": 4574,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Tras \"Cambiar horario\": misma fecha y bloque 15:00 elegido"
+        },
+        {
+          "ok": true,
+          "texto": "Tras recargar la página: se conserva la fecha y el bloque y la franja se vuelve a apartar"
+        },
+        {
+          "ok": true,
+          "texto": "Se puede volver a entrar al resumen sin repetir la selección"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-09-1.jpg",
+          "leyenda": "Después de \"Cambiar horario\": la selección se conserva"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:55:06.062Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-10",
+      "hu": "US-08",
+      "ca": [
+        2,
+        3
+      ],
+      "grupo": "Flujo de reserva",
+      "titulo": "Franjas ocupadas y horas pasadas aparecen \"No disponible\"",
+      "objetivo": "Verificar que las franjas ya reservadas y las horas de hoy que ya pasaron no se pueden seleccionar.",
+      "datos": "Hoy es 2026-10-11 y la hora actual en Colombia es 14:55.",
+      "pasos": [
+        "Otro usuario reserva el bloque 11:00 de mañana (por API).",
+        "Abrir esa fecha y revisar el bloque 11:00 y uno libre.",
+        "Abrir la fecha de hoy y revisar los bloques anteriores a la hora actual."
+      ],
+      "esperado": "El bloque reservado se ve tachado con \"No disponible\" y está deshabilitado; los bloques libres se pueden elegir; hoy, los bloques cuya hora ya pasó aparecen \"No disponible\".",
+      "estado": "APROBADA",
+      "duracionMs": 4664,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Preparación: A reserva 11:00 por API → HTTP 201"
+        },
+        {
+          "ok": true,
+          "texto": "El bloque 11:00 aparece deshabilitado con \"No disponible\""
+        },
+        {
+          "ok": true,
+          "texto": "El contador descuenta el bloque ocupado: \"15 bloques libres\" (de 16)"
+        },
+        {
+          "ok": true,
+          "texto": "Un bloque libre (12:00) se puede seleccionar"
+        },
+        {
+          "ok": true,
+          "texto": "Hoy: los 7 bloques anteriores a las 14:00 aparecen \"No disponible\" y deshabilitados"
+        },
+        {
+          "ok": true,
+          "texto": "Hoy: los 5 bloques posteriores a la hora actual siguen disponibles"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-10-1.jpg",
+          "leyenda": "Bloque 11:00 \"No disponible\""
+        },
+        {
+          "archivo": "E2E-10-2.jpg",
+          "leyenda": "Fecha de hoy: horas pasadas deshabilitadas"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:55:10.734Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-11",
+      "hu": "US-08",
+      "hus": [
+        "US-08",
+        "US-09"
+      ],
+      "ca": {
+        "US-08": [
+          4
+        ],
+        "US-09": [
+          5
+        ]
+      },
+      "grupo": "Flujo de reserva",
+      "titulo": "La franja se ocupa antes de confirmar: mensaje amigable y poder elegir otra",
+      "objetivo": "Verificar el comportamiento del frontend cuando el backend rechaza porque la franja ya no está disponible, tanto al entrar al resumen como al confirmar.",
+      "datos": "Se elimina de la base la retención del usuario B para simular que la perdió (p. ej. por limpieza) y A reserva la misma franja por API.",
+      "pasos": [
+        "B elige un bloque (queda retenido).",
+        "Se pierde la retención de B y A reserva ese bloque.",
+        "B pulsa \"Iniciar reserva\".",
+        "Repetir con otro bloque, pero esta vez B ya está en el resumen y pulsa \"Confirmar reserva\".",
+        "B elige otra franja libre y completa la reserva."
+      ],
+      "esperado": "En ambos casos aparece \"El horario ya no está disponible\" (mensaje amigable, sin error técnico ni pantalla en blanco), se refrescan las franjas, el bloque queda \"No disponible\" y B puede elegir otra y confirmar.",
+      "estado": "APROBADA",
+      "duracionMs": 7064,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Preparación: A reserva el bloque 09:00 → HTTP 201"
+        },
+        {
+          "ok": true,
+          "texto": "Al entrar al resumen: muestra \"El horario ya no está disponible\" → El horario ya no está disponible"
+        },
+        {
+          "ok": true,
+          "texto": "Las franjas se refrescan: 09:00 queda \"No disponible\""
+        },
+        {
+          "ok": true,
+          "texto": "No se muestra éxito ni resumen"
+        },
+        {
+          "ok": true,
+          "texto": "Preparación: A reserva el bloque 10:00 → HTTP 201"
+        },
+        {
+          "ok": true,
+          "texto": "Al confirmar: muestra \"El horario ya no está disponible\" y no informa éxito → El horario ya no está disponible"
+        },
+        {
+          "ok": true,
+          "texto": "El bloque 10:00 queda deshabilitado"
+        },
+        {
+          "ok": true,
+          "texto": "B elige otra franja (12:00) y completa su reserva"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-11-1.jpg",
+          "leyenda": "Mensaje amigable al ocuparse la franja"
+        },
+        {
+          "archivo": "E2E-11-2.jpg",
+          "leyenda": "Rechazo al confirmar: mensaje claro"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:55:17.801Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-12",
+      "hu": "US-09",
+      "hus": [
+        "US-09",
+        "US-10",
+        "US-11"
+      ],
+      "ca": {
+        "US-09": [
+          3
+        ],
+        "US-10": [
+          6
+        ],
+        "US-11": [
+          3,
+          5
+        ]
+      },
+      "grupo": "Flujo de reserva",
+      "titulo": "Doble clic, indicadores de carga y error del servidor",
+      "objetivo": "Verificar que el botón se bloquea mientras la petición está en curso, que se ven indicadores de carga y que un error del servidor no se presenta como éxito.",
+      "datos": "La respuesta de POST /reservas se retrasa 1,5 s con una intercepción de red; en la segunda parte se simula un 500.",
+      "pasos": [
+        "Elegir un bloque y pulsar \"Iniciar reserva\" (observar el texto del botón).",
+        "Hacer doble clic en \"Confirmar reserva\" con la respuesta retrasada.",
+        "Contar las peticiones POST enviadas y las reservas en la base.",
+        "Con otra franja, simular un error 500 del servidor y confirmar."
+      ],
+      "esperado": "El botón cambia a \"Verificando...\" y \"Confirmando...\" y queda deshabilitado; el doble clic envía una sola petición y crea una sola reserva; ante el 500 se muestra \"Error interno del servidor\" y nunca la pantalla de éxito.",
+      "estado": "APROBADA",
+      "duracionMs": 9610,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Al entrar al resumen: indicador \"Verificando...\" y botón deshabilitado"
+        },
+        {
+          "ok": true,
+          "texto": "Durante la petición el botón muestra \"Confirmando...\" y queda deshabilitado"
+        },
+        {
+          "ok": true,
+          "texto": "El doble clic envía una sola petición POST → 1 petición(es)"
+        },
+        {
+          "ok": true,
+          "texto": "Existe una sola reserva en la base"
+        },
+        {
+          "ok": true,
+          "texto": "Ante un 500 se muestra el mensaje de error del servidor"
+        },
+        {
+          "ok": true,
+          "texto": "Nunca se muestra la pantalla de éxito cuando el backend falla"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-12-1.jpg",
+          "leyenda": "Indicador \"Confirmando...\" con el botón bloqueado"
+        },
+        {
+          "archivo": "E2E-12-2.jpg",
+          "leyenda": "Error del servidor: sin pantalla de éxito"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:55:27.413Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-13",
+      "hu": "US-11",
+      "ca": [
+        1,
+        2,
+        4,
+        6,
+        7,
+        8
+      ],
+      "grupo": "Flujo de reserva",
+      "titulo": "Pantalla de confirmación, historial y accesos directos",
+      "objetivo": "Verificar la confirmación inmediata y su continuidad: \"Ver mis reservas\" y \"Hacer otra reserva\".",
+      "pasos": [
+        "Completar una reserva y medir el tiempo entre el clic y la confirmación.",
+        "Revisar los datos de la confirmación.",
+        "Pulsar \"Ver mis reservas\".",
+        "Volver a la cancha y pulsar \"Hacer otra reserva\"."
+      ],
+      "esperado": "La confirmación aparece en menos de 2 s con código, cancha, fecha, hora y estado; el temporizador ya no cuenta; \"Ver mis reservas\" lista la reserva con el mismo código y estado \"Confirmada\"; \"Hacer otra reserva\" abre un temporizador nuevo.",
+      "estado": "APROBADA",
+      "duracionMs": 4569,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "La confirmación se muestra en menos de 2 segundos → 316 ms"
+        },
+        {
+          "ok": true,
+          "texto": "Muestra el código de la reserva → CY-481DB65C"
+        },
+        {
+          "ok": true,
+          "texto": "Muestra cancha, hora y estado \"Confirmada\""
+        },
+        {
+          "ok": true,
+          "texto": "El temporizador deja de mostrarse tras confirmar"
+        },
+        {
+          "ok": true,
+          "texto": "\"Ver mis reservas\" lista la reserva con su código y estado \"Confirmada\" → Cancha La Rivera · lunes, 19 de octubre de 2026 · 16:00 - 17:00 · CONFIRMADA · CY-481DB65C"
+        },
+        {
+          "ok": true,
+          "texto": "Se puede volver a la cancha y empezar otra reserva"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-13-1.jpg",
+          "leyenda": "Pantalla de confirmación con código"
+        },
+        {
+          "archivo": "E2E-13-2.jpg",
+          "leyenda": "Historial \"Mis reservas\""
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:55:31.983Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-14",
+      "hu": "US-17",
+      "ca": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "grupo": "Temporizador y tiempo real",
+      "titulo": "Cuenta regresiva mm:ss sincronizada con el servidor",
+      "objetivo": "Verificar la cuenta regresiva visible, su formato y su avance.",
+      "pasos": [
+        "Abrir el detalle de una cancha.",
+        "Leer el temporizador al inicio y 4 s después.",
+        "Confirmar que la barra de progreso está presente."
+      ],
+      "esperado": "Se muestra \"Tiempo para reservar: 03:00\" aproximadamente al entrar, con formato mm:ss, que decrece con el tiempo y una barra de progreso.",
+      "estado": "APROBADA",
+      "duracionMs": 7512,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Formato mm:ss → 02:59"
+        },
+        {
+          "ok": true,
+          "texto": "Al entrar queda cerca de 03:00 → 02:59"
+        },
+        {
+          "ok": true,
+          "texto": "La cuenta regresiva decrece con el tiempo → 179s → 174s"
+        },
+        {
+          "ok": true,
+          "texto": "Muestra la barra de progreso"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-14-1.jpg",
+          "leyenda": "Temporizador en marcha"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:55:39.496Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-15",
+      "hu": "US-17",
+      "ca": [
+        3,
+        4
+      ],
+      "grupo": "Temporizador y tiempo real",
+      "titulo": "La cuenta regresiva no depende del reloj local del navegador",
+      "objetivo": "Verificar que el tiempo mostrado se calcula con la hora del servidor y no con el reloj del equipo del usuario (el criterio pide corregir desfases).",
+      "datos": "Se adelanta 120 s el reloj del navegador (Date.now) con un script de inicialización.",
+      "pasos": [
+        "Abrir el navegador con el reloj local adelantado 2 minutos.",
+        "Entrar al detalle de una cancha.",
+        "Leer el temporizador y esperar a una sincronización (5 s)."
+      ],
+      "esperado": "El temporizador debe mostrar ≈ 03:00 (hora del servidor) aunque el reloj local esté adelantado; la sincronización de 5 s debe corregir el desfase.",
+      "estado": "APROBADA",
+      "duracionMs": 9968,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Con el reloj local adelantado 2 min el temporizador sigue mostrando ≈ 03:00 → se muestra Tiempo para reservar: 02:52 (172 s)"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-15-1.jpg",
+          "leyenda": "Temporizador con el reloj local adelantado 2 minutos"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:55:49.465Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-16",
+      "hu": "US-17",
+      "ca": [
+        9,
+        10
+      ],
+      "grupo": "Temporizador y tiempo real",
+      "titulo": "Dos pestañas del mismo usuario comparten el temporizador",
+      "objetivo": "Verificar que abrir la cancha en otra pestaña no reinicia el tiempo y que cerrar una pestaña no cancela la sesión.",
+      "pasos": [
+        "Abrir la cancha en la pestaña 1 y esperar 8 s.",
+        "Abrir la misma cancha en la pestaña 2.",
+        "Comparar los temporizadores.",
+        "Cerrar la pestaña 2 y comprobar la pestaña 1."
+      ],
+      "esperado": "Ambas pestañas muestran el mismo tiempo (±2 s) en lugar de 03:00 en la nueva; al cerrar una, la otra sigue contando.",
+      "estado": "APROBADA",
+      "duracionMs": 14343,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "La segunda pestaña muestra el mismo tiempo, no un 03:00 nuevo → pestaña 1: 169 s · pestaña 2: 169 s"
+        },
+        {
+          "ok": true,
+          "texto": "Al cerrar una pestaña, la otra sigue contando → 169 s → 167 s"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-16-1.jpg",
+          "leyenda": "Segunda pestaña: tiempo compartido"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:56:03.808Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-17",
+      "hu": "US-18",
+      "ca": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "grupo": "Temporizador y tiempo real",
+      "titulo": "Dos usuarios: retención, cambio de franja, confirmación y cancelación en tiempo real",
+      "objetivo": "Verificar que lo que hace un usuario se refleja en la pantalla de otro sin recargar.",
+      "pasos": [
+        "A y B abren la misma cancha y fecha.",
+        "A elige 09:00.",
+        "A cambia a 10:00.",
+        "A confirma 10:00.",
+        "La reserva de A se cancela.",
+        "B elige 09:00 y pulsa \"Cancelar y liberar la franja\"."
+      ],
+      "esperado": "B ve 09:00 \"En proceso de reserva\" (deshabilitado); al cambiar A, B ve 09:00 libre y 10:00 en proceso; al confirmar, B ve 10:00 \"No disponible\"; al cancelarse, B lo ve libre; la retención de B se libera para A al cancelar.",
+      "estado": "APROBADA",
+      "duracionMs": 10712,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "A elige 09:00: B lo ve \"En proceso de reserva\" sin recargar"
+        },
+        {
+          "ok": true,
+          "texto": "El bloque retenido está deshabilitado y con la etiqueta \"En proceso de reserva\""
+        },
+        {
+          "ok": true,
+          "texto": "A cambia a 10:00: B ve 09:00 libre y 10:00 en proceso"
+        },
+        {
+          "ok": true,
+          "texto": "A confirma: B ve 10:00 \"No disponible\""
+        },
+        {
+          "ok": true,
+          "texto": "Se cancela la reserva de A: B ve 10:00 libre otra vez"
+        },
+        {
+          "ok": true,
+          "texto": "B cancela desde el resumen: su retención se elimina de la base"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-17-1.jpg",
+          "leyenda": "Pantalla de B: 09:00 \"En proceso de reserva\""
+        },
+        {
+          "archivo": "E2E-17-2.jpg",
+          "leyenda": "Pantalla de B tras confirmar A: 10:00 \"No disponible\""
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:56:14.521Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-18",
+      "hu": "US-10",
+      "ca": [
+        8
+      ],
+      "grupo": "Flujo de reserva",
+      "titulo": "Sesión vencida: redirige al login y al volver se retoma el flujo",
+      "objetivo": "Verificar el manejo de una sesión (JWT) expirada o inválida en medio del flujo.",
+      "datos": "Se invalida el token guardado en el navegador para simular su vencimiento.",
+      "pasos": [
+        "Elegir fecha y bloque en una cancha.",
+        "Invalidar el token y pulsar \"Iniciar reserva\" (la petición recibe 401).",
+        "Verificar la redirección a /login con el destino.",
+        "Iniciar sesión de nuevo."
+      ],
+      "esperado": "La aplicación redirige a /login?redirect=/canchas/:id; tras iniciar sesión vuelve a la misma cancha con la fecha y el bloque que había elegido.",
+      "estado": "APROBADA",
+      "duracionMs": 4726,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Con la sesión vencida redirige a /login con el destino a retomar → /login?redirect=/canchas/92939ea8-b34f-4f63-acae-bfde4483f4b9"
+        },
+        {
+          "ok": true,
+          "texto": "Tras iniciar sesión vuelve a la misma cancha"
+        },
+        {
+          "ok": true,
+          "texto": "Recupera la fecha elegida → 2026-10-24"
+        },
+        {
+          "ok": true,
+          "texto": "Recupera el bloque elegido (17:00)"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-18-1.jpg",
+          "leyenda": "Redirigido al login con ?redirect="
+        },
+        {
+          "archivo": "E2E-18-2.jpg",
+          "leyenda": "Flujo retomado tras volver a iniciar sesión"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:56:19.249Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-19",
+      "hu": "US-10",
+      "ca": [
+        7
+      ],
+      "grupo": "Flujo de reserva",
+      "titulo": "Flujo completo en celular (390 × 844) con emulación táctil",
+      "objetivo": "Verificar que el flujo de reserva funciona en un viewport móvil y que la tarjeta de reserva queda accesible.",
+      "pasos": [
+        "Emular un celular (390 × 844, táctil).",
+        "Elegir una cancha del listado.",
+        "Elegir fecha y bloque, ir al resumen y confirmar.",
+        "Revisar que no haya desbordes horizontales."
+      ],
+      "esperado": "El flujo se completa sin gestos especiales, la tarjeta de reserva aparece antes que la información en pantallas angostas y no hay scroll horizontal.",
+      "estado": "APROBADA",
+      "duracionMs": 5033,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "En pantallas angostas la tarjeta de reserva queda antes que la información → reserva a 429 px, información a 1267 px"
+        },
+        {
+          "ok": true,
+          "texto": "Reserva confirmada desde el celular"
+        },
+        {
+          "ok": true,
+          "texto": "Sin scroll horizontal → 0 px"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-19-1.jpg",
+          "leyenda": "Listado en celular"
+        },
+        {
+          "archivo": "E2E-19-2.jpg",
+          "leyenda": "Resumen en celular"
+        },
+        {
+          "archivo": "E2E-19-3.jpg",
+          "leyenda": "Confirmación en celular"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:56:24.283Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-20",
+      "hu": "US-10",
+      "hus": [
+        "US-10",
+        "US-11"
+      ],
+      "ca": {
+        "US-10": [
+          6
+        ],
+        "US-11": [
+          3
+        ]
+      },
+      "grupo": "Flujo de reserva",
+      "titulo": "Cancha o servicio no disponible: error claro y sin pantallas en blanco",
+      "objetivo": "Verificar que ante fallos de la API la interfaz muestra mensajes y no queda en blanco.",
+      "pasos": [
+        "Abrir una cancha con un id inexistente.",
+        "Abrir el detalle con la API de disponibilidad respondiendo 500."
+      ],
+      "esperado": "Para una cancha inexistente se muestra \"Cancha no encontrada\" con enlace para volver; si falla la disponibilidad se muestra un aviso y la página sigue utilizable.",
+      "estado": "APROBADA",
+      "duracionMs": 2996,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Cancha inexistente: \"Cancha no encontrada\""
+        },
+        {
+          "ok": true,
+          "texto": "Ofrece volver a \"Todas las canchas\""
+        },
+        {
+          "ok": true,
+          "texto": "Si falla la disponibilidad se informa en la tarjeta de reserva"
+        },
+        {
+          "ok": true,
+          "texto": "La página sigue visible (no queda en blanco)"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-20-1.jpg",
+          "leyenda": "Cancha inexistente"
+        },
+        {
+          "archivo": "E2E-20-2.jpg",
+          "leyenda": "Fallo de la API de disponibilidad"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T19:56:27.280Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-21",
+      "hu": "US-17",
+      "hus": [
+        "US-17",
+        "US-18"
+      ],
+      "ca": {
+        "US-17": [
+          7
+        ],
+        "US-18": [
+          3,
+          7
+        ]
+      },
+      "grupo": "Temporizador y tiempo real",
+      "titulo": "Aviso de 30 s, expiración real y reinicio del temporizador",
+      "objetivo": "Dejar correr los 3 minutos completos en el navegador y verificar el aviso, el bloqueo de la selección, el mensaje de expiración y el reinicio, y su efecto sobre otro usuario.",
+      "pasos": [
+        "A elige un bloque; B observa la misma cancha.",
+        "Esperar sin actuar hasta que queden 30 s.",
+        "Esperar a que el tiempo llegue a 0.",
+        "Observar la pantalla de A y la de B.",
+        "A pulsa \"Reiniciar temporizador\"."
+      ],
+      "esperado": "Al quedar 30 s aparece el aviso visual; a los 180 s A ve \"Tu tiempo expiró\" con la selección deshabilitada; B ve liberarse la franja; \"Reiniciar temporizador\" abre una nueva sesión de 3 min con la selección habilitada.",
+      "estado": "APROBADA",
+      "duracionMs": 1,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Al inicio el temporizador marca ≈ 03:00 → 177 s"
+        },
+        {
+          "ok": true,
+          "texto": "Mientras tanto B ve la franja de A \"En proceso de reserva\""
+        },
+        {
+          "ok": true,
+          "texto": "Aparece el aviso visual cuando quedan ≈ 30 s → se mostró con 29 s restantes (148 s tras elegir)"
+        },
+        {
+          "ok": true,
+          "texto": "El aviso dice \"Quedan menos de 30 segundos…\" y el temporizador cambia a estilo de urgencia → ¡Quedan menos de 30 segundos! Al terminar, la franja que elegiste se libera para otros usu"
+        },
+        {
+          "ok": true,
+          "texto": "La expiración ocurre ≈ 30 s después del aviso y justo cuando la cuenta regresiva llega a cero → 30 s después del aviso · la cuenta marcaba 177 s y expiró 178 s después"
+        },
+        {
+          "ok": true,
+          "texto": "Muestra \"Tu tiempo expiró\" → Tu tiempo expiró"
+        },
+        {
+          "ok": true,
+          "texto": "La selección queda deshabilitada (bloques, fecha e \"Iniciar reserva\") → 0 bloques habilitados"
+        },
+        {
+          "ok": true,
+          "texto": "B ve liberarse la franja de A en tiempo real al expirar"
+        },
+        {
+          "ok": true,
+          "texto": "Tras \"Reiniciar temporizador\" hay una sesión nueva de 3 min y la selección vuelve a estar habilitada → 179 s, 16 bloques habilitados"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-L-1.jpg",
+          "leyenda": "A: temporizador y franja apartada al inicio"
+        },
+        {
+          "archivo": "E2E-L-2.jpg",
+          "leyenda": "B: ve la franja de A \"En proceso de reserva\""
+        },
+        {
+          "archivo": "E2E-L-3.jpg",
+          "leyenda": "A: aviso visual cuando quedan 30 segundos"
+        },
+        {
+          "archivo": "E2E-L-4.jpg",
+          "leyenda": "A: \"Tu tiempo expiró\" con la selección deshabilitada"
+        },
+        {
+          "archivo": "E2E-L-5.jpg",
+          "leyenda": "B: la franja de A vuelve a estar libre"
+        },
+        {
+          "archivo": "E2E-L-6.jpg",
+          "leyenda": "A: tras reiniciar, nueva sesión de 3 minutos"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T20:07:00.428Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Media",
+      "id": "E2E-22",
+      "hu": "US-10",
+      "hus": [
+        "US-10",
+        "US-11",
+        "US-17",
+        "US-18"
+      ],
+      "ca": {},
+      "grupo": "Transversal",
+      "titulo": "Sin errores de JavaScript ni de consola en todo el recorrido",
+      "objetivo": "Verificar que ninguna de las pruebas E2E provocó errores no controlados en el navegador.",
+      "pasos": [
+        "Recoger los eventos \"pageerror\" y los errores de consola de todas las pestañas usadas en esta suite.",
+        "Descartar los esperados (respuestas 4xx/5xx simuladas o provocadas a propósito)."
+      ],
+      "esperado": "Cero errores inesperados.",
+      "estado": "APROBADA",
+      "duracionMs": 8,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "No hubo errores de JavaScript inesperados → 10 mensajes de red esperados (4xx/5xx provocados por las pruebas)"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:56:37.648Z"
+    }
+  ]
+}

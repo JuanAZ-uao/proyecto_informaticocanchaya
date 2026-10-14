@@ -1,0 +1,1856 @@
+{
+  "fecha": "2026-10-11T19:47:40.520Z",
+  "migracion": true,
+  "duracionMs": 8809,
+  "resumen": {
+    "suites": 7,
+    "suitesAprobadas": 7,
+    "pruebas": 72,
+    "aprobadas": 72,
+    "fallidas": 0,
+    "omitidas": 0
+  },
+  "suites": [
+    {
+      "archivo": "tests/reservasDuplicadas.integration.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 2770,
+      "tests": [
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "ante dos peticiones simultáneas por la misma franja, solo una crea la reserva (201) y la otra recibe 409",
+          "estado": "APROBADA",
+          "duracionMs": 116
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "al cancelar la reserva ganadora, la franja queda libre y se puede volver a reservar",
+          "estado": "APROBADA",
+          "duracionMs": 43
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "no deja registros huérfanos: un intento duplicado no inserta filas parciales",
+          "estado": "APROBADA",
+          "duracionMs": 37
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "US-11: confirma con 201 y devuelve id, código, cancha, fecha, hora y estado \"confirmada\"",
+          "estado": "APROBADA",
+          "duracionMs": 19
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "US-11: la reserva confirmada aparece de inmediato en el historial del usuario",
+          "estado": "APROBADA",
+          "duracionMs": 12
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "US-11: sin token no se puede confirmar ni consultar el historial (401)",
+          "estado": "APROBADA",
+          "duracionMs": 13
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "DEF-03: una reserva fuera del horario de la cancha se rechaza con 400 FUERA_DE_HORARIO",
+          "estado": "APROBADA",
+          "duracionMs": 11
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "DEF-04: una franja solapada se rechaza y la base de datos impide el solape aunque se intente por SQL",
+          "estado": "APROBADA",
+          "duracionMs": 34
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "DEF-07: tras 10 inicios de sesión fallidos de una cuenta, el siguiente intento se frena con 429; otra cuenta no se afecta",
+          "estado": "APROBADA",
+          "duracionMs": 78
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "DEF-08: un origen no permitido por CORS recibe 403 y no un error interno",
+          "estado": "APROBADA",
+          "duracionMs": 5
+        }
+      ]
+    },
+    {
+      "archivo": "tests/temporizadorReservaService.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 145,
+      "tests": [
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "inicia una sesión de 180s para (usuario, cancha) y la guarda en la base",
+          "estado": "APROBADA",
+          "duracionMs": 5
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "si ya hay una sesión activa, retoma el mismo expiresAt en vez de crear otra",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "US-18: tras un reinicio retoma la sesión guardada con el mismo expiresAt",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "US-18: restaurarSesiones reprograma las sesiones vigentes y luego expiran a su hora",
+          "estado": "APROBADA",
+          "duracionMs": 4
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "completarSesion marca la sesión como completada, detiene el temporizador y lo persiste",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "completarSesion lanza 409 si no hay sesión activa",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "completarSesion es idempotente: completar dos veces sin expirar no lanza error (permite volver atrás y reentrar al panel)",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "al pasar los 180s emite \"expirado\" y \"terminada\", borra la sesión y rechaza completar después",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "emite sincronización periódica cada 5s mientras la sesión está activa",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "cancela la sesión solo cuando se desconecta el último socket (multi-pestaña)",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "US-18: al salir el último socket, tras el lapso de gracia emite \"terminada\" (libera la franja) y borra la sesión",
+          "estado": "APROBADA",
+          "duracionMs": 4
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "DEF-05: si el usuario reconecta dentro del lapso de gracia, la sesión sigue con el mismo expiresAt",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "cancelarSesion detiene el temporizador y libera la clave",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        }
+      ]
+    },
+    {
+      "archivo": "tests/retencionService.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 198,
+      "tests": [
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "retiene la franja hasta el vencimiento de la sesión y avisa a los demás",
+          "estado": "APROBADA",
+          "duracionMs": 3
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "al elegir otra franja libera la anterior y retiene la nueva",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "volver a retener la misma franja (p. ej. al reconectar) no genera avisos duplicados",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "rechaza con FRANJA_RETENIDA si otro usuario ya la retiene (índice único)",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "rechaza con FRANJA_OCUPADA si la franja ya está reservada",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "rechaza con SESION_EXPIRADA si el usuario no tiene sesión en la cancha",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "DEF-09: un payload nulo o que no es un objeto responde DATOS_INVALIDOS (no un error interno)",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "DEF-03: rechaza con FUERA_DE_HORARIO una franja que la cancha no atiende",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "rechaza con HORA_PASADA o DATOS_INVALIDOS ante franjas no válidas",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "cuando la sesión termina (expira o el usuario sale) libera su franja y avisa",
+          "estado": "APROBADA",
+          "duracionMs": 5
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "al confirmar, la retención se convierte en reserva y se avisa \"reservada\" (no \"liberada\")",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "no deja reservar una franja que otro usuario tiene retenida",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "sí deja reservar la franja que el propio usuario retiene",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "lista las franjas retenidas por otros sin exponer quién las retiene",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "el barrido elimina retenciones vencidas y avisa que quedaron libres",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        }
+      ]
+    },
+    {
+      "archivo": "tests/reservaService.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 115,
+      "tests": [
+        {
+          "grupo": "reservaService.crearReserva",
+          "nombre": "US-18: rechaza con 409 si otro usuario tiene la franja retenida, sin crear la reserva",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "reservaService.crearReserva",
+          "nombre": "US-18: al confirmar, la retención se convierte en reserva definitiva",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "reservaService.crearReserva",
+          "nombre": "crea la reserva cuando la cancha existe y la franja está libre",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "reservaService.crearReserva",
+          "nombre": "US-11: devuelve la reserva confirmada con los datos de la cancha",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "reservaService.crearReserva",
+          "nombre": "US-11: al confirmar, finaliza el temporizador del usuario en esa cancha",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "reservaService.crearReserva",
+          "nombre": "US-11: envía el correo de confirmación con el resumen al correo del usuario",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "reservaService.crearReserva",
+          "nombre": "US-11: si el correo falla, la reserva igual queda confirmada",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "reservaService.crearReserva",
+          "nombre": "US-11: si la reserva no se guarda, no envía correo",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "reservaService.crearReserva",
+          "nombre": "lanza 404 si la cancha no existe",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "reservaService.crearReserva",
+          "nombre": "lanza 400 si horaFin no es posterior a horaInicio",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "reservaService.crearReserva",
+          "nombre": "DEF-03: rechaza con 400 FUERA_DE_HORARIO una reserva fuera del horario de la cancha, sin guardarla",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "reservaService.crearReserva",
+          "nombre": "DEF-03: rechaza un día en que la cancha no tiene horario",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "reservaService.crearReserva",
+          "nombre": "DEF-04: rechaza con 400 las franjas que no son de exactamente 1 hora (evita solapes)",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "reservaService.crearReserva",
+          "nombre": "DEF-04: la restricción de exclusión de Postgres (23P01, franjas solapadas) también se traduce en un 409 amigable",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "reservaService.crearReserva",
+          "nombre": "convierte la violación de índice único de Postgres (23505) en un 409 amigable",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "reservaService.crearReserva",
+          "nombre": "propaga cualquier otro error sin traducirlo a 409",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "reservaService.cancelarReserva",
+          "nombre": "cancela una reserva confirmada del dueño y libera la franja",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "reservaService.cancelarReserva",
+          "nombre": "lanza 404 si la reserva no existe",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "reservaService.cancelarReserva",
+          "nombre": "lanza 403 si la reserva es de otro usuario",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "reservaService.cancelarReserva",
+          "nombre": "lanza 409 si la reserva ya estaba cancelada",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        }
+      ]
+    },
+    {
+      "archivo": "tests/horarioReservaService.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 93,
+      "tests": [
+        {
+          "grupo": "horarioReservaService.validarFranjaEnHorario",
+          "nombre": "acepta un bloque de 1 hora dentro del horario del día",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "horarioReservaService.validarFranjaEnHorario",
+          "nombre": "rechaza horas anteriores a la apertura o posteriores al cierre",
+          "estado": "APROBADA",
+          "duracionMs": 6
+        },
+        {
+          "grupo": "horarioReservaService.validarFranjaEnHorario",
+          "nombre": "rechaza un día de la semana sin horario",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "horarioReservaService.validarFranjaEnHorario",
+          "nombre": "rechaza franjas que no duran exactamente 1 hora",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "horarioReservaService.validarFranjaEnHorario",
+          "nombre": "rechaza bloques que no están alineados con la hora de apertura (se solaparían con la cuadrícula del día)",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        }
+      ]
+    },
+    {
+      "archivo": "tests/corsOrigin.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 101,
+      "tests": [
+        {
+          "grupo": "corsOrigin (DEF-08)",
+          "nombre": "permite el origen configurado y las peticiones sin origen (curl, servidor a servidor)",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "corsOrigin (DEF-08)",
+          "nombre": "en producción rechaza otros orígenes, incluso localhost con otro puerto",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "corsOrigin (DEF-08)",
+          "nombre": "verificarOrigen no genera un error: un origen ajeno simplemente no recibe cabeceras CORS",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "corsOrigin (DEF-08)",
+          "nombre": "el middleware responde 403 \"Origen no permitido\" (y no un error 500) a un origen ajeno",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "corsOrigin (DEF-08)",
+          "nombre": "el middleware deja pasar los orígenes permitidos",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        }
+      ]
+    },
+    {
+      "archivo": "tests/fechaHora.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 97,
+      "tests": [
+        {
+          "grupo": "fechaHora",
+          "nombre": "interpreta la fecha y hora en hora de Colombia (UTC-5)",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "fechaHora",
+          "nombre": "considera pasado un bloque de hoy cuya hora de inicio ya pasó",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "fechaHora",
+          "nombre": "no considera pasado un bloque posterior a la hora actual",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "fechaHora",
+          "nombre": "trata como pasado un valor de fecha inválido",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        }
+      ]
+    }
+  ],
+  "cobertura": {
+    "total": {
+      "lines": {
+        "total": 855,
+        "covered": 483,
+        "skipped": 0,
+        "pct": 56.49
+      },
+      "statements": {
+        "total": 890,
+        "covered": 499,
+        "skipped": 0,
+        "pct": 56.06
+      },
+      "functions": {
+        "total": 173,
+        "covered": 83,
+        "skipped": 0,
+        "pct": 47.97
+      },
+      "branches": {
+        "total": 299,
+        "covered": 164,
+        "skipped": 0,
+        "pct": 54.84
+      },
+      "branchesTrue": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\app.js": {
+      "lines": {
+        "total": 17,
+        "covered": 15,
+        "skipped": 0,
+        "pct": 88.23
+      },
+      "functions": {
+        "total": 2,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "statements": {
+        "total": 17,
+        "covered": 15,
+        "skipped": 0,
+        "pct": 88.23
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\server.js": {
+      "lines": {
+        "total": 16,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "functions": {
+        "total": 3,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "statements": {
+        "total": 16,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\config\\corsOrigin.js": {
+      "lines": {
+        "total": 11,
+        "covered": 11,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 3,
+        "covered": 3,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 14,
+        "covered": 13,
+        "skipped": 0,
+        "pct": 92.85
+      },
+      "branches": {
+        "total": 8,
+        "covered": 7,
+        "skipped": 0,
+        "pct": 87.5
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\config\\db.js": {
+      "lines": {
+        "total": 11,
+        "covered": 8,
+        "skipped": 0,
+        "pct": 72.72
+      },
+      "functions": {
+        "total": 3,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 33.33
+      },
+      "statements": {
+        "total": 11,
+        "covered": 8,
+        "skipped": 0,
+        "pct": 72.72
+      },
+      "branches": {
+        "total": 2,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 50
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\config\\env.js": {
+      "lines": {
+        "total": 7,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 71.42
+      },
+      "functions": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 7,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 71.42
+      },
+      "branches": {
+        "total": 18,
+        "covered": 9,
+        "skipped": 0,
+        "pct": 50
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\controllers\\authController.js": {
+      "lines": {
+        "total": 23,
+        "covered": 6,
+        "skipped": 0,
+        "pct": 26.08
+      },
+      "functions": {
+        "total": 4,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 25
+      },
+      "statements": {
+        "total": 23,
+        "covered": 6,
+        "skipped": 0,
+        "pct": 26.08
+      },
+      "branches": {
+        "total": 2,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\controllers\\canchaController.js": {
+      "lines": {
+        "total": 17,
+        "covered": 3,
+        "skipped": 0,
+        "pct": 17.64
+      },
+      "functions": {
+        "total": 3,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "statements": {
+        "total": 17,
+        "covered": 3,
+        "skipped": 0,
+        "pct": 17.64
+      },
+      "branches": {
+        "total": 8,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\controllers\\reservaController.js": {
+      "lines": {
+        "total": 15,
+        "covered": 13,
+        "skipped": 0,
+        "pct": 86.66
+      },
+      "functions": {
+        "total": 3,
+        "covered": 3,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 15,
+        "covered": 13,
+        "skipped": 0,
+        "pct": 86.66
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\controllers\\temporizadorController.js": {
+      "lines": {
+        "total": 14,
+        "covered": 4,
+        "skipped": 0,
+        "pct": 28.57
+      },
+      "functions": {
+        "total": 1,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "statements": {
+        "total": 14,
+        "covered": 4,
+        "skipped": 0,
+        "pct": 28.57
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\db\\migrate.js": {
+      "lines": {
+        "total": 12,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "functions": {
+        "total": 2,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "statements": {
+        "total": 12,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\middlewares\\authMiddleware.js": {
+      "lines": {
+        "total": 11,
+        "covered": 10,
+        "skipped": 0,
+        "pct": 90.9
+      },
+      "functions": {
+        "total": 1,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 11,
+        "covered": 10,
+        "skipped": 0,
+        "pct": 90.9
+      },
+      "branches": {
+        "total": 6,
+        "covered": 6,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\middlewares\\errorHandler.js": {
+      "lines": {
+        "total": 5,
+        "covered": 4,
+        "skipped": 0,
+        "pct": 80
+      },
+      "functions": {
+        "total": 1,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 5,
+        "covered": 4,
+        "skipped": 0,
+        "pct": 80
+      },
+      "branches": {
+        "total": 10,
+        "covered": 7,
+        "skipped": 0,
+        "pct": 70
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\middlewares\\limitadores.js": {
+      "lines": {
+        "total": 11,
+        "covered": 11,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 2,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 11,
+        "covered": 11,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 6,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 83.33
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\middlewares\\validate.js": {
+      "lines": {
+        "total": 7,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 71.42
+      },
+      "functions": {
+        "total": 2,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 50
+      },
+      "statements": {
+        "total": 7,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 71.42
+      },
+      "branches": {
+        "total": 2,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 50
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\models\\Cancha.js": {
+      "lines": {
+        "total": 4,
+        "covered": 4,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 1,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 5,
+        "covered": 4,
+        "skipped": 0,
+        "pct": 80
+      },
+      "branches": {
+        "total": 12,
+        "covered": 10,
+        "skipped": 0,
+        "pct": 83.33
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\models\\HorarioDisponible.js": {
+      "lines": {
+        "total": 4,
+        "covered": 4,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 1,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 5,
+        "covered": 4,
+        "skipped": 0,
+        "pct": 80
+      },
+      "branches": {
+        "total": 2,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 50
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\models\\PasswordResetToken.js": {
+      "lines": {
+        "total": 4,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 50
+      },
+      "functions": {
+        "total": 1,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "statements": {
+        "total": 5,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 40
+      },
+      "branches": {
+        "total": 2,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\models\\Reserva.js": {
+      "lines": {
+        "total": 10,
+        "covered": 10,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 3,
+        "covered": 3,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 12,
+        "covered": 10,
+        "skipped": 0,
+        "pct": 83.33
+      },
+      "branches": {
+        "total": 4,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 50
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\models\\Retencion.js": {
+      "lines": {
+        "total": 6,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 83.33
+      },
+      "functions": {
+        "total": 2,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 7,
+        "covered": 6,
+        "skipped": 0,
+        "pct": 85.71
+      },
+      "branches": {
+        "total": 2,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 50
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\models\\Usuario.js": {
+      "lines": {
+        "total": 4,
+        "covered": 4,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 1,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 5,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 2,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\repositories\\canchaRepository.js": {
+      "lines": {
+        "total": 39,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 12.82
+      },
+      "functions": {
+        "total": 6,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 16.66
+      },
+      "statements": {
+        "total": 39,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 12.82
+      },
+      "branches": {
+        "total": 29,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\repositories\\horarioRepository.js": {
+      "lines": {
+        "total": 17,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 29.41
+      },
+      "functions": {
+        "total": 2,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 50
+      },
+      "statements": {
+        "total": 17,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 29.41
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\repositories\\passwordResetRepository.js": {
+      "lines": {
+        "total": 9,
+        "covered": 3,
+        "skipped": 0,
+        "pct": 33.33
+      },
+      "functions": {
+        "total": 4,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "statements": {
+        "total": 9,
+        "covered": 3,
+        "skipped": 0,
+        "pct": 33.33
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\repositories\\reservaRepository.js": {
+      "lines": {
+        "total": 23,
+        "covered": 19,
+        "skipped": 0,
+        "pct": 82.6
+      },
+      "functions": {
+        "total": 7,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 71.42
+      },
+      "statements": {
+        "total": 24,
+        "covered": 20,
+        "skipped": 0,
+        "pct": 83.33
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\repositories\\retencionRepository.js": {
+      "lines": {
+        "total": 23,
+        "covered": 7,
+        "skipped": 0,
+        "pct": 30.43
+      },
+      "functions": {
+        "total": 6,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 33.33
+      },
+      "statements": {
+        "total": 23,
+        "covered": 7,
+        "skipped": 0,
+        "pct": 30.43
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\repositories\\sesionReservaRepository.js": {
+      "lines": {
+        "total": 13,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 15.38
+      },
+      "functions": {
+        "total": 7,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "statements": {
+        "total": 14,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 14.28
+      },
+      "branches": {
+        "total": 2,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\repositories\\usuarioRepository.js": {
+      "lines": {
+        "total": 11,
+        "covered": 7,
+        "skipped": 0,
+        "pct": 63.63
+      },
+      "functions": {
+        "total": 4,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 50
+      },
+      "statements": {
+        "total": 11,
+        "covered": 7,
+        "skipped": 0,
+        "pct": 63.63
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\routes\\authRoutes.js": {
+      "lines": {
+        "total": 11,
+        "covered": 11,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 11,
+        "covered": 11,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\routes\\canchaRoutes.js": {
+      "lines": {
+        "total": 16,
+        "covered": 16,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 16,
+        "covered": 16,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\routes\\index.js": {
+      "lines": {
+        "total": 9,
+        "covered": 9,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 9,
+        "covered": 9,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\routes\\reservaRoutes.js": {
+      "lines": {
+        "total": 9,
+        "covered": 9,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 9,
+        "covered": 9,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\seed\\catalogoCanchas.js": {
+      "lines": {
+        "total": 2,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "functions": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 2,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\seed\\enriquecerCanchas.js": {
+      "lines": {
+        "total": 11,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "functions": {
+        "total": 2,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "statements": {
+        "total": 11,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "branches": {
+        "total": 2,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\seed\\seedCanchas.js": {
+      "lines": {
+        "total": 20,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "functions": {
+        "total": 4,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "statements": {
+        "total": 20,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "branches": {
+        "total": 4,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\seed\\seedReservas.js": {
+      "lines": {
+        "total": 27,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "functions": {
+        "total": 3,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "statements": {
+        "total": 27,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "branches": {
+        "total": 4,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\authService.js": {
+      "lines": {
+        "total": 41,
+        "covered": 13,
+        "skipped": 0,
+        "pct": 31.7
+      },
+      "functions": {
+        "total": 4,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 25
+      },
+      "statements": {
+        "total": 41,
+        "covered": 13,
+        "skipped": 0,
+        "pct": 31.7
+      },
+      "branches": {
+        "total": 10,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 10
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\canchaService.js": {
+      "lines": {
+        "total": 18,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 27.77
+      },
+      "functions": {
+        "total": 6,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "statements": {
+        "total": 20,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 25
+      },
+      "branches": {
+        "total": 5,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\emailService.js": {
+      "lines": {
+        "total": 21,
+        "covered": 12,
+        "skipped": 0,
+        "pct": 57.14
+      },
+      "functions": {
+        "total": 3,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 66.66
+      },
+      "statements": {
+        "total": 21,
+        "covered": 12,
+        "skipped": 0,
+        "pct": 57.14
+      },
+      "branches": {
+        "total": 9,
+        "covered": 3,
+        "skipped": 0,
+        "pct": 33.33
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\horarioReservaService.js": {
+      "lines": {
+        "total": 18,
+        "covered": 18,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 3,
+        "covered": 3,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 19,
+        "covered": 19,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 12,
+        "covered": 12,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\reservaService.js": {
+      "lines": {
+        "total": 49,
+        "covered": 46,
+        "skipped": 0,
+        "pct": 93.87
+      },
+      "functions": {
+        "total": 9,
+        "covered": 7,
+        "skipped": 0,
+        "pct": 77.77
+      },
+      "statements": {
+        "total": 51,
+        "covered": 47,
+        "skipped": 0,
+        "pct": 92.15
+      },
+      "branches": {
+        "total": 18,
+        "covered": 15,
+        "skipped": 0,
+        "pct": 83.33
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\retencionService.js": {
+      "lines": {
+        "total": 65,
+        "covered": 58,
+        "skipped": 0,
+        "pct": 89.23
+      },
+      "functions": {
+        "total": 17,
+        "covered": 14,
+        "skipped": 0,
+        "pct": 82.35
+      },
+      "statements": {
+        "total": 73,
+        "covered": 64,
+        "skipped": 0,
+        "pct": 87.67
+      },
+      "branches": {
+        "total": 53,
+        "covered": 43,
+        "skipped": 0,
+        "pct": 81.13
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\temporizadorReservaService.js": {
+      "lines": {
+        "total": 81,
+        "covered": 78,
+        "skipped": 0,
+        "pct": 96.29
+      },
+      "functions": {
+        "total": 20,
+        "covered": 19,
+        "skipped": 0,
+        "pct": 95
+      },
+      "statements": {
+        "total": 89,
+        "covered": 81,
+        "skipped": 0,
+        "pct": 91.01
+      },
+      "branches": {
+        "total": 42,
+        "covered": 34,
+        "skipped": 0,
+        "pct": 80.95
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\sockets\\temporizadorSocket.js": {
+      "lines": {
+        "total": 74,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "functions": {
+        "total": 19,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "statements": {
+        "total": 76,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "branches": {
+        "total": 16,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\utils\\ErrorDeAplicacion.js": {
+      "lines": {
+        "total": 4,
+        "covered": 4,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 1,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 4,
+        "covered": 4,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 2,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 50
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\utils\\fechaHora.js": {
+      "lines": {
+        "total": 5,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 2,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 5,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 3,
+        "covered": 3,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\utils\\jwt.js": {
+      "lines": {
+        "total": 5,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 2,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 5,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\utils\\passwordPolicy.js": {
+      "lines": {
+        "total": 3,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 66.66
+      },
+      "functions": {
+        "total": 1,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "statements": {
+        "total": 3,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 66.66
+      },
+      "branches": {
+        "total": 2,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\utils\\resetToken.js": {
+      "lines": {
+        "total": 4,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 50
+      },
+      "functions": {
+        "total": 2,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "statements": {
+        "total": 4,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 50
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\utils\\validators\\authValidators.js": {
+      "lines": {
+        "total": 7,
+        "covered": 7,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 7,
+        "covered": 7,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\utils\\validators\\canchaValidators.js": {
+      "lines": {
+        "total": 5,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 5,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\utils\\validators\\reservaValidators.js": {
+      "lines": {
+        "total": 6,
+        "covered": 6,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 6,
+        "covered": 6,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    }
+  }
+}

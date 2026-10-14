@@ -7,6 +7,8 @@ const env = {
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '1d',
   passwordResetTokenExpiresMin: Number(process.env.PASSWORD_RESET_TOKEN_EXPIRES_MIN || 30),
+  // US-12: tope de reservas "confirmada" simultáneas por usuario.
+  maxReservasActivasPorUsuario: Number(process.env.MAX_RESERVAS_ACTIVAS_USUARIO || 5),
   corsOrigin: process.env.CORS_ORIGIN || '*',
   smtp: {
     host: process.env.SMTP_HOST,

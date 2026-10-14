@@ -1,0 +1,915 @@
+{
+  "clave": "smoke",
+  "titulo": "Smoke test de Docker y pipeline",
+  "inicio": "2026-10-11T18:37:20.091Z",
+  "fin": "2026-10-11T19:09:18.417Z",
+  "casos": [
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Alta",
+      "grupo": "Docker",
+      "id": "SD-01",
+      "hu": "US-19",
+      "ca": [
+        1
+      ],
+      "titulo": "El docker-compose.yml es válido",
+      "objetivo": "Verificar que la definición del entorno (db, backend, frontend) es válida y resuelve sus variables.",
+      "pasos": [
+        "Ejecutar \"docker compose config -q\" con las variables de entorno de pruebas."
+      ],
+      "esperado": "El comando termina con código 0 y sin mensajes de error.",
+      "estado": "APROBADA",
+      "duracionMs": 488,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "docker compose config -q termina con código 0 → código 0"
+        },
+        {
+          "ok": true,
+          "texto": "Define los servicios db, backend y frontend → backend, db, frontend"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:37:20.580Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Alta",
+      "grupo": "Docker",
+      "id": "SD-02",
+      "hu": "US-19",
+      "ca": [
+        5
+      ],
+      "titulo": "Prueba negativa: sin JWT_SECRET el compose se niega a arrancar",
+      "objetivo": "Comprobar que el entorno no puede levantarse con un secreto vacío (no hay un valor por defecto inseguro).",
+      "datos": "JWT_SECRET definida como cadena vacía.",
+      "pasos": [
+        "Ejecutar \"docker compose config\" con JWT_SECRET vacía."
+      ],
+      "esperado": "Error (código distinto de 0) con un mensaje que indica que falta JWT_SECRET.",
+      "estado": "APROBADA",
+      "duracionMs": 247,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "El comando falla como se espera → código 1"
+        },
+        {
+          "ok": true,
+          "texto": "El mensaje de error nombra la variable faltante → error while interpolating services.backend.environment.JWT_SECRET: required variable JWT_SECRET is missing a value: Define JWT_SECRET en el archivo .env de la r"
+        }
+      ],
+      "evidencias": [
+        {
+          "titulo": "Salida del comando",
+          "texto": "error while interpolating services.backend.environment.JWT_SECRET: required variable JWT_SECRET is missing a value: Define JWT_SECRET en el archivo .env de la raiz o en el entorno"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T18:37:20.829Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Alta",
+      "grupo": "Docker",
+      "id": "SD-03",
+      "hu": "US-19",
+      "ca": [
+        1
+      ],
+      "titulo": "Construcción de las imágenes desde cero (sin caché)",
+      "objetivo": "Verificar que las imágenes del backend y del frontend se construyen desde cero con Node 22 y que su tamaño es razonable.",
+      "pasos": [
+        "Ejecutar \"docker compose build --no-cache\".",
+        "Listar las imágenes resultantes y su tamaño."
+      ],
+      "esperado": "Ambas imágenes se construyen sin errores; el build completo tarda menos de 10 minutos.",
+      "estado": "APROBADA",
+      "duracionMs": 41321,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "La construcción termina sin errores → código 0"
+        },
+        {
+          "ok": true,
+          "texto": "El build completo tarda menos de 10 minutos → 40.5 s"
+        },
+        {
+          "ok": true,
+          "texto": "Existen las imágenes backend y frontend → canchaya-qa-frontend 96.3MB · canchaya-qa-backend 276MB"
+        },
+        {
+          "ok": true,
+          "texto": "El backend usa Node 22 (LTS vigente) → v22.23.3"
+        }
+      ],
+      "evidencias": [
+        {
+          "titulo": "Últimas líneas del build",
+          "texto": "#26 exporting manifest list sha256:d5e384db979c7db168f276b3bb5b81e52b79917360a32880b9ab5f4fa861a949 0.0s done\n#26 naming to docker.io/library/canchaya-qa-frontend:latest\n#26 naming to docker.io/library/canchaya-qa-frontend:latest done\n#26 unpacking to docker.io/library/canchaya-qa-frontend:latest 0.1s done\n#26 DONE 0.5s\n\n#27 [frontend] resolving provenance for metadata file\n#27 DONE 0.0s\n Image canchaya-qa-frontend Building \n Image canchaya-qa-backend Building \n Image canchaya-qa-backend Built \n Image canchaya-qa-frontend Built"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T18:38:02.151Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Alta",
+      "grupo": "Docker",
+      "id": "SD-04",
+      "hu": "US-19",
+      "ca": [
+        1,
+        2
+      ],
+      "titulo": "Arranque con \"docker compose up --wait\": los 3 servicios quedan sanos",
+      "objetivo": "Verificar que el entorno completo arranca con un solo comando y que los healthchecks de db, backend y frontend pasan a \"healthy\".",
+      "pasos": [
+        "Ejecutar \"docker compose up -d --wait --wait-timeout 300\".",
+        "Consultar el estado de salud de cada contenedor."
+      ],
+      "esperado": "Código 0; db, backend y frontend en estado healthy en menos de 3 minutos.",
+      "estado": "APROBADA",
+      "duracionMs": 19165,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "docker compose up --wait termina con código 0 → código 0"
+        },
+        {
+          "ok": true,
+          "texto": "El servicio db está healthy → healthy"
+        },
+        {
+          "ok": true,
+          "texto": "El servicio backend está healthy → healthy"
+        },
+        {
+          "ok": true,
+          "texto": "El servicio frontend está healthy → healthy"
+        },
+        {
+          "ok": true,
+          "texto": "Todo el entorno queda sano en menos de 3 minutos → 18.4 s"
+        }
+      ],
+      "evidencias": [
+        {
+          "titulo": "docker compose ps",
+          "texto": "NAME                     IMAGE                  COMMAND                  SERVICE    CREATED          STATUS                    PORTS\ncanchaya-qa-backend-1    canchaya-qa-backend    \"docker-entrypoint.s…\"   backend    17 seconds ago   Up 12 seconds (healthy)   0.0.0.0:4300->4000/tcp, [::]:4300->4000/tcp\ncanchaya-qa-db-1         postgres:16-alpine     \"docker-entrypoint.s…\"   db         6 minutes ago    Up 5 minutes (healthy)    5432/tcp\ncanchaya-qa-frontend-1   canchaya-qa-frontend   \"/docker-entrypoint.…\"   frontend   14 seconds ago   Up 6 seconds (healthy)    0.0.0.0:8380->80/tcp, [::]:8380->80/tcp"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T18:38:21.317Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Alta",
+      "grupo": "Docker",
+      "id": "SD-05",
+      "hu": "US-19",
+      "ca": [
+        2
+      ],
+      "titulo": "Orden de arranque: db → backend → frontend",
+      "objetivo": "Verificar que el backend espera a la base de datos y el frontend espera al backend (depends_on con service_healthy).",
+      "pasos": [
+        "Leer la hora de inicio (StartedAt) de cada contenedor.",
+        "Comparar el orden."
+      ],
+      "esperado": "db inició antes que backend y backend antes que frontend.",
+      "estado": "APROBADA",
+      "duracionMs": 386,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "La base de datos inició antes (o al mismo tiempo) que el backend → db→backend 347185 ms"
+        },
+        {
+          "ok": true,
+          "texto": "El backend inició antes (o al mismo tiempo) que el frontend → backend→frontend 5757 ms"
+        },
+        {
+          "ok": null,
+          "texto": "Dependencias declaradas en docker-compose.yml: backend espera service_healthy de db; frontend espera service_healthy de backend."
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:38:21.704Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Alta",
+      "grupo": "Docker",
+      "id": "SD-06",
+      "hu": "US-19",
+      "ca": [
+        3
+      ],
+      "titulo": "El esquema de la base se aplica solo al arrancar el backend",
+      "objetivo": "Verificar que no hace falta ejecutar migraciones a mano: al iniciar, el backend crea tablas, índices únicos y restricciones.",
+      "pasos": [
+        "Leer los logs del backend.",
+        "Consultar las tablas del esquema public en el Postgres del contenedor.",
+        "Consultar los índices únicos de reservas y retenciones."
+      ],
+      "esperado": "Logs con \"[MIGRATE] Esquema aplicado correctamente\"; existen las 7 tablas y los índices únicos de US-09 y US-18.",
+      "estado": "APROBADA",
+      "duracionMs": 1481,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "El log muestra que el esquema se aplicó automáticamente"
+        },
+        {
+          "ok": true,
+          "texto": "Existen las 7 tablas del modelo → canchas,horarios_disponibles,password_reset_tokens,reservas,retenciones,sesiones_reserva,usuarios"
+        },
+        {
+          "ok": true,
+          "texto": "Índice único parcial de reservas confirmadas (US-09) → uq_reservas_confirmada_cancha_fecha_hora, uq_retenciones_franja, uq_retenciones_usuario_cancha"
+        },
+        {
+          "ok": true,
+          "texto": "El índice es parcial: solo aplica a reservas con estado confirmada → CREATE UNIQUE INDEX uq_reservas_confirmada_cancha_fecha_hora ON public.reservas USING btree (cancha_id, fecha, hora_inicio) WHERE (estado = 'confirmada'::text)"
+        },
+        {
+          "ok": true,
+          "texto": "Restricciones únicas de retenciones (US-18)"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:38:23.185Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Alta",
+      "grupo": "Docker",
+      "id": "SD-07",
+      "hu": "US-19",
+      "ca": [
+        1
+      ],
+      "titulo": "Puertos publicados y aislamiento de la base de datos",
+      "objetivo": "Verificar que la API y el frontend responden en los puertos publicados y que la base de datos NO se expone fuera de la red de Docker.",
+      "pasos": [
+        "Consultar GET /api/health en el puerto de la API.",
+        "Consultar el frontend en su puerto.",
+        "Inspeccionar los puertos publicados del contenedor de la base."
+      ],
+      "esperado": "API y frontend responden 200; la base de datos no publica puertos en el host.",
+      "estado": "APROBADA",
+      "duracionMs": 174,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "GET /api/health responde 200 {\"estado\":\"ok\"} → {\"estado\":\"ok\"}"
+        },
+        {
+          "ok": true,
+          "texto": "El frontend responde 200 → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "La base de datos no publica puertos en el host → {\"5432/tcp\":null}"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:38:23.360Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Alta",
+      "grupo": "Docker",
+      "id": "SD-08",
+      "hu": "US-19",
+      "ca": [
+        5
+      ],
+      "titulo": "Las imágenes no contienen secretos y el backend no corre como root",
+      "objetivo": "Verificar buenas prácticas de seguridad en las imágenes: sin archivos .env, sin el secreto JWT incrustado y usuario sin privilegios.",
+      "pasos": [
+        "Listar el contenido de /app en la imagen del backend y ver el usuario.",
+        "Buscar el valor de JWT_SECRET dentro de las variables de la imagen y del bundle del frontend."
+      ],
+      "esperado": "No hay .env, .git ni tests en la imagen; el usuario es \"node\"; el secreto no aparece en la imagen ni en el frontend.",
+      "estado": "APROBADA",
+      "duracionMs": 1478,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "El backend corre con el usuario sin privilegios \"node\" → node"
+        },
+        {
+          "ok": true,
+          "texto": "La imagen no contiene .env, .git ni la carpeta tests → node_modules, package-lock.json, package.json, src"
+        },
+        {
+          "ok": true,
+          "texto": "El secreto JWT no está incrustado en la imagen del backend"
+        },
+        {
+          "ok": true,
+          "texto": "El bundle del frontend no contiene el secreto → 0 archivos con coincidencia"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:38:24.839Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Alta",
+      "grupo": "Docker",
+      "id": "SD-09",
+      "hu": "US-20",
+      "ca": [
+        2
+      ],
+      "titulo": "Smoke test del pipeline (scripts/smoke-test.sh) contra el entorno Docker",
+      "objetivo": "Ejecutar exactamente el mismo smoke test que corre el job \"Docker - build y smoke test\" del pipeline.",
+      "pasos": [
+        "Ejecutar \"bash scripts/smoke-test.sh\" apuntando al entorno de pruebas."
+      ],
+      "esperado": "Pasan las 7 verificaciones: health, frontend, rutas SPA, CORS, 401 sin token, registro/login y listado de canchas, y termina con \"Smoke test OK\".",
+      "estado": "APROBADA",
+      "duracionMs": 1044,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "API responde en /api/health"
+        },
+        {
+          "ok": true,
+          "texto": "Frontend sirve la app"
+        },
+        {
+          "ok": true,
+          "texto": "Rutas de React Router resuelven a index.html (SPA)"
+        },
+        {
+          "ok": true,
+          "texto": "CORS permite el origen del frontend"
+        },
+        {
+          "ok": true,
+          "texto": "Sin token la API responde 401"
+        },
+        {
+          "ok": true,
+          "texto": "Registro e inicio de sesión contra la base de datos"
+        },
+        {
+          "ok": true,
+          "texto": "Con token la API lista canchas"
+        },
+        {
+          "ok": true,
+          "texto": "El script termina con código 0 y \"Smoke test OK\" → código 0"
+        }
+      ],
+      "evidencias": [
+        {
+          "titulo": "Salida de scripts/smoke-test.sh",
+          "texto": "-> API responde en /api/health\n-> Frontend sirve la app\n-> Rutas de React Router resuelven a index.html (SPA)\n-> CORS permite el origen del frontend\n-> Sin token la API responde 401\n-> Registro e inicio de sesión contra la base de datos\n-> Con token la API lista canchas\nSmoke test OK"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T18:38:25.884Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Alta",
+      "grupo": "Docker",
+      "id": "SD-10",
+      "hu": "US-19",
+      "ca": [
+        3
+      ],
+      "titulo": "Datos de ejemplo: seed de canchas y fotos servidas por el frontend",
+      "objetivo": "Verificar que la base temporal puede poblarse con las 5 canchas de ejemplo y que el frontend sirve sus fotos.",
+      "pasos": [
+        "Ejecutar el seed dentro del contenedor del backend.",
+        "Consultar el listado de canchas.",
+        "Descargar la foto de cada cancha desde el frontend."
+      ],
+      "esperado": "Se insertan 5 canchas; cada una tiene foto y el frontend responde 200 con content-type image/jpeg.",
+      "estado": "APROBADA",
+      "duracionMs": 689,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "El seed inserta las 5 canchas de ejemplo → [SEED] Se insertaron 5 canchas de ejemplo con sus horarios"
+        },
+        {
+          "ok": true,
+          "texto": "GET /api/canchas devuelve 5 canchas → 5"
+        },
+        {
+          "ok": true,
+          "texto": "Foto de \"Cancha El Bosque\" disponible → /img/canchas/el-bosque.jpg → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "Foto de \"Cancha La Rivera\" disponible → /img/canchas/la-rivera.jpg → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "Foto de \"Cancha Los Cerros\" disponible → /img/canchas/los-cerros.jpg → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "Foto de \"Cancha San Fernando\" disponible → /img/canchas/san-fernando.jpg → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "Foto de \"Cancha Santa Mónica\" disponible → /img/canchas/santa-monica.jpg → HTTP 200"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:38:26.573Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Alta",
+      "grupo": "Docker",
+      "id": "SD-11",
+      "hu": "US-19",
+      "ca": [
+        1
+      ],
+      "titulo": "nginx: fallback de SPA, caché de assets y cabeceras",
+      "objetivo": "Verificar la configuración del servidor del frontend: recargar una ruta de React Router no debe dar 404 y los assets compilados deben cachearse.",
+      "pasos": [
+        "Pedir /canchas/cualquier-id y /login directamente.",
+        "Pedir un asset compilado de /assets/ y revisar Cache-Control.",
+        "Pedir una ruta de archivo inexistente de /assets/."
+      ],
+      "esperado": "Las rutas SPA responden 200 con index.html; los assets llevan Cache-Control immutable; un asset inexistente responde 404.",
+      "estado": "APROBADA",
+      "duracionMs": 16,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Ruta SPA /canchas/cualquier-id responde 200 con la app → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "Ruta SPA /login responde 200 con la app → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "Ruta SPA /mis-reservas responde 200 con la app → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "Los assets compilados se sirven con Cache-Control immutable → max-age=31536000, public, immutable"
+        },
+        {
+          "ok": true,
+          "texto": "Un asset inexistente no se disfraza de la app → HTTP 404"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:38:26.590Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Alta",
+      "grupo": "Docker",
+      "id": "SD-12",
+      "hu": "US-19",
+      "ca": [
+        2
+      ],
+      "titulo": "Healthchecks definidos y política de reinicio",
+      "objetivo": "Verificar que cada servicio declara un healthcheck y se reinicia automáticamente si falla (unless-stopped).",
+      "pasos": [
+        "Inspeccionar la configuración de cada contenedor."
+      ],
+      "esperado": "Los 3 contenedores tienen healthcheck y política de reinicio \"unless-stopped\".",
+      "estado": "APROBADA",
+      "duracionMs": 586,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "db: healthcheck definido, reinicio \"unless-stopped\""
+        },
+        {
+          "ok": true,
+          "texto": "backend: healthcheck definido, reinicio \"unless-stopped\""
+        },
+        {
+          "ok": true,
+          "texto": "frontend: healthcheck definido, reinicio \"unless-stopped\""
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:38:27.177Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Baja",
+      "grupo": "Docker",
+      "id": "SD-13",
+      "hu": "US-19",
+      "ca": [
+        1
+      ],
+      "titulo": "Consumo de recursos en reposo",
+      "objetivo": "Registrar el consumo de memoria y CPU de los contenedores sin carga, como referencia.",
+      "pasos": [
+        "Ejecutar \"docker stats --no-stream\"."
+      ],
+      "esperado": "Cada contenedor usa menos de 300 MiB de memoria en reposo.",
+      "estado": "APROBADA",
+      "duracionMs": 2273,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "db-1: 41.08MiB de memoria, CPU 5.24%"
+        },
+        {
+          "ok": true,
+          "texto": "backend-1: 34.44MiB de memoria, CPU 0.02%"
+        },
+        {
+          "ok": true,
+          "texto": "frontend-1: 5.121MiB de memoria, CPU 0.00%"
+        }
+      ],
+      "evidencias": [
+        {
+          "titulo": "docker stats",
+          "texto": "canchaya-qa-db-1|41.08MiB / 7.74GiB|5.24%\ncanchaya-qa-backend-1|34.44MiB / 7.74GiB|0.02%\ncanchaya-qa-frontend-1|5.121MiB / 7.74GiB|0.00%"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T18:38:29.451Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Alta",
+      "grupo": "Docker",
+      "id": "SD-14",
+      "hu": "US-20",
+      "ca": [
+        2
+      ],
+      "titulo": "Prueba de carga con 100 conexiones de socket (paso del pipeline)",
+      "objetivo": "Ejecutar la misma prueba de carga que corre el job Docker del pipeline.",
+      "pasos": [
+        "Ejecutar \"npm run test:carga\" con CLIENTES=100 apuntando al entorno de pruebas."
+      ],
+      "esperado": "9/9 verificaciones correctas: sin eventos perdidos ni duplicados y una sola reserva ganadora.",
+      "estado": "APROBADA",
+      "duracionMs": 23012,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "La prueba de carga termina con todas las verificaciones correctas → 9/9"
+        }
+      ],
+      "evidencias": [
+        {
+          "titulo": "Salida de la prueba de carga",
+          "texto": "Prueba de carga US-18 contra http://localhost:4300/api con 100 clientes\n[OK]    100/100 conexiones simultáneas recibieron su temporizador (678 ms)\n[OK]    El primer cliente retiene la franja A y el servidor lo confirma\n[OK]    Aviso \"franja A en proceso de reserva\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 421 ms)\n[OK]    99 retenciones simultáneas de la franja B: 1 aceptada, 98 rechazadas con FRANJA_RETENIDA\n[OK]    Aviso \"franja B en proceso de reserva\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 308 ms)\n[OK]    99 reservas simultáneas de la franja B: 1 creada (201), 98 rechazadas (409)\n[OK]    En la base quedó 1 reserva para la franja B (sin duplicados)\n[OK]    Aviso \"franja B reservada\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 310 ms)\n[OK]    Aviso \"franja A liberada\" al salir el usuario: 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 415 ms)\n9/9 verificaciones correctas"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T18:38:52.464Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Alta",
+      "grupo": "Docker",
+      "id": "SD-15",
+      "hu": "US-20",
+      "ca": [
+        1,
+        3,
+        4
+      ],
+      "titulo": "Análisis estático del workflow de CI/CD (ci-cd.yml)",
+      "objetivo": "Verificar la estructura del pipeline: jobs, dependencias, condición de despliegue y manejo de secretos.",
+      "pasos": [
+        "Cargar .github/workflows/ci-cd.yml.",
+        "Revisar jobs, \"needs\", la condición \"if\" del despliegue y el origen de los secretos.",
+        "Confirmar que no hay archivos .env versionados."
+      ],
+      "esperado": "Jobs backend, frontend, docker y deploy-local; el despliegue solo corre en push a sprint_4 con runner self-hosted; los secretos vienen de \"secrets.*\"; no hay .env en el repositorio.",
+      "estado": "APROBADA",
+      "duracionMs": 94,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Define los 4 jobs: backend, frontend, docker y deploy-local → backend, frontend, docker, deploy-local"
+        },
+        {
+          "ok": true,
+          "texto": "Se dispara en pull_request y en push"
+        },
+        {
+          "ok": true,
+          "texto": "El job docker espera a backend y frontend → [\"backend\",\"frontend\"]"
+        },
+        {
+          "ok": true,
+          "texto": "El despliegue espera al job docker"
+        },
+        {
+          "ok": true,
+          "texto": "El despliegue solo corre en push a sprint_4 (nunca en pull_request) → github.event_name == 'push' && github.ref == 'refs/heads/sprint_4'"
+        },
+        {
+          "ok": true,
+          "texto": "El despliegue usa el runner self-hosted"
+        },
+        {
+          "ok": true,
+          "texto": "JWT_SECRET y POSTGRES_PASSWORD se leen de secretos de GitHub"
+        },
+        {
+          "ok": true,
+          "texto": "Las acciones usan v5 (runtime Node 24, sin avisos de obsolescencia) → actions/checkout@v5, actions/setup-node@v5"
+        },
+        {
+          "ok": true,
+          "texto": "No hay archivos .env versionados en el repositorio → ninguno"
+        },
+        {
+          "ok": true,
+          "texto": ".gitignore excluye los archivos .env"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:38:52.559Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Alta",
+      "grupo": "Docker",
+      "id": "SD-16",
+      "hu": "US-20",
+      "ca": [
+        1,
+        3
+      ],
+      "titulo": "Despliegue real mediante el self-hosted runner",
+      "objetivo": "Comprobar que el job de despliegue ya levantó la aplicación en este equipo a través del runner de GitHub Actions.",
+      "pasos": [
+        "Listar los proyectos de Docker Compose.",
+        "Verificar que el proyecto \"canchaya\" fue creado desde el espacio de trabajo del runner.",
+        "Consultar la API y el frontend desplegados."
+      ],
+      "esperado": "Existe el proyecto \"canchaya\" con 3 contenedores, creado desde la carpeta del runner, y responde en 4100 y 8080.",
+      "estado": "APROBADA",
+      "duracionMs": 276,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Existe el proyecto de despliegue \"canchaya\" → running(3)"
+        },
+        {
+          "ok": true,
+          "texto": "Fue creado desde el espacio de trabajo del runner (actions-runner\\_work) → C:\\Windows\\System32\\actions-runner\\_work\\proyecto_informaticocanchaya\\proyecto_informaticocanchaya\\docker-compose.yml"
+        },
+        {
+          "ok": true,
+          "texto": "La API desplegada por el pipeline responde en http://localhost:4100/api/health → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "El frontend desplegado por el pipeline responde en http://localhost:8080 → HTTP 200"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T18:38:52.836Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Media",
+      "grupo": "Docker",
+      "id": "SD-17",
+      "hu": "US-20",
+      "ca": [
+        1,
+        4
+      ],
+      "titulo": "Evidencia de la ejecución del pipeline en GitHub Actions (aportada por el equipo)",
+      "objetivo": "Dejar constancia de la ejecución real del pipeline en GitHub. Esta prueba NO la ejecuta QA localmente: GitHub Actions solo corre en los servidores de GitHub.",
+      "pasos": [
+        "Revisar las capturas aportadas por el equipo del run del pipeline, del runner self-hosted y de los secretos."
+      ],
+      "esperado": "Los jobs Backend, Frontend y Docker en verde; runner conectado y escuchando; secretos JWT_SECRET y POSTGRES_PASSWORD creados.",
+      "estado": "OBSERVACIÓN",
+      "duracionMs": 5,
+      "resultado": [
+        {
+          "ok": "obs",
+          "texto": "Evidencia de terceros: las capturas las aportó el equipo; QA no puede ejecutar GitHub Actions desde este equipo."
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "SD-17-1.png",
+          "leyenda": "Run del pipeline en GitHub Actions: Backend, Frontend y Docker en verde (captura del equipo)"
+        },
+        {
+          "archivo": "SD-17-2.png",
+          "leyenda": "Self-hosted runner conectado: \"Listening for Jobs\" (captura del equipo)"
+        },
+        {
+          "archivo": "SD-17-3.png",
+          "leyenda": "Secretos del repositorio JWT_SECRET y POSTGRES_PASSWORD (captura del equipo)"
+        }
+      ],
+      "ejecutadaEn": "2026-10-11T18:38:52.842Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Alta",
+      "grupo": "Docker",
+      "id": "SD-20",
+      "hu": "US-19",
+      "ca": [
+        4
+      ],
+      "titulo": "Persistencia: los datos sobreviven a \"docker compose down\" y \"up\"",
+      "objetivo": "Verificar que el volumen db-data conserva usuarios y reservas cuando se bajan y suben los contenedores.",
+      "pasos": [
+        "Crear un usuario y una reserva.",
+        "Ejecutar \"docker compose down\" (sin -v) y luego \"up -d --wait\".",
+        "Iniciar sesión con el mismo usuario y consultar sus reservas."
+      ],
+      "esperado": "El usuario y la reserva siguen existiendo tras recrear los contenedores.",
+      "estado": "APROBADA",
+      "duracionMs": 26900,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Se crea la reserva antes del reinicio → HTTP 201"
+        },
+        {
+          "ok": true,
+          "texto": "docker compose down termina sin errores"
+        },
+        {
+          "ok": true,
+          "texto": "docker compose up --wait termina sin errores"
+        },
+        {
+          "ok": true,
+          "texto": "La API vuelve a ser alcanzable desde el equipo anfitrión → 0.5 s después de que Docker la marcó healthy"
+        },
+        {
+          "ok": true,
+          "texto": "Los conteos de usuarios/reservas no cambian → 1/1 → 1/1"
+        },
+        {
+          "ok": true,
+          "texto": "El usuario puede iniciar sesión después del reinicio → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "La reserva sigue en el historial como confirmada"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:08:34.695Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Alta",
+      "grupo": "Docker",
+      "id": "SD-21",
+      "hu": "US-19",
+      "ca": [
+        2
+      ],
+      "titulo": "Recuperación: reinicio del backend",
+      "objetivo": "Medir cuánto tarda el backend en volver a estar disponible tras un reinicio.",
+      "pasos": [
+        "Ejecutar \"docker compose restart backend\".",
+        "Consultar /api/health hasta que responda."
+      ],
+      "esperado": "El backend vuelve a responder en menos de 30 segundos y queda healthy.",
+      "estado": "APROBADA",
+      "duracionMs": 10594,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "El backend vuelve a responder /api/health → 5.8 s"
+        },
+        {
+          "ok": true,
+          "texto": "Se recupera en menos de 30 segundos → 5.8 s"
+        },
+        {
+          "ok": true,
+          "texto": "Queda en estado healthy → healthy"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:08:45.291Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Alta",
+      "grupo": "Docker",
+      "id": "SD-22",
+      "hu": "US-19",
+      "ca": [
+        3,
+        4
+      ],
+      "titulo": "Entorno limpio: \"down -v\" borra los datos y el esquema se recrea solo",
+      "objetivo": "Verificar que eliminar el volumen deja la base vacía y que al volver a levantar el esquema se aplica automáticamente.",
+      "pasos": [
+        "Ejecutar \"docker compose down -v\".",
+        "Ejecutar \"up -d --wait\".",
+        "Contar usuarios y verificar las tablas."
+      ],
+      "esperado": "Base vacía (0 usuarios) con las 7 tablas creadas automáticamente.",
+      "estado": "APROBADA",
+      "duracionMs": 26790,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "docker compose down -v termina sin errores"
+        },
+        {
+          "ok": true,
+          "texto": "El volumen db-data fue eliminado → sin volumen"
+        },
+        {
+          "ok": true,
+          "texto": "El entorno vuelve a levantar desde cero"
+        },
+        {
+          "ok": true,
+          "texto": "La base quedó vacía (0 usuarios)"
+        },
+        {
+          "ok": true,
+          "texto": "El esquema se aplicó automáticamente (7 tablas)"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:09:12.082Z"
+    },
+    {
+      "tipo": "Smoke test",
+      "nivel": "Infraestructura / Docker",
+      "prioridad": "Baja",
+      "grupo": "Docker",
+      "id": "SD-23",
+      "hu": "US-19",
+      "ca": [
+        1
+      ],
+      "titulo": "Limpieza del entorno de pruebas",
+      "objetivo": "Verificar que el entorno de pruebas se elimina por completo sin afectar el despliegue del pipeline (proyecto \"canchaya\").",
+      "pasos": [
+        "Ejecutar \"docker compose -p canchaya-qa down -v\".",
+        "Verificar que el proyecto de despliegue sigue activo."
+      ],
+      "esperado": "No quedan contenedores ni volúmenes de canchaya-qa; el proyecto \"canchaya\" sigue corriendo.",
+      "estado": "APROBADA",
+      "duracionMs": 6334,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "down -v --rmi local termina sin errores"
+        },
+        {
+          "ok": true,
+          "texto": "No quedan contenedores de canchaya-qa"
+        },
+        {
+          "ok": true,
+          "texto": "El despliegue del pipeline (proyecto canchaya) sigue sano → Up 41 minutes (healthy)"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-11T19:09:18.417Z"
+    }
+  ]
+}
