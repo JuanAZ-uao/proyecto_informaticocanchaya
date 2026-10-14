@@ -1,8 +1,24 @@
+# Dependencias y artefactos de compilación
 node_modules/
 dist/
+build/
+coverage/
+
+# Variables de entorno: nunca se versionan (usar .env.example)
 .env
+.env.*
+!.env.example
+
+# Registros
 npm-debug.log*
 *.log
+
+# Sistema operativo y editores
+.DS_Store
+Thumbs.db
+.idea/
+
+# SonarQube
 .scannerwork/
 report-task.txt
 .sonar_lock

@@ -38,6 +38,7 @@ function aHistorial(fila) {
 
   return {
     id: fila.id,
+    codigo: codigoReserva(fila.id),
     canchaId: fila.cancha_id,
     canchaNombre: fila.cancha_nombre,
     canchaDireccion: fila.cancha_direccion,

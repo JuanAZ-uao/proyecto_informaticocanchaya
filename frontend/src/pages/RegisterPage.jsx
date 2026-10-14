@@ -24,7 +24,7 @@ export default function RegisterPage() {
 
     try {
       await registrarUsuario(form);
-      navigate('/login', { state: { registroExitoso: true } });
+      void navigate('/login', { state: { registroExitoso: true } });
     } catch (err) {
       setError(extraerMensajeError(err, 'No fue posible completar el registro'));
     } finally {

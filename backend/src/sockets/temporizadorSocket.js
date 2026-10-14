@@ -66,8 +66,8 @@ function registrarTemporizadorSocket(io) {
         const socketsEnSala = io.sockets.adapter.rooms.get(sala) || [];
         socketsEnSala.forEach((socketId) => temporizadorService.registrarSocket(usuarioId, canchaId, socketId));
 
-        io.to(sala).emit('temporizador:inicio', { expiresAt: nuevaSesion.expiresAt, estado: nuevaSesion.estado });
-        responder(ack, { expiresAt: nuevaSesion.expiresAt });
+        io.to(sala).emit('temporizador:inicio', { expiresAt: nuevaSesion.expiresAt, estado: nuevaSesion.estado, ahora: Date.now() });
+        responder(ack, { expiresAt: nuevaSesion.expiresAt, ahora: Date.now() });
       } catch (error) {
         responder(ack, { error: aErrorSocket(error) });
       }
@@ -108,14 +108,14 @@ function registrarTemporizadorSocket(io) {
     try {
       const sesion = await temporizadorService.iniciarOTomarSesion(usuarioId, canchaId);
       temporizadorService.registrarSocket(usuarioId, canchaId, socket.id);
-      socket.emit('temporizador:inicio', { expiresAt: sesion.expiresAt, estado: sesion.estado });
+      socket.emit('temporizador:inicio', { expiresAt: sesion.expiresAt, estado: sesion.estado, ahora: Date.now() });
     } catch (error) {
       socket.emit('temporizador:error', aErrorSocket(error));
     }
   });
 
   temporizadorService.eventos.on('sync', ({ key, expiresAt }) => {
-    io.to(`temporizador:${key}`).emit('temporizador:sync', { expiresAt });
+    io.to(`temporizador:${key}`).emit('temporizador:sync', { expiresAt, ahora: Date.now() });
   });
 
   temporizadorService.eventos.on('expirado', ({ key }) => {

@@ -1,9 +1,11 @@
 jest.mock('../src/repositories/retencionRepository');
 jest.mock('../src/repositories/reservaRepository');
+jest.mock('../src/repositories/horarioRepository');
 jest.mock('../src/repositories/sesionReservaRepository');
 
 const retencionRepository = require('../src/repositories/retencionRepository');
 const reservaRepository = require('../src/repositories/reservaRepository');
+const horarioRepository = require('../src/repositories/horarioRepository');
 const temporizadorService = require('../src/services/temporizadorReservaService');
 const retencionService = require('../src/services/retencionService');
 
@@ -27,6 +29,7 @@ describe('retencionService (US-18)', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    horarioRepository.listarPorCancha.mockResolvedValue([0, 1, 2, 3, 4, 5, 6].map((diaSemana) => ({ diaSemana, horaInicio: '06:00:00', horaFin: '22:00:00' })));
     reservaRepository.existeConfirmada.mockResolvedValue(false);
     retencionRepository.liberarDeUsuario.mockResolvedValue(null);
     retencionRepository.obtenerVigentePorFranja.mockResolvedValue(null);
@@ -104,6 +107,19 @@ describe('retencionService (US-18)', () => {
     await expect(retencionService.retenerFranja(USUARIO, 'otra-cancha', FRANJA)).rejects.toMatchObject({
       codigo: 'SESION_EXPIRADA',
     });
+  });
+
+  it('DEF-09: un payload nulo o que no es un objeto responde DATOS_INVALIDOS (no un error interno)', async () => {
+    for (const franja of [null, undefined, 'texto', 42]) {
+      await expect(retencionService.retenerFranja(USUARIO, CANCHA, franja)).rejects.toMatchObject({ codigo: 'DATOS_INVALIDOS' });
+    }
+  });
+
+  it('DEF-03: rechaza con FUERA_DE_HORARIO una franja que la cancha no atiende', async () => {
+    await expect(
+      retencionService.retenerFranja(USUARIO, CANCHA, { fecha: '2099-06-01', horaInicio: '03:00', horaFin: '04:00' })
+    ).rejects.toMatchObject({ statusCode: 400, codigo: 'FUERA_DE_HORARIO' });
+    expect(retencionRepository.retener).not.toHaveBeenCalled();
   });
 
   it('rechaza con HORA_PASADA o DATOS_INVALIDOS ante franjas no válidas', async () => {

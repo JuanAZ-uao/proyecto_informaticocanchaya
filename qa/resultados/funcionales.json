@@ -1,8 +1,8 @@
 {
   "clave": "funcionales",
   "titulo": "Pruebas funcionales (API REST y Socket.IO)",
-  "inicio": "2026-10-11T19:47:41.419Z",
-  "fin": "2026-10-11T19:50:57.717Z",
+  "inicio": "2026-10-14T05:52:57.625Z",
+  "fin": "2026-10-14T05:56:44.694Z",
   "casos": [
     {
       "tipo": "Funcional",
@@ -23,7 +23,7 @@
       ],
       "esperado": "201 Created con mensaje \"Cuenta creada correctamente\" y el usuario (id, nombre, correo) sin contraseña ni hash.",
       "estado": "APROBADA",
-      "duracionMs": 332,
+      "duracionMs": 520,
       "resultado": [
         {
           "ok": true,
@@ -43,7 +43,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:47:42.648Z"
+      "ejecutadaEn": "2026-10-14T05:52:59.648Z"
     },
     {
       "tipo": "Funcional",
@@ -65,7 +65,7 @@
       ],
       "esperado": "409 Conflict con el mensaje \"El correo ya está registrado\"; solo existe 1 fila con ese correo.",
       "estado": "APROBADA",
-      "duracionMs": 962,
+      "duracionMs": 2118,
       "resultado": [
         {
           "ok": true,
@@ -81,7 +81,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:47:43.612Z"
+      "ejecutadaEn": "2026-10-14T05:53:01.772Z"
     },
     {
       "tipo": "Funcional",
@@ -103,7 +103,7 @@
       ],
       "esperado": "Cada intento responde 400 con \"Error de validación\" y la lista de campos con su mensaje; no se crea ningún usuario.",
       "estado": "APROBADA",
-      "duracionMs": 402,
+      "duracionMs": 773,
       "resultado": [
         {
           "ok": true,
@@ -127,7 +127,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:47:44.015Z"
+      "ejecutadaEn": "2026-10-14T05:53:02.545Z"
     },
     {
       "tipo": "Funcional",
@@ -147,7 +147,7 @@
       ],
       "esperado": "El valor es un hash bcrypt ($2a/$2b, 60 caracteres) distinto de la contraseña ingresada.",
       "estado": "APROBADA",
-      "duracionMs": 848,
+      "duracionMs": 881,
       "resultado": [
         {
           "ok": true,
@@ -159,7 +159,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:47:44.863Z"
+      "ejecutadaEn": "2026-10-14T05:53:03.427Z"
     },
     {
       "tipo": "Funcional",
@@ -179,7 +179,7 @@
       ],
       "esperado": "200 con token JWT (sub = id del usuario, con expiración) y usuario {id, nombre, correo}.",
       "estado": "APROBADA",
-      "duracionMs": 139,
+      "duracionMs": 185,
       "resultado": [
         {
           "ok": true,
@@ -195,7 +195,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:47:45.002Z"
+      "ejecutadaEn": "2026-10-14T05:53:03.612Z"
     },
     {
       "tipo": "Funcional",
@@ -216,7 +216,7 @@
       ],
       "esperado": "Ambas responden 401 con exactamente el mismo mensaje \"Correo o contraseña incorrectos\".",
       "estado": "APROBADA",
-      "duracionMs": 131,
+      "duracionMs": 189,
       "resultado": [
         {
           "ok": true,
@@ -232,7 +232,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:47:45.134Z"
+      "ejecutadaEn": "2026-10-14T05:53:03.801Z"
     },
     {
       "tipo": "Funcional",
@@ -255,7 +255,7 @@
       ],
       "esperado": "200 con token válido; 401 en los otros tres casos, con mensaje claro.",
       "estado": "APROBADA",
-      "duracionMs": 12,
+      "duracionMs": 25,
       "resultado": [
         {
           "ok": true,
@@ -275,7 +275,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:47:45.147Z"
+      "ejecutadaEn": "2026-10-14T05:53:03.827Z"
     },
     {
       "tipo": "Funcional",
@@ -299,7 +299,7 @@
       ],
       "esperado": "200 con el mismo mensaje neutro en ambos casos; solo el correo registrado genera un enlace con token en el log.",
       "estado": "APROBADA",
-      "duracionMs": 4539,
+      "duracionMs": 3168,
       "resultado": [
         {
           "ok": true,
@@ -327,7 +327,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:47:49.686Z"
+      "ejecutadaEn": "2026-10-14T05:53:06.995Z"
     },
     {
       "tipo": "Funcional",
@@ -352,7 +352,7 @@
       ],
       "esperado": "400 con la contraseña débil; 200 con la válida; login OK solo con la nueva; 400 al reutilizar el enlace y con un token inventado.",
       "estado": "APROBADA",
-      "duracionMs": 2538,
+      "duracionMs": 1921,
       "resultado": [
         {
           "ok": true,
@@ -384,7 +384,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:47:52.225Z"
+      "ejecutadaEn": "2026-10-14T05:53:08.917Z"
     },
     {
       "tipo": "Funcional",
@@ -406,7 +406,7 @@
       ],
       "esperado": "El primer token se rechaza (400); el segundo, ya vencido, también se rechaza (400).",
       "estado": "APROBADA",
-      "duracionMs": 6134,
+      "duracionMs": 3046,
       "resultado": [
         {
           "ok": true,
@@ -422,7 +422,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:47:58.360Z"
+      "ejecutadaEn": "2026-10-14T05:53:11.964Z"
     },
     {
       "tipo": "Funcional",
@@ -458,7 +458,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:47:58.368Z"
+      "ejecutadaEn": "2026-10-14T05:53:11.971Z"
     },
     {
       "tipo": "Funcional",
@@ -477,7 +477,7 @@
       ],
       "esperado": "401 \"No autenticado\".",
       "estado": "APROBADA",
-      "duracionMs": 6,
+      "duracionMs": 2,
       "resultado": [
         {
           "ok": true,
@@ -485,7 +485,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:47:58.375Z"
+      "ejecutadaEn": "2026-10-14T05:53:11.973Z"
     },
     {
       "tipo": "Funcional",
@@ -505,7 +505,7 @@
       ],
       "esperado": "200 con nombre, dirección, zona, costo, descripción, servicios y horarios por día (diaSemana 0-6, horaInicio < horaFin).",
       "estado": "APROBADA",
-      "duracionMs": 9,
+      "duracionMs": 5,
       "resultado": [
         {
           "ok": true,
@@ -525,7 +525,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:47:58.385Z"
+      "ejecutadaEn": "2026-10-14T05:53:11.979Z"
     },
     {
       "tipo": "Funcional",
@@ -547,7 +547,7 @@
       ],
       "esperado": "401, 400 y 404 respectivamente, con mensajes claros.",
       "estado": "APROBADA",
-      "duracionMs": 21,
+      "duracionMs": 8,
       "resultado": [
         {
           "ok": true,
@@ -563,7 +563,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:47:58.407Z"
+      "ejecutadaEn": "2026-10-14T05:53:11.988Z"
     },
     {
       "tipo": "Funcional",
@@ -588,7 +588,7 @@
       ],
       "esperado": "Cada filtro devuelve solo las canchas que lo cumplen; sin coincidencias → 200 con lista vacía.",
       "estado": "APROBADA",
-      "duracionMs": 53,
+      "duracionMs": 42,
       "resultado": [
         {
           "ok": true,
@@ -612,7 +612,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:47:58.461Z"
+      "ejecutadaEn": "2026-10-14T05:53:12.031Z"
     },
     {
       "tipo": "Funcional",
@@ -634,7 +634,7 @@
       ],
       "esperado": "Cada petición responde 400 con el campo y el motivo.",
       "estado": "APROBADA",
-      "duracionMs": 12,
+      "duracionMs": 45,
       "resultado": [
         {
           "ok": true,
@@ -654,7 +654,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:47:58.475Z"
+      "ejecutadaEn": "2026-10-14T05:53:12.076Z"
     },
     {
       "tipo": "Funcional",
@@ -684,7 +684,7 @@
       ],
       "esperado": "La cancha sin horario ese día no aparece; las demás sí.",
       "estado": "APROBADA",
-      "duracionMs": 3088,
+      "duracionMs": 2203,
       "resultado": [
         {
           "ok": true,
@@ -704,7 +704,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:01.564Z"
+      "ejecutadaEn": "2026-10-14T05:53:14.280Z"
     },
     {
       "tipo": "Funcional",
@@ -726,7 +726,7 @@
       ],
       "esperado": "Antes: lista vacía. Después: la franja 10:00–11:00 aparece como ocupada. Otra fecha: sigue vacía.",
       "estado": "APROBADA",
-      "duracionMs": 65,
+      "duracionMs": 108,
       "resultado": [
         {
           "ok": true,
@@ -746,7 +746,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:01.632Z"
+      "ejecutadaEn": "2026-10-14T05:53:14.389Z"
     },
     {
       "tipo": "Funcional",
@@ -766,7 +766,7 @@
       ],
       "esperado": "409 Conflict con el mensaje \"El horario ya no está disponible\"; no se crea una segunda reserva.",
       "estado": "APROBADA",
-      "duracionMs": 1285,
+      "duracionMs": 719,
       "resultado": [
         {
           "ok": true,
@@ -786,7 +786,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:02.918Z"
+      "ejecutadaEn": "2026-10-14T05:53:15.109Z"
     },
     {
       "tipo": "Funcional",
@@ -817,7 +817,7 @@
       ],
       "esperado": "Cancelar responde 200 con estado \"cancelada\"; la franja deja de aparecer ocupada; B obtiene 201; en la base quedan 1 cancelada y 1 confirmada.",
       "estado": "APROBADA",
-      "duracionMs": 874,
+      "duracionMs": 624,
       "resultado": [
         {
           "ok": true,
@@ -837,7 +837,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:03.795Z"
+      "ejecutadaEn": "2026-10-14T05:53:15.734Z"
     },
     {
       "tipo": "Funcional",
@@ -858,7 +858,7 @@
       ],
       "esperado": "Las tres peticiones responden 400 con \"No se pueden reservar fechas u horas pasadas\".",
       "estado": "APROBADA",
-      "duracionMs": 712,
+      "duracionMs": 943,
       "resultado": [
         {
           "ok": true,
@@ -878,7 +878,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:04.511Z"
+      "ejecutadaEn": "2026-10-14T05:53:16.678Z"
     },
     {
       "tipo": "Funcional",
@@ -909,7 +909,7 @@
       ],
       "esperado": "401 en todos los casos.",
       "estado": "APROBADA",
-      "duracionMs": 82,
+      "duracionMs": 115,
       "resultado": [
         {
           "ok": true,
@@ -929,7 +929,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:04.594Z"
+      "ejecutadaEn": "2026-10-14T05:53:16.794Z"
     },
     {
       "tipo": "Funcional",
@@ -952,7 +952,7 @@
       ],
       "esperado": "400 con el detalle del campo en cada caso de datos; 404 \"Cancha no encontrada\" para el UUID inexistente.",
       "estado": "APROBADA",
-      "duracionMs": 49,
+      "duracionMs": 44,
       "resultado": [
         {
           "ok": true,
@@ -992,7 +992,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:04.646Z"
+      "ejecutadaEn": "2026-10-14T05:53:16.839Z"
     },
     {
       "tipo": "Funcional",
@@ -1013,7 +1013,7 @@
       ],
       "esperado": "El backend debe rechazarla (400 o 409) porque la cancha no atiende a esa hora.",
       "estado": "APROBADA",
-      "duracionMs": 1141,
+      "duracionMs": 836,
       "resultado": [
         {
           "ok": null,
@@ -1033,7 +1033,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:05.787Z"
+      "ejecutadaEn": "2026-10-14T05:53:17.675Z"
     },
     {
       "tipo": "Funcional",
@@ -1066,7 +1066,7 @@
       ],
       "esperado": "Los dos intentos por la API se rechazan (400 o 409); el INSERT directo falla por la restricción de exclusión (ex_reservas_sin_solape); queda una sola reserva.",
       "estado": "APROBADA",
-      "duracionMs": 1653,
+      "duracionMs": 1325,
       "resultado": [
         {
           "ok": true,
@@ -1090,7 +1090,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:07.441Z"
+      "ejecutadaEn": "2026-10-14T05:53:19.001Z"
     },
     {
       "tipo": "Funcional",
@@ -1112,7 +1112,7 @@
       ],
       "esperado": "403 al cancelar una reserva ajena; 404 si no existe; 400 con id mal formado; 409 al cancelar una ya cancelada.",
       "estado": "APROBADA",
-      "duracionMs": 744,
+      "duracionMs": 653,
       "resultado": [
         {
           "ok": true,
@@ -1140,7 +1140,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:08.186Z"
+      "ejecutadaEn": "2026-10-14T05:53:19.655Z"
     },
     {
       "tipo": "Funcional",
@@ -1161,7 +1161,7 @@
       ],
       "esperado": "El INSERT confirmado falla con \"unique constraint uq_reservas_confirmada_cancha_fecha_hora\"; el INSERT cancelado sí se permite (índice parcial).",
       "estado": "APROBADA",
-      "duracionMs": 2890,
+      "duracionMs": 2604,
       "resultado": [
         {
           "ok": true,
@@ -1178,7 +1178,7 @@
           "texto": "CREATE UNIQUE INDEX uq_reservas_confirmada_cancha_fecha_hora ON public.reservas USING btree (cancha_id, fecha, hora_inicio) WHERE (estado = 'confirmada'::text)"
         }
       ],
-      "ejecutadaEn": "2026-10-11T19:48:11.079Z"
+      "ejecutadaEn": "2026-10-14T05:53:22.260Z"
     },
     {
       "tipo": "Funcional",
@@ -1200,7 +1200,7 @@
       ],
       "esperado": "Un 201 y un 409 con \"El horario ya no está disponible\", sin textos técnicos; una sola fila en la base. Se repite 5 veces con franjas distintas.",
       "estado": "APROBADA",
-      "duracionMs": 4742,
+      "duracionMs": 10008,
       "resultado": [
         {
           "ok": true,
@@ -1220,7 +1220,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:15.824Z"
+      "ejecutadaEn": "2026-10-14T05:53:32.269Z"
     },
     {
       "tipo": "Funcional",
@@ -1249,7 +1249,7 @@
       ],
       "esperado": "Una sola reserva creada (201); los demás envíos responden 409; una sola fila en la base.",
       "estado": "APROBADA",
-      "duracionMs": 914,
+      "duracionMs": 593,
       "resultado": [
         {
           "ok": true,
@@ -1265,7 +1265,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:16.739Z"
+      "ejecutadaEn": "2026-10-14T05:53:32.863Z"
     },
     {
       "tipo": "Funcional",
@@ -1288,7 +1288,7 @@
       ],
       "esperado": "Exactamente 1 respuesta 201 y 24 respuestas 409; 1 sola fila para la franja y ninguna fila parcial.",
       "estado": "APROBADA",
-      "duracionMs": 12760,
+      "duracionMs": 9159,
       "resultado": [
         {
           "ok": true,
@@ -1312,7 +1312,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:29.500Z"
+      "ejecutadaEn": "2026-10-14T05:53:42.023Z"
     },
     {
       "tipo": "Funcional",
@@ -1333,7 +1333,7 @@
       ],
       "esperado": "El total de filas crece solo en 1 (la reserva ganadora).",
       "estado": "APROBADA",
-      "duracionMs": 2755,
+      "duracionMs": 2546,
       "resultado": [
         {
           "ok": true,
@@ -1345,7 +1345,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:32.257Z"
+      "ejecutadaEn": "2026-10-14T05:53:44.570Z"
     },
     {
       "tipo": "Funcional",
@@ -1365,7 +1365,7 @@
       ],
       "esperado": "La reserva queda asociada al usuario del token; el usuarioId del cuerpo se ignora.",
       "estado": "APROBADA",
-      "duracionMs": 984,
+      "duracionMs": 1005,
       "resultado": [
         {
           "ok": true,
@@ -1381,7 +1381,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:33.243Z"
+      "ejecutadaEn": "2026-10-14T05:53:45.576Z"
     },
     {
       "tipo": "Funcional",
@@ -1402,7 +1402,7 @@
       ],
       "esperado": "201 con reserva {id, codigo CY-XXXXXXXX, cancha{id,nombre,direccion}, fecha, horaInicio, horaFin, estado \"confirmada\"}; en la base estado = confirmada.",
       "estado": "APROBADA",
-      "duracionMs": 866,
+      "duracionMs": 735,
       "resultado": [
         {
           "ok": true,
@@ -1410,7 +1410,7 @@
         },
         {
           "ok": true,
-          "texto": "Incluye identificador (UUID) y código legible CY-XXXXXXXX → 87f8f756… / CY-87F8F756"
+          "texto": "Incluye identificador (UUID) y código legible CY-XXXXXXXX → 4a529074… / CY-4A529074"
         },
         {
           "ok": true,
@@ -1418,7 +1418,7 @@
         },
         {
           "ok": true,
-          "texto": "Incluye fecha y hora → 2100-11-07 10:00:00–11:00:00"
+          "texto": "Incluye fecha y hora → 2101-10-06 10:00:00–11:00:00"
         },
         {
           "ok": true,
@@ -1430,7 +1430,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:34.110Z"
+      "ejecutadaEn": "2026-10-14T05:53:46.312Z"
     },
     {
       "tipo": "Funcional",
@@ -1450,7 +1450,7 @@
       ],
       "esperado": "Ninguna respuesta de error incluye \"reserva\"; todas traen \"mensaje\" claro sin detalles técnicos.",
       "estado": "APROBADA",
-      "duracionMs": 65,
+      "duracionMs": 49,
       "resultado": [
         {
           "ok": true,
@@ -1470,7 +1470,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:34.177Z"
+      "ejecutadaEn": "2026-10-14T05:53:46.362Z"
     },
     {
       "tipo": "Funcional",
@@ -1490,23 +1490,23 @@
       ],
       "esperado": "Todas las confirmaciones responden en menos de 2000 ms (objetivo del criterio); p95 por debajo de 1000 ms.",
       "estado": "APROBADA",
-      "duracionMs": 741,
+      "duracionMs": 648,
       "resultado": [
         {
           "ok": true,
-          "texto": "El máximo es menor a 2000 ms → 38 ms"
+          "texto": "El máximo es menor a 2000 ms → 36 ms"
         },
         {
           "ok": true,
-          "texto": "El p95 es menor a 1000 ms → 38 ms"
+          "texto": "El p95 es menor a 1000 ms → 36 ms"
         },
         {
           "ok": null,
-          "texto": "15 confirmaciones · promedio 22 ms · mediana 19 ms · mínimo 13 ms · máximo 38 ms"
+          "texto": "15 confirmaciones · promedio 20 ms · mediana 19 ms · mínimo 10 ms · máximo 36 ms"
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:34.920Z"
+      "ejecutadaEn": "2026-10-14T05:53:47.011Z"
     },
     {
       "tipo": "Funcional",
@@ -1528,7 +1528,7 @@
       ],
       "esperado": "A ve ambas, ordenadas de la más reciente a la más antigua, con código, cancha, fecha, hora y estado; B ve lista vacía; la cancelada aparece como \"cancelada\".",
       "estado": "APROBADA",
-      "duracionMs": 961,
+      "duracionMs": 914,
       "resultado": [
         {
           "ok": true,
@@ -1540,7 +1540,7 @@
         },
         {
           "ok": true,
-          "texto": "Cada ítem trae código, cancha y estado \"confirmada\" → CY-2BD273D2 · Cancha El Bosque"
+          "texto": "Cada ítem trae código, cancha y estado \"confirmada\" → CY-C49BBC14 · Cancha El Bosque"
         },
         {
           "ok": true,
@@ -1552,7 +1552,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:35.882Z"
+      "ejecutadaEn": "2026-10-14T05:53:47.926Z"
     },
     {
       "tipo": "Funcional",
@@ -1575,7 +1575,7 @@
       "esperado": "Aparece \"[EMAIL] … Confirmación de reserva\" con el mismo resumen. (El caso de fallo del correo se verifica con la prueba unitaria \"si el correo falla, la reserva igual queda confirmada\".)",
       "notaQA": "No se probó el envío contra un servidor SMTP real porque no hay credenciales configuradas; solo el modo simulado y la prueba unitaria del fallo.",
       "estado": "OBSERVACIÓN",
-      "duracionMs": 1815,
+      "duracionMs": 1956,
       "resultado": [
         {
           "ok": true,
@@ -1583,7 +1583,7 @@
         },
         {
           "ok": true,
-          "texto": "El log contiene el correo de confirmación de esa reserva → [EMAIL] SMTP no configurado. Confirmación de reserva (modo desarrollo) para mail.1791748115883.39@qa.local: CY-47B2ABC9 · Cancha Los Cerros · 2101-02-27 13:00 - 14:00"
+          "texto": "El log contiene el correo de confirmación de esa reserva → [EMAIL] SMTP no configurado. Confirmación de reserva (modo desarrollo) para mail.1791957227927.39@qa.local: CY-CFBE8086 · Cancha Los Cerros · 2101-05-02 13:00 - 14:00"
         },
         {
           "ok": true,
@@ -1595,7 +1595,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:37.698Z"
+      "ejecutadaEn": "2026-10-14T05:53:49.883Z"
     },
     {
       "tipo": "Funcional",
@@ -1626,7 +1626,7 @@
       ],
       "esperado": "Después de confirmar no llegan más eventos temporizador:sync y la sesión queda en estado \"completado\".",
       "estado": "APROBADA",
-      "duracionMs": 13598,
+      "duracionMs": 13566,
       "resultado": [
         {
           "ok": true,
@@ -1650,7 +1650,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:51.297Z"
+      "ejecutadaEn": "2026-10-14T05:54:03.450Z"
     },
     {
       "tipo": "Funcional",
@@ -1673,7 +1673,7 @@
       ],
       "esperado": "Las 4 primeras conexiones fallan con \"No autenticado\" o \"Token inválido o expirado\"; la última se acepta.",
       "estado": "APROBADA",
-      "duracionMs": 73,
+      "duracionMs": 139,
       "resultado": [
         {
           "ok": true,
@@ -1697,7 +1697,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:51.373Z"
+      "ejecutadaEn": "2026-10-14T05:54:03.590Z"
     },
     {
       "tipo": "Funcional",
@@ -1719,7 +1719,7 @@
       ],
       "esperado": "temporizador:inicio con expiresAt ≈ ahora + 180 s y estado \"activo\". Sin canchaId: evento temporizador:error y desconexión.",
       "estado": "APROBADA",
-      "duracionMs": 1565,
+      "duracionMs": 2407,
       "resultado": [
         {
           "ok": true,
@@ -1727,7 +1727,7 @@
         },
         {
           "ok": true,
-          "texto": "expiresAt corresponde a 180 s desde el inicio → 180.0 s restantes (25 ms tras conectar)"
+          "texto": "expiresAt corresponde a 180 s desde el inicio → 179.9 s restantes (66 ms tras conectar)"
         },
         {
           "ok": true,
@@ -1743,7 +1743,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:48:52.941Z"
+      "ejecutadaEn": "2026-10-14T05:54:05.999Z"
     },
     {
       "tipo": "Funcional",
@@ -1763,7 +1763,7 @@
       ],
       "esperado": "Al menos 3 eventos separados por 5 s (±0,5 s), todos con el mismo expiresAt del inicio.",
       "estado": "APROBADA",
-      "duracionMs": 17389,
+      "duracionMs": 17326,
       "resultado": [
         {
           "ok": true,
@@ -1779,7 +1779,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:49:10.332Z"
+      "ejecutadaEn": "2026-10-14T05:54:23.342Z"
     },
     {
       "tipo": "Funcional",
@@ -1802,7 +1802,7 @@
       ],
       "esperado": "200 {estado:\"completado\"}; no llegan más temporizador:sync; la sesión queda \"completado\" en la base; el reingreso también responde 200.",
       "estado": "APROBADA",
-      "duracionMs": 7836,
+      "duracionMs": 8570,
       "resultado": [
         {
           "ok": true,
@@ -1822,7 +1822,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:49:18.171Z"
+      "ejecutadaEn": "2026-10-14T05:54:31.942Z"
     },
     {
       "tipo": "Funcional",
@@ -1841,7 +1841,7 @@
       ],
       "esperado": "409 con \"Tu tiempo para reservar expiró…\" y código SESION_EXPIRADA.",
       "estado": "APROBADA",
-      "duracionMs": 216,
+      "duracionMs": 317,
       "resultado": [
         {
           "ok": true,
@@ -1853,7 +1853,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:49:18.388Z"
+      "ejecutadaEn": "2026-10-14T05:54:32.261Z"
     },
     {
       "tipo": "Funcional",
@@ -1875,11 +1875,11 @@
       ],
       "esperado": "Las dos primeras comparten el mismo expiresAt; la de otra cancha tiene uno distinto; hay 2 filas de sesión.",
       "estado": "APROBADA",
-      "duracionMs": 4524,
+      "duracionMs": 4128,
       "resultado": [
         {
           "ok": true,
-          "texto": "La segunda pestaña recibe el mismo expiresAt → 1791748338622 = 1791748338622"
+          "texto": "La segunda pestaña recibe el mismo expiresAt → 1791957452565 = 1791957452565"
         },
         {
           "ok": true,
@@ -1891,7 +1891,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:49:22.913Z"
+      "ejecutadaEn": "2026-10-14T05:54:36.391Z"
     },
     {
       "tipo": "Funcional",
@@ -1913,7 +1913,7 @@
       ],
       "esperado": "Con una pestaña abierta la sesión sigue; al cerrar la última, durante los primeros segundos aún existe (gracia) y pasados ~10 s se elimina de la base; al volver a entrar se crea una sesión nueva de 180 s.",
       "estado": "APROBADA",
-      "duracionMs": 15452,
+      "duracionMs": 16072,
       "resultado": [
         {
           "ok": true,
@@ -1937,7 +1937,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:49:38.366Z"
+      "ejecutadaEn": "2026-10-14T05:54:52.465Z"
     },
     {
       "tipo": "Funcional",
@@ -1961,11 +1961,11 @@
       ],
       "esperado": "El expiresAt recibido al reconectar es el mismo que antes del corte (se recupera el tiempo restante).",
       "estado": "APROBADA",
-      "duracionMs": 13884,
+      "duracionMs": 13977,
       "resultado": [
         {
           "ok": true,
-          "texto": "Al reconectar se recupera el mismo expiresAt → antes 19:52:38.638 · después 19:52:38.638 (diferencia 0.0 s)"
+          "texto": "Al reconectar se recupera el mismo expiresAt → antes 05:57:52.779 · después 05:57:52.779 (diferencia 0.0 s)"
         },
         {
           "ok": true,
@@ -1973,7 +1973,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:49:52.251Z"
+      "ejecutadaEn": "2026-10-14T05:55:06.443Z"
     },
     {
       "tipo": "Funcional",
@@ -1995,15 +1995,15 @@
       ],
       "esperado": "Ambos eventos traen \"ahora\" (milisegundos) con una diferencia menor a 2 s respecto de la hora actual del equipo de pruebas.",
       "estado": "APROBADA",
-      "duracionMs": 5558,
+      "duracionMs": 5915,
       "resultado": [
         {
           "ok": true,
-          "texto": "temporizador:inicio incluye \"ahora\" → diferencia 1 ms"
+          "texto": "temporizador:inicio incluye \"ahora\" → diferencia -1 ms"
         },
         {
           "ok": true,
-          "texto": "temporizador:sync incluye \"ahora\" → diferencia 1 ms"
+          "texto": "temporizador:sync incluye \"ahora\" → diferencia -37 ms"
         },
         {
           "ok": true,
@@ -2011,7 +2011,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:49:57.812Z"
+      "ejecutadaEn": "2026-10-14T05:55:12.359Z"
     },
     {
       "tipo": "Funcional",
@@ -2032,11 +2032,11 @@
       ],
       "esperado": "El ack trae un nuevo expiresAt (≈ +180 s desde el reinicio) y ambas pestañas reciben temporizador:inicio con ese valor.",
       "estado": "APROBADA",
-      "duracionMs": 5305,
+      "duracionMs": 6624,
       "resultado": [
         {
           "ok": true,
-          "texto": "El ack trae un expiresAt posterior al original → +4.0 s"
+          "texto": "El ack trae un expiresAt posterior al original → +4.1 s"
         },
         {
           "ok": true,
@@ -2048,7 +2048,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:50:03.118Z"
+      "ejecutadaEn": "2026-10-14T05:55:18.984Z"
     },
     {
       "tipo": "Funcional",
@@ -2071,11 +2071,11 @@
       ],
       "esperado": "A recibe ack {ok:true} y retencion:confirmada con expiresAt = vencimiento de su sesión. B recibe disponibilidad:retenida con la franja (sin identificar a A). A no recibe disponibilidad:retenida de su propia retención. Hay 1 fila en retenciones.",
       "estado": "APROBADA",
-      "duracionMs": 1069,
+      "duracionMs": 1568,
       "resultado": [
         {
           "ok": true,
-          "texto": "A recibe el ack {ok:true} con la retención → {\"ok\":true,\"retencion\":{\"fecha\":\"2102-04-18\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\",\"expiresAt\":1791748383684}}"
+          "texto": "A recibe el ack {ok:true} con la retención → {\"ok\":true,\"retencion\":{\"fecha\":\"2101-03-05\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\",\"expiresAt\":1791957499784}}"
         },
         {
           "ok": true,
@@ -2091,7 +2091,7 @@
         },
         {
           "ok": true,
-          "texto": "El aviso solo trae la franja: no revela quién la retiene → {\"canchaId\":\"0d6170dd-773a-475f-b65a-d822dd8f7477\",\"fecha\":\"2102-04-18\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\"}"
+          "texto": "El aviso solo trae la franja: no revela quién la retiene → {\"canchaId\":\"86254261-a2a7-4b77-b058-8fe68a92b2c2\",\"fecha\":\"2101-03-05\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\"}"
         },
         {
           "ok": true,
@@ -2103,7 +2103,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:50:04.189Z"
+      "ejecutadaEn": "2026-10-14T05:55:20.554Z"
     },
     {
       "tipo": "Funcional",
@@ -2126,7 +2126,7 @@
       ],
       "esperado": "B recibe {ok:false, error:{codigo:\"FRANJA_RETENIDA\", mensaje}}; con otra franja sí puede; en la base la franja tiene un único dueño.",
       "estado": "APROBADA",
-      "duracionMs": 1157,
+      "duracionMs": 2085,
       "resultado": [
         {
           "ok": true,
@@ -2146,7 +2146,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:50:05.348Z"
+      "ejecutadaEn": "2026-10-14T05:55:22.640Z"
     },
     {
       "tipo": "Funcional",
@@ -2169,7 +2169,7 @@
       ],
       "esperado": "B recibe disponibilidad:liberada (10:00) y disponibilidad:retenida (11:00); A conserva una sola fila en la base (11:00).",
       "estado": "APROBADA",
-      "duracionMs": 2392,
+      "duracionMs": 3130,
       "resultado": [
         {
           "ok": true,
@@ -2193,7 +2193,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:50:07.742Z"
+      "ejecutadaEn": "2026-10-14T05:55:25.772Z"
     },
     {
       "tipo": "Funcional",
@@ -2214,7 +2214,7 @@
       ],
       "esperado": "Con retencion:liberar B recibe disponibilidad:liberada de inmediato; al salir de la cancha la recibe tras el lapso de gracia (≈ 10 s); en ambos casos la fila desaparece de retenciones.",
       "estado": "APROBADA",
-      "duracionMs": 11969,
+      "duracionMs": 12635,
       "resultado": [
         {
           "ok": true,
@@ -2238,7 +2238,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:50:19.713Z"
+      "ejecutadaEn": "2026-10-14T05:55:38.409Z"
     },
     {
       "tipo": "Funcional",
@@ -2273,7 +2273,7 @@
       ],
       "esperado": "B recibe disponibilidad:reservada (no liberada); la fila de retenciones desaparece; reservas tiene 1 fila \"confirmada\"; B recibe 409.",
       "estado": "APROBADA",
-      "duracionMs": 4282,
+      "duracionMs": 3682,
       "resultado": [
         {
           "ok": true,
@@ -2313,7 +2313,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:50:23.997Z"
+      "ejecutadaEn": "2026-10-14T05:55:42.093Z"
     },
     {
       "tipo": "Funcional",
@@ -2344,7 +2344,7 @@
       ],
       "esperado": "B recibe 409 FRANJA_RETENIDA en ambos; no se crea reserva; /disponibilidad de B incluye la franja en \"retenidos\", la de A no.",
       "estado": "APROBADA",
-      "duracionMs": 1611,
+      "duracionMs": 1406,
       "resultado": [
         {
           "ok": true,
@@ -2360,7 +2360,7 @@
         },
         {
           "ok": true,
-          "texto": "La disponibilidad de B lista la franja como retenida → [{\"canchaId\":\"0d6170dd-773a-475f-b65a-d822dd8f7477\",\"fecha\":\"2102-02-16\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\"}]"
+          "texto": "La disponibilidad de B lista la franja como retenida → [{\"canchaId\":\"86254261-a2a7-4b77-b058-8fe68a92b2c2\",\"fecha\":\"2102-05-08\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\"}]"
         },
         {
           "ok": true,
@@ -2372,7 +2372,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:50:25.609Z"
+      "ejecutadaEn": "2026-10-14T05:55:43.500Z"
     },
     {
       "tipo": "Funcional",
@@ -2393,7 +2393,7 @@
       ],
       "esperado": "B recibe disponibilidad:reservada al confirmar y disponibilidad:liberada al cancelar.",
       "estado": "APROBADA",
-      "duracionMs": 687,
+      "duracionMs": 688,
       "resultado": [
         {
           "ok": true,
@@ -2405,7 +2405,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:50:26.297Z"
+      "ejecutadaEn": "2026-10-14T05:55:44.190Z"
     },
     {
       "tipo": "Funcional",
@@ -2427,7 +2427,7 @@
       ],
       "esperado": "Respuestas {ok:false, error:{codigo}}: DATOS_INVALIDOS, DATOS_INVALIDOS, HORA_PASADA y FRANJA_OCUPADA.",
       "estado": "APROBADA",
-      "duracionMs": 289,
+      "duracionMs": 549,
       "resultado": [
         {
           "ok": true,
@@ -2447,7 +2447,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:50:26.588Z"
+      "ejecutadaEn": "2026-10-14T05:55:44.741Z"
     },
     {
       "tipo": "Funcional",
@@ -2469,7 +2469,7 @@
       ],
       "esperado": "1 respuesta ok y 9 con FRANJA_RETENIDA; 1 fila en retenciones; los 9 perdedores reciben exactamente un aviso disponibilidad:retenida.",
       "estado": "APROBADA",
-      "duracionMs": 5825,
+      "duracionMs": 4867,
       "resultado": [
         {
           "ok": true,
@@ -2485,7 +2485,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:50:32.416Z"
+      "ejecutadaEn": "2026-10-14T05:55:49.610Z"
     },
     {
       "tipo": "Funcional",
@@ -2505,7 +2505,7 @@
       ],
       "esperado": "Todos los eventos (temporizador:*, retencion:*, disponibilidad:*) y códigos de error están documentados, con payload.",
       "estado": "APROBADA",
-      "duracionMs": 2,
+      "duracionMs": 17,
       "resultado": [
         {
           "ok": true,
@@ -2525,7 +2525,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:50:32.432Z"
+      "ejecutadaEn": "2026-10-14T05:55:49.629Z"
     },
     {
       "tipo": "Funcional",
@@ -2576,7 +2576,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:50:45.214Z"
+      "ejecutadaEn": "2026-10-14T05:56:04.018Z"
     },
     {
       "tipo": "Funcional",
@@ -2597,11 +2597,11 @@
       ],
       "esperado": "B recibe disponibilidad:liberada al expirar la sesión de A; la fila de retenciones desaparece.",
       "estado": "APROBADA",
-      "duracionMs": 1,
+      "duracionMs": 0,
       "resultado": [
         {
           "ok": true,
-          "texto": "B recibió disponibilidad:liberada de la franja de A → 0.00 s después del vencimiento"
+          "texto": "B recibió disponibilidad:liberada de la franja de A → 0.11 s después del vencimiento"
         },
         {
           "ok": true,
@@ -2609,7 +2609,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:50:45.217Z"
+      "ejecutadaEn": "2026-10-14T05:56:04.020Z"
     },
     {
       "tipo": "Funcional",
@@ -2641,7 +2641,7 @@
       ],
       "esperado": "Sesión y retención siguen en la base; A recibe el MISMO expiresAt al reconectar; la franja sigue retenida para B (FRANJA_RETENIDA); el temporizador sigue sincronizando y A puede continuar.",
       "estado": "APROBADA",
-      "duracionMs": 12498,
+      "duracionMs": 18664,
       "resultado": [
         {
           "ok": true,
@@ -2653,7 +2653,7 @@
         },
         {
           "ok": true,
-          "texto": "El backend vuelve a responder tras el reinicio → 6.0 s"
+          "texto": "El backend vuelve a responder tras el reinicio → 9.8 s"
         },
         {
           "ok": true,
@@ -2685,7 +2685,624 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:50:57.717Z"
+      "ejecutadaEn": "2026-10-14T05:56:22.686Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-12-01",
+      "hu": "US-12",
+      "ca": [
+        1,
+        5
+      ],
+      "grupo": "US-12",
+      "titulo": "Un usuario tiene varias reservas activas a la vez",
+      "objetivo": "Verificar que un mismo usuario puede reservar en canchas, fechas y horas distintas sin cancelar las anteriores y que todas quedan visibles.",
+      "pasos": [
+        "Crear un usuario nuevo.",
+        "Reservar 3 franjas distintas (2 canchas, 2 fechas).",
+        "Consultar GET /api/reservas/mias y GET /api/reservas."
+      ],
+      "esperado": "Las 3 reservas responden 201; las 3 aparecen como \"confirmada\" en ambos listados; en la base hay 3 filas confirmadas del usuario.",
+      "estado": "APROBADA",
+      "duracionMs": 850,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Las 3 reservas responden 201 → 201, 201, 201"
+        },
+        {
+          "ok": true,
+          "texto": "GET /reservas/mias lista las 3 como \"confirmada\" → 3 reservas"
+        },
+        {
+          "ok": true,
+          "texto": "GET /reservas (historial) informa total = 3 → {\"pagina\":1,\"limite\":50,\"total\":3,\"totalPaginas\":1}"
+        },
+        {
+          "ok": true,
+          "texto": "En la base hay 3 reservas confirmadas del usuario"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-14T05:56:23.537Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-12-02",
+      "hu": "US-12",
+      "hus": [
+        "US-12",
+        "US-09"
+      ],
+      "ca": {
+        "US-12": [
+          2
+        ],
+        "US-09": [
+          2
+        ]
+      },
+      "grupo": "US-12",
+      "titulo": "No se permiten dos reservas del mismo usuario que se solapen (caso de error)",
+      "objetivo": "Verificar que el solape se rechaza aunque sea en otra cancha, que bloques contiguos sí se permiten y que otro usuario no se ve afectado.",
+      "pasos": [
+        "El usuario reserva K0 de 10:00 a 11:00.",
+        "Intenta reservar K1 de 10:00 a 11:00 (mismo horario, otra cancha).",
+        "Reserva K1 de 11:00 a 12:00 (contiguo).",
+        "Otro usuario reserva K1 de 10:00 a 11:00."
+      ],
+      "esperado": "El segundo intento responde 409 \"Ya tienes una reserva en ese horario\" (codigo RESERVA_SOLAPADA) y no se crea la fila; el bloque contiguo responde 201; el otro usuario obtiene 201.",
+      "estado": "APROBADA",
+      "duracionMs": 1092,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Primera reserva: 201 → HTTP 201"
+        },
+        {
+          "ok": true,
+          "texto": "Mismo horario en otra cancha: 409 con mensaje claro → HTTP 409 Ya tienes una reserva en ese horario"
+        },
+        {
+          "ok": true,
+          "texto": "El error trae el codigo RESERVA_SOLAPADA → RESERVA_SOLAPADA"
+        },
+        {
+          "ok": true,
+          "texto": "No se creó una segunda fila"
+        },
+        {
+          "ok": true,
+          "texto": "Bloque contiguo (11:00-12:00) en otra cancha: 201 → HTTP 201"
+        },
+        {
+          "ok": true,
+          "texto": "Otro usuario sí puede reservar K1 10:00-11:00: 201 → HTTP 201"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-14T05:56:24.630Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-12-03",
+      "hu": "US-12",
+      "ca": [
+        4
+      ],
+      "grupo": "US-12",
+      "titulo": "Cancelar una reserva no afecta a las demás",
+      "objetivo": "Verificar que cancelar una de varias reservas deja intactas las otras.",
+      "pasos": [
+        "El usuario crea 3 reservas.",
+        "Cancela la del medio.",
+        "Consulta GET /api/reservas/mias."
+      ],
+      "esperado": "La cancelación responde 200; en el listado quedan 2 \"confirmada\" y 1 \"cancelada\"; la franja cancelada vuelve a poder reservarse.",
+      "estado": "APROBADA",
+      "duracionMs": 804,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Cancelar la reserva del medio: 200 \"cancelada\" → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "Quedan 2 confirmadas y 1 cancelada → cancelada,confirmada,confirmada"
+        },
+        {
+          "ok": true,
+          "texto": "La franja cancelada vuelve a estar disponible para otro usuario: 201 → HTTP 201"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-14T05:56:25.436Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-12-04",
+      "hu": "US-12",
+      "ca": [
+        3
+      ],
+      "grupo": "US-12",
+      "titulo": "Límite máximo de reservas activas por usuario (caso de error)",
+      "objetivo": "Verificar el tope configurable de reservas simultáneas con un backend adicional configurado con un máximo de 3.",
+      "pasos": [
+        "Levantar un segundo backend contra la misma base con MAX_RESERVAS_ACTIVAS_USUARIO=3.",
+        "El usuario crea 3 reservas en horas distintas.",
+        "Intenta una cuarta.",
+        "Cancela una y reintenta."
+      ],
+      "esperado": "Las 3 primeras responden 201; la cuarta 409 con codigo LIMITE_RESERVAS_ALCANZADO y el mensaje \"Ya tienes 3 reservas activas…\"; tras cancelar una, la cuarta se acepta.",
+      "estado": "APROBADA",
+      "duracionMs": 4449,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Segundo backend con límite 3 iniciado →  Container qa-backend-limite Created"
+        },
+        {
+          "ok": true,
+          "texto": "El segundo backend responde"
+        },
+        {
+          "ok": true,
+          "texto": "Las 3 primeras: 201 → 201, 201, 201"
+        },
+        {
+          "ok": true,
+          "texto": "La cuarta: 409 LIMITE_RESERVAS_ALCANZADO → HTTP 409 LIMITE_RESERVAS_ALCANZADO"
+        },
+        {
+          "ok": true,
+          "texto": "El mensaje explica el límite → Ya tienes 3 reservas activas. Cancela alguna para poder reservar otra."
+        },
+        {
+          "ok": true,
+          "texto": "No se creó la cuarta fila"
+        },
+        {
+          "ok": true,
+          "texto": "Tras cancelar una, la cuarta se acepta: 201 → HTTP 201"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-14T05:56:29.887Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-13-01",
+      "hu": "US-13",
+      "ca": [
+        1,
+        2
+      ],
+      "grupo": "US-13",
+      "titulo": "Historial: solo las reservas propias, próximas de la más cercana a la más lejana",
+      "objetivo": "Verificar el contenido y el orden del listado por defecto y que no se filtran reservas de otros usuarios.",
+      "pasos": [
+        "Crear 3 reservas futuras en orden desordenado para el usuario A y 1 para B.",
+        "GET /api/reservas del usuario A (periodo por defecto).",
+        "GET /api/reservas del usuario B."
+      ],
+      "esperado": "A ve solo sus 3 reservas, de la fecha más cercana a la más lejana, con id, codigo, canchaNombre, canchaDireccion, fecha, horaInicio, horaFin y estado; B ve solo la suya.",
+      "estado": "APROBADA",
+      "duracionMs": 460,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "A recibe 200 con sus 3 reservas → HTTP 200, 3"
+        },
+        {
+          "ok": true,
+          "texto": "Orden: de la más cercana a la más lejana → 2101-04-19 < 2101-04-22 < 2101-04-25"
+        },
+        {
+          "ok": true,
+          "texto": "Cada reserva trae id, código, cancha, dirección, hora (HH:mm) y estado → {\"id\":\"09acd7e7-a6f3-4a72-a10e-746975ec555b\",\"codigo\":\"CY-09ACD7E7\",\"canchaId\":\"f9396948-eccc-438a-810c-0a5deb3be3ee\",\"canchaNombre\":\"Cancha La Rivera\",\"canchaDireccion\":\"Cra 8 # 12-50, Cali\",\"fecha\":\"2101-04-19\",\"horaInicio\":\"08:00\",\"horaFin\":\"09:00\",\"estado\":\"confirmada\",\"createdAt\":\"2026-10-14T05:56:30.313Z\"}"
+        },
+        {
+          "ok": true,
+          "texto": "B ve solo la suya → 1"
+        }
+      ],
+      "evidencias": [
+        {
+          "titulo": "Respuesta de GET /api/reservas (usuario A)",
+          "texto": "{\n \"reservas\": [\n  {\n   \"id\": \"09acd7e7-a6f3-4a72-a10e-746975ec555b\",\n   \"codigo\": \"CY-09ACD7E7\",\n   \"canchaId\": \"f9396948-eccc-438a-810c-0a5deb3be3ee\",\n   \"canchaNombre\": \"Cancha La Rivera\",\n   \"canchaDireccion\": \"Cra 8 # 12-50, Cali\",\n   \"fecha\": \"2101-04-19\",\n   \"horaInicio\": \"08:00\",\n   \"horaFin\": \"09:00\",\n   \"estado\": \"confirmada\",\n   \"createdAt\": \"2026-10-14T05:56:30.313Z\"\n  },\n  {\n   \"id\": \"e31b4bf3-7978-497a-b45a-b205c3ff5e25\",\n   \"codigo\": \"CY-E31B4BF3\",\n   \"canchaId\": \"0ebfcbc0-accc-49d4-810a-953b677d49a0\",\n   \"canchaNombre\": \"Cancha El Bosque\",\n   \"canchaDireccion\": \"Av. Roosevelt # 30-10, Cali\",\n   \"fecha\": \"2101-04-22\",\n   \"horaInicio\": \"08:00\",\n   \"horaFin\": \"09:00\",\n   \"estado\": \"confirmada\",\n   \"createdAt\": \"2026-10-14T05:56:30.325Z\"\n  },\n  {\n   \"id\": \"a1a2def7-3e7e-41c9-b8aa-e8c349bce2d6\",\n   \"codigo\": \"CY-A1A2DEF7\",\n   \"canchaId\": \"0ebfcbc0-accc-49d4-810a-953b677d49a0\",\n   \"canchaNombre\": \"Cancha El Bosque\",\n   \"canchaDireccion\": \"Av. Roosevelt # 30-10, Cali\",\n   \"fecha\": \"2101-04-25\",\n   \"horaInicio\": \"08:00\",\n   \"horaFin\": \"09:00\",\n   \"estado\": \"confirmada\",\n   \"createdAt\": \"2026-10-14T05:56:30.302Z\"\n  }\n ],\n \"paginacion\": {\n  \"pagina\": 1,\n  \"limite\": 10,\n  \"total\": 3,\n  \"totalPaginas\": 1\n }\n}"
+        }
+      ],
+      "ejecutadaEn": "2026-10-14T05:56:30.349Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-13-02",
+      "hu": "US-13",
+      "ca": [
+        2,
+        3,
+        4
+      ],
+      "grupo": "US-13",
+      "titulo": "Historial: pasadas, estado \"completada\" y filtro por estado",
+      "objetivo": "Verificar la separación próximas/pasadas, que una confirmada ya jugada se muestra \"completada\" y el filtro por estado.",
+      "pasos": [
+        "Insertar reservas pasadas: una confirmada y una cancelada. Crear una futura confirmada y una futura cancelada.",
+        "GET /api/reservas?periodo=pasadas.",
+        "GET con estado=completada, cancelada y confirmada."
+      ],
+      "esperado": "Pasadas: la más reciente primero, la confirmada como \"completada\" y la cancelada como \"cancelada\"; el filtro devuelve solo ese estado; las próximas no incluyen las pasadas.",
+      "estado": "APROBADA",
+      "duracionMs": 1025,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Preparación: la reserva futura se creó (201)"
+        },
+        {
+          "ok": true,
+          "texto": "Pasadas: 2 reservas → 2"
+        },
+        {
+          "ok": true,
+          "texto": "La confirmada ya jugada se muestra \"completada\" y va primero (la más reciente) → 2026-10-11 completada · 2026-10-04 cancelada"
+        },
+        {
+          "ok": true,
+          "texto": "La cancelada se muestra \"cancelada\""
+        },
+        {
+          "ok": true,
+          "texto": "Próximas: solo las 2 futuras (no incluye las pasadas) → 2"
+        },
+        {
+          "ok": true,
+          "texto": "Filtro pasadas + completada: 1 resultado(s) → 1"
+        },
+        {
+          "ok": true,
+          "texto": "Filtro pasadas + cancelada: 1 resultado(s) → 1"
+        },
+        {
+          "ok": true,
+          "texto": "Filtro proximas + confirmada: 1 resultado(s) → 1"
+        },
+        {
+          "ok": true,
+          "texto": "Filtro proximas + cancelada: 1 resultado(s) → 1"
+        },
+        {
+          "ok": true,
+          "texto": "Filtro proximas + completada: 0 resultado(s) → 0"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-14T05:56:31.375Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-13-03",
+      "hu": "US-13",
+      "ca": [
+        5
+      ],
+      "grupo": "US-13",
+      "titulo": "Historial: paginación",
+      "objetivo": "Verificar el tamaño de página por defecto, el desplazamiento, el total y el límite máximo.",
+      "pasos": [
+        "Insertar 12 reservas pasadas para un usuario.",
+        "GET periodo=pasadas (página 1 y 2).",
+        "GET con limite=5&pagina=3.",
+        "GET con limite=500."
+      ],
+      "esperado": "Página 1: 10 reservas, total 12, totalPaginas 2; página 2: 2 reservas; limite=5 pagina=3: 2 reservas; limite=500 responde 400.",
+      "estado": "APROBADA",
+      "duracionMs": 5707,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Página 1: 10 reservas y paginación {1, 10, 12, 2} → {\"pagina\":1,\"limite\":10,\"total\":12,\"totalPaginas\":2}"
+        },
+        {
+          "ok": true,
+          "texto": "Página 2: 2 reservas → 2"
+        },
+        {
+          "ok": true,
+          "texto": "Las dos páginas no repiten reservas (12 distintas) → 12"
+        },
+        {
+          "ok": true,
+          "texto": "limite=5 pagina=3: 2 reservas, 3 páginas → {\"pagina\":3,\"limite\":5,\"total\":12,\"totalPaginas\":3}"
+        },
+        {
+          "ok": true,
+          "texto": "limite=500 se rechaza con 400 → HTTP 400"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-14T05:56:37.083Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-13-04",
+      "hu": "US-13",
+      "ca": [
+        6,
+        7
+      ],
+      "grupo": "US-13",
+      "titulo": "Historial: usuario sin reservas, sin token y parámetros inválidos (casos de error)",
+      "objetivo": "Verificar el estado vacío y el rechazo de peticiones no autenticadas o con parámetros incorrectos.",
+      "pasos": [
+        "GET /api/reservas de un usuario sin reservas.",
+        "GET sin token y con token inválido.",
+        "GET con periodo, estado, pagina y limite inválidos."
+      ],
+      "esperado": "Vacío: 200 con reservas [] y total 0, totalPaginas 1; sin token 401; parámetros inválidos 400 con el campo señalado.",
+      "estado": "APROBADA",
+      "duracionMs": 231,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Sin reservas: 200, lista vacía, total 0 y 1 página → {\"reservas\":[],\"paginacion\":{\"pagina\":1,\"limite\":10,\"total\":0,\"totalPaginas\":1}}"
+        },
+        {
+          "ok": true,
+          "texto": "Sin token o con token inválido: 401 → 401 / 401"
+        },
+        {
+          "ok": true,
+          "texto": "periodo=futuro: 400 señalando \"periodo\" → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "estado=rara: 400 señalando \"estado\" → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "pagina=0: 400 señalando \"pagina\" → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "limite=0: 400 señalando \"limite\" → HTTP 400"
+        },
+        {
+          "ok": true,
+          "texto": "pagina=abc: 400 señalando \"pagina\" → HTTP 400"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-14T05:56:37.316Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-DOC-01",
+      "hu": "PIG1-23",
+      "ca": [
+        1,
+        2,
+        6
+      ],
+      "grupo": "PIG1-23",
+      "titulo": "Swagger UI y la especificación se publican en /api/docs",
+      "objetivo": "Verificar que la documentación está disponible en el backend, que la especificación es OpenAPI 3.x y que declara la autenticación Bearer JWT.",
+      "pasos": [
+        "GET /api/docs/ (Swagger UI).",
+        "GET /api/docs/openapi.json y /api/docs/openapi.yaml.",
+        "Revisar el esquema de seguridad y los servidores."
+      ],
+      "esperado": "Swagger UI responde 200 con HTML; la especificación JSON es openapi 3.x con el esquema bearerAuth (http, bearer, JWT) y el servidor actual como primer servidor; el YAML se puede descargar.",
+      "estado": "APROBADA",
+      "duracionMs": 325,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "GET /api/docs/ sirve Swagger UI (200, HTML) → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "La especificación JSON es OpenAPI 3.x → 3.0.3"
+        },
+        {
+          "ok": true,
+          "texto": "Declara la autenticación Bearer JWT (bearerAuth)"
+        },
+        {
+          "ok": true,
+          "texto": "El primer servidor es el servidor actual (Try it out apunta al backend correcto) → http://localhost:4300"
+        },
+        {
+          "ok": true,
+          "texto": "El YAML versionado se puede descargar"
+        },
+        {
+          "ok": true,
+          "texto": "El archivo backend/openapi/openapi.yaml existe en el repositorio"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-10-14T05:56:37.642Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-DOC-02",
+      "hu": "PIG1-23",
+      "ca": [
+        3,
+        4,
+        5,
+        7,
+        8
+      ],
+      "grupo": "PIG1-23",
+      "titulo": "Cobertura y contenido de la documentación (≥ 90 %)",
+      "objetivo": "Calcular endpoints implementados contra documentados y comprobar que cada operación documenta respuestas, ejemplos, modelos reutilizados y los casos del motor de reservas.",
+      "pasos": [
+        "Ejecutar \"npm run docs:cobertura\" (lee las rutas reales de Express).",
+        "Revisar en la especificación cada operación: descripción, respuestas y ejemplos.",
+        "Revisar components/schemas y los ejemplos de error del motor de reservas.",
+        "Buscar los eventos de Socket.IO en la documentación."
+      ],
+      "esperado": "Cobertura ≥ 90 % (se espera 100 %, 14/14); cada operación con descripción, 2xx y ejemplos; modelos Usuario, Cancha, Reserva y Error definidos una vez; 409 con duplicada, solapada, límite y retenida; los 11 eventos de socket descritos.",
+      "estado": "APROBADA",
+      "duracionMs": 2890,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "La cobertura de endpoints es ≥ 90 % → 100 % (14 de 14)"
+        },
+        {
+          "ok": true,
+          "texto": "Las 14 operaciones tienen resumen, descripción y respuesta exitosa"
+        },
+        {
+          "ok": true,
+          "texto": "Las 9 operaciones protegidas documentan el 401"
+        },
+        {
+          "ok": true,
+          "texto": "Las operaciones con cuerpo tienen ejemplo y documentan el 400"
+        },
+        {
+          "ok": true,
+          "texto": "Se documentan los códigos 200, 201, 400, 401, 403, 404, 409 y 500 → 200, 201, 400, 401, 403, 404, 409, 429, 500"
+        },
+        {
+          "ok": true,
+          "texto": "Los modelos Usuario, Cancha, Reserva y Error están en components/schemas → Error, ErrorValidacion, Mensaje, Usuario, RegistroRequest, LoginRequest, LoginResponse, CanchaResumen, Cancha, HorarioAtencion, FranjaRequest, Reserva, ReservaConfirmada, ReservaHistorial, Paginacion, BloqueOcupado, FranjaRetenida, Disponibilidad"
+        },
+        {
+          "ok": true,
+          "texto": "POST reservas documenta el 409: duplicada (US-09), retenida (US-18), solapada y límite (US-12) → duplicada, retenida, solapada, limite"
+        },
+        {
+          "ok": true,
+          "texto": "Están los endpoints de disponibilidad (US-08), confirmación (US-11) e historial (US-13)"
+        },
+        {
+          "ok": true,
+          "texto": "Los 11 eventos de Socket.IO están documentados (nombre, dirección, payload y errores) → 11/11"
+        },
+        {
+          "ok": true,
+          "texto": "Se documentan los códigos de error de los eventos"
+        }
+      ],
+      "evidencias": [
+        {
+          "titulo": "Endpoints implementados contra documentados",
+          "texto": "> canchaya-backend@1.0.0 docs:cobertura\n> node scripts/coberturaDocumentacion.js\n\nSI  POST   /api/auth/login\nSI  POST   /api/auth/olvide-password\nSI  POST   /api/auth/registro\nSI  POST   /api/auth/restablecer-password\nSI  GET    /api/canchas\nSI  GET    /api/canchas/{id}\nSI  GET    /api/canchas/{id}/disponibilidad\nSI  GET    /api/canchas/{id}/reservas\nSI  POST   /api/canchas/{id}/reservas\nSI  POST   /api/canchas/{id}/temporizador/completar\nSI  GET    /api/health\nSI  GET    /api/reservas\nSI  PATCH  /api/reservas/{id}/cancelar\nSI  GET    /api/reservas/mias\n\nEndpoints implementados: 14\nEndpoints documentados:  14\nCobertura: 100 %"
+        }
+      ],
+      "ejecutadaEn": "2026-10-14T05:56:40.533Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-DOC-03",
+      "hu": "PIG1-23",
+      "ca": [
+        9,
+        10,
+        11
+      ],
+      "grupo": "PIG1-23",
+      "titulo": "Validación con Spectral y ejemplos de \"Try it out\" contra el backend",
+      "objetivo": "Validar la especificación con Spectral, ejecutar los ejemplos de la documentación contra el backend real y comprobar que el README enlaza y explica la actualización.",
+      "pasos": [
+        "Ejecutar \"npm run docs:lint\" (Spectral).",
+        "Llamar a cada endpoint de lectura documentado con el token del usuario y verificar que el código es uno de los documentados.",
+        "Probar el flujo reserva → repetición → cancelación con los cuerpos de ejemplo.",
+        "Revisar el README."
+      ],
+      "esperado": "Spectral sin errores ni advertencias; todos los códigos de respuesta obtenidos están documentados; el flujo con los ejemplos funciona; el README enlaza /api/docs y explica cómo actualizar.",
+      "estado": "APROBADA",
+      "duracionMs": 4159,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Spectral valida la especificación sin errores ni advertencias → No results with a severity of 'warn' or higher found!"
+        },
+        {
+          "ok": true,
+          "texto": "GET /api/health: 200 documentado → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "GET /api/canchas: 200 documentado → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "GET /api/canchas/{id}: 200 documentado → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "GET /api/canchas/{id}/disponibilidad: 200 documentado → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "GET /api/canchas/{id}/reservas: 200 documentado → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "GET /api/reservas: 200 documentado → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "GET /api/reservas/mias: 200 documentado → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "POST reservas con el cuerpo de ejemplo: 201 documentado → HTTP 201"
+        },
+        {
+          "ok": true,
+          "texto": "Repetir el ejemplo: 409 documentado → HTTP 409 Ya tienes una reserva en ese horario"
+        },
+        {
+          "ok": true,
+          "texto": "PATCH cancelar: 200 documentado → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "Sin token: 401 documentado → HTTP 401"
+        },
+        {
+          "ok": true,
+          "texto": "El README enlaza /api/docs y explica cómo actualizar la documentación"
+        }
+      ],
+      "evidencias": [
+        {
+          "titulo": "Salida de Spectral",
+          "texto": "> canchaya-backend@1.0.0 docs:lint\n> spectral lint openapi/openapi.yaml --ruleset .spectral.yaml --fail-severity=warn\n\nNo results with a severity of 'warn' or higher found!"
+        }
+      ],
+      "ejecutadaEn": "2026-10-14T05:56:44.694Z"
     }
   ]
 }

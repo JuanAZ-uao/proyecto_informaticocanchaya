@@ -90,6 +90,7 @@ export default function CanchaDetallePage() {
   const {
     expiresAt,
     expirado: expiradoSocket,
+    desfaseMs,
     reiniciar,
     retenerFranja,
     liberarFranja,
@@ -119,6 +120,8 @@ export default function CanchaDetallePage() {
   const [errorReserva, setErrorReserva] = useState('');
   const [reservaConfirmada, setReservaConfirmada] = useState(null);
   const [ahora, setAhora] = useState(() => Date.now());
+  // Hora del servidor (hora local + desfase informado por el socket): evita errores si el reloj del equipo está mal.
+  const ahoraServidor = ahora + desfaseMs;
 
   // Reloj local para que los bloques de hoy pasen a "No disponible" a medida que avanza la hora.
   useEffect(() => {
@@ -160,7 +163,7 @@ export default function CanchaDetallePage() {
       }
     }
 
-    cargarCancha();
+    void cargarCancha();
     return () => {
       activo = false;
     };
@@ -213,7 +216,7 @@ export default function CanchaDetallePage() {
       }
     }
 
-    cargarOcupados();
+    void cargarOcupados();
     return () => {
       activo = false;
     };
@@ -247,16 +250,16 @@ export default function CanchaDetallePage() {
     (bloque) =>
       !bloquesOcupadosSet.has(bloque.horaInicio) &&
       !bloquesRetenidosSet.has(bloque.horaInicio) &&
-      !esBloquePasado(fecha, bloque.horaInicio, ahora)
+      !esBloquePasado(fecha, bloque.horaInicio, ahoraServidor)
   ).length;
 
   useEffect(() => {
-    if (bloqueSeleccionado && esBloquePasado(fecha, bloqueSeleccionado.horaInicio, ahora)) {
+    if (bloqueSeleccionado && esBloquePasado(fecha, bloqueSeleccionado.horaInicio, ahoraServidor)) {
       setBloqueSeleccionado(null);
       setReservaIniciada(false);
       setMensajeValidacion(MENSAJE_BLOQUE_PASADO);
     }
-  }, [fecha, bloqueSeleccionado, ahora]);
+  }, [fecha, bloqueSeleccionado, ahoraServidor]);
 
   function marcarRetenido(hora) {
     setBloquesRetenidos((previos) => (previos.includes(hora) ? previos : [...previos, hora]));
@@ -279,14 +282,14 @@ export default function CanchaDetallePage() {
     } else if (tipo === 'liberada') {
       // Puede venir de una retención que terminó o de una reserva cancelada: se consulta el estado real.
       setBloquesRetenidos((previos) => previos.filter((h) => h !== hora));
-      recargarOcupados(fecha);
+      void recargarOcupados(fecha);
     }
   }
 
   function manejarRechazoRetencion(errorRetencion, bloque) {
     const codigo = errorRetencion?.codigo;
     if (codigo === 'FRANJA_RETENIDA') marcarRetenido(bloque.horaInicio);
-    if (codigo === 'FRANJA_OCUPADA') recargarOcupados(fecha);
+    if (codigo === 'FRANJA_OCUPADA') void recargarOcupados(fecha);
     if (codigo === 'SESION_EXPIRADA') setExpiradoServidor(true);
     if (codigo === 'HORA_PASADA') setAhora(Date.now());
     setMensajeValidacion(errorRetencion?.mensaje || 'No fue posible apartar esta franja. Intenta con otra.');
@@ -363,7 +366,7 @@ export default function CanchaDetallePage() {
       return;
     }
 
-    if (esBloquePasado(fecha, bloqueSeleccionado.horaInicio)) {
+    if (esBloquePasado(fecha, bloqueSeleccionado.horaInicio, Date.now() + desfaseMs)) {
       setAhora(Date.now());
       setBloqueSeleccionado(null);
       setMensajeValidacion(MENSAJE_BLOQUE_PASADO);
@@ -386,7 +389,7 @@ export default function CanchaDetallePage() {
       if (data?.codigo === 'FRANJA_RETENIDA' || data?.codigo === 'FRANJA_OCUPADA') {
         if (data.codigo === 'FRANJA_RETENIDA') marcarRetenido(bloqueSeleccionado.horaInicio);
         setBloqueSeleccionado(null);
-        recargarOcupados(fecha);
+        void recargarOcupados(fecha);
       } else if (status === 409 || status === 403) {
         setExpiradoServidor(true);
       }
@@ -578,6 +581,7 @@ export default function CanchaDetallePage() {
             <>
               <TemporizadorReserva
                 expiresAt={expiresAt}
+            desfaseMs={desfaseMs}
                 expirado={expiradoCombinado}
                 completado={panelCompletado && !expiradoCombinado}
                 onReiniciar={manejarReiniciarTemporizador}
@@ -622,7 +626,7 @@ export default function CanchaDetallePage() {
                     {bloquesDisponibles.map((bloque) => {
                       const seleccionado = bloqueSeleccionado?.horaInicio === bloque.horaInicio;
                       const ocupado =
-                        bloquesOcupadosSet.has(bloque.horaInicio) || esBloquePasado(fecha, bloque.horaInicio, ahora);
+                        bloquesOcupadosSet.has(bloque.horaInicio) || esBloquePasado(fecha, bloque.horaInicio, ahoraServidor);
                       const retenido = !ocupado && !seleccionado && bloquesRetenidosSet.has(bloque.horaInicio);
                       const bloqueado = ocupado || retenido || expiradoCombinado;
                       const claseBloque = [

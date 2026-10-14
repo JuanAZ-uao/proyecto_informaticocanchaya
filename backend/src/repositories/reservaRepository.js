@@ -20,7 +20,7 @@ async function existeConfirmada(canchaId, fecha, horaInicio) {
   return rows.length > 0;
 }
 
-async function listarPorUsuario(usuarioId) {
+async function listarTodasPorUsuario(usuarioId) {
   const { rows } = await pool.query(
     `SELECT r.*, c.nombre AS cancha_nombre, c.direccion AS cancha_direccion
      FROM reservas r
@@ -34,6 +34,45 @@ async function listarPorUsuario(usuarioId) {
     ...Reserva.aDominio(fila),
     cancha: { id: fila.cancha_id, nombre: fila.cancha_nombre, direccion: fila.cancha_direccion },
   }));
+}
+
+// US-13: historial paginado. Una reserva confirmada cuyo horario ya terminó (hora de Colombia)
+// se muestra como "completada"; "proximas" son las que aún no terminan y "pasadas" las que sí.
+const FIN_RESERVA = `(r.fecha + r.hora_fin)`;
+const AHORA_COLOMBIA = `(now() AT TIME ZONE 'America/Bogota')`;
+const ESTADO_VISIBLE = `CASE WHEN r.estado = 'confirmada' AND ${FIN_RESERVA} < ${AHORA_COLOMBIA} THEN 'completada' ELSE r.estado END`;
+
+async function listarPorUsuario({ usuarioId, periodo = 'proximas', estado = null, limite = 10, offset = 0 }) {
+  const condiciones = ['r.usuario_id = $1', periodo === 'pasadas' ? `${FIN_RESERVA} < ${AHORA_COLOMBIA}` : `${FIN_RESERVA} >= ${AHORA_COLOMBIA}`];
+  const valores = [usuarioId];
+
+  if (estado) {
+    valores.push(estado);
+    condiciones.push(`(${ESTADO_VISIBLE}) = $${valores.length}`);
+  }
+
+  const donde = condiciones.join(' AND ');
+  const orden = periodo === 'pasadas' ? 'DESC' : 'ASC';
+
+  const [{ rows }, { rows: conteo }] = await Promise.all([
+    pool.query(
+      `SELECT r.id, r.cancha_id, r.created_at, r.hora_inicio, r.hora_fin, r.fecha,
+              c.nombre AS cancha_nombre, c.direccion AS cancha_direccion,
+              to_char(r.fecha, 'YYYY-MM-DD') AS fecha_texto,
+              to_char(r.hora_inicio, 'HH24:MI') AS hora_inicio_texto,
+              to_char(r.hora_fin, 'HH24:MI') AS hora_fin_texto,
+              ${ESTADO_VISIBLE} AS estado_visible
+       FROM reservas r
+       JOIN canchas c ON c.id = r.cancha_id
+       WHERE ${donde}
+       ORDER BY r.fecha ${orden}, r.hora_inicio ${orden}
+       LIMIT $${valores.length + 1} OFFSET $${valores.length + 2}`,
+      [...valores, limite, offset]
+    ),
+    pool.query(`SELECT COUNT(*)::int AS total FROM reservas r WHERE ${donde}`, valores),
+  ]);
+
+  return { reservas: rows.map(Reserva.aHistorial), total: conteo[0].total };
 }
 
 // US-12: el mismo usuario no puede tener dos reservas confirmadas que se solapen en
@@ -103,6 +142,7 @@ module.exports = {
   existeSolapadaDeUsuario,
   contarConfirmadasPorUsuario,
   listarPorUsuario,
+  listarTodasPorUsuario,
   obtenerPorId,
   crear,
   cancelar,

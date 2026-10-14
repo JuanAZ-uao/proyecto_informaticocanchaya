@@ -2059,7 +2059,7 @@ main.contenido {
 .reserva-item-cancha { margin: 0; font-size: 1.1rem; }
 .reserva-item-datos { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 0; padding: 0; list-style: none; color: var(--tinta-suave); font-size: 0.92rem; }
 .reserva-item-datos li { display: inline-flex; align-items: center; gap: 6px; }
-.reserva-item-id { margin: 0; color: var(--tinta-tenue); font-size: 0.75rem; }
+.reserva-item-id { margin: 0; color: var(--tinta-suave); font-size: 0.75rem; }
 .reserva-item-id code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break: break-all; }
 .estado-reserva { flex-shrink: 0; padding: 5px 12px; border-radius: var(--radio-pill); font-size: 0.75rem; font-weight: 700; line-height: 1; }
 .estado-confirmada { background: var(--verde-100); color: var(--verde-800); }

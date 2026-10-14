@@ -1,0 +1,28 @@
+{
+  "name": "canchaya-qa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pruebas de QA automatizadas de CanchaYa: smoke de Docker, funcionales, E2E y no funcionales, más el generador de los documentos Word de resultados.",
+  "type": "module",
+  "scripts": {
+    "smoke:1": "node smoke.mjs 1",
+    "smoke:2": "node smoke.mjs 2",
+    "funcionales": "node funcionales.mjs",
+    "e2e": "node e2e.mjs",
+    "nofuncionales": "node nofuncionales.mjs",
+    "jest": "node jest.mjs",
+    "entorno": "node entorno.mjs",
+    "sonar:1": "node sonar.mjs 1",
+    "sonar:2": "node sonar.mjs 2",
+    "sonar:bajar": "node sonar.mjs --bajar",
+    "docs": "node generar-docs.mjs && node generar-extra.mjs",
+    "browsers": "playwright install chromium firefox webkit"
+  },
+  "dependencies": {
+    "axe-core": "^4.14.0",
+    "docx": "^9.10.0",
+    "js-yaml": "^5.4.3",
+    "playwright": "^1.63.0",
+    "socket.io-client": "^4.8.4"
+  }
+}

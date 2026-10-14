@@ -13,7 +13,7 @@ const tieneEntorno = Boolean(process.env.DATABASE_URL && process.env.JWT_SECRET)
 
 if (!tieneEntorno) {
   describe('Bloqueo de reservas duplicadas (concurrencia real en Neon)', () => {
-    it.skip('requiere DATABASE_URL y JWT_SECRET configuradas para ejecutarse', () => {});
+    it.todo('requiere DATABASE_URL y JWT_SECRET configuradas para ejecutarse');
   });
 } else {
   const request = require('supertest');
@@ -52,6 +52,13 @@ if (!tieneEntorno) {
         [`Cancha US-09 ${sufijo}`]
       );
       canchaId = canchas.rows[0].id;
+
+      // Horario de atención diario (la API valida que la reserva caiga dentro del horario de la cancha).
+      await pool.query(
+        `INSERT INTO horarios_disponibles (cancha_id, dia_semana, hora_inicio, hora_fin)
+         SELECT $1, dia, '06:00', '22:00' FROM generate_series(0, 6) AS dia`,
+        [canchaId]
+      );
 
       token1 = generarToken({ sub: usuarioUnoId });
       token2 = generarToken({ sub: usuarioDosId });
@@ -169,5 +176,64 @@ if (!tieneEntorno) {
       expect(confirmar.status).toBe(401);
       expect(historial.status).toBe(401);
     });
+
+    it('DEF-03: una reserva fuera del horario de la cancha se rechaza con 400 FUERA_DE_HORARIO', async () => {
+      const respuesta = await request(app)
+        .post(`/api/canchas/${canchaId}/reservas`)
+        .set('Authorization', `Bearer ${token1}`)
+        .send({ fecha: '2099-11-20', horaInicio: '03:00', horaFin: '04:00' });
+
+      expect(respuesta.status).toBe(400);
+      expect(respuesta.body.codigo).toBe('FUERA_DE_HORARIO');
+      const { rows } = await pool.query(`SELECT 1 FROM reservas WHERE cancha_id = $1 AND fecha = '2099-11-20'`, [canchaId]);
+      expect(rows).toHaveLength(0);
+    });
+
+    it('DEF-04: una franja solapada se rechaza y la base de datos impide el solape aunque se intente por SQL', async () => {
+      const fechaSolape = '2099-11-21';
+      const primera = await request(app)
+        .post(`/api/canchas/${canchaId}/reservas`)
+        .set('Authorization', `Bearer ${token1}`)
+        .send({ fecha: fechaSolape, horaInicio: '10:00', horaFin: '11:00' });
+      expect(primera.status).toBe(201);
+
+      const solapada = await request(app)
+        .post(`/api/canchas/${canchaId}/reservas`)
+        .set('Authorization', `Bearer ${token2}`)
+        .send({ fecha: fechaSolape, horaInicio: '10:30', horaFin: '11:30' });
+      expect(solapada.status).toBe(400);
+
+      await expect(
+        pool.query(
+          `INSERT INTO reservas (cancha_id, usuario_id, fecha, hora_inicio, hora_fin, estado)
+           VALUES ($1, $2, $3, '10:30', '11:30', 'confirmada')`,
+          [canchaId, usuarioDosId, fechaSolape]
+        )
+      ).rejects.toMatchObject({ code: '23P01' });
+    });
+
+    it('DEF-07: tras 10 inicios de sesión fallidos de una cuenta, el siguiente intento se frena con 429; otra cuenta no se afecta', async () => {
+      const correo = `limite.${Date.now()}@test.local`;
+      const intentar = (c) => request(app).post('/api/auth/login').send({ correo: c, password: 'Incorrecta123' });
+
+      for (let i = 0; i < 10; i += 1) {
+        expect((await intentar(correo)).status).toBe(401);
+      }
+      const frenado = await intentar(correo);
+      expect(frenado.status).toBe(429);
+      expect(frenado.body.codigo).toBe('DEMASIADOS_INTENTOS');
+
+      const otraCuenta = await intentar(`otra.${Date.now()}@test.local`);
+      expect(otraCuenta.status).toBe(401);
+    });
+
+    it('DEF-08: un origen no permitido por CORS recibe 403 y no un error interno', async () => {
+      const respuesta = await request(app).get('/api/health').set('Origin', 'http://sitio-malicioso.example');
+
+      expect(respuesta.status).toBe(403);
+      expect(respuesta.body.mensaje).toBe('Origen no permitido');
+      expect(respuesta.headers['access-control-allow-origin']).toBeUndefined();
+    });
+
   });
 }

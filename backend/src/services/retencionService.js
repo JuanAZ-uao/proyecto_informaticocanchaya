@@ -2,6 +2,7 @@ const { EventEmitter } = require('events');
 const retencionRepository = require('../repositories/retencionRepository');
 const reservaRepository = require('../repositories/reservaRepository');
 const temporizadorService = require('./temporizadorReservaService');
+const { validarFranjaEnHorario } = require('./horarioReservaService');
 const ErrorDeAplicacion = require('../utils/ErrorDeAplicacion');
 const { esMomentoPasado } = require('../utils/fechaHora');
 const Retencion = require('../models/Retencion');
@@ -9,7 +10,7 @@ const Retencion = require('../models/Retencion');
 // Tras entrar al panel de confirmación el temporizador se detiene (US-17); la franja
 // sigue retenida este tiempo para que el usuario confirme sin que otro se la quite.
 const VENTANA_CONFIRMACION_MS = 10 * 60 * 1000;
-const CODIGO_VIOLACION_UNICA = '23505';
+const CODIGOS_FRANJA_OCUPADA = ['23505', '23P01'];
 const FECHA_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const HORA_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -24,7 +25,10 @@ function mismaFranja(a, b) {
   return a.fecha === b.fecha && a.horaInicio === b.horaInicio;
 }
 
-function validarFranja({ fecha, horaInicio, horaFin } = {}) {
+function validarFranja(franja) {
+  // Un payload nulo o que no sea un objeto también es un dato inválido (no un error interno).
+  const { fecha, horaInicio, horaFin } = franja && typeof franja === 'object' ? franja : {};
+
   if (!FECHA_REGEX.test(fecha || '') || !HORA_REGEX.test(horaInicio || '') || !HORA_REGEX.test(horaFin || '')) {
     throw new ErrorDeAplicacion('La franja debe tener fecha (YYYY-MM-DD), horaInicio y horaFin (HH:mm)', 400, 'DATOS_INVALIDOS');
   }
@@ -53,6 +57,7 @@ function vencimientoDeRetencion(usuarioId, canchaId) {
 
 async function retenerFranja(usuarioId, canchaId, franja) {
   validarFranja(franja);
+  await validarFranjaEnHorario(canchaId, franja);
   const expiresAt = vencimientoDeRetencion(usuarioId, canchaId);
   const { fecha, horaInicio, horaFin } = franja;
 
@@ -64,7 +69,7 @@ async function retenerFranja(usuarioId, canchaId, franja) {
   try {
     resultado = await retencionRepository.retener({ usuarioId, canchaId, fecha, horaInicio, horaFin, expiresAt });
   } catch (error) {
-    if (error.code === CODIGO_VIOLACION_UNICA) {
+    if (CODIGOS_FRANJA_OCUPADA.includes(error.code)) {
       throw new ErrorDeAplicacion('Otro usuario está reservando esta franja en este momento', 409, 'FRANJA_RETENIDA');
     }
     throw error;

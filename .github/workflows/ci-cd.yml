@@ -38,16 +38,20 @@ jobs:
       DATABASE_URL: postgresql://canchaya:canchaya@localhost:5432/canchaya_test
       JWT_SECRET: secreto-solo-para-ci
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
           cache-dependency-path: backend/package-lock.json
 
       - run: npm ci
       - run: npm run lint --if-present
+      - name: Validar la especificación OpenAPI (Spectral)
+        run: npm run docs:lint
+      - name: Cobertura de la documentación de la API (mínimo 90 %)
+        run: npm run docs:cobertura
       - name: Aplicar esquema a la base de pruebas
         run: npm run migrate
       - name: Pruebas con cobertura
@@ -64,7 +68,7 @@ jobs:
 
       - name: Publicar reportes
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: backend-reports
           if-no-files-found: error
@@ -77,11 +81,11 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
@@ -95,18 +99,18 @@ jobs:
     if: always() && needs.backend.result == 'success' && needs.frontend.result == 'success'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: backend-reports
           path: artifacts-descarga/backend-reports
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: "20"
+          node-version: "22"
 
       - name: Alinear el LCOV con la raíz
         run: |
@@ -132,7 +136,7 @@ jobs:
     env:
       JWT_SECRET: secreto-solo-para-ci
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Construir y levantar servicios
         run: docker compose up -d --build --wait --wait-timeout 180
@@ -145,9 +149,9 @@ jobs:
       - name: Cargar canchas de ejemplo en la base temporal
         run: docker compose exec -T backend node src/seed/seedCanchas.js
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
           cache-dependency-path: backend/package-lock.json
 
@@ -180,7 +184,7 @@ jobs:
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Desplegar con Docker Compose
         run: docker compose up -d --build --wait --wait-timeout 180

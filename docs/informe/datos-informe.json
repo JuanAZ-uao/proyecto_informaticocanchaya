@@ -1,0 +1,11 @@
+{
+  "repo": "https://github.com/JuanAZ-uao/proyecto_informaticocanchaya",
+  "prs": [
+    { "n": 1, "titulo": "Agrega flujo de ramas y pipeline inicial de GitHub Actions", "hu": "Tarea técnica de CI/CD (antecedente de US-20)", "autor": "Juan Sebastián Castillo (Juansec01)", "revisor": "No registrado en GitHub", "metodo": "Cerrado sin fusionar en GitHub; el contenido se integró con git merge local en sprint_2", "base": "sprint_2", "estado": "Cerrado" },
+    { "n": 2, "titulo": "Agrega validación de disponibilidad (US-08)", "hu": "US-08", "autor": "Juan Sebastián Castillo (Juansec01)", "revisor": "Fusionó JuanAZ-uao; sin comentarios de revisión", "metodo": "Integración local (fast-forward) y push; GitHub lo marcó Merged", "base": "sprint_3", "estado": "Fusionado" },
+    { "n": 3, "titulo": "Us 11,18,19,20", "hu": "US-11, US-18, US-19, US-20", "autor": "Juan Esteban Panesso (JuanAZ-uao)", "revisor": "Sin revisión registrada; 8 de 8 checks de CI en verde", "metodo": "Create a merge commit", "base": "sprint_4", "estado": "Fusionado" },
+    { "n": 4, "titulo": "(US-13): agrega historial de reservas del usuario", "hu": "US-13", "autor": "Juan Sebastián Castillo (Juansec01)", "revisor": "Fusionó JuanAZ-uao; sin comentarios de revisión", "metodo": "Create a merge commit", "base": "sprint_4", "estado": "Fusionado" },
+    { "n": 5, "titulo": "Como usuario autenticado, quiero tener varias reservas activas al mismo tiempo…", "hu": "US-12", "autor": "Samuel Ríos (commit de la HU) · PR abierto por JuanAZ-uao", "revisor": "Fusionó JuanAZ-uao; sin comentarios de revisión", "metodo": "Create a merge commit (tras resolver un conflicto)", "base": "sprint_4", "estado": "Fusionado" },
+    { "n": 6, "titulo": "Us 21 sonar qube y continuacion de pruebas qa", "hu": "US-21", "autor": "Byron Zapata (commits) · PR abierto por JuanAZ-uao", "revisor": "Fusionó JuanAZ-uao; sin comentarios de revisión", "metodo": "Create a merge commit", "base": "sprint_4", "estado": "Fusionado" }
+  ]
+}

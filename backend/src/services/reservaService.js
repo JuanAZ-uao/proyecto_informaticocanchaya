@@ -4,11 +4,13 @@ const usuarioRepository = require('../repositories/usuarioRepository');
 const emailService = require('./emailService');
 const temporizadorService = require('./temporizadorReservaService');
 const retencionService = require('./retencionService');
+const { validarFranjaEnHorario } = require('./horarioReservaService');
 const ErrorDeAplicacion = require('../utils/ErrorDeAplicacion');
 const { esMomentoPasado } = require('../utils/fechaHora');
 const env = require('../config/env');
 
-const CODIGO_VIOLACION_UNICA = '23505';
+// 23505: índice único (misma franja). 23P01: restricción de exclusión (franjas que se solapan).
+const CODIGOS_FRANJA_OCUPADA = ['23505', '23P01'];
 const MENSAJE_HORA_PASADA = 'No se pueden reservar fechas u horas pasadas';
 const MENSAJE_SOLAPE_USUARIO = 'Ya tienes una reserva en ese horario';
 
@@ -29,6 +31,8 @@ async function crearReserva({ canchaId, usuarioId, fecha, horaInicio, horaFin })
   if (horaFin <= horaInicio) {
     throw new ErrorDeAplicacion('horaFin debe ser posterior a horaInicio', 400);
   }
+
+  await validarFranjaEnHorario(canchaId, { fecha, horaInicio, horaFin });
 
   // US-12: el usuario puede tener varias reservas activas (en cualquier cancha), pero
   // no dos que se solapen en el tiempo, y hasta un máximo configurable de simultáneas.
@@ -52,7 +56,7 @@ async function crearReserva({ canchaId, usuarioId, fecha, horaInicio, horaFin })
   try {
     reserva = await reservaRepository.crear({ canchaId, usuarioId, fecha, horaInicio, horaFin });
   } catch (error) {
-    if (error.code === CODIGO_VIOLACION_UNICA) {
+    if (CODIGOS_FRANJA_OCUPADA.includes(error.code)) {
       throw new ErrorDeAplicacion('El horario ya no está disponible', 409);
     }
 
@@ -95,7 +99,7 @@ function enviarCorreoConfirmacion(usuarioId, reserva) {
 }
 
 async function listarReservasDeUsuario(usuarioId) {
-  return reservaRepository.listarPorUsuario(usuarioId);
+  return reservaRepository.listarTodasPorUsuario(usuarioId);
 }
 
 async function cancelarReserva(id, usuarioId) {

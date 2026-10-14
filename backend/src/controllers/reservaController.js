@@ -36,4 +36,21 @@ async function listarMias(req, res, next) {
   }
 }
 
-module.exports = { crear, cancelar, listarMias };
+// US-13: historial paginado con filtros (periodo, estado, pagina, limite).
+async function listarHistorial(req, res, next) {
+  try {
+    const { periodo, estado, pagina, limite } = req.query;
+    const resultado = await reservaService.listarMisReservas({
+      usuarioId: req.usuarioId,
+      periodo,
+      estado: estado || null,
+      pagina,
+      limite,
+    });
+    return res.status(200).json(resultado);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+module.exports = { crear, cancelar, listarMias, listarHistorial };

@@ -1,0 +1,12 @@
+# Reglas de validación de la especificación OpenAPI (RNF-07). Se ejecuta con "npm run docs:lint" y en el pipeline.
+extends: ["spectral:oas"]
+rules:
+  # La documentación está escrita en español.
+  info-contact: off
+  operation-tag-defined: error
+  operation-operationId: error
+  operation-description: error
+  operation-success-response: error
+  no-$ref-siblings: off
+  # Los tags de Socket.IO no tienen operaciones HTTP a propósito.
+  oas3-unused-component: warn

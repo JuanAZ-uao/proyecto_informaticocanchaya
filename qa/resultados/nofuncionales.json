@@ -1,8 +1,8 @@
 {
   "clave": "nofuncionales",
   "titulo": "Pruebas no funcionales",
-  "inicio": "2026-10-11T19:56:40.285Z",
-  "fin": "2026-10-11T20:02:28.825Z",
+  "inicio": "2026-10-14T06:00:07.478Z",
+  "fin": "2026-10-14T06:03:53.236Z",
   "casos": [
     {
       "tipo": "No funcional",
@@ -24,36 +24,36 @@
       ],
       "esperado": "El p95 de todos los endpoints es menor a 2000 ms (objetivo) y no hay errores 5xx.",
       "estado": "APROBADA",
-      "duracionMs": 5471,
+      "duracionMs": 3160,
       "resultado": [
         {
           "ok": true,
-          "texto": "GET /api/canchas: p95 11 ms (< 2000 ms), sin errores → p50 4 ms · máx 65 ms"
+          "texto": "GET /api/canchas: p95 6 ms (< 2000 ms), sin errores → p50 3 ms · máx 7 ms"
         },
         {
           "ok": true,
-          "texto": "GET /api/canchas/:id: p95 15 ms (< 2000 ms), sin errores → p50 6 ms · máx 24 ms"
+          "texto": "GET /api/canchas/:id: p95 7 ms (< 2000 ms), sin errores → p50 4 ms · máx 12 ms"
         },
         {
           "ok": true,
-          "texto": "GET /api/canchas/:id/disponibilidad: p95 21 ms (< 2000 ms), sin errores → p50 6 ms · máx 22 ms"
+          "texto": "GET /api/canchas/:id/disponibilidad: p95 9 ms (< 2000 ms), sin errores → p50 4 ms · máx 30 ms"
         },
         {
           "ok": true,
-          "texto": "GET /api/reservas/mias: p95 12 ms (< 2000 ms), sin errores → p50 4 ms · máx 18 ms"
+          "texto": "GET /api/reservas/mias: p95 9 ms (< 2000 ms), sin errores → p50 4 ms · máx 21 ms"
         },
         {
           "ok": true,
-          "texto": "POST /api/auth/login: p95 227 ms (< 2000 ms), sin errores → p50 204 ms · máx 268 ms"
+          "texto": "POST /api/auth/login: p95 114 ms (< 2000 ms), sin errores → p50 94 ms · máx 205 ms"
         }
       ],
       "evidencias": [
         {
           "titulo": "Latencias medidas",
-          "texto": "Endpoint\tn\tp50\tp95\tmáx\terrores 5xx\nGET /api/canchas\t60\t4 ms\t11 ms\t65 ms\t0\nGET /api/canchas/:id\t60\t6 ms\t15 ms\t24 ms\t0\nGET /api/canchas/:id/disponibilidad\t60\t6 ms\t21 ms\t22 ms\t0\nGET /api/reservas/mias\t60\t4 ms\t12 ms\t18 ms\t0\nPOST /api/auth/login\t20\t204 ms\t227 ms\t268 ms\t0"
+          "texto": "Endpoint\tn\tp50\tp95\tmáx\terrores 5xx\nGET /api/canchas\t60\t3 ms\t6 ms\t7 ms\t0\nGET /api/canchas/:id\t60\t4 ms\t7 ms\t12 ms\t0\nGET /api/canchas/:id/disponibilidad\t60\t4 ms\t9 ms\t30 ms\t0\nGET /api/reservas/mias\t60\t4 ms\t9 ms\t21 ms\t0\nPOST /api/auth/login\t20\t94 ms\t114 ms\t205 ms\t0"
         }
       ],
-      "ejecutadaEn": "2026-10-11T19:56:46.760Z"
+      "ejecutadaEn": "2026-10-14T06:00:11.072Z"
     },
     {
       "tipo": "No funcional",
@@ -75,7 +75,7 @@
       ],
       "esperado": "p95 menor a 2000 ms y cero errores 5xx.",
       "estado": "APROBADA",
-      "duracionMs": 1345,
+      "duracionMs": 575,
       "resultado": [
         {
           "ok": true,
@@ -83,11 +83,11 @@
         },
         {
           "ok": true,
-          "texto": "p95 menor a 2000 ms → p50 189 ms · p95 496 ms · máx 573 ms"
+          "texto": "p95 menor a 2000 ms → p50 86 ms · p95 180 ms · máx 205 ms"
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:56:48.108Z"
+      "ejecutadaEn": "2026-10-14T06:00:11.649Z"
     },
     {
       "tipo": "No funcional",
@@ -110,23 +110,23 @@
       ],
       "esperado": "El listado queda usable en menos de 2 s en el p95; el detalle (incluida la conexión del socket) en menos de 3 s.",
       "estado": "APROBADA",
-      "duracionMs": 18466,
+      "duracionMs": 7314,
       "resultado": [
         {
           "ok": true,
-          "texto": "Listado usable en menos de 2 s (p95) → p50 610 ms · p95 775 ms · máx 775 ms"
+          "texto": "Listado usable en menos de 2 s (p95) → p50 175 ms · p95 236 ms · máx 236 ms"
         },
         {
           "ok": true,
-          "texto": "Detalle con temporizador en menos de 3 s (p95) → p50 357 ms · p95 829 ms · máx 829 ms"
+          "texto": "Detalle con temporizador en menos de 3 s (p95) → p50 187 ms · p95 249 ms · máx 249 ms"
         },
         {
           "ok": null,
-          "texto": "DOMContentLoaded del listado: mediana 68 ms"
+          "texto": "DOMContentLoaded del listado: mediana 18 ms"
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:57:06.574Z"
+      "ejecutadaEn": "2026-10-14T06:00:18.965Z"
     },
     {
       "tipo": "No funcional",
@@ -144,15 +144,15 @@
       ],
       "esperado": "El JavaScript principal pesa menos de 500 KB sin comprimir (menos de 150 KB con gzip) y el CSS menos de 60 KB.",
       "estado": "OBSERVACIÓN",
-      "duracionMs": 78,
+      "duracionMs": 28,
       "resultado": [
         {
           "ok": true,
-          "texto": "JavaScript: < 500 KB (< 150 KB gzip) → 313 KB · 103 KB gzip"
+          "texto": "JavaScript: < 500 KB (< 150 KB gzip) → 316 KB · 104 KB gzip"
         },
         {
           "ok": true,
-          "texto": "CSS: < 60 KB → 28 KB · 6 KB gzip"
+          "texto": "CSS: < 60 KB → 30 KB · 6 KB gzip"
         },
         {
           "ok": true,
@@ -164,7 +164,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:57:06.653Z"
+      "ejecutadaEn": "2026-10-14T06:00:18.993Z"
     },
     {
       "tipo": "No funcional",
@@ -188,11 +188,11 @@
       ],
       "esperado": "100/100 conexiones; 99/99 reciben cada aviso exactamente una vez; 1 retención y 1 reserva ganadoras; una sola fila en la base.",
       "estado": "APROBADA",
-      "duracionMs": 54569,
+      "duracionMs": 32586,
       "resultado": [
         {
           "ok": true,
-          "texto": "100/100 conexiones simultáneas recibieron su temporizador (768 ms)"
+          "texto": "100/100 conexiones simultáneas recibieron su temporizador (452 ms)"
         },
         {
           "ok": true,
@@ -200,7 +200,7 @@
         },
         {
           "ok": true,
-          "texto": "Aviso \"franja A en proceso de reserva\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 424 ms)"
+          "texto": "Aviso \"franja A en proceso de reserva\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 309 ms)"
         },
         {
           "ok": true,
@@ -208,7 +208,7 @@
         },
         {
           "ok": true,
-          "texto": "Aviso \"franja B en proceso de reserva\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 303 ms)"
+          "texto": "Aviso \"franja B en proceso de reserva\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 320 ms)"
         },
         {
           "ok": true,
@@ -220,11 +220,11 @@
         },
         {
           "ok": true,
-          "texto": "Aviso \"franja B reservada\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 327 ms)"
+          "texto": "Aviso \"franja B reservada\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 313 ms)"
         },
         {
           "ok": true,
-          "texto": "Aviso \"franja A liberada\" al salir el usuario: 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 10433 ms)"
+          "texto": "Aviso \"franja A liberada\" al salir el usuario: 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 10428 ms)"
         },
         {
           "ok": true,
@@ -232,7 +232,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T19:58:01.223Z"
+      "ejecutadaEn": "2026-10-14T06:00:51.580Z"
     },
     {
       "tipo": "No funcional",
@@ -254,7 +254,7 @@
       ],
       "esperado": "Todas las verificaciones correctas (sin eventos perdidos ni duplicados) con 250 clientes.",
       "estado": "APROBADA",
-      "duracionMs": 123005,
+      "duracionMs": 63572,
       "resultado": [
         {
           "ok": true,
@@ -262,20 +262,20 @@
         },
         {
           "ok": null,
-          "texto": "Conexión de 250 clientes: 250/250 en 2456 ms"
+          "texto": "Conexión de 250 clientes: 250/250 en 1139 ms"
         },
         {
           "ok": null,
-          "texto": "Consumo del backend tras la prueba: canchaya-qa-backend-1 66.1MiB / 7.74GiB 0.00%"
+          "texto": "Consumo del backend tras la prueba: canchaya-qa-backend-1 71.71MiB / 7.74GiB 2.65%"
         }
       ],
       "evidencias": [
         {
           "titulo": "Salida de la prueba",
-          "texto": "Prueba de carga US-18 contra http://localhost:4300/api con 250 clientes\n[OK]    250/250 conexiones simultáneas recibieron su temporizador (2456 ms)\n[OK]    El primer cliente retiene la franja A y el servidor lo confirma\n[OK]    Aviso \"franja A en proceso de reserva\": 249/249 lo recibieron una vez (perdidos 0, duplicados 0, 317 ms)\n[OK]    249 retenciones simultáneas de la franja B: 1 aceptada, 248 rechazadas con FRANJA_RETENIDA\n[OK]    Aviso \"franja B en proceso de reserva\": 249/249 lo recibieron una vez (perdidos 0, duplicados 0, 310 ms)\n[OK]    249 reservas simultáneas de la franja B: 1 creada (201), 248 rechazadas (409)\n[OK]    En la base quedó 1 reserva para la franja B (sin duplicados)\n[OK]    Aviso \"franja B reservada\": 249/249 lo recibieron una vez (perdidos 0, duplicados 0, 300 ms)\n[OK]    Aviso \"franja A liberada\" al salir el usuario: 249/249 lo recibieron una vez (perdidos 0, duplicados 0, 10448 ms)\n9/9 verificaciones correctas"
+          "texto": "> node scripts/pruebaCargaSockets.js || echo 'Prueba de carga omitida o archivo no encontrado.'\nPrueba de carga US-18 contra http://localhost:4300/api con 250 clientes\n[OK]    250/250 conexiones simultáneas recibieron su temporizador (1139 ms)\n[OK]    El primer cliente retiene la franja A y el servidor lo confirma\n[OK]    Aviso \"franja A en proceso de reserva\": 249/249 lo recibieron una vez (perdidos 0, duplicados 0, 425 ms)\n[OK]    249 retenciones simultáneas de la franja B: 1 aceptada, 248 rechazadas con FRANJA_RETENIDA\n[OK]    Aviso \"franja B en proceso de reserva\": 249/249 lo recibieron una vez (perdidos 0, duplicados 0, 301 ms)\n[OK]    249 reservas simultáneas de la franja B: 1 creada (201), 248 rechazadas (409)\n[OK]    En la base quedó 1 reserva para la franja B (sin duplicados)\n[OK]    Aviso \"franja B reservada\": 249/249 lo recibieron una vez (perdidos 0, duplicados 0, 310 ms)\n[OK]    Aviso \"franja A liberada\" al salir el usuario: 249/249 lo recibieron una vez (perdidos 0, duplicados 0, 10388 ms)\n9/9 verificaciones correctas"
         }
       ],
-      "ejecutadaEn": "2026-10-11T20:00:04.230Z"
+      "ejecutadaEn": "2026-10-14T06:01:55.153Z"
     },
     {
       "tipo": "No funcional",
@@ -299,7 +299,7 @@
       ],
       "esperado": "10 respuestas 201 (una por franja), 90 respuestas 409, ninguna 5xx; 10 filas confirmadas en la base.",
       "estado": "APROBADA",
-      "duracionMs": 24138,
+      "duracionMs": 19886,
       "resultado": [
         {
           "ok": true,
@@ -319,11 +319,11 @@
         },
         {
           "ok": null,
-          "texto": "Las 100 peticiones simultáneas se resolvieron en 765 ms (p95 individual 738 ms)"
+          "texto": "Las 100 peticiones simultáneas se resolvieron en 537 ms (p95 individual 514 ms)"
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T20:00:28.369Z"
+      "ejecutadaEn": "2026-10-14T06:02:15.040Z"
     },
     {
       "tipo": "No funcional",
@@ -346,7 +346,7 @@
       ],
       "esperado": "El payload solo trae sub, iat y exp; el token manipulado se rechaza (401); A solo ve sus reservas y no puede cancelar las de B (403).",
       "estado": "APROBADA",
-      "duracionMs": 425,
+      "duracionMs": 208,
       "resultado": [
         {
           "ok": true,
@@ -370,7 +370,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T20:00:28.796Z"
+      "ejecutadaEn": "2026-10-14T06:02:15.249Z"
     },
     {
       "tipo": "No funcional",
@@ -391,7 +391,7 @@
       ],
       "esperado": "Ninguna respuesta 5xx ni datos adicionales; las tablas siguen existiendo; el nombre se muestra como texto y no se ejecuta ningún script.",
       "estado": "APROBADA",
-      "duracionMs": 4416,
+      "duracionMs": 2426,
       "resultado": [
         {
           "ok": true,
@@ -415,7 +415,7 @@
         },
         {
           "ok": true,
-          "texto": "Id de cancha con SQL: 400 inmediato (sin ejecutar pg_sleep) → HTTP 400 en 3 ms"
+          "texto": "Id de cancha con SQL: 400 inmediato (sin ejecutar pg_sleep) → HTTP 400 en 2 ms"
         },
         {
           "ok": true,
@@ -440,7 +440,7 @@
           "leyenda": "Barra de navegación con el nombre malicioso mostrado como texto"
         }
       ],
-      "ejecutadaEn": "2026-10-11T20:00:33.212Z"
+      "ejecutadaEn": "2026-10-14T06:02:17.676Z"
     },
     {
       "tipo": "No funcional",
@@ -462,7 +462,7 @@
       ],
       "esperado": "JSON inválido → 400; cuerpo excesivo → 413; ruta inexistente → 404 JSON; ningún mensaje contiene \"stack\", rutas del servidor o SQL.",
       "estado": "APROBADA",
-      "duracionMs": 17,
+      "duracionMs": 16,
       "resultado": [
         {
           "ok": true,
@@ -486,7 +486,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T20:00:33.230Z"
+      "ejecutadaEn": "2026-10-14T06:02:17.693Z"
     },
     {
       "tipo": "No funcional",
@@ -506,7 +506,7 @@
       ],
       "esperado": "El origen permitido recibe Access-Control-Allow-Origin; el ajeno NO la recibe y la respuesta es un 403 claro (no un error 500); las cabeceras X-Content-Type-Options, X-Frame-Options y la ausencia de X-Powered-By son recomendables.",
       "estado": "OBSERVACIÓN",
-      "duracionMs": 8,
+      "duracionMs": 9,
       "resultado": [
         {
           "ok": true,
@@ -522,15 +522,11 @@
         },
         {
           "ok": "obs",
-          "texto": "La API expone la cabecera \"X-Powered-By: Express\" (revela la tecnología); se recomienda deshabilitarla."
-        },
-        {
-          "ok": "obs",
           "texto": "Faltan cabeceras de seguridad recomendadas: X-Content-Type-Options, X-Frame-Options, Content-Security-Policy, Strict-Transport-Security (se resuelven con el middleware \"helmet\" y la configuración de nginx)."
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T20:00:33.239Z"
+      "ejecutadaEn": "2026-10-14T06:02:17.702Z"
     },
     {
       "tipo": "No funcional",
@@ -550,7 +546,7 @@
       ],
       "esperado": "Después de varios intentos la API debería limitar o bloquear (429).",
       "estado": "APROBADA",
-      "duracionMs": 2136,
+      "duracionMs": 1371,
       "resultado": [
         {
           "ok": true,
@@ -562,7 +558,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T20:00:35.375Z"
+      "ejecutadaEn": "2026-10-14T06:02:19.074Z"
     },
     {
       "tipo": "No funcional",
@@ -581,11 +577,11 @@
       ],
       "esperado": "Sin credenciales en el repositorio y sin vulnerabilidades altas o críticas en dependencias de producción.",
       "estado": "OBSERVACIÓN",
-      "duracionMs": 5552,
+      "duracionMs": 5190,
       "resultado": [
         {
           "ok": true,
-          "texto": "Ninguno de los 102 archivos versionados contiene credenciales → sin coincidencias"
+          "texto": "Ninguno de los 145 archivos versionados contiene credenciales → sin coincidencias"
         },
         {
           "ok": "obs",
@@ -593,7 +589,11 @@
         },
         {
           "ok": true,
-          "texto": "backend: sin vulnerabilidades altas ni críticas en producción → crítica 0 · alta 0 · moderada 0 · baja 0"
+          "texto": "backend: sin vulnerabilidades altas ni críticas en producción → crítica 0 · alta 0 · moderada 1 · baja 0"
+        },
+        {
+          "ok": "obs",
+          "texto": "backend: 1 vulnerabilidades moderadas/bajas pendientes de revisión (npm audit)."
         },
         {
           "ok": true,
@@ -601,7 +601,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T20:00:40.928Z"
+      "ejecutadaEn": "2026-10-14T06:02:24.265Z"
     },
     {
       "tipo": "No funcional",
@@ -622,7 +622,7 @@
       ],
       "esperado": "Cero violaciones de impacto crítico o grave en todas las pantallas.",
       "estado": "APROBADA",
-      "duracionMs": 21554,
+      "duracionMs": 16251,
       "resultado": [
         {
           "ok": true,
@@ -635,7 +635,7 @@
           "texto": "Pantalla\tCrítico\tGrave\tModerado\tLeve\nLogin\t0\t0\t0\t0\nRegistro\t0\t0\t0\t0\nRecuperar contraseña\t0\t0\t0\t0\nListado de canchas\t0\t0\t0\t0\nDetalle de cancha\t0\t0\t0\t0\nMis reservas\t0\t0\t0\t0"
         }
       ],
-      "ejecutadaEn": "2026-10-11T20:01:02.486Z"
+      "ejecutadaEn": "2026-10-14T06:02:40.519Z"
     },
     {
       "tipo": "No funcional",
@@ -656,7 +656,7 @@
       ],
       "esperado": "Sin scroll horizontal en ninguna combinación de pantalla y ancho; contenido principal visible.",
       "estado": "APROBADA",
-      "duracionMs": 50465,
+      "duracionMs": 38299,
       "resultado": [
         {
           "ok": true,
@@ -685,7 +685,7 @@
           "texto": "Pantalla\t360 px\t390 px\t768 px\t1024 px\t1366 px\t1920 px\nLogin\tOK\tOK\tOK\tOK\tOK\tOK\nRegistro\tOK\tOK\tOK\tOK\tOK\tOK\nListado\tOK\tOK\tOK\tOK\tOK\tOK\nDetalle\tOK\tOK\tOK\tOK\tOK\tOK\nMis reservas\tOK\tOK\tOK\tOK\tOK\tOK"
         }
       ],
-      "ejecutadaEn": "2026-10-11T20:01:52.952Z"
+      "ejecutadaEn": "2026-10-14T06:03:18.819Z"
     },
     {
       "tipo": "No funcional",
@@ -705,7 +705,7 @@
       ],
       "esperado": "Se puede iniciar sesión y elegir un bloque solo con el teclado; los elementos enfocados tienen un indicador visible (outline).",
       "estado": "OBSERVACIÓN",
-      "duracionMs": 3328,
+      "duracionMs": 2317,
       "resultado": [
         {
           "ok": true,
@@ -721,7 +721,7 @@
         },
         {
           "ok": true,
-          "texto": "El campo enfocado muestra un indicador visible → outline: none 3px, sombra: rgba(21, 128, 61, 0.09) 0px 0px 0px 2.96"
+          "texto": "El campo enfocado muestra un indicador visible → outline: none 3px, sombra: rgba(21, 128, 61, 0.07) 0px 0px 0px 2.30"
         },
         {
           "ok": true,
@@ -733,7 +733,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T20:01:56.281Z"
+      "ejecutadaEn": "2026-10-14T06:03:21.137Z"
     },
     {
       "tipo": "No funcional",
@@ -752,23 +752,23 @@
       ],
       "esperado": "El recorrido funciona en los tres motores, con las 5 canchas y el temporizador activo.",
       "estado": "APROBADA",
-      "duracionMs": 18562,
+      "duracionMs": 17930,
       "resultado": [
         {
           "ok": true,
-          "texto": "Chromium 156.0.8078.4: login, 5 canchas y temporizador en marcha → 02:36 → 02:34"
+          "texto": "Chromium 156.0.8078.4: login, 5 canchas y temporizador en marcha → 02:41 → 02:39"
         },
         {
           "ok": true,
-          "texto": "Firefox 157.0: login, 5 canchas y temporizador en marcha → 02:28 → 02:26"
+          "texto": "Firefox 157.0: login, 5 canchas y temporizador en marcha → 02:33 → 02:30"
         },
         {
           "ok": true,
-          "texto": "WebKit 27.2: login, 5 canchas y temporizador en marcha → 02:22 → 02:20"
+          "texto": "WebKit 27.2: login, 5 canchas y temporizador en marcha → 02:27 → 02:25"
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T20:02:14.844Z"
+      "ejecutadaEn": "2026-10-14T06:03:39.067Z"
     },
     {
       "tipo": "No funcional",
@@ -791,11 +791,11 @@
       ],
       "esperado": "Con la base caída: error controlado (5xx con mensaje genérico) en menos de 10 s y sin exponer detalles; al volver la base, la API se recupera en menos de 60 s sin reiniciar el backend.",
       "estado": "APROBADA",
-      "duracionMs": 6717,
+      "duracionMs": 7584,
       "resultado": [
         {
           "ok": true,
-          "texto": "Con la base caída la API responde en menos de 10 s (no se cuelga) → 3407 ms"
+          "texto": "Con la base caída la API responde en menos de 10 s (no se cuelga) → 5016 ms"
         },
         {
           "ok": true,
@@ -807,7 +807,7 @@
         },
         {
           "ok": true,
-          "texto": "Al volver la base, la API se recupera sin reiniciar el backend → 1.1 s"
+          "texto": "Al volver la base, la API se recupera sin reiniciar el backend → 1.0 s"
         },
         {
           "ok": true,
@@ -815,7 +815,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T20:02:21.562Z"
+      "ejecutadaEn": "2026-10-14T06:03:46.652Z"
     },
     {
       "tipo": "No funcional",
@@ -837,7 +837,7 @@
       ],
       "esperado": "Las tres ejecuciones terminan con código 0 y los datos no cambian.",
       "estado": "APROBADA",
-      "duracionMs": 3302,
+      "duracionMs": 2789,
       "resultado": [
         {
           "ok": true,
@@ -845,11 +845,11 @@
         },
         {
           "ok": true,
-          "texto": "Los datos no cambian → 761/23 → 761/23"
+          "texto": "Los datos no cambian → 675/118 → 675/118"
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T20:02:24.865Z"
+      "ejecutadaEn": "2026-10-14T06:03:49.442Z"
     },
     {
       "tipo": "No funcional",
@@ -864,7 +864,7 @@
       "nivel": "API REST",
       "titulo": "Las horas se interpretan en hora de Colombia, no en la del servidor",
       "objetivo": "Verificar que la validación de \"hora pasada\" usa la hora de Colombia (UTC-5) aunque el contenedor corra en UTC.",
-      "datos": "Hora actual en Colombia: 15:02; el contenedor del backend usa UTC.",
+      "datos": "Hora actual en Colombia: 01:03; el contenedor del backend usa UTC.",
       "pasos": [
         "Consultar la zona horaria del contenedor.",
         "Reservar hoy una hora que ya pasó en Colombia pero que en UTC aún no.",
@@ -872,23 +872,19 @@
       ],
       "esperado": "La hora pasada en Colombia se rechaza (400); la hora futura en Colombia se acepta (201).",
       "estado": "APROBADA",
-      "duracionMs": 759,
+      "duracionMs": 322,
       "resultado": [
         {
           "ok": null,
-          "texto": "Zona horaria del contenedor: UTC; hora en Colombia 15:02"
+          "texto": "Zona horaria del contenedor: UTC; hora en Colombia 01:03"
         },
         {
-          "ok": true,
-          "texto": "Hoy 14:00 (ya pasó en Colombia): 400 → HTTP 400"
-        },
-        {
-          "ok": true,
-          "texto": "Hoy 16:00 (futura en Colombia): 201 → HTTP 201"
+          "ok": null,
+          "texto": "La hora actual no permite el escenario (se necesita entre las 02:00 y las 20:59 de Colombia)."
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-11T20:02:25.625Z"
+      "ejecutadaEn": "2026-10-14T06:03:49.765Z"
     },
     {
       "tipo": "No funcional",
@@ -907,7 +903,7 @@
       ],
       "esperado": "Lint sin errores; cobertura de líneas de los servicios del backend de al menos 70 %.",
       "estado": "OBSERVACIÓN",
-      "duracionMs": 3199,
+      "duracionMs": 3470,
       "resultado": [
         {
           "ok": true,
@@ -919,20 +915,20 @@
         },
         {
           "ok": true,
-          "texto": "Cobertura de líneas de los servicios del backend ≥ 70 % → 78.5 % (230/293 líneas)"
+          "texto": "Cobertura de líneas de los servicios del backend ≥ 70 % → 94.4 % (289/306 líneas)"
         },
         {
           "ok": null,
-          "texto": "Cobertura global del backend: líneas 56.49 % · sentencias 56.06 % · funciones 47.97 % · ramas 54.84 %"
+          "texto": "Cobertura global del backend: líneas 71.1 % · sentencias 70.56 % · funciones 67.37 % · ramas 67.06 %"
         }
       ],
       "evidencias": [
         {
           "titulo": "Cobertura por archivo (líneas)",
-          "texto": "src\\app.js\t88.23 %\t15/17\nsrc\\server.js\t0 %\t0/16\nsrc\\config\\corsOrigin.js\t100 %\t11/11\nsrc\\config\\db.js\t72.72 %\t8/11\nsrc\\config\\env.js\t71.42 %\t5/7\nsrc\\controllers\\authController.js\t26.08 %\t6/23\nsrc\\controllers\\canchaController.js\t17.64 %\t3/17\nsrc\\controllers\\reservaController.js\t86.66 %\t13/15\nsrc\\controllers\\temporizadorController.js\t28.57 %\t4/14\nsrc\\db\\migrate.js\t0 %\t0/12\nsrc\\middlewares\\authMiddleware.js\t90.9 %\t10/11\nsrc\\middlewares\\errorHandler.js\t80 %\t4/5\nsrc\\middlewares\\limitadores.js\t100 %\t11/11\nsrc\\middlewares\\validate.js\t71.42 %\t5/7\nsrc\\models\\Cancha.js\t100 %\t4/4\nsrc\\models\\HorarioDisponible.js\t100 %\t4/4\nsrc\\models\\PasswordResetToken.js\t50 %\t2/4\nsrc\\models\\Reserva.js\t100 %\t10/10\nsrc\\models\\Retencion.js\t83.33 %\t5/6\nsrc\\models\\Usuario.js\t100 %\t4/4\nsrc\\repositories\\canchaRepository.js\t12.82 %\t5/39\nsrc\\repositories\\horarioRepository.js\t29.41 %\t5/17\nsrc\\repositories\\passwordResetRepository.js\t33.33 %\t3/9\nsrc\\repositories\\reservaRepository.js\t82.6 %\t19/23\nsrc\\repositories\\retencionRepository.js\t30.43 %\t7/23\nsrc\\repositories\\sesionReservaRepository.js\t15.38 %\t2/13\nsrc\\repositories\\usuarioRepository.js\t63.63 %\t7/11\nsrc\\routes\\authRoutes.js\t100 %\t11/11\nsrc\\routes\\canchaRoutes.js\t100 %\t16/16\nsrc\\routes\\index.js\t100 %\t9/9\nsrc\\routes\\reservaRoutes.js\t100 %\t9/9\nsrc\\seed\\catalogoCanchas.js\t0 %\t0/2\nsrc\\seed\\enriquecerCanchas.js\t0 %\t0/11\nsrc\\seed\\seedCanchas.js\t0 %\t0/20\nsrc\\seed\\seedReservas.js\t0 %\t0/27\nsrc\\services\\authService.js\t31.7 %\t13/41\nsrc\\services\\canchaService.js\t27.77 %\t5/18\nsrc\\services\\emailService.js\t57.14 %\t12/21\nsrc\\services\\horarioReservaService.js\t100 %\t18/18\nsrc\\services\\reservaService.js\t93.87 %\t46/49\nsrc\\services\\retencionService.js\t89.23 %\t58/65\nsrc\\services\\temporizadorReservaService.js\t96.29 %\t78/81\nsrc\\sockets\\temporizadorSocket.js\t0 %\t0/74\nsrc\\utils\\ErrorDeAplicacion.js\t100 %\t4/4\nsrc\\utils\\fechaHora.js\t100 %\t5/5\nsrc\\utils\\jwt.js\t100 %\t5/5\nsrc\\utils\\passwordPolicy.js\t66.66 %\t2/3\nsrc\\utils\\resetToken.js\t50 %\t2/4\nsrc\\utils\\validators\\authValidators.js\t100 %\t7/7\nsrc\\utils\\validators\\canchaValidators.js\t100 %\t5/5\nsrc\\utils\\validators\\reservaValidators.js\t100 %\t6/6"
+          "texto": "src\\app.js\t95.23 %\t20/21\nsrc\\server.js\t0 %\t0/16\nsrc\\config\\corsOrigin.js\t93.33 %\t14/15\nsrc\\config\\db.js\t72.72 %\t8/11\nsrc\\config\\documentacion.js\t100 %\t22/22\nsrc\\config\\env.js\t71.42 %\t5/7\nsrc\\controllers\\authController.js\t91.3 %\t21/23\nsrc\\controllers\\canchaController.js\t88.23 %\t15/17\nsrc\\controllers\\reservaController.js\t90 %\t18/20\nsrc\\controllers\\temporizadorController.js\t78.57 %\t11/14\nsrc\\db\\migrate.js\t0 %\t0/12\nsrc\\middlewares\\authMiddleware.js\t90.9 %\t10/11\nsrc\\middlewares\\errorHandler.js\t80 %\t4/5\nsrc\\middlewares\\limitadores.js\t100 %\t11/11\nsrc\\middlewares\\validate.js\t100 %\t7/7\nsrc\\models\\Cancha.js\t100 %\t4/4\nsrc\\models\\HorarioDisponible.js\t100 %\t4/4\nsrc\\models\\PasswordResetToken.js\t100 %\t4/4\nsrc\\models\\Reserva.js\t100 %\t12/12\nsrc\\models\\Retencion.js\t83.33 %\t5/6\nsrc\\models\\Usuario.js\t100 %\t4/4\nsrc\\repositories\\canchaRepository.js\t33.33 %\t13/39\nsrc\\repositories\\horarioRepository.js\t29.41 %\t5/17\nsrc\\repositories\\passwordResetRepository.js\t88.88 %\t8/9\nsrc\\repositories\\reservaRepository.js\t94.87 %\t37/39\nsrc\\repositories\\retencionRepository.js\t39.13 %\t9/23\nsrc\\repositories\\sesionReservaRepository.js\t15.38 %\t2/13\nsrc\\repositories\\usuarioRepository.js\t81.81 %\t9/11\nsrc\\routes\\authRoutes.js\t100 %\t11/11\nsrc\\routes\\canchaRoutes.js\t100 %\t16/16\nsrc\\routes\\index.js\t100 %\t9/9\nsrc\\routes\\reservaRoutes.js\t100 %\t10/10\nsrc\\seed\\catalogoCanchas.js\t0 %\t0/2\nsrc\\seed\\enriquecerCanchas.js\t0 %\t0/11\nsrc\\seed\\seedCanchas.js\t0 %\t0/20\nsrc\\seed\\seedReservas.js\t0 %\t0/27\nsrc\\services\\authService.js\t90.24 %\t37/41\nsrc\\services\\canchaService.js\t94.44 %\t17/18\nsrc\\services\\emailService.js\t85.71 %\t18/21\nsrc\\services\\horarioReservaService.js\t100 %\t18/18\nsrc\\services\\reservaService.js\t96.77 %\t60/62\nsrc\\services\\retencionService.js\t93.84 %\t61/65\nsrc\\services\\temporizadorReservaService.js\t96.29 %\t78/81\nsrc\\sockets\\temporizadorSocket.js\t0 %\t0/74\nsrc\\utils\\ErrorDeAplicacion.js\t100 %\t4/4\nsrc\\utils\\fechaHora.js\t100 %\t5/5\nsrc\\utils\\jwt.js\t100 %\t5/5\nsrc\\utils\\passwordPolicy.js\t66.66 %\t2/3\nsrc\\utils\\resetToken.js\t100 %\t4/4\nsrc\\utils\\validators\\authValidators.js\t100 %\t7/7\nsrc\\utils\\validators\\canchaValidators.js\t100 %\t5/5\nsrc\\utils\\validators\\reservaValidators.js\t100 %\t8/8"
         }
       ],
-      "ejecutadaEn": "2026-10-11T20:02:28.825Z"
+      "ejecutadaEn": "2026-10-14T06:03:53.236Z"
     }
   ]
 }

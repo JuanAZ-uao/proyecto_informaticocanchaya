@@ -64,7 +64,7 @@ export default function MisReservasPage() {
       }
     }
 
-    cargarReservas();
+    void cargarReservas();
     return () => {
       activo = false;
     };
@@ -196,7 +196,7 @@ export default function MisReservasPage() {
               </ul>
 
               <p className="reserva-item-id">
-                Reserva <code>{reserva.id}</code>
+                Reserva <code>{reserva.codigo ?? reserva.id}</code>
               </p>
             </li>
           ))}

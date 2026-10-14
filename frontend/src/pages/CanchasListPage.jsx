@@ -31,7 +31,7 @@ export default function CanchasListPage() {
       }
     }
 
-    cargarCanchas();
+    void cargarCanchas();
     return () => {
       activo = false;
     };

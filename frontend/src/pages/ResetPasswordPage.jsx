@@ -27,7 +27,7 @@ export default function ResetPasswordPage() {
     setCargando(true);
     try {
       await restablecerPassword({ token, nuevaPassword });
-      navigate('/login', { state: { registroExitoso: false } });
+      void navigate('/login', { state: { registroExitoso: false } });
     } catch (err) {
       setError(extraerMensajeError(err, 'No fue posible restablecer la contraseña'));
     } finally {

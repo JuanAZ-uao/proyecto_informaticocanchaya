@@ -18,7 +18,7 @@ const tieneEntorno = Boolean(process.env.DATABASE_URL && process.env.JWT_SECRET)
 
 if (!tieneEntorno) {
   describe('Reservas múltiples por usuario (US-12, contra Neon real)', () => {
-    it.skip('requiere DATABASE_URL y JWT_SECRET configuradas para ejecutarse', () => {});
+    it.todo('requiere DATABASE_URL y JWT_SECRET configuradas para ejecutarse');
   });
 } else {
   const request = require('supertest');
@@ -60,6 +60,13 @@ if (!tieneEntorno) {
       canchaUnoId = canchas.rows[0].id;
       canchaDosId = canchas.rows[1].id;
       canchasCreadas.push(canchaUnoId, canchaDosId);
+
+      // Horario de atención diario (la API valida que la reserva caiga dentro del horario de la cancha).
+      await pool.query(
+        `INSERT INTO horarios_disponibles (cancha_id, dia_semana, hora_inicio, hora_fin)
+         SELECT c, dia, '06:00', '22:00' FROM unnest($1::uuid[]) AS c, generate_series(0, 6) AS dia`,
+        [canchasCreadas]
+      );
     });
 
     afterAll(async () => {

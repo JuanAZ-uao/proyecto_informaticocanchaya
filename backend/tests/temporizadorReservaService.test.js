@@ -125,22 +125,45 @@ describe('temporizadorReservaService', () => {
     temporizadorService.registrarSocket('usuario-8', 'cancha-8', 'socket-b');
 
     await temporizadorService.quitarSocket('usuario-8', 'cancha-8', 'socket-a');
-    // Todavía queda socket-b conectado: la sesión debe seguir activa.
+    // Todavía queda socket-b conectado: aun pasado el lapso de gracia la sesión debe seguir activa.
+    jest.advanceTimersByTime(temporizadorService.GRACIA_DESCONEXION_MS + 1000);
     await expect(temporizadorService.completarSesion('usuario-8', 'cancha-8')).resolves.toMatchObject({
       estado: 'completado',
     });
   });
 
-  it('US-18: al salir el último socket emite "terminada" (para liberar la franja) y borra la sesión', async () => {
+  it('US-18: al salir el último socket, tras el lapso de gracia emite "terminada" (libera la franja) y borra la sesión', async () => {
     const escuchaTerminada = jest.fn();
     temporizadorService.eventos.on('terminada', escuchaTerminada);
     await temporizadorService.iniciarOTomarSesion('usuario-12', 'cancha-12');
     temporizadorService.registrarSocket('usuario-12', 'cancha-12', 'socket-a');
 
     await temporizadorService.quitarSocket('usuario-12', 'cancha-12', 'socket-a');
+    expect(escuchaTerminada).not.toHaveBeenCalled();
+
+    jest.advanceTimersByTime(temporizadorService.GRACIA_DESCONEXION_MS + 1);
+    await Promise.resolve();
 
     expect(escuchaTerminada).toHaveBeenCalledWith({ usuarioId: 'usuario-12', canchaId: 'cancha-12', motivo: 'salio' });
     expect(sesionRepository.eliminar).toHaveBeenCalledWith('usuario-12', 'cancha-12');
+    temporizadorService.eventos.off('terminada', escuchaTerminada);
+  });
+
+  it('DEF-05: si el usuario reconecta dentro del lapso de gracia, la sesión sigue con el mismo expiresAt', async () => {
+    const escuchaTerminada = jest.fn();
+    temporizadorService.eventos.on('terminada', escuchaTerminada);
+    const original = await temporizadorService.iniciarOTomarSesion('usuario-13', 'cancha-13');
+    temporizadorService.registrarSocket('usuario-13', 'cancha-13', 'socket-a');
+
+    await temporizadorService.quitarSocket('usuario-13', 'cancha-13', 'socket-a');
+    jest.advanceTimersByTime(3000);
+    const retomada = await temporizadorService.iniciarOTomarSesion('usuario-13', 'cancha-13');
+    temporizadorService.registrarSocket('usuario-13', 'cancha-13', 'socket-b');
+    jest.advanceTimersByTime(temporizadorService.GRACIA_DESCONEXION_MS + 1000);
+
+    expect(retomada.expiresAt).toBe(original.expiresAt);
+    expect(escuchaTerminada).not.toHaveBeenCalled();
+    await expect(temporizadorService.completarSesion('usuario-13', 'cancha-13')).resolves.toMatchObject({ estado: 'completado' });
     temporizadorService.eventos.off('terminada', escuchaTerminada);
   });
 

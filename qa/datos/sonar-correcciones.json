@@ -1,0 +1,20 @@
+[
+  {
+    "regla": "javascript:S5689 (vulnerabilidad, menor)",
+    "archivo": "backend/src/app.js:9",
+    "problema": "Express anuncia su tecnología en la cabecera X-Powered-By, lo que facilita a un atacante buscar vulnerabilidades de esa versión. La misma observación la había reportado la prueba NF-11.",
+    "correccion": "app.disable('x-powered-by') al crear la aplicación."
+  },
+  {
+    "regla": "javascript:S2699 (code smell, bloqueante)",
+    "archivo": "backend/tests/*.integration.test.js (4 archivos)",
+    "problema": "El marcador de «pruebas omitidas cuando no hay base de datos» era un it.skip con cuerpo vacío; SonarQube lo toma como una prueba sin aserciones. Es un falso positivo del análisis, pero dejaba un hallazgo bloqueante.",
+    "correccion": "Se reemplazó por it.todo(...), que declara la prueba pendiente sin cuerpo, con el mismo mensaje."
+  },
+  {
+    "regla": "javascript:S9383 (bug, mayor)",
+    "archivo": "frontend/src/components/layout/Navbar.jsx y 6 páginas (11 llamadas)",
+    "problema": "Llamadas a funciones asíncronas (cargarCancha, cargarOcupados, cargarReservas, cargarCanchas, recargarOcupados) y a navigate() sin await ni catch. Las funciones de carga ya capturan sus errores internamente, así que no había un fallo real, pero una promesa rechazada fuera de ese try/catch quedaría sin tratar.",
+    "correccion": "Se marcan explícitamente como ignoradas con el operador void, tal como indica la regla. No cambia el comportamiento."
+  }
+]

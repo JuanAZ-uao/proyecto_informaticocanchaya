@@ -17,7 +17,7 @@ export default function Navbar() {
 
   function handleLogout() {
     logout();
-    navigate('/login');
+    void navigate('/login');
   }
 
   return (

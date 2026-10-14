@@ -1,0 +1,1236 @@
+openapi: 3.0.3
+info:
+  title: CanchaYa API
+  version: 1.0.0
+  description: |
+    API REST de **CanchaYa**, plataforma para consultar canchas sintéticas y reservar franjas de una hora.
+
+    ## Cómo autenticarse
+    1. Cree una cuenta con `POST /api/auth/registro`.
+    2. Inicie sesión con `POST /api/auth/login`: la respuesta trae un `token` JWT.
+    3. Pulse **Authorize** (arriba a la derecha), pegue **solo el token** (Swagger UI agrega el prefijo `Bearer`) y confirme.
+       Todos los endpoints con candado quedan autenticados para la opción **Try it out**.
+
+    ## Convenciones
+    - Las fechas son `YYYY-MM-DD` y las horas `HH:mm`, en hora de Colombia (UTC-5).
+    - Las reservas son bloques de **exactamente 1 hora**, alineados a la hora de apertura de la cancha.
+    - Todo error responde `{ "mensaje": "..." }`; los errores de negocio agregan un `codigo` estable que el cliente puede usar para decidir qué mostrar.
+    - Un error de validación (400) agrega la lista `errores` con el campo y el motivo.
+
+    ## Tiempo real (Socket.IO)
+    El temporizador de 180 s (US-17) y la retención de franjas con disponibilidad en vivo (US-18) usan Socket.IO sobre el mismo servidor.
+    Los eventos están descritos en la sección **Socket.IO (tiempo real)** de esta página y en
+    [docs/api/eventos-socket.md](https://github.com/JuanAZ-uao/proyecto_informaticocanchaya/blob/sprint_4/docs/api/eventos-socket.md).
+  contact:
+    name: Equipo CanchaYa
+  license:
+    name: Uso académico
+servers:
+  - url: http://localhost:4000
+    description: Desarrollo local (npm run dev)
+  - url: http://localhost:4100
+    description: Docker Compose (staging local)
+tags:
+  - name: Sistema
+    description: Estado del servicio.
+  - name: Autenticación
+    description: Registro, inicio de sesión y recuperación de contraseña.
+  - name: Canchas
+    description: Catálogo, detalle y disponibilidad por fecha (US-06, US-07, US-08).
+  - name: Reservas
+    description: Crear, confirmar, consultar y cancelar reservas (US-09, US-10, US-11, US-12, US-13).
+  - name: Temporizador
+    description: Paso intermedio entre elegir la franja y confirmar (US-17, US-18).
+  - name: Socket.IO (tiempo real)
+    description: |
+      Los eventos en tiempo real **no son endpoints HTTP**, por eso no aparecen como operaciones. Se documentan aquí.
+
+      **Conexión:** `io("<host>", { auth: { token: "<JWT>" }, query: { canchaId: "<uuid>" } })`. Un socket corresponde a una cancha.
+
+      | Error de conexión (`connect_error`) | Causa |
+      |---|---|
+      | `No autenticado` | No se envió `auth.token`. |
+      | `Token inválido o expirado` | El JWT no es válido o ya venció. |
+
+      Si falta `canchaId`, el servidor emite `temporizador:error` y cierra la conexión.
+
+      ### Eventos que envía el cliente (con *ack*)
+      | Evento | Payload | Respuesta (ack) |
+      |---|---|---|
+      | `retencion:solicitar` | `{ "fecha": "2026-10-22", "horaInicio": "10:00", "horaFin": "11:00" }` | Éxito: `{ "ok": true, "retencion": { "fecha", "horaInicio", "horaFin", "expiresAt" } }`. Error: `{ "ok": false, "error": { "codigo", "mensaje" } }` |
+      | `retencion:liberar` | `null` | `{ "ok": true }` |
+      | `temporizador:reiniciar` | `null` | `{ "expiresAt": <ms epoch>, "ahora": <ms epoch> }` |
+
+      ### Eventos que envía el servidor
+      | Evento | Destinatario | Payload | Cuándo |
+      |---|---|---|---|
+      | `temporizador:inicio` | El usuario (todas sus pestañas) | `{ "expiresAt", "estado": "activo", "ahora" }` | Al conectarse, reconectarse o reiniciar |
+      | `temporizador:sync` | El usuario | `{ "expiresAt", "ahora" }` | Cada 5 s con la sesión activa |
+      | `temporizador:expirado` | El usuario | — | A los 180 s |
+      | `temporizador:error` | El socket | `{ "mensaje" }` o `{ "codigo", "mensaje" }` | Falta `canchaId` o falló el inicio de la sesión |
+      | `retencion:confirmada` | El usuario (todas sus pestañas) | `{ "fecha", "horaInicio", "horaFin", "expiresAt" }` | El servidor aceptó la retención |
+      | `disponibilidad:retenida` | Los **demás** usuarios de la cancha | `{ "canchaId", "fecha", "horaInicio", "horaFin" }` | Alguien retuvo la franja ("En proceso de reserva") |
+      | `disponibilidad:liberada` | Los **demás** usuarios de la cancha | `{ "canchaId", "fecha", "horaInicio", "horaFin" }` | Se liberó una retención o se canceló una reserva |
+      | `disponibilidad:reservada` | Los **demás** usuarios de la cancha | `{ "canchaId", "fecha", "horaInicio", "horaFin" }` | Se confirmó una reserva ("No disponible") |
+
+      `ahora` es la hora del servidor: el cliente calcula `ahora - Date.now()` para que un reloj local mal ajustado no altere la cuenta regresiva.
+      Las horas se envían como `HH:mm`, las fechas como `YYYY-MM-DD` y los `expiresAt` en milisegundos desde epoch.
+
+      ### Códigos de error de los eventos (en el *ack*)
+      | Código | Equivale a | Significado |
+      |---|---|---|
+      | `DATOS_INVALIDOS` | 400 | Faltan datos o `horaFin` no es posterior a `horaInicio`. |
+      | `HORA_PASADA` | 400 | La franja ya pasó. |
+      | `BLOQUE_INVALIDO` | 400 | La reserva no es un bloque de exactamente 1 hora. |
+      | `FUERA_DE_HORARIO` | 400 | La cancha no atiende en ese horario. |
+      | `FRANJA_OCUPADA` | 409 | Ya existe una reserva confirmada en esa franja. |
+      | `FRANJA_RETENIDA` | 409 | Otro usuario tiene la franja retenida. |
+      | `SESION_EXPIRADA` | 409 | Se acabó el tiempo para reservar; hay que reiniciar el temporizador. |
+paths:
+  /api/health:
+    get:
+      tags: [Sistema]
+      operationId: verificarSalud
+      summary: Estado del servicio
+      description: Responde `200` si la API está arriba. Lo usan los healthchecks de Docker y el smoke test del pipeline. No requiere autenticación.
+      responses:
+        '200':
+          description: La API está en funcionamiento.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [estado]
+                properties:
+                  estado:
+                    type: string
+                    example: ok
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/auth/registro:
+    post:
+      tags: [Autenticación]
+      operationId: registrarUsuario
+      summary: Crear una cuenta
+      description: Registra un usuario nuevo. La contraseña se guarda cifrada y debe tener mínimo 8 caracteres, con al menos una letra y un número.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistroRequest'
+            example:
+              nombre: Ana Pérez
+              correo: ana@ejemplo.com
+              telefono: '3001234567'
+              password: Password123!
+      responses:
+        '201':
+          description: Cuenta creada.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [mensaje, usuario]
+                properties:
+                  mensaje:
+                    type: string
+                    example: Cuenta creada correctamente
+                  usuario:
+                    $ref: '#/components/schemas/Usuario'
+        '400':
+          $ref: '#/components/responses/ErrorValidacion'
+        '403':
+          $ref: '#/components/responses/OrigenNoPermitido'
+        '409':
+          description: El correo ya está registrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                mensaje: El correo ya está registrado
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/auth/login:
+    post:
+      tags: [Autenticación]
+      operationId: iniciarSesion
+      summary: Iniciar sesión
+      description: |
+        Devuelve un token JWT (vigencia de 1 día por defecto) para enviar como `Authorization: Bearer <token>`.
+
+        Tras **10 intentos fallidos** con la misma cuenta desde la misma IP en 15 minutos, responde `429` hasta que pase la ventana. Los inicios de sesión correctos no consumen el cupo.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              correo: ana@ejemplo.com
+              password: Password123!
+      responses:
+        '200':
+          description: Sesión iniciada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/ErrorValidacion'
+        '401':
+          description: Correo o contraseña incorrectos (el mensaje es el mismo en ambos casos para no revelar qué cuentas existen).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                mensaje: Correo o contraseña incorrectos
+        '403':
+          $ref: '#/components/responses/OrigenNoPermitido'
+        '429':
+          $ref: '#/components/responses/DemasiadosIntentos'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/auth/olvide-password:
+    post:
+      tags: [Autenticación]
+      operationId: solicitarRecuperacionPassword
+      summary: Solicitar el enlace de recuperación de contraseña
+      description: |
+        Envía por correo un enlace con un token de un solo uso (vigencia de 30 minutos por defecto).
+        La respuesta es **siempre la misma**, exista o no el correo, para no revelar qué cuentas están registradas.
+        Límite: 5 solicitudes cada 15 minutos por IP y correo.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [correo]
+              properties:
+                correo:
+                  type: string
+                  format: email
+                  example: ana@ejemplo.com
+            example:
+              correo: ana@ejemplo.com
+      responses:
+        '200':
+          description: Solicitud recibida.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+              example:
+                mensaje: Si el correo está registrado, recibirás un enlace de recuperación
+        '400':
+          $ref: '#/components/responses/ErrorValidacion'
+        '403':
+          $ref: '#/components/responses/OrigenNoPermitido'
+        '429':
+          $ref: '#/components/responses/DemasiadosIntentos'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/auth/restablecer-password:
+    post:
+      tags: [Autenticación]
+      operationId: restablecerPassword
+      summary: Definir una contraseña nueva con el token del correo
+      description: El token del enlace de recuperación solo sirve una vez y vence a los 30 minutos.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, nuevaPassword]
+              properties:
+                token:
+                  type: string
+                  description: Token recibido en el enlace del correo.
+                  example: 9f2c4d7e1a6b…
+                nuevaPassword:
+                  type: string
+                  format: password
+                  description: Mínimo 8 caracteres, con al menos una letra y un número.
+                  example: NuevaClave456
+            example:
+              token: 9f2c4d7e1a6b…
+              nuevaPassword: NuevaClave456
+      responses:
+        '200':
+          description: Contraseña actualizada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+              example:
+                mensaje: Contraseña actualizada correctamente
+        '400':
+          description: Datos inválidos, o el enlace de recuperación es inválido o ya expiró.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/ErrorValidacion'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                enlaceInvalido:
+                  summary: Token inválido, usado o vencido
+                  value:
+                    mensaje: El enlace de recuperación es inválido o ha expirado
+                passwordDebil:
+                  summary: Contraseña que no cumple la política
+                  value:
+                    mensaje: Error de validación
+                    errores:
+                      - campo: nuevaPassword
+                        mensaje: La contraseña debe tener mínimo 8 caracteres, incluyendo una letra y un número
+        '403':
+          $ref: '#/components/responses/OrigenNoPermitido'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/canchas:
+    get:
+      tags: [Canchas]
+      operationId: listarCanchas
+      summary: Listar las canchas disponibles
+      description: Catálogo de canchas con filtros opcionales por zona, rango de precio y fecha (US-06).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: zona
+          in: query
+          description: Texto contenido en la zona (no distingue mayúsculas).
+          schema:
+            type: string
+          example: Centro
+        - name: precioMin
+          in: query
+          description: Costo mínimo por hora, en pesos.
+          schema:
+            type: number
+            minimum: 0
+          example: 50000
+        - name: precioMax
+          in: query
+          description: Costo máximo por hora, en pesos.
+          schema:
+            type: number
+            minimum: 0
+          example: 80000
+        - name: fecha
+          in: query
+          description: Si se envía, solo se listan las canchas con horario ese día.
+          schema:
+            type: string
+            format: date
+          example: '2026-10-22'
+      responses:
+        '200':
+          description: Lista de canchas (puede estar vacía).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [canchas]
+                properties:
+                  canchas:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CanchaResumen'
+              example:
+                canchas:
+                  - id: b67c4d88-a1fb-45de-830e-dd3bf416a472
+                    nombre: Cancha El Bosque
+                    direccion: Av. Roosevelt # 30-10, Cali
+                    zona: Oeste
+                    costoHora: 70000
+                    imagenUrl: /img/canchas/el-bosque.jpg
+                    tipo: Fútbol 5
+                    servicios: [Cancha cerrada, Iluminación LED, Parqueadero]
+        '400':
+          $ref: '#/components/responses/ErrorValidacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/OrigenNoPermitido'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/canchas/{id}:
+    get:
+      tags: [Canchas]
+      operationId: obtenerCancha
+      summary: Detalle de una cancha
+      description: Datos completos de la cancha y su horario de atención por día de la semana (0 = domingo … 6 = sábado).
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CanchaId'
+      responses:
+        '200':
+          description: Detalle de la cancha.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [cancha]
+                properties:
+                  cancha:
+                    $ref: '#/components/schemas/Cancha'
+        '400':
+          $ref: '#/components/responses/ErrorValidacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/OrigenNoPermitido'
+        '404':
+          $ref: '#/components/responses/CanchaNoEncontrada'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/canchas/{id}/disponibilidad:
+    get:
+      tags: [Canchas]
+      operationId: consultarDisponibilidad
+      summary: Franjas ocupadas y retenidas de una cancha en una fecha
+      description: |
+        Devuelve las franjas **ocupadas** (con reserva confirmada) y las **retenidas** por otros usuarios que están en pleno proceso de reserva (US-08, US-18).
+        Las retenidas del propio usuario no se incluyen. Las franjas no listadas están libres, siempre que caigan dentro del horario de la cancha y no hayan pasado.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CanchaId'
+        - $ref: '#/components/parameters/FechaObligatoria'
+      responses:
+        '200':
+          $ref: '#/components/responses/Disponibilidad'
+        '400':
+          $ref: '#/components/responses/ErrorValidacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/OrigenNoPermitido'
+        '404':
+          $ref: '#/components/responses/CanchaNoEncontrada'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/canchas/{id}/reservas:
+    get:
+      tags: [Canchas]
+      operationId: listarFranjasOcupadas
+      summary: Franjas ocupadas de una cancha en una fecha (alias de disponibilidad)
+      description: Misma respuesta que `GET /api/canchas/{id}/disponibilidad`. Se conserva por compatibilidad con la versión inicial del frontend.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CanchaId'
+        - $ref: '#/components/parameters/FechaObligatoria'
+      responses:
+        '200':
+          $ref: '#/components/responses/Disponibilidad'
+        '400':
+          $ref: '#/components/responses/ErrorValidacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/OrigenNoPermitido'
+        '404':
+          $ref: '#/components/responses/CanchaNoEncontrada'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+    post:
+      tags: [Reservas]
+      operationId: crearReserva
+      summary: Confirmar una reserva
+      description: |
+        Crea la reserva (estado `confirmada`) y devuelve el comprobante con su código `CY-XXXXXXXX` (US-10, US-11).
+        El usuario sale del token; **no** se envía en el cuerpo.
+
+        **Reglas, en el orden en que se validan:**
+        1. La cancha debe existir (404).
+        2. La franja no puede estar en el pasado (400).
+        3. Debe ser un bloque de exactamente 1 hora (`BLOQUE_INVALIDO`) dentro del horario de la cancha (`FUERA_DE_HORARIO`) (400).
+        4. **Reservas múltiples (US-12):** el usuario puede tener varias reservas activas, pero no dos que se solapen en el tiempo, ni aunque sean en canchas distintas (`RESERVA_SOLAPADA`), y hasta un máximo configurable (5 por defecto, `LIMITE_RESERVAS_ALCANZADO`) (409).
+        5. Si otro usuario tiene la franja retenida (US-18), se rechaza con `FRANJA_RETENIDA` (409).
+        6. **Duplicados (US-09):** si la franja ya está reservada, o dos personas confirman a la vez, solo una gana; la otra recibe `409 El horario ya no está disponible`.
+
+        Al confirmar, el temporizador del usuario se detiene, los demás usuarios de la cancha reciben `disponibilidad:reservada` y se envía un correo de confirmación sin retrasar la respuesta.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CanchaId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FranjaRequest'
+            example:
+              fecha: '2026-10-22'
+              horaInicio: '10:00'
+              horaFin: '11:00'
+      responses:
+        '201':
+          description: Reserva confirmada.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reserva]
+                properties:
+                  reserva:
+                    $ref: '#/components/schemas/ReservaConfirmada'
+        '400':
+          description: Datos inválidos, franja pasada, bloque que no es de 1 hora o fuera del horario de la cancha.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/ErrorValidacion'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                validacion:
+                  summary: Falta un campo o tiene mal formato
+                  value:
+                    mensaje: Error de validación
+                    errores:
+                      - campo: horaInicio
+                        mensaje: horaInicio debe tener formato HH:mm
+                horaPasada:
+                  summary: La franja ya pasó
+                  value:
+                    mensaje: No se pueden reservar fechas u horas pasadas
+                bloqueInvalido:
+                  summary: No es un bloque de 1 hora
+                  value:
+                    mensaje: Las reservas son por bloques de 1 hora
+                    codigo: BLOQUE_INVALIDO
+                fueraDeHorario:
+                  summary: La cancha no atiende a esa hora
+                  value:
+                    mensaje: La cancha no atiende en ese horario
+                    codigo: FUERA_DE_HORARIO
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/OrigenNoPermitido'
+        '404':
+          $ref: '#/components/responses/CanchaNoEncontrada'
+        '409':
+          description: La franja no se puede reservar (ocupada, retenida por otro usuario, solapada con otra reserva propia o límite de reservas activas).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                duplicada:
+                  summary: Reserva duplicada (US-09)
+                  value:
+                    mensaje: El horario ya no está disponible
+                retenida:
+                  summary: Otro usuario la tiene retenida (US-18)
+                  value:
+                    mensaje: Otro usuario está reservando esta franja en este momento
+                    codigo: FRANJA_RETENIDA
+                solapada:
+                  summary: Se cruza con otra reserva del mismo usuario (US-12)
+                  value:
+                    mensaje: Ya tienes una reserva en ese horario
+                    codigo: RESERVA_SOLAPADA
+                limite:
+                  summary: Alcanzó el máximo de reservas activas (US-12)
+                  value:
+                    mensaje: Ya tienes 5 reservas activas. Cancela alguna para poder reservar otra.
+                    codigo: LIMITE_RESERVAS_ALCANZADO
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/canchas/{id}/temporizador/completar:
+    post:
+      tags: [Temporizador]
+      operationId: completarTemporizador
+      summary: Pasar al panel de confirmación deteniendo el temporizador
+      description: |
+        El usuario eligió una franja y pulsó "Iniciar reserva" (US-10, US-17). Valida la franja, la deja retenida para él durante 10 minutos más para que confirme (US-18) y detiene la cuenta regresiva.
+        Es idempotente dentro de la misma sesión: si el usuario vuelve atrás ("Cambiar horario") y regresa, no se rechaza.
+        Si hay un error, el temporizador **sigue corriendo** y el usuario puede elegir otra franja.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CanchaId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FranjaRequest'
+            example:
+              fecha: '2026-10-22'
+              horaInicio: '10:00'
+              horaFin: '11:00'
+      responses:
+        '200':
+          description: Temporizador detenido; el usuario puede confirmar.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [estado]
+                properties:
+                  estado:
+                    type: string
+                    enum: [completado]
+                    example: completado
+        '400':
+          description: Datos inválidos o franja pasada.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/ErrorValidacion'
+                  - $ref: '#/components/schemas/Error'
+              example:
+                mensaje: No se pueden reservar fechas u horas pasadas
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/OrigenNoPermitido'
+        '409':
+          description: Se acabó el tiempo, o la franja ya no se puede reservar.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                sesionExpirada:
+                  summary: Pasaron los 180 s
+                  value:
+                    mensaje: Tu tiempo para reservar expiró. Reinicia el temporizador para continuar.
+                    codigo: SESION_EXPIRADA
+                retenida:
+                  summary: Otro usuario la tiene retenida
+                  value:
+                    mensaje: Otro usuario está reservando esta franja en este momento
+                    codigo: FRANJA_RETENIDA
+                ocupada:
+                  summary: Ya hay una reserva confirmada
+                  value:
+                    mensaje: El horario ya no está disponible
+                    codigo: FRANJA_OCUPADA
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/reservas:
+    get:
+      tags: [Reservas]
+      operationId: listarHistorialReservas
+      summary: Historial de reservas del usuario (paginado y filtrable)
+      description: |
+        "Mis reservas" (US-13): solo devuelve las reservas del usuario autenticado.
+        - `periodo=proximas` (por defecto): reservas cuyo horario aún no termina, de la más cercana a la más lejana.
+        - `periodo=pasadas`: reservas cuyo horario ya terminó, de la más reciente a la más antigua.
+
+        Una reserva confirmada cuyo horario ya terminó se muestra con el estado `completada`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: periodo
+          in: query
+          schema:
+            type: string
+            enum: [proximas, pasadas]
+            default: proximas
+        - name: estado
+          in: query
+          description: Filtra por estado visible.
+          schema:
+            type: string
+            enum: [confirmada, cancelada, completada]
+        - name: pagina
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limite
+          in: query
+          description: Reservas por página (máximo 50).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+      responses:
+        '200':
+          description: Página de reservas (puede estar vacía).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reservas, paginacion]
+                properties:
+                  reservas:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ReservaHistorial'
+                  paginacion:
+                    $ref: '#/components/schemas/Paginacion'
+              example:
+                reservas:
+                  - id: d1ad1c79-85f3-4d01-a0f0-0a7186c8417a
+                    codigo: CY-D1AD1C79
+                    canchaId: b67c4d88-a1fb-45de-830e-dd3bf416a472
+                    canchaNombre: Cancha El Bosque
+                    canchaDireccion: Av. Roosevelt # 30-10, Cali
+                    fecha: '2026-10-22'
+                    horaInicio: '10:00'
+                    horaFin: '11:00'
+                    estado: confirmada
+                    createdAt: '2026-10-14T04:22:43.719Z'
+                paginacion:
+                  pagina: 1
+                  limite: 10
+                  total: 1
+                  totalPaginas: 1
+        '400':
+          $ref: '#/components/responses/ErrorValidacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/OrigenNoPermitido'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/reservas/mias:
+    get:
+      tags: [Reservas]
+      operationId: listarMisReservas
+      summary: Todas las reservas del usuario, sin paginar
+      description: Lista completa (la más reciente primero) con los datos de la cancha. La usan la pantalla de confirmación y las pruebas de QA; para la pantalla "Mis reservas" use `GET /api/reservas`.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Reservas del usuario.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reservas]
+                properties:
+                  reservas:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ReservaConfirmada'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/OrigenNoPermitido'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/reservas/{id}/cancelar:
+    patch:
+      tags: [Reservas]
+      operationId: cancelarReserva
+      summary: Cancelar una reserva propia
+      description: >-
+        Cambia el estado a `cancelada` y libera la franja: otros usuarios pueden reservarla
+        y quienes miran la cancha reciben `disponibilidad:liberada`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identificador de la reserva.
+          schema:
+            type: string
+            format: uuid
+          example: d1ad1c79-85f3-4d01-a0f0-0a7186c8417a
+      responses:
+        '200':
+          description: Reserva cancelada.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reserva]
+                properties:
+                  reserva:
+                    $ref: '#/components/schemas/Reserva'
+        '400':
+          $ref: '#/components/responses/ErrorValidacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          description: La reserva pertenece a otro usuario, o el origen no está permitido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                mensaje: No tienes permiso para cancelar esta reserva
+        '404':
+          description: La reserva no existe.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                mensaje: Reserva no encontrada
+        '409':
+          description: La reserva ya estaba cancelada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                mensaje: Esta reserva ya estaba cancelada
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token obtenido con `POST /api/auth/login`. Pegue solo el token; Swagger UI agrega el prefijo `Bearer`.
+  parameters:
+    CanchaId:
+      name: id
+      in: path
+      required: true
+      description: Identificador de la cancha.
+      schema:
+        type: string
+        format: uuid
+      example: b67c4d88-a1fb-45de-830e-dd3bf416a472
+    FechaObligatoria:
+      name: fecha
+      in: query
+      required: true
+      description: Día a consultar (`YYYY-MM-DD`).
+      schema:
+        type: string
+        format: date
+      example: '2026-10-22'
+  responses:
+    Disponibilidad:
+      description: Franjas ocupadas y retenidas para la fecha.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Disponibilidad'
+          example:
+            ocupados:
+              - horaInicio: '09:00:00'
+                horaFin: '10:00:00'
+            retenidos:
+              - canchaId: b67c4d88-a1fb-45de-830e-dd3bf416a472
+                fecha: '2026-10-22'
+                horaInicio: '11:00'
+                horaFin: '12:00'
+    ErrorValidacion:
+      description: Datos de entrada inválidos.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorValidacion'
+          example:
+            mensaje: Error de validación
+            errores:
+              - campo: fecha
+                mensaje: fecha debe tener formato ISO (YYYY-MM-DD)
+    NoAutenticado:
+      description: Falta el token o no es válido.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            sinToken:
+              summary: No se envió el encabezado Authorization
+              value:
+                mensaje: No autenticado
+            tokenInvalido:
+              summary: Token inválido o vencido
+              value:
+                mensaje: Token inválido o expirado
+    OrigenNoPermitido:
+      description: Un navegador llamó desde un origen que el servidor no permite (CORS). Las llamadas sin cabecera `Origin` (curl, Postman, Swagger UI en el mismo servidor) no se ven afectadas.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            mensaje: Origen no permitido
+    CanchaNoEncontrada:
+      description: La cancha no existe.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            mensaje: Cancha no encontrada
+    DemasiadosIntentos:
+      description: Se superó el límite de intentos; espere unos minutos.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            mensaje: Demasiados intentos. Espera unos minutos e inténtalo de nuevo.
+            codigo: DEMASIADOS_INTENTOS
+    ErrorInterno:
+      description: Error inesperado del servidor. El detalle técnico nunca se envía al cliente.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            mensaje: Error interno del servidor
+  schemas:
+    Error:
+      type: object
+      description: Formato común de todos los errores.
+      required: [mensaje]
+      properties:
+        mensaje:
+          type: string
+          description: Texto para mostrar al usuario.
+        codigo:
+          type: string
+          description: Código estable de los errores de negocio (por ejemplo `FRANJA_RETENIDA`).
+          enum:
+            - BLOQUE_INVALIDO
+            - FUERA_DE_HORARIO
+            - DATOS_INVALIDOS
+            - HORA_PASADA
+            - FRANJA_OCUPADA
+            - FRANJA_RETENIDA
+            - RESERVA_SOLAPADA
+            - LIMITE_RESERVAS_ALCANZADO
+            - SESION_EXPIRADA
+            - DEMASIADOS_INTENTOS
+    ErrorValidacion:
+      type: object
+      description: Error 400 de validación, con el detalle por campo.
+      required: [mensaje, errores]
+      properties:
+        mensaje:
+          type: string
+          example: Error de validación
+        errores:
+          type: array
+          items:
+            type: object
+            required: [campo, mensaje]
+            properties:
+              campo:
+                type: string
+                example: fecha
+              mensaje:
+                type: string
+                example: fecha debe tener formato ISO (YYYY-MM-DD)
+    Mensaje:
+      type: object
+      required: [mensaje]
+      properties:
+        mensaje:
+          type: string
+    Usuario:
+      type: object
+      description: Datos públicos de una cuenta. Nunca incluye la contraseña ni su hash.
+      required: [id, nombre, correo]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 81a157d0-2eda-435a-afb7-17f190edd77a
+        nombre:
+          type: string
+          example: Ana Pérez
+        correo:
+          type: string
+          format: email
+          example: ana@ejemplo.com
+    RegistroRequest:
+      type: object
+      required: [nombre, correo, telefono, password]
+      properties:
+        nombre:
+          type: string
+          example: Ana Pérez
+        correo:
+          type: string
+          format: email
+          example: ana@ejemplo.com
+        telefono:
+          type: string
+          example: '3001234567'
+        password:
+          type: string
+          format: password
+          description: Mínimo 8 caracteres, con al menos una letra y un número.
+          example: Password123!
+    LoginRequest:
+      type: object
+      required: [correo, password]
+      properties:
+        correo:
+          type: string
+          format: email
+          example: ana@ejemplo.com
+        password:
+          type: string
+          format: password
+          example: Password123!
+    LoginResponse:
+      type: object
+      required: [token, usuario]
+      properties:
+        token:
+          type: string
+          description: "JWT para el encabezado `Authorization: Bearer`."
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4MWExNTdkMC0yZWRhLTQzNWEtYWZiNy0xN2YxOTBlZGQ3N2EifQ.firma
+        usuario:
+          $ref: '#/components/schemas/Usuario'
+    CanchaResumen:
+      type: object
+      description: Cancha tal como aparece en el listado.
+      required: [id, nombre, direccion, zona, costoHora]
+      properties:
+        id:
+          type: string
+          format: uuid
+        nombre:
+          type: string
+          example: Cancha El Bosque
+        direccion:
+          type: string
+          example: Av. Roosevelt # 30-10, Cali
+        zona:
+          type: string
+          example: Oeste
+        costoHora:
+          type: number
+          description: Pesos colombianos por hora.
+          example: 70000
+        imagenUrl:
+          type: string
+          nullable: true
+          example: /img/canchas/el-bosque.jpg
+        tipo:
+          type: string
+          nullable: true
+          example: Fútbol 5
+        servicios:
+          type: array
+          items:
+            type: string
+          example: [Cancha cerrada, Iluminación LED, Parqueadero]
+    Cancha:
+      allOf:
+        - $ref: '#/components/schemas/CanchaResumen'
+        - type: object
+          description: Detalle de la cancha con su horario de atención.
+          properties:
+            imagenCredito:
+              type: string
+              nullable: true
+              example: 'Foto: Reptonix · CC BY 3.0 · Wikimedia Commons'
+            descripcion:
+              type: string
+              nullable: true
+            horarios:
+              type: array
+              items:
+                $ref: '#/components/schemas/HorarioAtencion'
+    HorarioAtencion:
+      type: object
+      description: Horario de atención de un día de la semana.
+      required: [diaSemana, horaInicio, horaFin]
+      properties:
+        diaSemana:
+          type: integer
+          minimum: 0
+          maximum: 6
+          description: 0 = domingo … 6 = sábado.
+          example: 1
+        horaInicio:
+          type: string
+          example: '06:00:00'
+        horaFin:
+          type: string
+          example: '22:00:00'
+    FranjaRequest:
+      type: object
+      description: Franja que se quiere retener o reservar. Debe durar exactamente 1 hora.
+      required: [fecha, horaInicio, horaFin]
+      properties:
+        fecha:
+          type: string
+          format: date
+          example: '2026-10-22'
+        horaInicio:
+          type: string
+          pattern: '^([01]\d|2[0-3]):[0-5]\d$'
+          example: '10:00'
+        horaFin:
+          type: string
+          pattern: '^([01]\d|2[0-3]):[0-5]\d$'
+          example: '11:00'
+    Reserva:
+      type: object
+      required: [id, codigo, canchaId, usuarioId, fecha, horaInicio, horaFin, estado]
+      properties:
+        id:
+          type: string
+          format: uuid
+        codigo:
+          type: string
+          description: Código corto para mostrar al usuario, derivado del id.
+          example: CY-D1AD1C79
+        canchaId:
+          type: string
+          format: uuid
+        usuarioId:
+          type: string
+          format: uuid
+        fecha:
+          type: string
+          format: date
+          example: '2026-10-22'
+        horaInicio:
+          type: string
+          example: '10:00:00'
+        horaFin:
+          type: string
+          example: '11:00:00'
+        estado:
+          type: string
+          enum: [confirmada, cancelada]
+        createdAt:
+          type: string
+          format: date-time
+    ReservaConfirmada:
+      allOf:
+        - $ref: '#/components/schemas/Reserva'
+        - type: object
+          properties:
+            cancha:
+              type: object
+              required: [id, nombre]
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                nombre:
+                  type: string
+                  example: Cancha El Bosque
+                direccion:
+                  type: string
+                  example: Av. Roosevelt # 30-10, Cali
+    ReservaHistorial:
+      type: object
+      description: Reserva tal como aparece en "Mis reservas".
+      required: [id, codigo, canchaNombre, fecha, horaInicio, horaFin, estado]
+      properties:
+        id:
+          type: string
+          format: uuid
+        codigo:
+          type: string
+          example: CY-D1AD1C79
+        canchaId:
+          type: string
+          format: uuid
+        canchaNombre:
+          type: string
+          example: Cancha El Bosque
+        canchaDireccion:
+          type: string
+          example: Av. Roosevelt # 30-10, Cali
+        fecha:
+          type: string
+          format: date
+        horaInicio:
+          type: string
+          example: '10:00'
+        horaFin:
+          type: string
+          example: '11:00'
+        estado:
+          type: string
+          description: La reserva `completada` es una confirmada cuyo horario ya terminó.
+          enum: [confirmada, cancelada, completada]
+        createdAt:
+          type: string
+          format: date-time
+    Paginacion:
+      type: object
+      required: [pagina, limite, total, totalPaginas]
+      properties:
+        pagina:
+          type: integer
+          example: 1
+        limite:
+          type: integer
+          example: 10
+        total:
+          type: integer
+          example: 23
+        totalPaginas:
+          type: integer
+          example: 3
+    BloqueOcupado:
+      type: object
+      required: [horaInicio, horaFin]
+      properties:
+        horaInicio:
+          type: string
+          example: '09:00:00'
+        horaFin:
+          type: string
+          example: '10:00:00'
+    FranjaRetenida:
+      type: object
+      description: Franja que otro usuario está reservando. Nunca revela quién.
+      required: [canchaId, fecha, horaInicio, horaFin]
+      properties:
+        canchaId:
+          type: string
+          format: uuid
+        fecha:
+          type: string
+          format: date
+        horaInicio:
+          type: string
+          example: '11:00'
+        horaFin:
+          type: string
+          example: '12:00'
+    Disponibilidad:
+      type: object
+      required: [ocupados, retenidos]
+      properties:
+        ocupados:
+          type: array
+          items:
+            $ref: '#/components/schemas/BloqueOcupado'
+        retenidos:
+          type: array
+          items:
+            $ref: '#/components/schemas/FranjaRetenida'

@@ -6,7 +6,7 @@ const { cancelarReservaValidators, listarMisReservasValidators } = require('../u
 
 const router = Router();
 
-router.get('/', authMiddleware, listarMisReservasValidators, validate, reservaController.listarMias);
+router.get('/', authMiddleware, listarMisReservasValidators, validate, reservaController.listarHistorial);
 
 router.get('/mias', authMiddleware, reservaController.listarMias);
 
@@ -14,7 +14,6 @@ router.patch(
   '/:id/cancelar',
   authMiddleware,
   cancelarReservaValidators,
-  listarMisReservasValidators,
   validate,
   reservaController.cancelar
 );

@@ -1,6 +1,6 @@
 # Eventos de Socket.IO — sesión de reserva y disponibilidad en tiempo real
 
-Documentación de los eventos en tiempo real de CanchaYa (US-17 y US-18). Complementa la documentación de la API REST (PIG1-23).
+Documentación de los eventos en tiempo real de CanchaYa (US-17 y US-18). Complementa la documentación de la API REST (PIG1-23), que está en Swagger UI (`/api/docs`) y en [backend/openapi/openapi.yaml](../../backend/openapi/openapi.yaml); los mismos eventos se resumen en la sección *Socket.IO (tiempo real)* de esa página.
 
 - **Servidor:** el mismo host de la API, sin `/api`. Por ejemplo, `http://localhost:4000`; en Docker, `http://localhost:4100`.
 - **Librería:** Socket.IO 4 (`socket.io-client` en el frontend).
@@ -49,8 +49,10 @@ Si falta `canchaId`, el servidor emite `temporizador:error` y cierra la conexió
 - el temporizador expira;
 - el usuario elige otra franja (solo puede retener una por cancha);
 - el usuario emite `retencion:liberar`, por ejemplo al cambiar de fecha o al pulsar "Cancelar";
-- se desconecta la última pestaña del usuario en esa cancha;
+- se desconecta la última pestaña del usuario en esa cancha y no vuelve en 10 segundos (lapso de gracia);
 - el usuario reinicia el temporizador.
+
+**Lapso de gracia:** cuando se cierra la última conexión del usuario en una cancha, el servidor espera 10 s antes de cancelar la sesión. Si el usuario reconecta en ese lapso (por ejemplo, tras una caída breve de red) se retoma la misma sesión con el mismo `expiresAt` y la retención no se libera.
 
 **Persistencia:**
 - Las sesiones (`sesiones_reserva`) y las retenciones (`retenciones`) se guardan en PostgreSQL.
@@ -90,21 +92,23 @@ Libera la franja retenida por el usuario en la cancha.
 
 Descarta la sesión actual, libera su retención e inicia una nueva sesión de 180 s.
 - **Payload:** `null`.
-- **Ack:** `{ "expiresAt": <ms epoch> }`.
+- **Ack:** `{ "expiresAt": <ms epoch>, "ahora": <ms epoch> }`.
 - Todas las pestañas del usuario reciben `temporizador:inicio`.
 
 ## Eventos que emite el servidor
 
 | Evento | Destinatario | Payload | Cuándo |
 |---|---|---|---|
-| `temporizador:inicio` | El usuario (todas sus pestañas) | `{ "expiresAt": <ms epoch>, "estado": "activo" }` | Al conectarse o reconectarse, y al reiniciar |
-| `temporizador:sync` | El usuario | `{ "expiresAt": <ms epoch> }` | Cada 5 s mientras la sesión está activa |
+| `temporizador:inicio` | El usuario (todas sus pestañas) | `{ "expiresAt": <ms epoch>, "estado": "activo", "ahora": <ms epoch> }` | Al conectarse o reconectarse, y al reiniciar |
+| `temporizador:sync` | El usuario | `{ "expiresAt": <ms epoch>, "ahora": <ms epoch> }` | Cada 5 s mientras la sesión está activa |
 | `temporizador:expirado` | El usuario | — | Al cumplirse los 180 s |
 | `temporizador:error` | El socket | `{ "mensaje" }` o `{ "codigo", "mensaje" }` | Falta `canchaId` o falló el inicio de sesión |
 | `retencion:confirmada` | El usuario (todas sus pestañas) | `{ "fecha", "horaInicio", "horaFin", "expiresAt" }` | El servidor aceptó una retención |
 | `disponibilidad:retenida` | Los **demás** usuarios en la cancha | `{ "canchaId", "fecha", "horaInicio", "horaFin" }` | Alguien retuvo esa franja: mostrarla "En proceso de reserva" |
 | `disponibilidad:liberada` | Los **demás** usuarios en la cancha | `{ "canchaId", "fecha", "horaInicio", "horaFin" }` | Se liberó una retención o se canceló una reserva: la franja vuelve a estar libre |
 | `disponibilidad:reservada` | Los **demás** usuarios en la cancha | `{ "canchaId", "fecha", "horaInicio", "horaFin" }` | Se confirmó una reserva: mostrarla "No disponible" |
+
+`ahora` es la hora actual del servidor. El cliente calcula el desfase `ahora − Date.now()` y lo usa para la cuenta regresiva, de modo que un reloj local mal configurado no altera el tiempo mostrado.
 
 Las horas se envían como `HH:mm` y las fechas como `YYYY-MM-DD`, en hora de Colombia. Los eventos `disponibilidad:*` no dicen qué usuario hizo el cambio.
 
@@ -114,8 +118,10 @@ Se usan en el ack de los eventos de socket y en el campo `codigo` de las respues
 
 | Código | HTTP equivalente | Significado |
 |---|---|---|
-| `DATOS_INVALIDOS` | 400 | Falta la fecha u hora, el formato no es válido o `horaFin` no es posterior a `horaInicio`. |
+| `DATOS_INVALIDOS` | 400 | Falta la fecha u hora, el payload es nulo o no es un objeto, el formato no es válido o `horaFin` no es posterior a `horaInicio`. |
 | `HORA_PASADA` | 400 | La fecha u hora ya pasó. |
+| `FUERA_DE_HORARIO` | 400 | La cancha no atiende en esa fecha y hora (fuera de su horario de atención o en un día sin horario). |
+| `BLOQUE_INVALIDO` | 400 | La franja no dura exactamente 1 hora. Las reservas son por bloques de 1 hora alineados con la apertura de la cancha. |
 | `SESION_EXPIRADA` | 409 | El usuario no tiene sesión vigente en la cancha; debe reiniciar el temporizador. |
 | `FRANJA_RETENIDA` | 409 | Otro usuario tiene retenida la franja. |
 | `FRANJA_OCUPADA` | 409 | La franja ya tiene una reserva confirmada. |

@@ -1,0 +1,356 @@
+[
+  {
+    "id": "DEF-01",
+    "severidad": "Alta",
+    "titulo": "Pruebas unitarias con una fecha fija que ya venció: el job de backend del pipeline falla",
+    "hu": "US-20 (pipeline) · US-08 CA-6",
+    "casos": [
+      "JEST"
+    ],
+    "descripcion": "backend/tests/reservaService.test.js usa la fecha fija 2026-10-01 como si fuera una fecha futura. Desde el 1 de octubre de 2026 a las 08:00 (hora de Colombia) esa fecha ya es pasada y el servicio la rechaza correctamente con \"No se pueden reservar fechas u horas pasadas\". El fallo no está en el producto sino en los datos de la prueba, pero hace que `npm test` termine en rojo y bloquee el job \"Backend - lint y pruebas\" (y con él los jobs Docker y de despliegue).",
+    "pasos": [
+      "Ejecutar `npm test` en la carpeta backend con una base PostgreSQL disponible (fecha del sistema posterior al 1-oct-2026).",
+      "Revisar las pruebas de reservaService.test.js."
+    ],
+    "esperado": "Las 51 pruebas pasan en cualquier fecha.",
+    "obtenido": "10 de 51 pruebas fallan (todas de reservaService.test.js › crearReserva) con \"No se pueden reservar fechas u horas pasadas\".",
+    "impacto": "El pipeline de CI/CD queda en rojo en cada push y no se puede desplegar. Cualquier cambio futuro quedaría sin validación automática hasta corregirlo.",
+    "recomendacion": "Reemplazar la fecha fija por una calculada (por ejemplo, una fecha lejana como 2099-12-31 o la de mañana en hora de Colombia) en los datos de prueba de reservaService.test.js y revisar que ninguna otra prueba dependa de la fecha actual.",
+    "correccion": "En backend/tests/reservaService.test.js se reemplazó la fecha fija 2026-10-01 por una fecha lejana (2099-12-31) que no vence, y se agregó el mock del repositorio de horarios que ahora necesita el servicio.",
+    "verifican": [
+      "JEST"
+    ],
+    "estadoInicial": "Abierto"
+  },
+  {
+    "id": "DEF-02",
+    "severidad": "Alta",
+    "titulo": "Dependencias de producción del backend con vulnerabilidades conocidas (1 crítica, 1 alta, 2 moderadas)",
+    "hu": "US-20 (CI/CD) · RNF-03 (seguridad)",
+    "casos": [
+      "NF-13"
+    ],
+    "descripcion": "`npm audit --omit=dev` en el backend reporta: proxy-addr (crítica, suplantación de IP), nodemailer ≤ 10.0.5 (alta, varias inyecciones SMTP y de cabeceras) y qs/express (moderada, denegación de servicio). En el frontend hay 2 moderadas en react-router. En el uso actual la explotabilidad es limitada (la API no configura \"trust proxy\" y el SMTP no está configurado), pero el criterio de salida exige 0 vulnerabilidades altas o críticas.",
+    "pasos": [
+      "En backend, ejecutar `npm audit --omit=dev`.",
+      "En frontend, ejecutar `npm audit --omit=dev`."
+    ],
+    "esperado": "Sin vulnerabilidades altas ni críticas en dependencias de producción.",
+    "obtenido": "Backend: 1 crítica, 1 alta, 2 moderadas. Frontend: 2 moderadas.",
+    "impacto": "Riesgo de seguridad al desplegar fuera del entorno local, sobre todo cuando se configure el envío real de correos (nodemailer).",
+    "recomendacion": "Ejecutar `npm audit fix` en el backend (corrige proxy-addr y qs sin cambios incompatibles) y planificar la actualización de nodemailer a una versión corregida (cambio mayor; revisar el envío de correos) y de react-router-dom en el frontend. Volver a ejecutar las pruebas después de actualizar.",
+    "correccion": "Backend: npm audit fix (corrige proxy-addr y qs) y actualización de nodemailer 6.9 → 10.1. Frontend: react-router-dom 6.26 → 7.18. npm audit queda en 0 vulnerabilidades en ambos proyectos; se comprobó que el build, el lint y los flujos E2E siguen funcionando.",
+    "verifican": [
+      "NF-13"
+    ],
+    "estadoInicial": "Abierto"
+  },
+  {
+    "id": "DEF-03",
+    "severidad": "Media",
+    "titulo": "La API acepta reservas fuera del horario de atención de la cancha",
+    "hu": "US-08 · CA-8",
+    "casos": [
+      "F-08-07"
+    ],
+    "descripcion": "El backend no compara la reserva con la tabla de horarios de la cancha. La interfaz solo ofrece bloques dentro del horario, pero cualquier cliente que llame directamente a la API puede reservar a cualquier hora (por ejemplo, 03:00) o en un día en que la cancha no atiende. El criterio exige que la validación se haga siempre en el backend.",
+    "pasos": [
+      "Consultar el horario de una cancha (07:00–20:00).",
+      "Enviar POST /api/canchas/:id/reservas con horaInicio 03:00 y horaFin 04:00 en una fecha futura."
+    ],
+    "esperado": "400 o 409: la cancha no atiende a esa hora.",
+    "obtenido": "201 Created: la reserva se guardó.",
+    "impacto": "Se pueden crear reservas imposibles de cumplir y se bloquean franjas que no existen; solo es posible por la API directa.",
+    "recomendacion": "En crearReserva (y en retenerFranja) validar que la franja esté contenida en el horario del día de la semana de la cancha, usando la fecha en hora de Colombia.",
+    "correccion": "Nuevo servicio backend/src/services/horarioReservaService.js: tanto crearReserva como retenerFranja exigen que la franja caiga dentro del horario del día de la semana de la cancha; si no, responden 400 con el código FUERA_DE_HORARIO.",
+    "verifican": [
+      "F-08-07"
+    ],
+    "estadoInicial": "Abierto"
+  },
+  {
+    "id": "DEF-04",
+    "severidad": "Media",
+    "titulo": "La API acepta franjas solapadas en la misma cancha",
+    "hu": "US-09 · CA-1 y CA-2 · US-08 CA-8",
+    "casos": [
+      "F-08-08"
+    ],
+    "descripcion": "El índice único parcial solo impide dos reservas con la misma hora de inicio. Una reserva 10:00–12:00 no bloquea 11:00–12:00 ni 10:30–11:30. La interfaz solo genera bloques de 1 hora alineados, por lo que el problema aparece solo con llamadas directas a la API, pero el criterio de US-09 es que \"nunca se generen reservas duplicadas\" para la misma cancha, día y hora.",
+    "pasos": [
+      "Reservar 10:00–12:00 en una cancha y fecha.",
+      "Reservar 11:00–12:00 en la misma cancha y fecha.",
+      "Reservar 10:30–11:30."
+    ],
+    "esperado": "409 en los dos últimos intentos.",
+    "obtenido": "201 en ambos: quedan 3 reservas confirmadas que se solapan.",
+    "impacto": "Posible doble reserva real de la cancha por la API directa; la restricción de la base de datos no protege ese caso.",
+    "recomendacion": "Exigir bloques de 1 hora alineados (horaFin = horaInicio + 1 h y minutos en 00) y, como defensa en profundidad, una restricción de exclusión en PostgreSQL (EXCLUDE USING gist con rangos de tiempo, extensión btree_gist) para reservas confirmadas.",
+    "correccion": "Las franjas deben ser bloques de exactamente 1 hora alineados con la apertura de la cancha (400 BLOQUE_INVALIDO / FUERA_DE_HORARIO). Además, el esquema agrega la restricción de exclusión ex_reservas_sin_solape (extensión btree_gist) que impide en PostgreSQL cualquier solape entre reservas confirmadas; el error 23P01 se traduce en 409 \"El horario ya no está disponible\".",
+    "verifican": [
+      "F-08-08",
+      "SD-06"
+    ],
+    "estadoInicial": "Abierto"
+  },
+  {
+    "id": "DEF-05",
+    "severidad": "Media",
+    "titulo": "Al reconectar el socket no se recupera el tiempo restante: se inicia una sesión nueva de 3 minutos",
+    "hu": "US-17 · CA-11 (y CA-10)",
+    "casos": [
+      "F-17-09"
+    ],
+    "descripcion": "Cuando se cierra la última conexión del usuario en una cancha, el servidor cancela la sesión de inmediato (criterio CA-10). Si la conexión se cae por un instante y se reconecta, ya no hay sesión que retomar y el servidor crea una nueva de 180 s, por lo que el cliente no \"recupera el tiempo restante\" (CA-11). Los dos criterios son parcialmente contradictorios y la implementación solo cumple el primero.",
+    "pasos": [
+      "Conectar el socket y anotar expiresAt.",
+      "Cortar la conexión (pérdida de red) y reconectar 2 s después con el mismo token.",
+      "Comparar el expiresAt recibido."
+    ],
+    "esperado": "El expiresAt al reconectar es el mismo que antes del corte.",
+    "obtenido": "expiresAt nuevo, 2,0 s posterior al original: se creó una sesión nueva de 180 s.",
+    "impacto": "Una caída breve de red le regala al usuario un temporizador completo y le libera la franja retenida (el frontend la vuelve a pedir al reconectar). No impide reservar, pero el tiempo mostrado no refleja la sesión original.",
+    "recomendacion": "Dar un período de gracia (por ejemplo 10 a 15 s) antes de cancelar la sesión cuando se cierra el último socket; si el usuario reconecta dentro de ese lapso se retoma el mismo expiresAt.",
+    "correccion": "temporizadorReservaService espera un lapso de gracia de 10 s antes de cancelar la sesión cuando se cierra el último socket; si el usuario reconecta dentro de ese lapso se retoma la misma sesión con el mismo expiresAt y no se libera su franja.",
+    "verifican": [
+      "F-17-09",
+      "F-17-08"
+    ],
+    "estadoInicial": "Abierto"
+  },
+  {
+    "id": "DEF-06",
+    "severidad": "Media",
+    "titulo": "La cuenta regresiva depende del reloj del navegador, no del servidor",
+    "hu": "US-17 · CA-3 y CA-4",
+    "casos": [
+      "E2E-15"
+    ],
+    "descripcion": "El frontend calcula el tiempo restante como expiresAt (hora del servidor) menos Date.now() (hora del equipo del usuario). La sincronización cada 5 s reenvía el mismo expiresAt absoluto, por lo que no corrige desfases del reloj local. El criterio pide una cuenta regresiva calculada a partir de la hora del servidor, no del reloj local.",
+    "pasos": [
+      "Abrir el navegador con el reloj local adelantado 2 minutos.",
+      "Entrar al detalle de una cancha y esperar 6 s."
+    ],
+    "esperado": "El temporizador muestra ≈ 03:00 (hora del servidor).",
+    "obtenido": "Muestra 00:52: la cuenta regresiva está desfasada 2 minutos.",
+    "impacto": "Un usuario con la hora del equipo mal configurada ve un tiempo incorrecto (o \"Tu tiempo expiró\" de inmediato), aunque el servidor siga validando bien su sesión.",
+    "recomendacion": "Enviar en temporizador:inicio y temporizador:sync la hora actual del servidor (serverNow) o el tiempo restante en milisegundos, y calcular en el cliente el desfase (serverNow − Date.now()) para ajustar la cuenta regresiva.",
+    "correccion": "temporizador:inicio, temporizador:sync y el ack de temporizador:reiniciar envían ahora (hora del servidor). El frontend calcula el desfase respecto de su reloj y lo usa para la cuenta regresiva y para marcar las horas pasadas.",
+    "verifican": [
+      "E2E-15",
+      "F-17-11"
+    ],
+    "estadoInicial": "Abierto"
+  },
+  {
+    "id": "DEF-07",
+    "severidad": "Media",
+    "titulo": "No hay límite de intentos de inicio de sesión",
+    "hu": "US-02 · seguridad (RNF-03)",
+    "casos": [
+      "NF-12"
+    ],
+    "descripcion": "La API permite intentos ilimitados de inicio de sesión contra una misma cuenta, sin retrasos ni bloqueos, lo que facilita ataques de fuerza bruta o de relleno de credenciales.",
+    "pasos": [
+      "Enviar 40 inicios de sesión con contraseña incorrecta contra la misma cuenta.",
+      "Iniciar sesión con la contraseña correcta."
+    ],
+    "esperado": "Después de varios fallos, la API limita (429) o bloquea temporalmente.",
+    "obtenido": "Los 40 intentos respondieron 401 sin ninguna limitación y el inicio de sesión correcto posterior respondió 200.",
+    "impacto": "Una contraseña débil puede adivinarse por fuerza bruta.",
+    "recomendacion": "Agregar express-rate-limit (por IP y por correo) en /api/auth/login y /api/auth/olvide-password.",
+    "correccion": "Nuevo middleware backend/src/middlewares/limitadores.js (express-rate-limit): 10 intentos fallidos por IP y correo cada 15 minutos en /api/auth/login y 5 solicitudes en /api/auth/olvide-password; responde 429 con el código DEMASIADOS_INTENTOS. Iniciar sesión bien no consume el cupo y otras cuentas no se ven afectadas.",
+    "verifican": [
+      "NF-12"
+    ],
+    "estadoInicial": "Abierto"
+  },
+  {
+    "id": "DEF-08",
+    "severidad": "Baja",
+    "titulo": "Un origen no permitido por CORS recibe un error 500 y deja un error en el log",
+    "hu": "RNF-03 (seguridad)",
+    "casos": [
+      "NF-11"
+    ],
+    "descripcion": "La función de verificación de CORS rechaza los orígenes ajenos con un Error, que el manejador de errores convierte en un 500 \"Error interno del servidor\" y registra como error del servidor. El navegador igualmente bloquea la respuesta (no se envía Access-Control-Allow-Origin), así que no hay fuga de datos, pero el estado y el log son engañosos.",
+    "pasos": [
+      "Enviar GET /api/health con la cabecera Origin: http://sitio-malicioso.example."
+    ],
+    "esperado": "Respuesta sin Access-Control-Allow-Origin y con un estado de rechazo (403), sin error 500.",
+    "obtenido": "HTTP 500 {\"mensaje\":\"Error interno del servidor\"} y un [ERROR] en el log del backend.",
+    "impacto": "Ruido en los logs y diagnóstico confuso; sin impacto de seguridad directo.",
+    "recomendacion": "Rechazar con un ErrorDeAplicacion de estado 403 y mensaje \"Origen no permitido\" (o simplemente no habilitar CORS para ese origen).",
+    "correccion": "backend/src/config/corsOrigin.js: la API responde 403 \"Origen no permitido\" a un origen ajeno y las librerías cors/Socket.IO ya no reciben un Error, por lo que no hay error 500 ni ruido en el log.",
+    "verifican": [
+      "NF-11"
+    ],
+    "estadoInicial": "Abierto"
+  },
+  {
+    "id": "DEF-09",
+    "severidad": "Baja",
+    "titulo": "retencion:solicitar con un payload nulo responde ERROR_INTERNO en lugar de DATOS_INVALIDOS",
+    "hu": "US-18 · CA-1 y CA-9 (errores documentados)",
+    "casos": [
+      "F-18-08"
+    ],
+    "descripcion": "validarFranja usa un valor por defecto en la desestructuración, que solo aplica a undefined; si el cliente envía null el servicio lanza un TypeError, el socket responde ERROR_INTERNO y se registra un error. El código DATOS_INVALIDOS documentado no se devuelve en este caso.",
+    "pasos": [
+      "Conectar un socket autenticado.",
+      "Emitir retencion:solicitar con payload null."
+    ],
+    "esperado": "ack {ok:false, error:{codigo:\"DATOS_INVALIDOS\"}}.",
+    "obtenido": "ack {ok:false, error:{codigo:\"ERROR_INTERNO\", mensaje:\"Error interno del servidor\"}}.",
+    "impacto": "Un mensaje malformado de un cliente produce un error interno registrado; sin efecto sobre otros usuarios.",
+    "recomendacion": "En validarFranja tratar cualquier valor no objeto (null incluido) como DATOS_INVALIDOS antes de desestructurar.",
+    "correccion": "validarFranja trata cualquier payload que no sea un objeto (null incluido) como DATOS_INVALIDOS antes de desestructurar.",
+    "verifican": [
+      "F-18-08"
+    ],
+    "estadoInicial": "Abierto"
+  },
+  {
+    "id": "DEF-10",
+    "severidad": "Baja",
+    "estadoInicial": "Abierto",
+    "titulo": "Regresión de la corrección de DEF-02: al cerrar sesión la URL queda en /login?redirect=/canchas",
+    "hu": "US-02 · CA-4",
+    "casos": [
+      "E2E-03"
+    ],
+    "descripcion": "Al actualizar react-router-dom a la versión 7 (corrección de DEF-02), el orden en que se procesan el cierre de sesión y la navegación cambió: la ruta protegida alcanzaba a redirigir a /login agregando el parámetro redirect con la ruta que se acababa de abandonar. Esto no ocurría con la versión anterior. Lo detectó la regresión (E2E-03). Al volver a iniciar sesión, el usuario habría sido llevado a /canchas en lugar del flujo normal.",
+    "pasos": [
+      "Iniciar sesión y abrir el listado de canchas.",
+      "Pulsar \"Salir\".",
+      "Revisar la URL."
+    ],
+    "esperado": "La aplicación queda en /login, sin parámetros.",
+    "obtenido": "La URL quedó en /login?redirect=%2Fcanchas y la prueba que espera /login falló por tiempo de espera.",
+    "impacto": "Menor: solo cambia el destino tras volver a iniciar sesión después de cerrar sesión a propósito.",
+    "recomendacion": "Que el contexto de autenticación recuerde que el cierre de sesión fue voluntario y la ruta protegida no agregue el parámetro redirect en ese caso.",
+    "correccion": "AuthContext expone cerroSesion (verdadero tras un cierre voluntario, falso al iniciar sesión) y ProtectedRoute envía a /login sin parámetros cuando está activo.",
+    "verifican": [
+      "E2E-03"
+    ]
+  },
+  {
+    "id": "DEF-11",
+    "severidad": "Alta",
+    "estadoInicial": "Abierto",
+    "titulo": "US-13 quedó a medias tras unir las ramas: GET /api/reservas no tenía la consulta paginada ni los filtros",
+    "hu": "US-13 · CA-1 a CA-5",
+    "casos": [
+      "F-13-01"
+    ],
+    "descripcion": "Al unir la rama del historial (US-13) con sprint_4, el servicio y la pantalla \"Mis reservas\" quedaron esperando una consulta paginada (periodo, estado, página, límite), pero el repositorio y el controlador seguían con la versión anterior: listarPorUsuario recibía un objeto en lugar del id del usuario y GET /api/reservas devolvía la lista sin paginación (la pantalla leía paginacion.total de un valor indefinido). Las pruebas unitarias de US-13 usan un repositorio simulado, por eso pasaban.",
+    "pasos": [
+      "Unir la rama US-13 y la rama de las correcciones de QA en sprint_4.",
+      "Iniciar sesión y abrir \"Mis reservas\" (GET /api/reservas?periodo=proximas)."
+    ],
+    "esperado": "Respuesta { reservas, paginacion } con el estado visible de cada reserva, filtrada por periodo y estado.",
+    "obtenido": "La consulta no existía en el repositorio real: la respuesta no traía paginacion y la pantalla no podía mostrar el contador ni la paginación.",
+    "impacto": "Alto: la pantalla \"Mis reservas\" no funcionaba de punta a punta aunque las pruebas unitarias estuvieran en verde.",
+    "recomendacion": "Implementar la consulta en el repositorio y agregar una prueba de integración contra la base real.",
+    "correccion": "Se implementó reservaRepository.listarPorUsuario (periodo, estado \"completada\" derivado de la hora de Colombia, paginación y total), el controlador listarHistorial y la ruta GET /api/reservas; se conservó GET /api/reservas/mias. Se agregó historialReservas.integration.test.js.",
+    "verifican": [
+      "F-13-01",
+      "F-13-02",
+      "F-13-03",
+      "F-13-04",
+      "E2E-23"
+    ]
+  },
+  {
+    "id": "DEF-12",
+    "severidad": "Media",
+    "estadoInicial": "Abierto",
+    "titulo": "Contraste insuficiente en el código de la reserva de \"Mis reservas\" (WCAG 2.1 AA)",
+    "hu": "US-13 · CA-1 · RNF-05",
+    "casos": [
+      "NF-14"
+    ],
+    "descripcion": "El texto del identificador de cada reserva usaba el gris más claro de la paleta (#94a3b8) sobre fondo blanco, con una relación de contraste de 2,6:1; WCAG 2.1 AA exige 4,5:1. axe-core lo reportó como violación grave en la pantalla \"Mis reservas\" (2 elementos).",
+    "pasos": [
+      "Iniciar sesión con un usuario con reservas.",
+      "Abrir /mis-reservas y ejecutar axe-core."
+    ],
+    "esperado": "Ninguna violación crítica o grave.",
+    "obtenido": "1 violación grave: color-contrast en .reserva-item-id.",
+    "impacto": "Personas con baja visión no pueden leer el código de su reserva.",
+    "recomendacion": "Usar el color de texto secundario de la paleta (#475569, 7,6:1).",
+    "correccion": "En global.css, .reserva-item-id usa var(--tinta-suave).",
+    "verifican": [
+      "NF-14"
+    ]
+  },
+  {
+    "id": "DEF-13",
+    "severidad": "Media",
+    "estadoInicial": "Abierto",
+    "titulo": "La prueba de integración de US-12 no cumplía la validación de horario de la cancha y fallaba en Jest",
+    "hu": "US-12 · CA-1 · US-20 (pipeline)",
+    "casos": [
+      "JEST"
+    ],
+    "descripcion": "reservasMultiples.integration.test.js crea sus canchas de prueba sin horario de atención. Desde que la API valida que la reserva caiga dentro del horario de la cancha (DEF-03), las 5 pruebas de esa suite recibían 400 FUERA_DE_HORARIO en vez de 201. El fallo estaba en los datos de la prueba, pero dejaba el job de backend del pipeline en rojo.",
+    "pasos": [
+      "Unir la rama de US-12 con las correcciones de QA.",
+      "Ejecutar npm test en backend con una base de datos."
+    ],
+    "esperado": "Todas las pruebas pasan.",
+    "obtenido": "5 pruebas fallidas en reservasMultiples.integration.test.js.",
+    "impacto": "Bloquea el job de backend y, con él, Docker y el despliegue.",
+    "recomendacion": "Las pruebas de integración deben insertar el horario de atención de sus canchas, como ya hace la de US-09.",
+    "correccion": "La prueba inserta un horario diario de 06:00 a 22:00 para sus canchas.",
+    "verifican": [
+      "JEST"
+    ]
+  },
+  {
+    "id": "DEF-14",
+    "severidad": "Media",
+    "estadoInicial": "Abierto",
+    "titulo": "El job de SonarQube del pipeline seguía con acciones v4 y Node 20 (obsoletos)",
+    "hu": "US-21 · CA-2 · US-20",
+    "casos": [
+      "SD-15"
+    ],
+    "descripcion": "El job quality-gate agregado para US-21 usaba actions/checkout@v4, actions/setup-node@v4, actions/download-artifact@v4 y Node 20, mientras el resto del workflow ya estaba en v5 y Node 22. GitHub emite avisos de obsolescencia por Node 20 y lo retirará de los runners.",
+    "pasos": [
+      "Analizar .github/workflows/ci-cd.yml."
+    ],
+    "esperado": "Todas las acciones en v5 y Node 22.",
+    "obtenido": "Tres acciones en v4 y node-version \"20\" en el job quality-gate.",
+    "impacto": "Avisos de obsolescencia y riesgo de que el job deje de funcionar.",
+    "recomendacion": "Unificar versiones en todo el workflow.",
+    "correccion": "checkout, setup-node, upload-artifact y download-artifact en v5 y Node 22 en todos los jobs.",
+    "verifican": [
+      "SD-15"
+    ]
+  },
+  {
+    "id": "DEF-15",
+    "severidad": "Baja",
+    "estadoInicial": "Abierto",
+    "titulo": "\"Mis reservas\" mostraba el UUID de la reserva en lugar del código CY-XXXXXXXX",
+    "hu": "US-13 · CA-1 · US-11 · CA-6",
+    "casos": [
+      "E2E-13"
+    ],
+    "descripcion": "La pantalla de confirmación entrega al usuario un código corto (CY-XXXXXXXX), pero el nuevo historial mostraba el identificador interno de 36 caracteres. El usuario no podía reconocer la reserva que acababa de confirmar.",
+    "pasos": [
+      "Confirmar una reserva y anotar el código.",
+      "Pulsar \"Ver mis reservas\"."
+    ],
+    "esperado": "La reserva aparece con el mismo código.",
+    "obtenido": "Aparecía el UUID.",
+    "impacto": "Menor: inconsistencia visible entre la confirmación y el historial.",
+    "recomendacion": "Incluir el código en la respuesta del historial y mostrarlo.",
+    "correccion": "El historial devuelve codigo y la pantalla lo muestra (con el id como respaldo).",
+    "verifican": [
+      "E2E-13",
+      "F-13-01"
+    ]
+  }
+]

@@ -28,7 +28,7 @@ export default function LoginPage() {
     try {
       const { data } = await iniciarSesion({ correo, password });
       login(data.token, data.usuario);
-      navigate(redirectDestino || '/canchas', { replace: true });
+      void navigate(redirectDestino || '/canchas', { replace: true });
     } catch (err) {
       setError(extraerMensajeError(err, 'No fue posible iniciar sesión'));
     } finally {

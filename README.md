@@ -13,6 +13,85 @@ Proyecto Informático 1 — Universidad Autónoma de Occidente, Facultad de Inge
 
 ---
 
+## Descripción del proyecto y stack tecnológico
+
+**CanchaYa** es una aplicación web para consultar canchas sintéticas, ver su disponibilidad por fecha y reservar franjas de una hora. Evita las reservas duplicadas, retiene la franja mientras el usuario completa su reserva (temporizador de 3 minutos) y muestra a los demás usuarios la disponibilidad en tiempo real.
+
+| Capa | Tecnología |
+|---|---|
+| Frontend | React 18, Vite, React Router 7, Axios, Socket.IO Client |
+| Backend | Node.js 22, Express 4, express-validator, JWT, bcryptjs, Socket.IO 4 |
+| Base de datos | PostgreSQL 16 (Neon en desarrollo, contenedor en Docker) |
+| Pruebas | Jest, Supertest, Playwright, axe-core, Spectral |
+| Calidad | ESLint, SonarQube |
+| Contenedores y CI/CD | Docker Compose, GitHub Actions, runner self-hosted |
+| Documentación de la API | OpenAPI 3 y Swagger UI |
+
+---
+
+## Control de versiones
+
+### Estrategia de ramas
+
+Cada historia de usuario (HU) se desarrolla en su propia rama y entra a la rama de integración del sprint mediante un Pull Request. Nadie hace push directo a las ramas `main` ni `sprint_N`.
+
+```
+main         o--------------------------------------o   versión validada en el Sprint Review
+              \                                    /
+sprint_N       o-----o-----------o------------o---o     integración del sprint (hoy: sprint_4)
+                      \         / \          /
+feature/us-xx-nombre   o---o---o   \        /           una rama por HU (varios commits pequeños)
+                                    \      /
+fix/nombre-del-error                 o----o             corrección de un defecto
+qa/nombre                       o---o                   pruebas y documentación de QA
+```
+
+| Rama | Nombre | Sale de | Se fusiona en | Ejemplo real del repositorio |
+|---|---|---|---|---|
+| Principal | `main` | — | — (recibe `sprint_N` al validar el Sprint Review) | — |
+| Integración del sprint | `sprint_N` | `main` o `sprint_(N-1)` | `main` | `sprint_3`, `sprint_4` |
+| Funcionalidad | `feature/us-<n>-<descripcion>` | `sprint_N` | `sprint_N` por Pull Request | `feature/us-13-historial-reservas`, `US-12/Reservas_multiples` |
+| Corrección | `fix/<descripcion>` | `sprint_N` | `sprint_N` por Pull Request | — |
+| Pruebas | `qa/<descripcion>` | `sprint_N` | `sprint_N` por Pull Request | `qa/sprint-3-testing` |
+
+La relación HU → rama → commits debe ser trazable: el nombre de la rama lleva el número de la HU y cada commit la menciona en su alcance o en su pie.
+
+### Convención de commits
+
+Se sigue Conventional Commits: `<tipo>(<alcance>): <descripción corta en imperativo>`. La descripción va en minúscula, tiene unos 50 caracteres como máximo y un commit equivale a un cambio lógico.
+
+| Tipo | Se usa para | Ejemplo |
+|---|---|---|
+| `feat` | Nueva funcionalidad | `feat(us-13): agregar historial de reservas paginado` |
+| `fix` | Corrección de un error | `fix(reservas): rechazar reservas fuera del horario` |
+| `docs` | Documentación | `docs(api): documentar los endpoints con OpenAPI` |
+| `test` | Crear o ajustar pruebas | `test(us-12): cubrir el límite de reservas activas` |
+| `refactor` | Mejora interna sin cambiar el comportamiento | `refactor(reservas): extraer la validación de horario` |
+| `style` | Formato sin impacto funcional | `style(frontend): ordenar los estilos de la navbar` |
+| `build` | Dependencias y empaquetado | `build(backend): agregar swagger-ui-express` |
+| `ci` | Integración continua | `ci: validar la especificación OpenAPI con Spectral` |
+| `chore` | Mantenimiento | `chore: actualizar el .gitignore` |
+| `perf` | Rendimiento | `perf(reservas): indexar la consulta de disponibilidad` |
+
+### Pull Request y revisión de código
+
+1. Se abre el PR desde la rama de la HU hacia `sprint_N`. El título lleva el número de la HU y la descripción explica qué resuelve y cómo se probó.
+2. El pipeline de CI/CD corre solo (backend, frontend, quality gate de SonarQube y Docker). Si algún job falla, no se fusiona.
+3. Otro integrante, distinto del autor, revisa el código: deja comentarios (en el PR o en líneas específicas) y aprueba o solicita cambios.
+4. El autor atiende los comentarios con nuevos commits en la misma rama.
+5. Con la aprobación y los checks en verde, se fusiona con **Create a merge commit**. Así el historial conserva cada commit de la HU y el punto exacto donde entró al sprint (`git log --graph`).
+6. La rama de la HU se elimina después de fusionarse.
+
+### Resolución de conflictos
+
+1. Actualizar la rama de trabajo: `git fetch origin` y `git merge origin/sprint_N`.
+2. Identificar los archivos en conflicto: `git status` y `git diff --name-only --diff-filter=U`.
+3. Abrir cada archivo, decidir qué conservar de cada lado y borrar por completo los marcadores `<<<<<<<`, `=======` y `>>>>>>>`.
+4. Verificar con las pruebas: `cd backend && npm test`.
+5. Agregar solo los archivos resueltos (`git add <archivo>`, nunca `git add .`), hacer el commit del merge y subir la rama.
+
+---
+
 ## Sprint Planning — Sprint 1
 
 **Sprint:** Sprint 1 — 2 al 9 de septiembre de 2026 (1 semana)
@@ -328,7 +407,7 @@ npm run dev   # http://localhost:5173
 | US-12 | Reservas múltiples | EPIC-03: Motor de Reservas | 3 | Por hacer |
 | US-13 | Historial de reservas | EPIC-03: Motor de Reservas | 3 | Por hacer |
 | US-18 | Retención de franja y disponibilidad en tiempo real (Socket) | EPIC-03: Motor de Reservas | 5 | En curso |
-| PIG1-23 | Documentación técnica de API (OpenAPI/Swagger) | — | — | Por hacer |
+| PIG1-23 | Documentación técnica de API (OpenAPI/Swagger) | — | — | En curso |
 | US-19 | Contenedorización con Docker | — | 5 | En curso |
 | US-20 | Pipeline CI/CD con Docker | — | 5 | En curso |
 | US-21 | Integración de SonarQube y continuación de pruebas QA | — | 5 | Por hacer |
@@ -374,13 +453,67 @@ npm run dev   # http://localhost:5173
 
 ### US-19 · Contenedorización con Docker
 
-- [backend/Dockerfile](backend/Dockerfile): imagen Node 20 Alpine que aplica el esquema de la base al arrancar y luego inicia la API.
+- [backend/Dockerfile](backend/Dockerfile): imagen Node 22 Alpine que aplica el esquema de la base al arrancar y luego inicia la API.
 - [frontend/Dockerfile](frontend/Dockerfile): compila la app con Vite y la sirve con nginx. [frontend/nginx.conf](frontend/nginx.conf) redirige las rutas de React Router (por ejemplo `/canchas/:id`) a `index.html`.
 - [docker-compose.yml](docker-compose.yml): levanta tres servicios con healthcheck y los arranca en orden (`db` → `backend` → `frontend`).
   - `db`: PostgreSQL 16, en un contenedor propio y separado de Neon.
   - `backend`: la API.
   - `frontend`: la app servida con nginx.
 - Las variables del entorno Docker van en un `.env` en la raíz (plantilla: [.env.example](.env.example)), que no se sube al repositorio.
+
+### Documentación técnica de la API (OpenAPI / Swagger) · PIG1-23
+
+La API está documentada con **OpenAPI 3.0**. La especificación es el archivo [backend/openapi/openapi.yaml](backend/openapi/openapi.yaml), versionado junto con el código.
+
+**Swagger UI:** con el backend en marcha, abra `/api/docs`.
+
+| Ambiente | Dirección |
+|---|---|
+| Desarrollo (`npm run dev`) | http://localhost:4000/api/docs |
+| Docker Compose (staging local) | http://localhost:4100/api/docs |
+| Producción | Apagada por defecto con `NODE_ENV=production`; el equipo decide si la activa con `API_DOCS_HABILITADA=true` |
+
+La especificación también se descarga en `/api/docs/openapi.json` y `/api/docs/openapi.yaml`.
+
+**Probar un endpoint ("Try it out")**
+1. `POST /api/auth/registro` y luego `POST /api/auth/login`; copie el `token` de la respuesta.
+2. Pulse **Authorize**, pegue solo el token (Swagger UI agrega `Bearer`) y confirme.
+3. Los endpoints con candado ya usan ese token. Cada uno trae un ejemplo de cuerpo y de cada respuesta posible (200/201, 400, 401, 403, 404, 409, 429 y 500, según aplique).
+
+**Qué cubre**
+- Los 14 endpoints implementados, con método, ruta, descripción, parámetros, esquema del cuerpo y respuestas con ejemplos.
+- Los modelos se definen una sola vez en `components/schemas` (`Usuario`, `Cancha`, `Reserva`, `Error`, entre otros) y se reutilizan.
+- Los casos de error del motor de reservas: disponibilidad (US-08), reserva duplicada `409` (US-09), confirmación (US-11), reservas múltiples (US-12) e historial (US-13).
+- Los eventos de Socket.IO (US-17 y US-18), con nombre, dirección, contenido y errores, en la sección *Socket.IO (tiempo real)* de la misma página y en [docs/api/eventos-socket.md](docs/api/eventos-socket.md).
+
+**Cobertura: endpoints implementados contra documentados.** La tabla la genera `npm run docs:cobertura` leyendo las rutas reales de Express; el pipeline falla si baja del 90 %.
+
+| Método | Ruta | Documentado |
+|---|---|---|
+| POST | `/api/auth/login` | Sí |
+| POST | `/api/auth/olvide-password` | Sí |
+| POST | `/api/auth/registro` | Sí |
+| POST | `/api/auth/restablecer-password` | Sí |
+| GET | `/api/canchas` | Sí |
+| GET | `/api/canchas/{id}` | Sí |
+| GET | `/api/canchas/{id}/disponibilidad` | Sí |
+| GET | `/api/canchas/{id}/reservas` | Sí |
+| POST | `/api/canchas/{id}/reservas` | Sí |
+| POST | `/api/canchas/{id}/temporizador/completar` | Sí |
+| GET | `/api/health` | Sí |
+| GET | `/api/reservas` | Sí |
+| PATCH | `/api/reservas/{id}/cancelar` | Sí |
+| GET | `/api/reservas/mias` | Sí |
+
+**14 de 14 endpoints documentados (100 %).**
+
+**Cómo actualizar la documentación**
+1. Al crear o cambiar un endpoint, edite [backend/openapi/openapi.yaml](backend/openapi/openapi.yaml) en el mismo PR: ruta, parámetros, cuerpo, respuestas y ejemplos. Reutilice los modelos de `components/schemas`.
+2. Valide con `cd backend && npm run docs:lint` (Spectral, reglas en [backend/.spectral.yaml](backend/.spectral.yaml)).
+3. Compruebe la cobertura con `npm run docs:cobertura`. Si agregó un endpoint y no lo documentó, falla.
+4. Corra `npm test`: la prueba de contrato `openapiContrato.integration.test.js` ejecuta los ejemplos contra el backend real y verifica que cada respuesta cumpla el esquema publicado.
+
+El pipeline ejecuta los pasos 2 y 3 en el job *Backend - lint y pruebas* (US-20), y el paso 4 junto con el resto de las pruebas.
 
 ### US-20 · Pipeline CI/CD con Docker
 
@@ -413,3 +546,23 @@ El pipeline está en [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml).
 - Smoke test contra Docker: todas las verificaciones pasaron.
 - Prueba en navegador sobre `http://localhost:8080`: registro, login, listado con fotos, temporizador por socket y reserva confirmada, sin errores de consola.
 - Job de backend simulado con un Postgres temporal: 25/25 pruebas, incluida la de concurrencia.
+
+### Pruebas de QA (plan, ejecución y resultados)
+
+El plan de pruebas y los resultados están en [docs/testing/](docs/testing/), como documentos Word:
+
+| Documento | Contenido |
+|---|---|
+| [01_Plan_de_Pruebas_QA.docx](docs/testing/01_Plan_de_Pruebas_QA.docx) | Alcance, estrategia, entorno, criterios de salida y matriz de trazabilidad HU/criterio ↔ caso |
+| [02_Resultados_Pruebas_Funcionales.docx](docs/testing/02_Resultados_Pruebas_Funcionales.docx) | 72 casos de API y sockets por historia de usuario + 140 pruebas Jest |
+| [03_Resultados_Pruebas_No_Funcionales.docx](docs/testing/03_Resultados_Pruebas_No_Funcionales.docx) | 21 casos: rendimiento, carga, seguridad, accesibilidad, compatibilidad, fiabilidad y mantenibilidad |
+| [04_Resultados_Pruebas_E2E.docx](docs/testing/04_Resultados_Pruebas_E2E.docx) | 25 flujos en navegador con capturas |
+| [05_Resultados_Smoke_Docker.docx](docs/testing/05_Resultados_Smoke_Docker.docx) | 24 casos de Docker, smoke test y análisis del pipeline |
+| [06_Informe_Resumen_QA_y_Defectos.docx](docs/testing/06_Informe_Resumen_QA_y_Defectos.docx) | Conclusiones, veredicto frente a los criterios de salida y detalle de los 15 defectos |
+| [07_Resultados_SonarQube.docx](docs/testing/07_Resultados_SonarQube.docx) | Análisis estático con SonarQube (US-21): Quality Gate, métricas, hallazgos y correcciones |
+| [08_Verificacion_Documentacion_API.docx](docs/testing/08_Verificacion_Documentacion_API.docx) | Verificación de la documentación OpenAPI/Swagger (PIG1-23) contra sus criterios de aceptación |
+| [09_Consolidado_de_Pruebas.docx](docs/testing/09_Consolidado_de_Pruebas.docx) | Total de pruebas realizadas y listado completo de todas ellas |
+
+**Resultado de la regresión final: 282 pruebas, 0 fallidas** (140 de Jest, 72 funcionales, 25 E2E, 21 no funcionales y 24 de Docker/pipeline; 7 casos con una observación de mejora). SonarQube: Quality Gate aprobado, 0 bugs, 0 vulnerabilidades, 0 puntos críticos de seguridad y 0 code smells.
+
+La primera ejecución detectó 10 defectos (guardada en [ejecucion-1-inicial](docs/testing/ejecucion-1-inicial/)). Tras unir las historias US-12, US-13 y US-21 aparecieron 5 más (DEF-11 a DEF-15); los 15 están corregidos y verificados. Cada caso documenta la historia de usuario y el criterio que cubre, los pasos, el resultado esperado, el obtenido (incluidos los errores que el sistema debe devolver) y la evidencia. Los scripts que ejecutan las pruebas están en [qa/](qa/README.md) y corren sobre un entorno Docker aislado, sin tocar la base de Neon.
