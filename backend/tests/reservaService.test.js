@@ -30,6 +30,8 @@ describe('reservaService.crearReserva', () => {
     emailService.enviarCorreoConfirmacionReserva.mockResolvedValue({ simulado: true });
     retencionService.verificarDisponibleParaReservar.mockResolvedValue(undefined);
     retencionService.convertirEnReserva.mockResolvedValue(undefined);
+    reservaRepository.existeSolapadaDeUsuario.mockResolvedValue(false);
+    reservaRepository.contarConfirmadasPorUsuario.mockResolvedValue(0);
   });
 
   it('US-18: rechaza con 409 si otro usuario tiene la franja retenida, sin crear la reserva', async () => {
@@ -50,10 +52,18 @@ describe('reservaService.crearReserva', () => {
     expect(retencionService.convertirEnReserva).toHaveBeenCalledWith(USUARIO_ID, CANCHA_ID, reserva);
   });
 
+  // Fecha siempre futura (no hardcodeada) para que la prueba no empiece a fallar
+  // sola con el paso del tiempo por la validación de "no reservar fechas pasadas".
+  const fechaFutura = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
   const datosReserva = {
     canchaId: CANCHA_ID,
     usuarioId: USUARIO_ID,
+
+    fecha: fechaFutura,
+
     fecha: '2099-12-31',
+
     horaInicio: '08:00',
     horaFin: '09:00',
   };
@@ -136,6 +146,50 @@ describe('reservaService.crearReserva', () => {
       reservaService.crearReserva({ ...datosReserva, horaFin: '08:00' })
     ).rejects.toMatchObject({ statusCode: 400 });
     expect(reservaRepository.crear).not.toHaveBeenCalled();
+  });
+
+  it('US-12: rechaza con 409 si el usuario ya tiene una reserva que se solapa en el horario, sin crearla', async () => {
+    reservaRepository.existeSolapadaDeUsuario.mockResolvedValue(true);
+
+    await expect(reservaService.crearReserva(datosReserva)).rejects.toMatchObject({
+      statusCode: 409,
+      message: 'Ya tienes una reserva en ese horario',
+    });
+    expect(reservaRepository.existeSolapadaDeUsuario).toHaveBeenCalledWith(
+      USUARIO_ID,
+      datosReserva.fecha,
+      datosReserva.horaInicio,
+      datosReserva.horaFin
+    );
+    expect(reservaRepository.crear).not.toHaveBeenCalled();
+  });
+
+  it('US-12: permite reservas del mismo usuario en canchas/fechas/horas distintas sin solape', async () => {
+    reservaRepository.existeSolapadaDeUsuario.mockResolvedValue(false);
+    reservaRepository.crear.mockResolvedValue({ id: 'reserva-1', ...datosReserva, estado: 'confirmada' });
+
+    const reserva = await reservaService.crearReserva(datosReserva);
+
+    expect(reserva.id).toBe('reserva-1');
+  });
+
+  it('US-12: rechaza con 409 y mensaje claro si el usuario ya alcanzó el máximo de reservas activas', async () => {
+    reservaRepository.contarConfirmadasPorUsuario.mockResolvedValue(5);
+
+    await expect(reservaService.crearReserva(datosReserva)).rejects.toMatchObject({
+      statusCode: 409,
+      message: expect.stringMatching(/5 reservas activas/i),
+    });
+    expect(reservaRepository.crear).not.toHaveBeenCalled();
+  });
+
+  it('US-12: permite crear la reserva justo por debajo del límite máximo', async () => {
+    reservaRepository.contarConfirmadasPorUsuario.mockResolvedValue(4);
+    reservaRepository.crear.mockResolvedValue({ id: 'reserva-1', ...datosReserva, estado: 'confirmada' });
+
+    const reserva = await reservaService.crearReserva(datosReserva);
+
+    expect(reserva.id).toBe('reserva-1');
   });
 
   it('convierte la violación de índice único de Postgres (23505) en un 409 amigable', async () => {
