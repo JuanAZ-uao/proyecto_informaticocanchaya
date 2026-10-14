@@ -35,16 +35,7 @@ Proyecto Informático 1 — Universidad Autónoma de Occidente, Facultad de Inge
 
 Cada historia de usuario (HU) se desarrolla en su propia rama y entra a la rama de integración del sprint mediante un Pull Request. Nadie hace push directo a las ramas `main` ni `sprint_N`.
 
-```
-main         o--------------------------------------o   versión validada en el Sprint Review
-              \                                    /
-sprint_N       o-----o-----------o------------o---o     integración del sprint (hoy: sprint_4)
-                      \         / \          /
-feature/us-xx-nombre   o---o---o   \        /           una rama por HU (varios commits pequeños)
-                                    \      /
-fix/nombre-del-error                 o----o             corrección de un defecto
-qa/nombre                       o---o                   pruebas y documentación de QA
-```
+![Estrategia de ramas del equipo](docs/img/estrategia-ramas.png)
 
 | Rama | Nombre | Sale de | Se fusiona en | Ejemplo real del repositorio |
 |---|---|---|---|---|
