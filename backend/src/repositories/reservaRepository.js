@@ -88,9 +88,12 @@ async function existeSolapadaDeUsuario(usuarioId, fecha, horaInicio, horaFin) {
   return rows.length > 0;
 }
 
-async function contarConfirmadasPorUsuario(usuarioId) {
+// "Activas" = confirmadas cuyo horario aún no terminó. Las ya jugadas (que el historial muestra
+// como "completada") no cuentan para el límite máximo de reservas por usuario.
+async function contarActivasPorUsuario(usuarioId) {
   const { rows } = await pool.query(
-    `SELECT COUNT(*)::int AS total FROM reservas WHERE usuario_id = $1 AND estado = $2`,
+    `SELECT COUNT(*)::int AS total FROM reservas r
+     WHERE r.usuario_id = $1 AND r.estado = $2 AND ${FIN_RESERVA} >= ${AHORA_COLOMBIA}`,
     [usuarioId, ESTADO_CONFIRMADA]
   );
   return rows[0].total;
@@ -140,7 +143,7 @@ module.exports = {
   listarPorCanchaYFecha,
   existeConfirmada,
   existeSolapadaDeUsuario,
-  contarConfirmadasPorUsuario,
+  contarActivasPorUsuario,
   listarPorUsuario,
   listarTodasPorUsuario,
   obtenerPorId,

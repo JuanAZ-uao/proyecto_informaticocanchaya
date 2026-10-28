@@ -104,7 +104,7 @@ function tablaEntorno() {
 }
 
 function portadaMeta(extra = []) {
-  const fechas = todos.map((c) => c.ejecutadaEn).sort();
+  const fechas = todos.map((c) => c.ejecutadaEn).sort((x, y) => x.localeCompare(y));
   return [
     ['Proyecto', 'CanchaYa — Sistema de reserva de canchas sintéticas (Proyecto Informático 1, UAO, 2026-2)'],
     ['Equipo', 'Samuel Rios Calderón · Juan Esteban Panesso Bernal · Juan Sebastian Castillo Acevedo · Byron Stiven Zapata Zapata'],

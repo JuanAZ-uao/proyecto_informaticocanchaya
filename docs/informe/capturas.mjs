@@ -12,7 +12,7 @@ const EVID = path.join(AQUI, 'evidencias');
 fs.mkdirSync(EVID, { recursive: true });
 const { chromium } = createRequire(path.join(ROOT, 'qa/package.json'))('playwright');
 const repo = JSON.parse(fs.readFileSync(path.join(AQUI, 'datos-informe.json'), 'utf8')).repo;
-const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const esc = (t) => t.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 
 const browser = await chromium.launch();
 
@@ -56,7 +56,7 @@ await page.close();
 
 // ---------- Historial de Git ----------
 const grafo = execSync('git log --oneline --graph --all -n 30 --decorate=short --format="%h %s"', { cwd: ROOT, encoding: 'utf8' })
-  .split('\n').map((l) => l.replace(/\t/g, ' ').replace(/\s+/g, ' ').slice(0, 130)).join('\n');
+  .split('\n').map((l) => l.replaceAll('\t', ' ').replace(/\s+/g, ' ').slice(0, 130)).join('\n');
 page = await browser.newPage({ viewport: { width: 1200, height: 800 } });
 await page.setContent(`<body style="margin:0;background:#fff"><pre style="margin:0;padding:14px 18px;font:14px/1.35 Consolas,'Courier New',monospace;color:#000;white-space:pre">$ git log --oneline --graph --all\n${esc(grafo)}</pre></body>`);
 const alto = await page.evaluate(() => document.body.scrollHeight);

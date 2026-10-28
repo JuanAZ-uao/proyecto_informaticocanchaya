@@ -127,7 +127,7 @@ await S.caso(
   { ...base, id: 'NF-05', hu: 'US-18', ca: [8], grupo: 'Carga y concurrencia', rnf: 'US-18 CA-8', nivel: 'Socket.IO (carga)', titulo: 'Prueba de carga: 100 conexiones concurrentes sin pérdida de eventos ni reservas duplicadas', objetivo: 'Ejecutar la prueba de carga del criterio de aceptación de US-18.', datos: '100 usuarios nuevos conectados a la misma cancha.', pasos: ['Crear 100 usuarios y conectarlos por socket a la misma cancha.', 'Uno retiene la franja A; los 99 restantes deben recibir el aviso.', 'Los 99 compiten a la vez por la franja B (retención y luego reserva).', 'Verificar eventos recibidos y filas en la base.'], esperado: '100/100 conexiones; 99/99 reciben cada aviso exactamente una vez; 1 retención y 1 reserva ganadoras; una sola fila en la base.' },
   async (c) => {
     const r = sh('npm run test:carga', { cwd: `${ROOT}/backend`, env: { API_URL: CFG.API, CLIENTES: '100' }, timeout: 300000 });
-    const m = r.out.match(/(\d+)\/(\d+) verificaciones correctas/);
+    const m = r.out.match(/(\d{1,6})\/(\d{1,6}) verificaciones correctas/);
     const lineas = r.out.split('\n').filter((l) => /^\[(OK|FALLO)\]/.test(l));
     lineas.forEach((l) => c.verifica(l.startsWith('[OK]'), l.replace(/^\[(OK|FALLO)\]\s*/, '')));
     c.verifica(r.code === 0 && m && m[1] === m[2], 'La prueba termina con todas las verificaciones correctas', m ? `${m[1]}/${m[2]}` : `código ${r.code}`);
@@ -138,13 +138,13 @@ await S.caso(
   { ...base, id: 'NF-06', hu: 'US-18', ca: [8], grupo: 'Carga y concurrencia', rnf: 'Estrés', nivel: 'Socket.IO (estrés)', prioridad: 'Media', titulo: 'Prueba de estrés: 250 conexiones concurrentes', objetivo: 'Superar 2,5 veces la carga exigida para conocer el margen del servidor.', datos: '250 usuarios nuevos; misma cancha.', pasos: ['Ejecutar la prueba de carga con CLIENTES=250.', 'Medir el consumo del contenedor del backend después.'], esperado: 'Todas las verificaciones correctas (sin eventos perdidos ni duplicados) con 250 clientes.' },
   async (c) => {
     const r = sh('npm run test:carga', { cwd: `${ROOT}/backend`, env: { API_URL: CFG.API, CLIENTES: '250' }, timeout: 480000 });
-    const m = r.out.match(/(\d+)\/(\d+) verificaciones correctas/);
+    const m = r.out.match(/(\d{1,6})\/(\d{1,6}) verificaciones correctas/);
     c.verifica(r.code === 0 && m && m[1] === m[2], 'Todas las verificaciones correctas con 250 clientes', m ? `${m[1]}/${m[2]}` : `código ${r.code}`);
-    const con = r.out.match(/(\d+)\/250 conexiones simultáneas[^\n]*\((\d+) ms\)/);
+    const con = r.out.match(/(\d{1,6})\/250 conexiones simultáneas[^\n(]*\((\d{1,9}) ms\)/);
     if (con) c.nota(`Conexión de 250 clientes: ${con[1]}/250 en ${con[2]} ms`);
     const stats = sh(`docker stats --no-stream --format "{{.Name}} {{.MemUsage}} {{.CPUPerc}}" ${CFG.proyecto}-backend-1`).stdout.trim();
     c.nota(`Consumo del backend tras la prueba: ${stats}`);
-    c.evidenciaTexto('Salida de la prueba', r.out.split('\n').filter((l) => /^\[|verificaciones|Prueba/.test(l)).join('\n'));
+    c.evidenciaTexto('Salida de la prueba', r.out.split('\n').filter((l) => /(?:^\[)|verificaciones|Prueba/.test(l)).join('\n'));
   }
 );
 
@@ -174,7 +174,7 @@ await S.caso(
   { ...base, id: 'NF-08', hu: 'US-02', ca: [3, 4], grupo: 'Seguridad', rnf: 'RNF-03', nivel: 'API REST', titulo: 'Seguridad del JWT y control de acceso entre usuarios', objetivo: 'Verificar que el token no contiene datos sensibles, que no se puede manipular y que un usuario no accede a datos ajenos.', pasos: ['Decodificar el JWT y revisar su contenido.', 'Modificar el identificador del payload sin volver a firmar.', 'Usar el token de A para ver el historial y cancelar reservas de B.'], esperado: 'El payload solo trae sub, iat y exp; el token manipulado se rechaza (401); A solo ve sus reservas y no puede cancelar las de B (403).' },
   async (c) => {
     const p = jwt.decode(U.token);
-    c.verifica(Object.keys(p).sort().join() === 'exp,iat,sub', 'El payload solo contiene sub, iat y exp (sin correo, nombre ni contraseña)', Object.keys(p).join(', '));
+    c.verifica(Object.keys(p).sort((x, y) => x.localeCompare(y)).join() === 'exp,iat,sub', 'El payload solo contiene sub, iat y exp (sin correo, nombre ni contraseña)', Object.keys(p).join(', '));
     c.verifica(p.exp - p.iat === 86400, 'Vigencia del token: 24 horas', `${(p.exp - p.iat) / 3600} h`);
     const [h, pl, f] = U.token.split('.');
     const otro = Buffer.from(JSON.stringify({ ...p, sub: '00000000-0000-4000-8000-000000000001' })).toString('base64url');

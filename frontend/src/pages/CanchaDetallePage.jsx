@@ -59,10 +59,31 @@ function claveFlujo(canchaId) {
   return `canchaya_flujo_reserva_${canchaId}`;
 }
 
+const FECHA_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const HORA_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+// Solo se guardan (y se leen) valores con el formato esperado: lo que haya en el almacenamiento
+// del navegador no es de fiar, así que nunca se usa tal cual.
+function normalizarFlujo(flujo) {
+  if (!flujo || typeof flujo !== 'object' || !FECHA_REGEX.test(flujo.fecha ?? '')) return null;
+
+  const bloque = flujo.bloqueSeleccionado;
+  const bloqueValido =
+    bloque && HORA_REGEX.test(bloque.horaInicio ?? '') && HORA_REGEX.test(bloque.horaFin ?? '')
+      ? { horaInicio: bloque.horaInicio, horaFin: bloque.horaFin }
+      : null;
+
+  return {
+    fecha: flujo.fecha,
+    bloqueSeleccionado: bloqueValido,
+    reservaIniciada: Boolean(bloqueValido && flujo.reservaIniciada),
+  };
+}
+
 function leerFlujoGuardado(canchaId) {
   try {
     const guardado = sessionStorage.getItem(claveFlujo(canchaId));
-    return guardado ? JSON.parse(guardado) : null;
+    return guardado ? normalizarFlujo(JSON.parse(guardado)) : null;
   } catch {
     return null;
   }
@@ -70,7 +91,8 @@ function leerFlujoGuardado(canchaId) {
 
 function guardarFlujo(canchaId, flujo) {
   try {
-    sessionStorage.setItem(claveFlujo(canchaId), JSON.stringify(flujo));
+    const limpio = normalizarFlujo(flujo);
+    if (limpio) sessionStorage.setItem(claveFlujo(canchaId), JSON.stringify(limpio));
   } catch {
     // El almacenamiento de sesión es solo una comodidad: si falla, el flujo sigue funcionando en memoria.
   }

@@ -26,7 +26,7 @@ curl -fsS -o /dev/null -D - -X OPTIONS "$API/canchas" \
 
 paso "Sin token la API responde 401"
 codigo=$(curl -s -o /dev/null -w '%{http_code}' "$API/canchas")
-[ "$codigo" = "401" ] || falla "se esperaba 401 y llegó $codigo"
+[[ "$codigo" == "401" ]] || falla "se esperaba 401 y llegó $codigo"
 
 paso "Registro e inicio de sesión contra la base de datos"
 correo="smoke.$(date +%s).$RANDOM@example.com"
@@ -35,7 +35,7 @@ curl -fsS -o /dev/null -X POST "$API/auth/registro" -H 'Content-Type: applicatio
   || falla "el registro falló"
 token=$(curl -fsS -X POST "$API/auth/login" -H 'Content-Type: application/json' \
   -d "{\"correo\":\"$correo\",\"password\":\"Password123!\"}" | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
-[ -n "$token" ] || falla "el login no devolvió token"
+[[ -n "$token" ]] || falla "el login no devolvió token"
 
 paso "Con token la API lista canchas"
 curl -fsS "$API/canchas" -H "Authorization: Bearer $token" | grep -q '"canchas"' || falla "GET /canchas falló"

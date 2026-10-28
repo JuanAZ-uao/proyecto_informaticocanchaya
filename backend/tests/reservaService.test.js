@@ -37,7 +37,7 @@ describe('reservaService.crearReserva', () => {
     retencionService.convertirEnReserva.mockResolvedValue(undefined);
     horarioRepository.listarPorCancha.mockResolvedValue(HORARIO_DIARIO);
     reservaRepository.existeSolapadaDeUsuario.mockResolvedValue(false);
-    reservaRepository.contarConfirmadasPorUsuario.mockResolvedValue(0);
+    reservaRepository.contarActivasPorUsuario.mockResolvedValue(0);
   });
 
   it('US-18: rechaza con 409 si otro usuario tiene la franja retenida, sin crear la reserva', async () => {
@@ -172,7 +172,7 @@ describe('reservaService.crearReserva', () => {
   });
 
   it('US-12: rechaza con 409 y mensaje claro si el usuario ya alcanzó el máximo de reservas activas', async () => {
-    reservaRepository.contarConfirmadasPorUsuario.mockResolvedValue(5);
+    reservaRepository.contarActivasPorUsuario.mockResolvedValue(5);
 
     await expect(reservaService.crearReserva(datosReserva)).rejects.toMatchObject({
       statusCode: 409,
@@ -182,7 +182,7 @@ describe('reservaService.crearReserva', () => {
   });
 
   it('US-12: permite crear la reserva justo por debajo del límite máximo', async () => {
-    reservaRepository.contarConfirmadasPorUsuario.mockResolvedValue(4);
+    reservaRepository.contarActivasPorUsuario.mockResolvedValue(4);
     reservaRepository.crear.mockResolvedValue({ id: 'reserva-1', ...datosReserva, estado: 'confirmada' });
 
     const reserva = await reservaService.crearReserva(datosReserva);

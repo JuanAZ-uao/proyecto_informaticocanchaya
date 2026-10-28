@@ -204,5 +204,24 @@ if (!tieneEntorno) {
       expect(respuestaExtra.status).toBe(409);
       expect(respuestaExtra.body.mensaje).toMatch(/reservas activas/i);
     }, 30000);
+
+    it('las reservas ya jugadas ("completada") no cuentan para el límite de reservas activas', async () => {
+      const { usuarioId, token } = await crearUsuarioConToken('limite-pasadas');
+
+      for (let i = 0; i < maxReservasActivasPorUsuario; i += 1) {
+        await pool.query(
+          `INSERT INTO reservas (cancha_id, usuario_id, fecha, hora_inicio, hora_fin, estado)
+           VALUES ($1, $2, '2000-01-10', $3, $4, 'confirmada')`,
+          [canchaUnoId, usuarioId, `${String(6 + i).padStart(2, '0')}:00`, `${String(7 + i).padStart(2, '0')}:00`]
+        );
+      }
+
+      const respuesta = await request(app)
+        .post(`/api/canchas/${canchaDosId}/reservas`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ fecha: '2099-11-17', horaInicio: '06:00', horaFin: '07:00' });
+
+      expect(respuesta.status).toBe(201);
+    }, 30000);
   });
 }

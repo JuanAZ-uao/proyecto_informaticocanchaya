@@ -13,7 +13,7 @@ function formatearFecha(fecha) {
 
 // Código corto y legible para mostrar al usuario (derivado del UUID de la reserva).
 function codigoReserva(id) {
-  return `CY-${String(id).replace(/-/g, '').slice(0, 8).toUpperCase()}`;
+  return `CY-${String(id).replaceAll('-', '').slice(0, 8).toUpperCase()}`;
 }
 
 function aDominio(fila) {

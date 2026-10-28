@@ -26,7 +26,8 @@ jobs:
         env:
           POSTGRES_DB: canchaya_test
           POSTGRES_USER: canchaya
-          POSTGRES_PASSWORD: canchaya
+          # Contraseña distinta en cada ejecución: la base es desechable y no hay credenciales en el repo.
+          POSTGRES_PASSWORD: ci-${{ github.run_id }}-${{ github.run_attempt }}
         ports:
           - 5432:5432
         options: >-
@@ -35,7 +36,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     env:
-      DATABASE_URL: postgresql://canchaya:canchaya@localhost:5432/canchaya_test
+      DATABASE_URL: postgresql://canchaya:ci-${{ github.run_id }}-${{ github.run_attempt }}@localhost:5432/canchaya_test
       JWT_SECRET: secreto-solo-para-ci
     steps:
       - uses: actions/checkout@v5
@@ -46,7 +47,7 @@ jobs:
           cache: npm
           cache-dependency-path: backend/package-lock.json
 
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npm run lint --if-present
       - name: Validar la especificación OpenAPI (Spectral)
         run: npm run docs:lint
@@ -89,7 +90,7 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npm run lint
       - run: npm run build
 
@@ -153,7 +154,7 @@ jobs:
 
       - name: Análisis y espera del Quality Gate
         if: steps.sonar.outputs.disponible == 'true'
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarqube-scan-action@2f77a1ec69fb1d595b06f35ab27e97605bdef703 # v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
@@ -168,6 +169,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       JWT_SECRET: secreto-solo-para-ci
+      POSTGRES_PASSWORD: ci-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v5
 
@@ -191,7 +193,7 @@ jobs:
       - name: Prueba de carga de sockets (100 conexiones)
         working-directory: backend
         run: |
-          npm ci
+          npm ci --ignore-scripts
           npm run test:carga
         env:
           API_URL: http://localhost:4100/api
