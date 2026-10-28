@@ -93,6 +93,22 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run lint
       - run: npm run build
+      - name: Pruebas con cobertura
+        run: npm run test:coverage
+
+      - name: Empaquetar reporte de cobertura
+        if: always()
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/artifacts/frontend-reports"
+          cp coverage/lcov.info "$GITHUB_WORKSPACE/artifacts/frontend-reports/lcov.info"
+
+      - name: Publicar reporte de cobertura
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: frontend-reports
+          if-no-files-found: error
+          path: artifacts/frontend-reports/
 
   quality-gate:
     name: SonarQube Quality Gate
@@ -139,6 +155,12 @@ jobs:
           name: backend-reports
           path: artifacts-descarga/backend-reports
 
+      - uses: actions/download-artifact@v5
+        if: steps.sonar.outputs.disponible == 'true'
+        with:
+          name: frontend-reports
+          path: artifacts-descarga/frontend-reports
+
       - uses: actions/setup-node@v5
         if: steps.sonar.outputs.disponible == 'true'
         with:
@@ -150,7 +172,8 @@ jobs:
           mkdir -p backend/coverage frontend/coverage
           cp artifacts-descarga/backend-reports/lcov.info backend/coverage/lcov.info
           node scripts/ci/prefijar-lcov.mjs backend/coverage/lcov.info backend/coverage/lcov.sonar.info backend/
-          printf 'TN:\nend_of_record\n' > frontend/coverage/lcov.sonar.info
+          cp artifacts-descarga/frontend-reports/lcov.info frontend/coverage/lcov.info
+          node scripts/ci/prefijar-lcov.mjs frontend/coverage/lcov.info frontend/coverage/lcov.sonar.info frontend/
 
       - name: Análisis y espera del Quality Gate
         if: steps.sonar.outputs.disponible == 'true'

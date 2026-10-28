@@ -114,8 +114,10 @@ async function generarCobertura() {
   // Mismos pasos que el job quality-gate del pipeline.
   const p = sh('node scripts/ci/prefijar-lcov.mjs backend/coverage/lcov.info backend/coverage/lcov.sonar.info backend/', { cwd: ROOT });
   if (p.code !== 0) throw new Error(`prefijar-lcov falló: ${p.out}`);
-  fs.mkdirSync(`${ROOT}/frontend/coverage`, { recursive: true });
-  fs.writeFileSync(`${ROOT}/frontend/coverage/lcov.sonar.info`, 'TN:\nend_of_record\n');
+  const f = sh('npm run test:coverage', { cwd: `${ROOT}/frontend`, timeout: 400000 });
+  if (f.code !== 0 || !fs.existsSync(`${ROOT}/frontend/coverage/lcov.info`)) throw new Error(`Las pruebas del frontend fallaron (código ${f.code}): ${f.out.slice(-800)}`);
+  const pf = sh('node scripts/ci/prefijar-lcov.mjs frontend/coverage/lcov.info frontend/coverage/lcov.sonar.info frontend/', { cwd: ROOT });
+  if (pf.code !== 0) throw new Error(`prefijar-lcov (frontend) falló: ${pf.out}`);
   return { pruebas: bruto.numTotalTests, aprobadas: bruto.numPassedTests, suites: bruto.numTotalTestSuites };
 }
 
