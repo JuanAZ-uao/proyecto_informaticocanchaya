@@ -2,7 +2,7 @@ FROM node:22-alpine AS build
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 COPY . .
 # Vite incrusta la URL de la API en el build: el navegador la usa para llamar al backend.

@@ -8,7 +8,18 @@
 
 const { io } = require('socket.io-client');
 
-const API = process.env.API_URL || 'http://localhost:4100/api';
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// API_URL debe ser una URL http(s) válida; se normaliza para no armar peticiones con texto arbitrario.
+function leerUrlApi(valor) {
+  const url = new URL(valor || 'http://localhost:4100/api');
+  if (!['http:', 'https:'].includes(url.protocol)) {
+    throw new Error('API_URL debe usar http o https');
+  }
+  return url.href.replace(/\/$/, '');
+}
+
+const API = leerUrlApi(process.env.API_URL);
 const SOCKET_URL = API.replace(/\/api\/?$/, '');
 const CLIENTES = Number(process.env.CLIENTES || 100);
 const ESPERA_MAXIMA_MS = 15000;
@@ -128,6 +139,7 @@ async function main() {
   const { datos } = await llamar('GET', '/canchas', null, tokens[0]);
   const canchaId = datos.canchas?.[0]?.id;
   if (!canchaId) throw new Error('No hay canchas: carga datos semilla antes de la prueba');
+  if (!UUID_REGEX.test(canchaId)) throw new Error('La API devolvió un id de cancha que no es un UUID');
 
   const fecha = fechaFuturaAleatoria();
   const franjaA = { fecha, horaInicio: '07:00', horaFin: '08:00' };

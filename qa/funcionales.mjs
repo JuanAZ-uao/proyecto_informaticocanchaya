@@ -490,7 +490,7 @@ await S.caso(
       const f = franja(8 + i);
       const [a, b] = await Promise.all([reservar(ANA, K1, f), reservar(BETO, K1, f)]);
       const filas = sqlq(`SELECT count(*) FROM reservas WHERE cancha_id='${K1.id}' AND fecha='${f.fecha}' AND hora_inicio='${f.horaInicio}'`);
-      resultados.push({ estados: [a.status, b.status].sort().join('/'), filas, perdedor: [a, b].find((x) => x.status === 409) });
+      resultados.push({ estados: [a.status, b.status].sort((x, y) => x - y).join('/'), filas, perdedor: [a, b].find((x) => x.status === 409) });
     }
     c.verifica(resultados.every((r) => r.estados === '201/409'), 'Las 5 repeticiones dan exactamente un 201 y un 409', resultados.map((r) => r.estados).join(' · '));
     c.verifica(resultados.every((r) => r.filas === '1'), 'En cada repetición hay una sola fila en la base', resultados.map((r) => r.filas).join(' · '));
@@ -506,7 +506,7 @@ await S.caso(
     const f = franja(16);
     const [a, b] = await Promise.all([reservar(CARLA, K1, f), reservar(CARLA, K1, f)]);
     const c3 = await reservar(CARLA, K1, f);
-    const estados = [a.status, b.status].sort();
+    const estados = [a.status, b.status].sort((x, y) => x - y);
     c.verifica(estados[0] === 201 && estados[1] === 409, 'Dos envíos en paralelo: un 201 y un 409', estados.join('/'));
     c.verifica(c3.status === 409, 'Un tercer envío posterior: 409', `HTTP ${c3.status}`);
     c.verifica(sqlq(`SELECT count(*) FROM reservas WHERE cancha_id='${K1.id}' AND fecha='${f.fecha}' AND hora_inicio='${f.horaInicio}'`) === '1', 'Una sola reserva en la base');
@@ -854,7 +854,7 @@ await S.caso(
     c.verifica(Boolean(conf), 'A recibe el evento retencion:confirmada');
     const ev = await esperarEvento(b, 'disponibilidad:retenida', (d) => d.fecha === f.fecha && d.horaInicio === '10:00');
     c.verifica(Boolean(ev), 'B recibe disponibilidad:retenida sin recargar', ev ? `${t(ev.t - conf.t)} después` : 'no llegó');
-    c.verifica(ev && !JSON.stringify(ev.datos).includes(u1.id) && Object.keys(ev.datos).sort().join() === 'canchaId,fecha,horaFin,horaInicio', 'El aviso solo trae la franja: no revela quién la retiene', JSON.stringify(ev?.datos));
+    c.verifica(ev && !JSON.stringify(ev.datos).includes(u1.id) && Object.keys(ev.datos).sort((x, y) => x.localeCompare(y)).join() === 'canchaId,fecha,horaFin,horaInicio', 'El aviso solo trae la franja: no revela quién la retiene', JSON.stringify(ev?.datos));
     c.verifica(eventosDe(a, 'disponibilidad:retenida').length === 0, 'A no recibe el aviso de su propia retención');
     c.verifica(sqlq(`SELECT count(*) FROM retenciones WHERE usuario_id='${u1.id}' AND fecha='${f.fecha}'`) === '1', 'Hay 1 fila en la tabla retenciones');
     cerrar(a, b);
@@ -1153,7 +1153,7 @@ await S.caso(
     const cancel = await api('PATCH', `/reservas/${medio}/cancelar`, undefined, u.token);
     c.verifica(cancel.status === 200 && cancel.datos.reserva.estado === 'cancelada', 'Cancelar la reserva del medio: 200 "cancelada"', `HTTP ${cancel.status}`);
     const mias = await api('GET', '/reservas/mias', undefined, u.token);
-    const estados = mias.datos.reservas.map((r) => r.estado).sort().join(',');
+    const estados = mias.datos.reservas.map((r) => r.estado).sort((x, y) => x.localeCompare(y)).join(',');
     c.verifica(estados === 'cancelada,confirmada,confirmada', 'Quedan 2 confirmadas y 1 cancelada', estados);
     const otra = await crearUsuario('cancela2');
     const re = await reservar(otra, K0, { fecha: dia, horaInicio: '09:00', horaFin: '10:00' });
@@ -1208,7 +1208,7 @@ await S.caso(
   async (c) => {
     const A = await crearUsuario('hist');
     const B = await crearUsuario('hist2');
-    const [d1, d2, d3] = [fechaUnica(), fechaUnica(), fechaUnica()].sort();
+    const [d1, d2, d3] = [fechaUnica(), fechaUnica(), fechaUnica()].sort((x, y) => x.localeCompare(y));
     await conReservas(A, [[K0, { fecha: d3, horaInicio: '08:00', horaFin: '09:00' }], [K1, { fecha: d1, horaInicio: '08:00', horaFin: '09:00' }], [K0, { fecha: d2, horaInicio: '08:00', horaFin: '09:00' }]]);
     await reservar(B, K2, { fecha: d1, horaInicio: '08:00', horaFin: '09:00' });
     const r = await api('GET', '/reservas', undefined, A.token);
@@ -1308,7 +1308,9 @@ await S.caso(
   async (c) => {
     const cob = sh('npm run docs:cobertura', { cwd: `${ROOT}/backend` });
     const m = cob.out.match(/Cobertura: ([\d.]+) %/);
-    const n = cob.out.match(/implementados: (\d+)[\s\S]*documentados:\s+(\d+)/);
+    const implementados = cob.out.match(/implementados: (\d{1,6})/);
+    const documentados = cob.out.match(/documentados:\s{1,10}(\d{1,6})/);
+    const n = implementados && documentados ? [null, implementados[1], documentados[1]] : null;
     c.verifica(cob.code === 0 && m && Number(m[1]) >= 90, 'La cobertura de endpoints es ≥ 90 %', m ? `${m[1]} % (${n?.[2]} de ${n?.[1]})` : `código ${cob.code}`);
     c.evidenciaTexto('Endpoints implementados contra documentados', cob.out.trim());
     const ops = Object.entries(especApi.paths).flatMap(([ruta, o]) => ['get', 'post', 'patch', 'put', 'delete'].filter((mm) => o[mm]).map((mm) => ({ ruta, mm, op: o[mm] })));

@@ -4,7 +4,7 @@ module.exports = {
   listarTodasPorUsuario: jest.fn(),
   existeConfirmada: jest.fn(),
   existeSolapadaDeUsuario: jest.fn(),
-  contarConfirmadasPorUsuario: jest.fn(),
+  contarActivasPorUsuario: jest.fn(),
   obtenerPorId: jest.fn(),
   crear: jest.fn(),
   cancelar: jest.fn(),

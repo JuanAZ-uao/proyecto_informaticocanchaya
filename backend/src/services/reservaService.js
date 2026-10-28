@@ -40,7 +40,7 @@ async function crearReserva({ canchaId, usuarioId, fecha, horaInicio, horaFin })
     throw new ErrorDeAplicacion(MENSAJE_SOLAPE_USUARIO, 409, 'RESERVA_SOLAPADA');
   }
 
-  const totalActivas = await reservaRepository.contarConfirmadasPorUsuario(usuarioId);
+  const totalActivas = await reservaRepository.contarActivasPorUsuario(usuarioId);
   if (totalActivas >= env.maxReservasActivasPorUsuario) {
     throw new ErrorDeAplicacion(
       `Ya tienes ${env.maxReservasActivasPorUsuario} reservas activas. Cancela alguna para poder reservar otra.`,

@@ -192,7 +192,7 @@ if (fase === '1') {
       const r = sh(`docker stats --no-stream --format "{{.Name}}|{{.MemUsage}}|{{.CPUPerc}}" ${contenedor('db')} ${contenedor('backend')} ${contenedor('frontend')}`).stdout.trim().split('\n');
       for (const linea of r) {
         const [nombre, mem, cpu] = linea.split('|');
-        const mib = parseFloat(mem) * (/GiB/.test(mem.split('/')[0]) ? 1024 : 1);
+        const mib = Number.parseFloat(mem) * (/GiB/.test(mem.split('/')[0]) ? 1024 : 1);
         c.verifica(mib < 300, `${nombre.replace(`${P}-`, '')}: ${mem.split('/')[0].trim()} de memoria, CPU ${cpu}`);
       }
       c.evidenciaTexto('docker stats', r.join('\n'));
@@ -203,9 +203,9 @@ if (fase === '1') {
     { ...base, id: 'SD-14', hu: 'US-20', ca: [2], titulo: 'Prueba de carga con 100 conexiones de socket (paso del pipeline)', objetivo: 'Ejecutar la misma prueba de carga que corre el job Docker del pipeline.', pasos: ['Ejecutar "npm run test:carga" con CLIENTES=100 apuntando al entorno de pruebas.'], esperado: '9/9 verificaciones correctas: sin eventos perdidos ni duplicados y una sola reserva ganadora.' },
     async (c) => {
       const r = sh('npm run test:carga', { cwd: `${ROOT}/backend`, env: { API_URL: CFG.API, CLIENTES: '100' }, timeout: 300000 });
-      const m = r.out.match(/(\d+)\/(\d+) verificaciones correctas/);
+      const m = r.out.match(/(\d{1,6})\/(\d{1,6}) verificaciones correctas/);
       c.verifica(r.code === 0 && m && m[1] === m[2], 'La prueba de carga termina con todas las verificaciones correctas', m ? `${m[1]}/${m[2]}` : `código ${r.code}`);
-      c.evidenciaTexto('Salida de la prueba de carga', r.out.split('\n').filter((l) => /^\[|verificaciones|Prueba/.test(l)).join('\n'));
+      c.evidenciaTexto('Salida de la prueba de carga', r.out.split('\n').filter((l) => /(?:^\[)|verificaciones|Prueba/.test(l)).join('\n'));
     }
   );
 

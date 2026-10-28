@@ -10,7 +10,7 @@ services:
     environment:
       POSTGRES_DB: canchaya
       POSTGRES_USER: canchaya
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-canchaya}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en el archivo .env de la raiz o en el entorno}
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
@@ -27,7 +27,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4000
-      DATABASE_URL: postgresql://canchaya:${POSTGRES_PASSWORD:-canchaya}@db:5432/canchaya
+      DATABASE_URL: postgresql://canchaya:${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en el archivo .env de la raiz o en el entorno}@db:5432/canchaya
       JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en el archivo .env de la raiz o en el entorno}
       CORS_ORIGIN: http://localhost:${FRONTEND_PORT:-8080}
       MAX_RESERVAS_ACTIVAS_USUARIO: ${MAX_RESERVAS_ACTIVAS_USUARIO:-5}

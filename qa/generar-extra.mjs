@@ -273,7 +273,7 @@ function docApi() {
   return documento({
     titulo: 'Verificación de la Documentación de la API',
     subtitulo: 'OpenAPI 3 y Swagger UI — PIG1-23 (RNF-07)',
-    meta: [...META_BASE, ['Fecha de ejecución', fmtFecha(casos.map((c) => c.ejecutadaEn).sort()[0])], ['Versión probada', entorno ? `rama ${entorno.repositorio.rama}, commit ${entorno.repositorio.commit}${entorno.repositorio.archivosSinCommit ? ` (más ${entorno.repositorio.archivosSinCommit} archivos con cambios sin commit)` : ''}` : '—'], ['Resultado global', `${ok} de ${total} casos aprobados`], ['Historia cubierta', `PIG1-23 · ${HU['PIG1-23'].titulo}`]],
+    meta: [...META_BASE, ['Fecha de ejecución', fmtFecha(casos.map((c) => c.ejecutadaEn).sort((x, y) => x.localeCompare(y))[0])], ['Versión probada', entorno ? `rama ${entorno.repositorio.rama}, commit ${entorno.repositorio.commit}${entorno.repositorio.archivosSinCommit ? ` (más ${entorno.repositorio.archivosSinCommit} archivos con cambios sin commit)` : ''}` : '—'], ['Resultado global', `${ok} de ${total} casos aprobados`], ['Historia cubierta', `PIG1-23 · ${HU['PIG1-23'].titulo}`]],
     hijos,
   });
 }
@@ -347,7 +347,7 @@ function docConsolidado() {
       : `De ${num(total.total)} pruebas, ${num(total.fa)} fallaron; revise el detalle en las secciones anteriores.`),
   );
 
-  const fechas = casosQa.map((c) => c.ejecutadaEn).sort();
+  const fechas = casosQa.map((c) => c.ejecutadaEn).sort((x, y) => x.localeCompare(y));
   return documento({
     titulo: 'Consolidado de Todas las Pruebas',
     subtitulo: 'Resumen y listado completo de las pruebas ejecutadas — Sprint 4',

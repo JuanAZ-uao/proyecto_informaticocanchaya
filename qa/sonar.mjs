@@ -17,6 +17,12 @@ const CLAVE_PROYECTO = 'canchaya';
 const CLAVE_ADMIN = 'CanchaYa-Qa-2026-x';
 const arg = process.argv[2] ?? '1';
 
+// El argumento forma parte de nombres de archivo (sonar-<arg>.json): solo se admite una etiqueta simple.
+if (arg !== '--bajar' && !/^[\w.-]{1,20}$/.test(arg)) {
+  console.error('Uso: node sonar.mjs <etiqueta: letras, números, punto o guion> | --bajar');
+  process.exit(1);
+}
+
 if (arg === '--bajar') {
   sh(`docker rm -f ${CONTENEDOR}`);
   console.log('SonarQube eliminado.');
@@ -187,7 +193,7 @@ async function capturas(etiqueta) {
 // ---------- Ejecución ----------
 const inicio = new Date().toISOString();
 const estado = await asegurarSonarQube();
-console.log(`SonarQube ${estado.version ?? ''} en ${URL_SONAR}`);
+console.log(`SonarQube ${String(estado.version ?? '').replace(/[\r\n\t]+/g, ' ')} en ${URL_SONAR}`);
 await prepararCredenciales();
 const token = await generarToken();
 console.log('Generando la cobertura del backend…');

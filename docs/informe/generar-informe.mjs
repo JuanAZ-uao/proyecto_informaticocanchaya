@@ -16,7 +16,7 @@ const salida = process.argv[2] ?? path.join(AQUI, 'Informe_Control_de_Versiones_
 const datos = JSON.parse(fs.readFileSync(path.join(AQUI, 'datos-informe.json'), 'utf8'));
 
 const git = (cmd) => execSync(`git ${cmd}`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 26 }).trim();
-const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const esc = (t) => String(t).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 const leer = (n) => (fs.existsSync(path.join(ROOT, `qa/resultados/${n}.json`)) ? JSON.parse(fs.readFileSync(path.join(ROOT, `qa/resultados/${n}.json`), 'utf8')) : null);
 const existe = (f) => fs.existsSync(path.join(EVID, f));
 
@@ -28,7 +28,7 @@ function figura(archivo, leyenda, { ancho = '100%' } = {}) {
   nFigura += 1;
   const datosImg = fs.readFileSync(path.join(EVID, archivo)).toString('base64');
   const tipo = archivo.endsWith('.png') ? 'png' : 'jpeg';
-  return `<figure><img src="data:image/${tipo};base64,${datosImg}" style="width:${ancho}"><figcaption>Figura ${nFigura}. ${esc(leyenda)}</figcaption></figure>`;
+  return `<figure><img src="data:image/${tipo};base64,${datosImg}" alt="${esc(leyenda)}" style="width:${ancho}"><figcaption>Figura ${nFigura}. ${esc(leyenda)}</figcaption></figure>`;
 }
 function tabla(titulo, encabezados, filas, { anchos } = {}) {
   nTabla += 1;
@@ -85,7 +85,7 @@ cuerpo.push(`<section class="portada">
 <p class="centro grande"><strong>INFORME DE PRÁCTICAS DE INGENIERÍA:<br>CONTROL DE VERSIONES, PULL REQUESTS Y REVISIÓN DE CÓDIGO</strong></p>
 <p class="centro"><strong>Proyecto CanchaYa · Sprint Review #3 y #4</strong></p>
 <p class="centro">Equipo de desarrollo</p>
-<table class="sin-borde"><tbody>
+<table class="sin-borde" role="presentation"><tbody>
 <tr><td>Samuel Ríos Calderón (2230205)</td><td>GitHub: Samuel Rios</td></tr>
 <tr><td>Juan Esteban Panesso Bernal (2215930)</td><td>GitHub: JuanAZ-uao</td></tr>
 <tr><td>Juan Sebastián Castillo Acevedo (2231921)</td><td>GitHub: Juansec01</td></tr>

@@ -16,6 +16,11 @@ function crearTransportador() {
 
 const transportador = crearTransportador();
 
+// Los datos de entrada del usuario no deben poder falsear líneas del log (saltos de línea).
+function paraLog(valor) {
+  return String(valor).replace(/[\r\n\t]+/g, ' ');
+}
+
 async function enviarCorreoRecuperacion({ para, enlaceRestablecimiento }) {
   const asunto = 'CanchaYa - Recuperación de contraseña';
   const html = `
@@ -27,7 +32,7 @@ async function enviarCorreoRecuperacion({ para, enlaceRestablecimiento }) {
 
   if (!transportador) {
     console.log('[EMAIL] SMTP no configurado. Enlace de recuperación (modo desarrollo):');
-    console.log(`[EMAIL] Para: ${para} -> ${enlaceRestablecimiento}`);
+    console.log(`[EMAIL] Para: ${paraLog(para)} -> ${paraLog(enlaceRestablecimiento)}`);
     return { simulado: true };
   }
 
@@ -55,7 +60,7 @@ async function enviarCorreoConfirmacionReserva({ para, nombre, reserva }) {
   `;
 
   if (!transportador) {
-    console.log(`[EMAIL] SMTP no configurado. Confirmación de reserva (modo desarrollo) para ${para}: ${reserva.codigo} · ${reserva.cancha.nombre} · ${reserva.fecha} ${horario}`);
+    console.log(`[EMAIL] SMTP no configurado. Confirmación de reserva (modo desarrollo) para ${paraLog(para)}: ${reserva.codigo} · ${paraLog(reserva.cancha.nombre)} · ${reserva.fecha} ${horario}`);
     return { simulado: true };
   }
 

@@ -5,7 +5,14 @@
 const MINIMO = 90;
 
 function normalizarRuta(ruta) {
-  return ruta.replace(/:([A-Za-z0-9_]+)/g, '{$1}').replace(/\/+$/, '') || '/';
+  return quitarBarrasFinales(ruta.replace(/:([A-Za-z0-9_]+)/g, '{$1}')) || '/';
+}
+
+// Sin expresión regular: evita el backtracking de /\/+$/ en rutas largas.
+function quitarBarrasFinales(texto) {
+  let fin = texto.length;
+  while (fin > 0 && texto[fin - 1] === '/') fin -= 1;
+  return texto.slice(0, fin);
 }
 
 function endpointsImplementados(app) {
