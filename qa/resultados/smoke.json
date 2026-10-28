@@ -1,8 +1,8 @@
 {
   "clave": "smoke",
   "titulo": "Smoke test de Docker y pipeline",
-  "inicio": "2026-10-14T05:48:22.539Z",
-  "fin": "2026-10-14T06:45:31.629Z",
+  "inicio": "2026-10-28T07:31:22.421Z",
+  "fin": "2026-10-28T08:05:56.132Z",
   "casos": [
     {
       "tipo": "Smoke test",
@@ -21,7 +21,7 @@
       ],
       "esperado": "El comando termina con código 0 y sin mensajes de error.",
       "estado": "APROBADA",
-      "duracionMs": 3691,
+      "duracionMs": 3306,
       "resultado": [
         {
           "ok": true,
@@ -33,7 +33,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:48:26.232Z"
+      "ejecutadaEn": "2026-10-28T07:31:25.729Z"
     },
     {
       "tipo": "Smoke test",
@@ -53,7 +53,7 @@
       ],
       "esperado": "Error (código distinto de 0) con un mensaje que indica que falta JWT_SECRET.",
       "estado": "APROBADA",
-      "duracionMs": 1388,
+      "duracionMs": 1074,
       "resultado": [
         {
           "ok": true,
@@ -70,7 +70,7 @@
           "texto": "error while interpolating services.backend.environment.JWT_SECRET: required variable JWT_SECRET is missing a value: Define JWT_SECRET en el archivo .env de la raiz o en el entorno"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:48:27.622Z"
+      "ejecutadaEn": "2026-10-28T07:31:26.807Z"
     },
     {
       "tipo": "Smoke test",
@@ -90,7 +90,7 @@
       ],
       "esperado": "Ambas imágenes se construyen sin errores; el build completo tarda menos de 10 minutos.",
       "estado": "APROBADA",
-      "duracionMs": 98914,
+      "duracionMs": 149763,
       "resultado": [
         {
           "ok": true,
@@ -98,24 +98,24 @@
         },
         {
           "ok": true,
-          "texto": "El build completo tarda menos de 10 minutos → 97.0 s"
+          "texto": "El build completo tarda menos de 10 minutos → 132.8 s"
         },
         {
           "ok": true,
-          "texto": "Existen las imágenes backend y frontend → canchaya-qa-frontend 96.4MB · canchaya-qa-backend 301MB"
+          "texto": "Existen las imágenes backend y frontend → canchaya-qa-frontend 96.4MB · canchaya-qa-backend 302MB"
         },
         {
           "ok": true,
-          "texto": "El backend usa Node 22 (LTS vigente) → v22.23.3"
+          "texto": "El backend usa Node 22 (LTS vigente) → v22.23.4"
         }
       ],
       "evidencias": [
         {
           "titulo": "Últimas líneas del build",
-          "texto": "#26 naming to docker.io/library/canchaya-qa-frontend:latest\n#26 naming to docker.io/library/canchaya-qa-frontend:latest 0.0s done\n#26 unpacking to docker.io/library/canchaya-qa-frontend:latest\n#26 unpacking to docker.io/library/canchaya-qa-frontend:latest 0.4s done\n#26 DONE 2.8s\n\n#28 [frontend] resolving provenance for metadata file\n#28 DONE 0.1s\n Image canchaya-qa-backend Building \n Image canchaya-qa-frontend Building \n Image canchaya-qa-frontend Built \n Image canchaya-qa-backend Built"
+          "texto": "#27 naming to docker.io/library/canchaya-qa-frontend:latest\n#27 naming to docker.io/library/canchaya-qa-frontend:latest 0.2s done\n#27 unpacking to docker.io/library/canchaya-qa-frontend:latest\n#27 unpacking to docker.io/library/canchaya-qa-frontend:latest 1.4s done\n#27 DONE 8.5s\n\n#28 [frontend] resolving provenance for metadata file\n#28 DONE 0.4s\n Image canchaya-qa-frontend Building \n Image canchaya-qa-backend Building \n Image canchaya-qa-backend Built \n Image canchaya-qa-frontend Built"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:50:06.536Z"
+      "ejecutadaEn": "2026-10-28T07:33:56.570Z"
     },
     {
       "tipo": "Smoke test",
@@ -136,7 +136,7 @@
       ],
       "esperado": "Código 0; db, backend y frontend en estado healthy en menos de 3 minutos.",
       "estado": "APROBADA",
-      "duracionMs": 28876,
+      "duracionMs": 81184,
       "resultado": [
         {
           "ok": true,
@@ -156,16 +156,16 @@
         },
         {
           "ok": true,
-          "texto": "Todo el entorno queda sano en menos de 3 minutos → 27.0 s"
+          "texto": "Todo el entorno queda sano en menos de 3 minutos → 66.4 s"
         }
       ],
       "evidencias": [
         {
           "titulo": "docker compose ps",
-          "texto": "NAME                     IMAGE                  COMMAND                  SERVICE    CREATED          STATUS                    PORTS\ncanchaya-qa-backend-1    canchaya-qa-backend    \"docker-entrypoint.s…\"   backend    24 seconds ago   Up 13 seconds (healthy)   0.0.0.0:4300->4000/tcp, [::]:4300->4000/tcp\ncanchaya-qa-db-1         postgres:16-alpine     \"docker-entrypoint.s…\"   db         28 seconds ago   Up 22 seconds (healthy)   5432/tcp\ncanchaya-qa-frontend-1   canchaya-qa-frontend   \"/docker-entrypoint.…\"   frontend   23 seconds ago   Up 7 seconds (healthy)    0.0.0.0:8380->80/tcp, [::]:8380->80/tcp"
+          "texto": "NAME                     IMAGE                  COMMAND                  SERVICE    CREATED              STATUS                        PORTS\ncanchaya-qa-backend-1    canchaya-qa-backend    \"docker-entrypoint.s…\"   backend    About a minute ago   Up 31 seconds (healthy)       0.0.0.0:4300->4000/tcp, [::]:4300->4000/tcp\ncanchaya-qa-db-1         postgres:16-alpine     \"docker-entrypoint.s…\"   db         About a minute ago   Up About a minute (healthy)   5432/tcp\ncanchaya-qa-frontend-1   canchaya-qa-frontend   \"/docker-entrypoint.…\"   frontend   About a minute ago   Up 20 seconds (healthy)       0.0.0.0:8380->80/tcp, [::]:8380->80/tcp"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:50:35.413Z"
+      "ejecutadaEn": "2026-10-28T07:35:17.755Z"
     },
     {
       "tipo": "Smoke test",
@@ -185,15 +185,15 @@
       ],
       "esperado": "db inició antes que backend y backend antes que frontend.",
       "estado": "APROBADA",
-      "duracionMs": 908,
+      "duracionMs": 4507,
       "resultado": [
         {
           "ok": true,
-          "texto": "La base de datos inició antes (o al mismo tiempo) que el backend → db→backend 8312 ms"
+          "texto": "La base de datos inició antes (o al mismo tiempo) que el backend → db→backend 28628 ms"
         },
         {
           "ok": true,
-          "texto": "El backend inició antes (o al mismo tiempo) que el frontend → backend→frontend 5863 ms"
+          "texto": "El backend inició antes (o al mismo tiempo) que el frontend → backend→frontend 11365 ms"
         },
         {
           "ok": null,
@@ -201,7 +201,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:50:36.323Z"
+      "ejecutadaEn": "2026-10-28T07:35:22.262Z"
     },
     {
       "tipo": "Smoke test",
@@ -222,7 +222,7 @@
       ],
       "esperado": "Logs con \"[MIGRATE] Esquema aplicado correctamente\"; existen las 7 tablas y los índices únicos de US-09 y US-18.",
       "estado": "APROBADA",
-      "duracionMs": 4446,
+      "duracionMs": 22653,
       "resultado": [
         {
           "ok": true,
@@ -250,7 +250,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:50:40.770Z"
+      "ejecutadaEn": "2026-10-28T07:35:44.916Z"
     },
     {
       "tipo": "Smoke test",
@@ -271,7 +271,7 @@
       ],
       "esperado": "API y frontend responden 200; la base de datos no publica puertos en el host.",
       "estado": "APROBADA",
-      "duracionMs": 575,
+      "duracionMs": 1248,
       "resultado": [
         {
           "ok": true,
@@ -287,7 +287,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:50:41.346Z"
+      "ejecutadaEn": "2026-10-28T07:35:46.164Z"
     },
     {
       "tipo": "Smoke test",
@@ -307,7 +307,7 @@
       ],
       "esperado": "No hay .env, .git ni tests en la imagen; el usuario es \"node\"; el secreto no aparece en la imagen ni en el frontend.",
       "estado": "APROBADA",
-      "duracionMs": 3664,
+      "duracionMs": 17256,
       "resultado": [
         {
           "ok": true,
@@ -327,7 +327,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:50:45.011Z"
+      "ejecutadaEn": "2026-10-28T07:36:03.422Z"
     },
     {
       "tipo": "Smoke test",
@@ -346,7 +346,7 @@
       ],
       "esperado": "Pasan las 7 verificaciones: health, frontend, rutas SPA, CORS, 401 sin token, registro/login y listado de canchas, y termina con \"Smoke test OK\".",
       "estado": "APROBADA",
-      "duracionMs": 3305,
+      "duracionMs": 7271,
       "resultado": [
         {
           "ok": true,
@@ -387,7 +387,7 @@
           "texto": "-> API responde en /api/health\n-> Frontend sirve la app\n-> Rutas de React Router resuelven a index.html (SPA)\n-> CORS permite el origen del frontend\n-> Sin token la API responde 401\n-> Registro e inicio de sesión contra la base de datos\n-> Con token la API lista canchas\nSmoke test OK"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:50:48.317Z"
+      "ejecutadaEn": "2026-10-28T07:36:10.694Z"
     },
     {
       "tipo": "Smoke test",
@@ -408,7 +408,7 @@
       ],
       "esperado": "Se insertan 5 canchas; cada una tiene foto y el frontend responde 200 con content-type image/jpeg.",
       "estado": "APROBADA",
-      "duracionMs": 2054,
+      "duracionMs": 7078,
       "resultado": [
         {
           "ok": true,
@@ -440,7 +440,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:50:50.372Z"
+      "ejecutadaEn": "2026-10-28T07:36:17.775Z"
     },
     {
       "tipo": "Smoke test",
@@ -461,7 +461,7 @@
       ],
       "esperado": "Las rutas SPA responden 200 con index.html; los assets llevan Cache-Control immutable; un asset inexistente responde 404.",
       "estado": "APROBADA",
-      "duracionMs": 48,
+      "duracionMs": 380,
       "resultado": [
         {
           "ok": true,
@@ -485,7 +485,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:50:50.421Z"
+      "ejecutadaEn": "2026-10-28T07:36:18.155Z"
     },
     {
       "tipo": "Smoke test",
@@ -504,7 +504,7 @@
       ],
       "esperado": "Los 3 contenedores tienen healthcheck y política de reinicio \"unless-stopped\".",
       "estado": "APROBADA",
-      "duracionMs": 1550,
+      "duracionMs": 7833,
       "resultado": [
         {
           "ok": true,
@@ -520,7 +520,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:50:51.972Z"
+      "ejecutadaEn": "2026-10-28T07:36:25.989Z"
     },
     {
       "tipo": "Smoke test",
@@ -539,28 +539,28 @@
       ],
       "esperado": "Cada contenedor usa menos de 300 MiB de memoria en reposo.",
       "estado": "APROBADA",
-      "duracionMs": 2440,
+      "duracionMs": 3261,
       "resultado": [
         {
           "ok": true,
-          "texto": "db-1: 41.01MiB de memoria, CPU 0.04%"
+          "texto": "db-1: 38.96MiB de memoria, CPU 7.29%"
         },
         {
           "ok": true,
-          "texto": "backend-1: 30.07MiB de memoria, CPU 0.10%"
+          "texto": "backend-1: 28.6MiB de memoria, CPU 0.21%"
         },
         {
           "ok": true,
-          "texto": "frontend-1: 5.578MiB de memoria, CPU 4.65%"
+          "texto": "frontend-1: 5.352MiB de memoria, CPU 0.00%"
         }
       ],
       "evidencias": [
         {
           "titulo": "docker stats",
-          "texto": "canchaya-qa-db-1|41.01MiB / 7.74GiB|0.04%\ncanchaya-qa-backend-1|30.07MiB / 7.74GiB|0.10%\ncanchaya-qa-frontend-1|5.578MiB / 7.74GiB|4.65%"
+          "texto": "canchaya-qa-db-1|38.96MiB / 7.739GiB|7.29%\ncanchaya-qa-backend-1|28.6MiB / 7.739GiB|0.21%\ncanchaya-qa-frontend-1|5.352MiB / 7.739GiB|0.00%"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:50:54.413Z"
+      "ejecutadaEn": "2026-10-28T07:36:29.253Z"
     },
     {
       "tipo": "Smoke test",
@@ -579,7 +579,7 @@
       ],
       "esperado": "9/9 verificaciones correctas: sin eventos perdidos ni duplicados y una sola reserva ganadora.",
       "estado": "APROBADA",
-      "duracionMs": 48855,
+      "duracionMs": 86621,
       "resultado": [
         {
           "ok": true,
@@ -589,10 +589,10 @@
       "evidencias": [
         {
           "titulo": "Salida de la prueba de carga",
-          "texto": "> node scripts/pruebaCargaSockets.js || echo 'Prueba de carga omitida o archivo no encontrado.'\nPrueba de carga US-18 contra http://localhost:4300/api con 100 clientes\n[OK]    100/100 conexiones simultáneas recibieron su temporizador (1188 ms)\n[OK]    El primer cliente retiene la franja A y el servidor lo confirma\n[OK]    Aviso \"franja A en proceso de reserva\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 428 ms)\n[OK]    99 retenciones simultáneas de la franja B: 1 aceptada, 98 rechazadas con FRANJA_RETENIDA\n[OK]    Aviso \"franja B en proceso de reserva\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 318 ms)\n[OK]    99 reservas simultáneas de la franja B: 1 creada (201), 98 rechazadas (409)\n[OK]    En la base quedó 1 reserva para la franja B (sin duplicados)\n[OK]    Aviso \"franja B reservada\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 314 ms)\n[OK]    Aviso \"franja A liberada\" al salir el usuario: 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 10547 ms)\n9/9 verificaciones correctas"
+          "texto": "> node scripts/pruebaCargaSockets.js || echo 'Prueba de carga omitida o archivo no encontrado.'\nPrueba de carga US-18 contra http://localhost:4300/api con 100 clientes\n[OK]    100/100 conexiones simultáneas recibieron su temporizador (7104 ms)\n[OK]    El primer cliente retiene la franja A y el servidor lo confirma\n[OK]    Aviso \"franja A en proceso de reserva\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 304 ms)\n[OK]    99 retenciones simultáneas de la franja B: 1 aceptada, 98 rechazadas con FRANJA_RETENIDA\n[OK]    Aviso \"franja B en proceso de reserva\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 304 ms)\n[OK]    99 reservas simultáneas de la franja B: 1 creada (201), 98 rechazadas (409)\n[OK]    En la base quedó 1 reserva para la franja B (sin duplicados)\n[OK]    Aviso \"franja B reservada\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 311 ms)\n[OK]    Aviso \"franja A liberada\" al salir el usuario: 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 10471 ms)\n9/9 verificaciones correctas"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:51:43.269Z"
+      "ejecutadaEn": "2026-10-28T07:37:55.876Z"
     },
     {
       "tipo": "Smoke test",
@@ -615,7 +615,7 @@
       ],
       "esperado": "Jobs backend, frontend, quality-gate, docker y deploy-local; el despliegue solo corre en push a sprint_4 con runner self-hosted; los secretos vienen de \"secrets.*\"; no hay .env en el repositorio.",
       "estado": "APROBADA",
-      "duracionMs": 266,
+      "duracionMs": 180,
       "resultado": [
         {
           "ok": true,
@@ -659,7 +659,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T06:45:31.612Z"
+      "ejecutadaEn": "2026-10-28T07:37:56.058Z"
     },
     {
       "tipo": "Smoke test",
@@ -681,7 +681,7 @@
       ],
       "esperado": "Existe el proyecto \"canchaya\" con 3 contenedores, creado desde la carpeta del runner, y responde en 4100 y 8080.",
       "estado": "APROBADA",
-      "duracionMs": 2076,
+      "duracionMs": 4784,
       "resultado": [
         {
           "ok": true,
@@ -701,7 +701,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:51:46.177Z"
+      "ejecutadaEn": "2026-10-28T07:38:00.843Z"
     },
     {
       "tipo": "Smoke test",
@@ -721,7 +721,7 @@
       ],
       "esperado": "Los jobs Backend, Frontend y Docker en verde; runner conectado y escuchando; secretos JWT_SECRET y POSTGRES_PASSWORD creados.",
       "estado": "OBSERVACIÓN",
-      "duracionMs": 7,
+      "duracionMs": 18,
       "resultado": [
         {
           "ok": "obs",
@@ -742,7 +742,7 @@
           "leyenda": "Secretos del repositorio JWT_SECRET y POSTGRES_PASSWORD (captura del equipo)"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:51:46.185Z"
+      "ejecutadaEn": "2026-10-28T07:38:00.861Z"
     },
     {
       "tipo": "Smoke test",
@@ -766,7 +766,7 @@
       ],
       "esperado": "Swagger UI y la especificación responden 200 en Docker; la llamada con el mismo origen no es rechazada; un origen ajeno recibe 403; con API_DOCS_HABILITADA=false /api/docs responde 404 y la API sigue funcionando.",
       "estado": "APROBADA",
-      "duracionMs": 8181,
+      "duracionMs": 15617,
       "resultado": [
         {
           "ok": true,
@@ -790,7 +790,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:51:54.366Z"
+      "ejecutadaEn": "2026-10-28T07:38:16.479Z"
     },
     {
       "tipo": "Smoke test",
@@ -821,7 +821,7 @@
       ],
       "esperado": "El job de backend contiene ambos pasos; Spectral no reporta errores ni advertencias; la cobertura es 100 % (14/14) y el comando termina con código 0.",
       "estado": "APROBADA",
-      "duracionMs": 12608,
+      "duracionMs": 58235,
       "resultado": [
         {
           "ok": true,
@@ -842,7 +842,7 @@
           "texto": "> canchaya-backend@1.0.0 docs:lint\n> spectral lint openapi/openapi.yaml --ruleset .spectral.yaml --fail-severity=warn\n\nNo results with a severity of 'warn' or higher found!\n\n> canchaya-backend@1.0.0 docs:cobertura\n> node scripts/coberturaDocumentacion.js\n\nSI  POST   /api/auth/login\nSI  POST   /api/auth/olvide-password\nSI  POST   /api/auth/registro\nSI  POST   /api/auth/restablecer-password\nSI  GET    /api/canchas\nSI  GET    /api/canchas/{id}\nSI  GET    /api/canchas/{id}/disponibilidad\nSI  GET    /api/canchas/{id}/reservas\nSI  POST   /api/canchas/{id}/reservas\nSI  POST   /api/canchas/{id}/temporizador/completar\nSI  GET    /api/health\nSI  GET    /api/reservas\nSI  PATCH  /api/reservas/{id}/cancelar\nSI  GET    /api/reservas/mias\n\nEndpoints implementados: 14\nEndpoints documentados:  14\nCobertura: 100 %"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:52:06.976Z"
+      "ejecutadaEn": "2026-10-28T07:39:14.715Z"
     },
     {
       "tipo": "Smoke test",
@@ -865,7 +865,7 @@
       ],
       "esperado": "El archivo define proyecto, fuentes del backend y frontend, exclusiones y la ruta del lcov; el job quality-gate depende de backend y frontend, descarga el lcov y espera el Quality Gate; Docker depende de quality-gate.",
       "estado": "APROBADA",
-      "duracionMs": 7,
+      "duracionMs": 12,
       "resultado": [
         {
           "ok": true,
@@ -901,7 +901,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T06:45:31.626Z"
+      "ejecutadaEn": "2026-10-28T07:39:14.728Z"
     },
     {
       "tipo": "Smoke test",
@@ -922,7 +922,7 @@
       ],
       "esperado": "El usuario y la reserva siguen existiendo tras recrear los contenedores.",
       "estado": "APROBADA",
-      "duracionMs": 23712,
+      "duracionMs": 43720,
       "resultado": [
         {
           "ok": true,
@@ -938,7 +938,7 @@
         },
         {
           "ok": true,
-          "texto": "La API vuelve a ser alcanzable desde el equipo anfitrión → 0.5 s después de que Docker la marcó healthy"
+          "texto": "La API vuelve a ser alcanzable desde el equipo anfitrión → 0.7 s después de que Docker la marcó healthy"
         },
         {
           "ok": true,
@@ -954,7 +954,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T06:04:22.244Z"
+      "ejecutadaEn": "2026-10-28T08:04:35.034Z"
     },
     {
       "tipo": "Smoke test",
@@ -974,15 +974,15 @@
       ],
       "esperado": "El backend vuelve a responder en menos de 30 segundos y queda healthy.",
       "estado": "APROBADA",
-      "duracionMs": 9282,
+      "duracionMs": 18251,
       "resultado": [
         {
           "ok": true,
-          "texto": "El backend vuelve a responder /api/health → 4.8 s"
+          "texto": "El backend vuelve a responder /api/health → 12.1 s"
         },
         {
           "ok": true,
-          "texto": "Se recupera en menos de 30 segundos → 4.8 s"
+          "texto": "Se recupera en menos de 30 segundos → 12.1 s"
         },
         {
           "ok": true,
@@ -990,7 +990,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T06:04:31.527Z"
+      "ejecutadaEn": "2026-10-28T08:04:53.308Z"
     },
     {
       "tipo": "Smoke test",
@@ -1012,7 +1012,7 @@
       ],
       "esperado": "Base vacía (0 usuarios) con las 7 tablas creadas automáticamente.",
       "estado": "APROBADA",
-      "duracionMs": 21261,
+      "duracionMs": 51551,
       "resultado": [
         {
           "ok": true,
@@ -1036,7 +1036,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T06:04:52.789Z"
+      "ejecutadaEn": "2026-10-28T08:05:44.861Z"
     },
     {
       "tipo": "Smoke test",
@@ -1056,7 +1056,7 @@
       ],
       "esperado": "No quedan contenedores ni volúmenes de canchaya-qa; el proyecto \"canchaya\" sigue corriendo.",
       "estado": "APROBADA",
-      "duracionMs": 4922,
+      "duracionMs": 11270,
       "resultado": [
         {
           "ok": true,
@@ -1068,11 +1068,11 @@
         },
         {
           "ok": true,
-          "texto": "El despliegue del pipeline (proyecto canchaya) sigue sano → Up 3 hours (healthy)"
+          "texto": "El despliegue del pipeline (proyecto canchaya) sigue sano → Up About an hour (healthy)"
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T06:04:57.713Z"
+      "ejecutadaEn": "2026-10-28T08:05:56.132Z"
     }
   ]
 }

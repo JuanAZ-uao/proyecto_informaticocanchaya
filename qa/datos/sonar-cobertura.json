@@ -1,0 +1,21 @@
+{
+  "fuente": "API de SonarQube (/api/measures/component_tree) sobre el análisis 4, 27 de octubre de 2026",
+  "areas": {
+    "backend": { "archivos": 51, "lineasACubrir": 882, "lineasSinCubrir": 122, "coberturaLineas": 86.2, "coberturaCombinada": 82.8 },
+    "frontend": { "archivos": 30, "lineasACubrir": 2019, "lineasSinCubrir": 24, "coberturaLineas": 98.8, "coberturaCombinada": 98.2 }
+  },
+  "lineasNuevas": { "3": 26, "4": 35 },
+  "pruebas": {
+    "backend": { "jest": 157, "suites": 13, "nuevas": 16, "archivoNuevo": "backend/tests/temporizadorSocket.test.js" },
+    "frontend": { "vitest": 147, "archivos": 9, "herramienta": "Vitest 2 con Testing Library y jsdom (cobertura con V8)" }
+  },
+  "acciones": [
+    "El frontend no tenía ninguna prueba automática: sus 562 líneas por cubrir figuraban sin cubrir (0 %). Se añadió Vitest con Testing Library y 147 pruebas en 9 archivos: autenticación, rutas protegidas, listado de canchas, detalle de la cancha con el flujo completo de reserva, historial «Mis reservas», temporizador, hook del socket y router.",
+    "El socket de reservas del backend (temporizadorSocket.js, 74 líneas) no tenía pruebas. Se añadieron 16 pruebas con un servidor Socket.IO real: conexión y autenticación, retención de franjas, avisos en tiempo real a los demás usuarios, reinicio del temporizador y manejo de errores.",
+    "El pipeline ahora ejecuta las pruebas del frontend con cobertura (npm run test:coverage), publica su reporte lcov y el job de SonarQube lo descarga junto con el del backend. Antes recibía un reporte vacío para el frontend."
+  ],
+  "recomendaciones": [
+    "Los repositorios de acceso a datos (canchaRepository, horarioRepository, retencionRepository, sesionReservaRepository) son lo menos cubierto del backend; hoy solo los ejercitan las pruebas de integración. Conviene añadir pruebas unitarias con el cliente de base de datos simulado.",
+    "Los archivos de apoyo de pruebas en backend/src/repositories/__mocks__ se cuentan como código fuente. Excluirlos en sonar.exclusions evitaría líneas sin cubrir que no son código de producción."
+  ]
+}

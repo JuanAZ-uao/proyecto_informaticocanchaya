@@ -352,5 +352,73 @@
       "E2E-13",
       "F-13-01"
     ]
+  },
+  {
+    "id": "DEF-16",
+    "severidad": "Alta",
+    "estadoInicial": "Abierto",
+    "titulo": "El límite de reservas activas contaba también las reservas ya jugadas y bloqueaba al usuario",
+    "hu": "US-12 · CA-5 · US-13 · CA-4",
+    "casos": [
+      "JEST"
+    ],
+    "descripcion": "La regla del límite máximo (5 por defecto) contaba todas las reservas con estado \"confirmada\", sin mirar la fecha. Una reserva ya jugada sigue guardada como \"confirmada\" (el historial solo la muestra como \"completada\"), así que un usuario con 5 partidos pasados no podía volver a reservar nunca: recibía \"Ya tienes 5 reservas activas\". Se detectó en una prueba manual: una cuenta con 36 reservas confirmadas, de las cuales solo 1 estaba vigente, no lograba reservar.",
+    "pasos": [
+      "Crear 5 reservas confirmadas en fechas pasadas para un mismo usuario.",
+      "Intentar crear una reserva nueva en una fecha futura."
+    ],
+    "esperado": "201: las reservas ya jugadas no cuentan como activas.",
+    "obtenido": "409 con el mensaje \"Ya tienes 5 reservas activas. Cancela alguna para poder reservar otra.\"",
+    "impacto": "Alto: cualquier usuario recurrente quedaba bloqueado de forma permanente tras su quinta reserva. Ninguna prueba lo detectó porque los casos de límite solo creaban reservas futuras.",
+    "recomendacion": "Contar solo las reservas confirmadas cuyo horario aún no terminó, con la misma definición de \"completada\" que usa el historial (hora de Colombia).",
+    "correccion": "reservaRepository.contarActivasPorUsuario cuenta las reservas confirmadas con fecha y hora de fin posteriores a la hora actual en Colombia. Se añadió la prueba de integración \"las reservas ya jugadas no cuentan para el límite de reservas activas\".",
+    "verifican": [
+      "JEST",
+      "F-12-04"
+    ]
+  },
+  {
+    "id": "DEF-17",
+    "severidad": "Media",
+    "estadoInicial": "Abierto",
+    "titulo": "Dependencias de producción con vulnerabilidades conocidas (1 alta en el backend y 1 alta en el frontend)",
+    "hu": "NF · Seguridad · US-19",
+    "casos": [
+      "NF-13"
+    ],
+    "descripcion": "La auditoría de dependencias (npm audit) del 27 de octubre encontró avisos nuevos, publicados después de la entrega anterior: en el backend body-parser (alta), nodemailer, qs y yaml (moderadas); en el frontend follow-redirects (alta), que llega a través de axios.",
+    "pasos": [
+      "Ejecutar npm audit --omit=dev en backend y en frontend (lo hace NF-13)."
+    ],
+    "esperado": "Sin vulnerabilidades altas ni críticas en dependencias de producción.",
+    "obtenido": "Backend: 1 alta y 3 moderadas. Frontend: 1 alta.",
+    "impacto": "Medio: son dependencias que viajan en las imágenes de producción.",
+    "recomendacion": "Actualizar a las versiones corregidas sin saltos de versión mayor y repetir la auditoría.",
+    "correccion": "npm audit fix en backend y frontend (solo cambian los package-lock.json). Tras el cambio, ambas auditorías de producción dan 0 vulnerabilidades y se repitieron las pruebas unitarias, el lint, el build y todo el plan QA. Quedan avisos solo en herramientas de desarrollo del frontend (no se empaquetan en producción).",
+    "verifican": [
+      "NF-13"
+    ]
+  },
+  {
+    "id": "DEF-18",
+    "severidad": "Media",
+    "estadoInicial": "Abierto",
+    "titulo": "Hallazgos de seguridad del SonarQube del equipo: credenciales de ejemplo en el pipeline, entradas sin validar y scripts de instalación habilitados",
+    "hu": "US-20 · US-21 · NF · Seguridad",
+    "casos": [
+      "NF-13"
+    ],
+    "descripcion": "El análisis del servidor SonarQube del equipo reportó, entre otros: la contraseña de la base de datos escrita en .github/workflows/ci-cd.yml y con valor por defecto en docker-compose.yml; la acción de Sonar sin fijar a un commit; npm ci sin --ignore-scripts en el workflow y en los dos Dockerfile; datos sin validar en el almacenamiento del navegador de la ficha de la cancha (sessionStorage), en la URL de la prueba de carga y en las rutas que reciben prefijar-lcov.mjs y sonar.mjs; y saltos de línea sin neutralizar en los registros del servicio de correo.",
+    "pasos": [
+      "Revisar los hallazgos abiertos del servidor SonarQube del equipo."
+    ],
+    "esperado": "Sin hallazgos de seguridad corregibles en el código.",
+    "obtenido": "Hallazgos de severidad Blocker, High, Medium y Low en el pipeline, los Dockerfile, el frontend y los scripts.",
+    "impacto": "Medio: ninguno era explotable de forma directa, pero dejaban credenciales y entradas sin validar en el repositorio.",
+    "recomendacion": "Eliminar las credenciales del repositorio, fijar las acciones por commit, deshabilitar los scripts de instalación y validar toda entrada externa.",
+    "correccion": "La contraseña de la base de pruebas del CI se genera en cada ejecución y la del compose pasa a ser obligatoria (sin valor por defecto). La acción de Sonar se fija por SHA. Se añadió --ignore-scripts a todos los npm ci. El flujo guardado en el navegador se valida al guardar y al leer; la URL de la prueba de carga, los argumentos de los scripts y los registros se validan o limpian. También se corrigieron alertas menores de fiabilidad (sort sin comparador, expresiones regulares, [[ ]] en bash, replaceAll, texto alternativo del informe). Pendiente de revisión manual en SonarQube: contraseñas de usuarios de prueba en qa/ (marcar como \"Safe\") y el contenedor de nginx que corre como root.",
+    "verifican": [
+      "NF-13"
+    ]
   }
 ]

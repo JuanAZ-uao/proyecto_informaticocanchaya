@@ -496,7 +496,8 @@ await S.caso(
     const tz = dc('exec -T backend sh -c "date +%Z"').stdout.trim();
     const hCO = Number(horaCO().slice(0, 2));
     c.nota(`Zona horaria del contenedor: ${tz}; hora en Colombia ${horaCO()}`);
-    if (hCO < 2 || hCO > 20) { c.nota('La hora actual no permite el escenario (se necesita entre las 02:00 y las 20:59 de Colombia).'); return; }
+    // Las canchas del seed atienden de 06:00 a 22:00 (fines de semana 07:00 a 20:00): la hora futura debe caer dentro de ese horario.
+    if (hCO < 6 || hCO > 18) { c.nota('La hora actual no permite el escenario (se necesita entre las 06:00 y las 18:59 de Colombia).'); return; }
     const pasada = await api('POST', `/canchas/${K2.id}/reservas`, { fecha: fechaCO(0), horaInicio: `${String(hCO - 1).padStart(2, '0')}:00`, horaFin: `${String(hCO).padStart(2, '0')}:00` }, U.token);
     c.verifica(pasada.status === 400, `Hoy ${String(hCO - 1).padStart(2, '0')}:00 (ya pasó en Colombia): 400`, `HTTP ${pasada.status}`);
     const futura = await api('POST', `/canchas/${K2.id}/reservas`, { fecha: fechaCO(0), horaInicio: `${String(hCO + 1).padStart(2, '0')}:00`, horaFin: `${String(hCO + 2).padStart(2, '0')}:00` }, U.token);

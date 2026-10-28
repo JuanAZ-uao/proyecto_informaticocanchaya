@@ -93,5 +93,20 @@
     "caso": "F-13-03",
     "problema": "Los datos de la prueba insertaban reservas pasadas en la misma cancha, fecha y hora que F-13-02 y chocaban con la restricción única.",
     "correccion": "La prueba usa otra cancha y fechas distintas."
+  },
+  {
+    "caso": "NF-20",
+    "problema": "La prueba se ejecutó a las 2:03 a. m. (Colombia) y reservó \"hoy 03:00\" esperando un 201. El servidor respondió 400 con razón: las canchas de ejemplo atienden desde las 06:00 y 03:00 queda fuera de su horario. La condición que decidía si el escenario era válido aceptaba cualquier hora desde las 02:00.",
+    "correccion": "El escenario solo se ejecuta entre las 06:00 y las 18:59 de Colombia, cuando la hora futura cae dentro del horario de atención. El producto no tenía ningún problema."
+  },
+  {
+    "caso": "NF-13 (nuevo)",
+    "problema": "El escaneo de secretos detectó una cadena de conexión con usuario y contraseña de ejemplo en la prueba nueva del socket (backend/tests/temporizadorSocket.test.js).",
+    "correccion": "La variable de entorno de la prueba se define sin credenciales; los repositorios están simulados y la base no se usa."
+  },
+  {
+    "caso": "NF-06 a NF-19",
+    "problema": "En una ejecución intermedia el Docker Desktop se cayó durante la prueba de 250 conexiones, por falta de memoria (el motor tiene 8 GB y estaban encendidos SonarQube, el entorno de desarrollo y el de QA). Todos los casos siguientes fallaron con \"fetch failed\" o con el daemon de Docker apagado.",
+    "correccion": "Se apagó SonarQube, se reinició Docker y se repitió el plan completo. Los resultados de este documento son los de la ejecución limpia."
   }
 ]

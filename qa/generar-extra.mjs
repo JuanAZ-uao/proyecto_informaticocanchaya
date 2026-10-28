@@ -14,6 +14,10 @@ const leerDatos = (n) => {
   const f = path.join(import.meta.dirname, 'datos', `${n}.json`);
   return fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : [];
 };
+const leerObjeto = (n) => {
+  const f = path.join(import.meta.dirname, 'datos', `${n}.json`);
+  return fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : null;
+};
 const fmtFecha = (iso) => new Date(iso).toLocaleString('es-CO', { timeZone: 'America/Bogota', dateStyle: 'long', timeStyle: 'short' });
 const entorno = leer('entorno');
 const META_BASE = [
@@ -36,9 +40,17 @@ const minutos = (v) => (v === undefined ? '—' : `${num(v)} min`);
 function docSonar() {
   const s1 = leer('sonar-1');
   const s2 = leer('sonar-2');
-  const final = s2 ?? s1;
+  const s3 = leer('sonar-3');
+  const s4 = leer('sonar-4');
+  const analisis = [s1, s2, s3, s4].filter(Boolean);
+  const final = s4 ?? s3 ?? s2 ?? s1;
   if (!final) return null;
   const correcciones = leerDatos('sonar-correcciones');
+  const cob = leerObjeto('sonar-cobertura');
+  const ETIQUETAS = { 1: 'línea base', 2: 'hallazgos corregidos', 3: 'frontend sin pruebas', 4: 'final' };
+  const nombreAnalisis = (s) => `Análisis ${s.etiqueta} (${ETIQUETAS[s.etiqueta] ?? 'intermedio'})`;
+  const coberturaNueva = (s) => s?.gate?.conditions?.find((c) => c.metricKey === 'new_coverage');
+  const pct = (v) => (v === undefined || v === null ? '—' : `${String(v).replace('.', ',')} %`);
   const gateOk = final.gate.status === 'OK';
   const celdaGate = (estado) => ({ t: estado === 'OK' ? 'APROBADO' : estado === 'NONE' ? 'Sin datos' : 'FALLIDO', fondo: estado === 'OK' ? verde.fondo : estado === 'NONE' ? 'F2F4F6' : rojo.fondo, color: estado === 'OK' ? verde.texto : estado === 'NONE' ? '5B6770' : rojo.texto, bold: true, alinear: AlignmentType.CENTER });
 
@@ -50,12 +62,10 @@ function docSonar() {
     INFO: s.issues.filter((i) => i.severity === 'INFO').length,
   }[clave]);
 
-  const filaMetrica = (nombre, k, formato = num, nota = '') => {
-    const f = (s) => (s ? formato(medida(s, k)) : '—');
-    return s2 ? [nombre, f(s1), f(s2), nota] : [nombre, f(s1), nota];
-  };
-  const columnasMetricas = s2 ? [3300, 1500, 1500, 3780] : [3600, 2200, 4280];
-  const encabezadoMetricas = s2 ? ['Métrica', 'Análisis 1 (línea base)', 'Análisis 2 (final)', 'Qué mide'] : ['Métrica', 'Valor', 'Qué mide'];
+  const filaMetrica = (nombre, k, formato = num, nota = '') => [nombre, ...analisis.map((s) => formato(medida(s, k))), nota];
+  const anchoAnalisis = analisis.length > 2 ? 1250 : 1500;
+  const columnasMetricas = [analisis.length > 2 ? 2700 : 3300, ...analisis.map(() => anchoAnalisis), 10080 - (analisis.length > 2 ? 2700 : 3300) - anchoAnalisis * analisis.length];
+  const encabezadoMetricas = ['Métrica', ...analisis.map(nombreAnalisis), 'Qué mide'];
   const metricas = [
     filaMetrica('Líneas de código (ncloc)', 'ncloc', num, 'Líneas de código analizadas (backend y frontend)'),
     filaMetrica('Archivos', 'files', num, 'Archivos fuente analizados'),
@@ -64,9 +74,11 @@ function docSonar() {
     filaMetrica('Puntos críticos de seguridad', 'security_hotspots', num, 'Código sensible que requiere revisión manual'),
     filaMetrica('Code smells', 'code_smells', num, 'Problemas de mantenibilidad'),
     filaMetrica('Deuda técnica', 'sqale_index', minutos, 'Esfuerzo estimado para corregir los code smells'),
-    filaMetrica('Cobertura de pruebas', 'coverage', (v) => (v === undefined ? '—' : `${v} %`), 'Líneas y ramas cubiertas por las pruebas Jest del backend'),
-    filaMetrica('Cobertura de líneas', 'line_coverage', (v) => (v === undefined ? '—' : `${v} %`), 'Solo líneas'),
-    filaMetrica('Duplicación', 'duplicated_lines_density', (v) => (v === undefined ? '—' : `${v} %`), 'Porcentaje de líneas duplicadas'),
+    filaMetrica('Cobertura de pruebas', 'coverage', pct, 'Líneas y ramas cubiertas por las pruebas (Jest en el backend y, desde el análisis 4, Vitest en el frontend)'),
+    filaMetrica('Cobertura de líneas', 'line_coverage', pct, 'Solo líneas'),
+    filaMetrica('Líneas por cubrir', 'lines_to_cover', num, 'Líneas ejecutables que las pruebas deberían recorrer'),
+    filaMetrica('Líneas sin cubrir', 'uncovered_lines', num, 'Líneas que ninguna prueba ejecuta'),
+    filaMetrica('Duplicación', 'duplicated_lines_density', pct, 'Porcentaje de líneas duplicadas'),
     filaMetrica('Calificación de confiabilidad', 'reliability_rating', calif, 'A = sin bugs'),
     filaMetrica('Calificación de seguridad', 'security_rating', calif, 'A = sin vulnerabilidades'),
     filaMetrica('Calificación de mantenibilidad', 'sqale_rating', calif, 'A = deuda técnica ≤ 5 % del esfuerzo de desarrollo'),
@@ -75,16 +87,17 @@ function docSonar() {
 
   const hijos = [
     h1('1. Resumen de la ejecución'),
-    p(`Se analizó el código fuente del backend y del frontend con SonarQube ${final.servidor ? `(${final.servidor}, edición Community)` : ''}, usando la misma configuración que el pipeline de CI/CD (sonar-project.properties y la cobertura de Jest). ${s2 ? 'El análisis se ejecutó dos veces: una línea base y otra después de corregir los hallazgos que el equipo decidió atender.' : 'Se ejecutó un análisis completo.'}`),
+    p(`Se analizó el código fuente del backend y del frontend con SonarQube ${final.servidor ? `(${final.servidor}, edición Community)` : ''}, usando la misma configuración que el pipeline de CI/CD (sonar-project.properties y la cobertura de Jest y de Vitest). ${analisis.length > 2 ? `El análisis se ejecutó ${analisis.length} veces: una línea base y otra tras corregir los hallazgos que el equipo decidió atender (14 de octubre), y dos más el 27 de octubre para medir y mejorar la cobertura de pruebas: el análisis 3 reveló que el frontend no tenía ninguna prueba y el análisis 4 midió el resultado tras añadirlas.` : s2 ? 'El análisis se ejecutó dos veces: una línea base y otra después de corregir los hallazgos que el equipo decidió atender.' : 'Se ejecutó un análisis completo.'}`),
     tabla([4200, 5880], [
       ['Resultado', 'Detalle'],
       ['Quality Gate final', celdaGate(final.gate.status)],
       ['Bugs / Vulnerabilidades', `${num(medida(final, 'bugs'))} / ${num(medida(final, 'vulnerabilities'))}`],
       ['Puntos críticos de seguridad', Number(medida(final, 'security_hotspots')) === 0 ? '0 (no hay puntos por revisar)' : `${num(medida(final, 'security_hotspots'))} (${medida(final, 'security_hotspots_reviewed') ?? '—'} % revisados)`],
       ['Code smells', `${num(medida(final, 'code_smells'))} (deuda técnica ${minutos(medida(final, 'sqale_index'))})`],
-      ['Cobertura de pruebas del backend', `${medida(final, 'coverage') ?? '—'} %`],
-      ['Duplicación', `${medida(final, 'duplicated_lines_density') ?? '—'} %`],
-      ['Pruebas Jest que generaron la cobertura', `${final.jest.aprobadas} de ${final.jest.pruebas} aprobadas (${final.jest.suites} suites)`],
+      ['Cobertura de pruebas (total)', `${pct(medida(final, 'coverage'))}${cob ? ` · backend ${pct(cob.areas.backend.coberturaLineas)} y frontend ${pct(cob.areas.frontend.coberturaLineas)} de líneas` : ''}`],
+      ...(coberturaNueva(final) ? [['Cobertura del código nuevo', `${pct(coberturaNueva(final).actualValue)} (el Quality Gate exige al menos ${coberturaNueva(final).errorThreshold} %)`]] : []),
+      ['Duplicación', `${pct(medida(final, 'duplicated_lines_density'))}`],
+      ['Pruebas que generaron la cobertura', `Backend (Jest): ${final.jest.aprobadas} de ${final.jest.pruebas} aprobadas (${final.jest.suites} suites)${cob ? `; frontend (Vitest): ${cob.pruebas.frontend.vitest} pruebas en ${cob.pruebas.frontend.archivos} archivos` : ''}`],
     ]),
     p('', { despues: 80 }),
     p([{ text: 'Veredicto: ', bold: true }, gateOk ? 'el código cumple el Quality Gate de SonarQube; no hay bugs, vulnerabilidades ni puntos críticos de seguridad pendientes que lo bloqueen.' : 'el código NO cumple el Quality Gate; las condiciones en rojo se detallan en la sección 3.']),
@@ -97,7 +110,7 @@ function docSonar() {
       ['Scanner', 'sonarsource/sonar-scanner-cli en Docker, con el repositorio montado'],
       ['Proyecto', 'canchaya (sonar-project.properties, versionado en el repositorio)'],
       ['Fuentes analizadas', 'backend/src y frontend/src (se excluyen pruebas, node_modules, dist, coverage, public y backend/src/seed)'],
-      ['Cobertura', 'Jest con --coverage sobre un Postgres temporal; el lcov se prefija con backend/ (scripts/ci/prefijar-lcov.mjs) igual que en el job quality-gate. El frontend no tiene pruebas unitarias y reporta cobertura vacía'],
+      ['Cobertura', `Backend: Jest con --coverage sobre un Postgres temporal. ${analisis.length > 2 ? 'Frontend (desde el análisis 4): Vitest con --coverage (V8). ' : 'El frontend no tiene pruebas unitarias y reporta cobertura vacía. '}Cada lcov se prefija con backend/ o frontend/ (scripts/ci/prefijar-lcov.mjs), igual que en el job quality-gate`],
       ['Quality Gate', `${final.gateAplicado ? 'Sonar way (por defecto): ' : ''}sin bugs ni vulnerabilidades nuevos, puntos críticos revisados, duplicación y cobertura sobre código nuevo según los umbrales del servidor`],
       ['Espera del resultado', 'sonar.qualitygate.wait=true: el scanner termina con error si el Quality Gate falla (así se comporta en el pipeline)'],
       ['Control de versiones', 'Se deshabilitó el proveedor SCM (sonar.scm.disabled=true) porque el scanner corre en un contenedor sin el repositorio Git configurado'],
@@ -106,6 +119,12 @@ function docSonar() {
     p('Comandos equivalentes a los del pipeline:', { bold: true }),
     p('cd backend && npm test -- --coverage           # genera backend/coverage/lcov.info', { base: { font: 'Consolas', size: 17 }, despues: 20 }),
     p('node scripts/ci/prefijar-lcov.mjs backend/coverage/lcov.info backend/coverage/lcov.sonar.info backend/', { base: { font: 'Consolas', size: 17 }, despues: 20 }),
+    ...(analisis.length > 2
+      ? [
+          p('cd frontend && npm run test:coverage          # genera frontend/coverage/lcov.info', { base: { font: 'Consolas', size: 17 }, despues: 20 }),
+          p('node scripts/ci/prefijar-lcov.mjs frontend/coverage/lcov.info frontend/coverage/lcov.sonar.info frontend/', { base: { font: 'Consolas', size: 17 }, despues: 20 }),
+        ]
+      : []),
     p('sonar-scanner -Dsonar.host.url=… -Dsonar.token=… -Dsonar.qualitygate.wait=true', { base: { font: 'Consolas', size: 17 }, despues: 100 }),
 
     h1('3. Resultados'),
@@ -119,7 +138,14 @@ function docSonar() {
   } else {
     hijos.push(p('El Quality Gate no devolvió condiciones evaluables en este análisis.'));
   }
-  hijos.push(p([{ text: 'Cómo leer estas condiciones. ', bold: true }, 'El Quality Gate por defecto de SonarQube (Sonar way) evalúa solo el código nuevo (new_*). En un análisis con pocos cambios, SonarQube puede marcar una condición como aprobada aunque su valor sea bajo: en el análisis 2 el código nuevo fue de solo 12 líneas por cubrir y 18 líneas nuevas (ver el tablero en la sección 4), con una cobertura del 8,3 % sobre ellas, y el gate no exige el umbral con una muestra tan pequeña. Por eso este documento reporta también la cobertura global del backend, que es la cifra que sirve para decidir dónde reforzar las pruebas: ' + `${medida(final, 'coverage') ?? '—'} % en total, con el frontend sin pruebas unitarias; se recomienda aumentarla en los próximos sprints.`]));
+  if (analisis.length > 2 && cob) {
+    const n2 = coberturaNueva(s2);
+    const n3 = coberturaNueva(s3);
+    const n4 = coberturaNueva(s4 ?? final);
+    hijos.push(p([{ text: 'Cómo leer estas condiciones. ', bold: true }, `El Quality Gate por defecto de SonarQube (Sonar way) evalúa solo el código nuevo (new_*), es decir, lo cambiado desde la versión de referencia. En el análisis 2 el código nuevo era de solo unas pocas líneas y SonarQube ignoró la condición de cobertura (${pct(n2?.actualValue)}) por la muestra tan pequeña. En el análisis 3 (27 de octubre) había ${cob.lineasNuevas['3']} líneas nuevas por cubrir, todas del frontend, que no tenía ninguna prueba: la cobertura del código nuevo fue ${pct(n3?.actualValue)} frente al mínimo de ${n3?.errorThreshold ?? 80} % y el Quality Gate falló. Tras añadir las pruebas del frontend (análisis 4), la cobertura del código nuevo subió a ${pct(n4?.actualValue)} sobre ${cob.lineasNuevas['4']} líneas nuevas y el Quality Gate se aprobó. La cobertura total del proyecto pasó de ${pct(medida(s3, 'coverage'))} a ${pct(medida(final, 'coverage'))} (sección 3.7).`]));
+  } else {
+    hijos.push(p([{ text: 'Cómo leer estas condiciones. ', bold: true }, 'El Quality Gate por defecto de SonarQube (Sonar way) evalúa solo el código nuevo (new_*). En un análisis con pocos cambios, SonarQube puede marcar una condición como aprobada aunque su valor sea bajo: en el análisis 2 el código nuevo fue de solo 12 líneas por cubrir y 18 líneas nuevas (ver el tablero en la sección 4), con una cobertura del 8,3 % sobre ellas, y el gate no exige el umbral con una muestra tan pequeña. Por eso este documento reporta también la cobertura global del backend, que es la cifra que sirve para decidir dónde reforzar las pruebas: ' + `${medida(final, 'coverage') ?? '—'} % en total, con el frontend sin pruebas unitarias; se recomienda aumentarla en los próximos sprints.`]));
+  }
 
   hijos.push(h2('3.2 Métricas'), tabla(columnasMetricas, [encabezadoMetricas, ...metricas]), p('', { despues: 60 }));
 
@@ -129,7 +155,9 @@ function docSonar() {
     tabla([2600, 1500, 1500, 1500, 1500, 1480], [['Tipo / severidad', 'Bloqueante', 'Crítica', 'Mayor', 'Menor', 'Info'], ['Total de hallazgos abiertos', ...['BLOCKER', 'CRITICAL', 'MAJOR', 'MINOR', 'INFO'].map((k) => ({ t: String(conteo(s, k)), alinear: AlignmentType.CENTER })), ].slice(0, 6)]),
   ];
   hijos.push(h2('3.3 Hallazgos (issues) abiertos'));
-  if (s2) hijos.push(...resumenIssues(s1, 'Análisis 1 (línea base)'), ...resumenIssues(s2, 'Análisis 2 (final)'));
+  if (analisis.length > 2) {
+    hijos.push(tabla([3480, 1320, 1320, 1320, 1320, 1320], [['Análisis', 'Bloqueante', 'Crítica', 'Mayor', 'Menor', 'Info'], ...analisis.map((s) => [nombreAnalisis(s), ...['BLOCKER', 'CRITICAL', 'MAJOR', 'MINOR', 'INFO'].map((k) => ({ t: String(conteo(s, k)), alinear: AlignmentType.CENTER }))])]));
+  } else if (s2) hijos.push(...resumenIssues(s1, 'Análisis 1 (línea base)'), ...resumenIssues(s2, 'Análisis 2 (final)'));
   else hijos.push(...resumenIssues(s1, 'Análisis 1'));
 
   const detalle = (s, titulo) => {
@@ -144,8 +172,9 @@ function docSonar() {
 
   if (s2 && correcciones.length) {
     hijos.push(h2('3.4 Hallazgos corregidos entre el análisis 1 y el 2'), p('Cada hallazgo se evaluó antes de corregirlo; solo se cambió código cuando el reporte señalaba un problema real o una mejora sin riesgo funcional. Tras los cambios se volvió a ejecutar toda la batería de pruebas.'), tabla([2000, 2600, 2700, 2780], [['Regla', 'Ubicación', 'Problema', 'Corrección'], ...correcciones.map((c) => [c.regla, c.archivo, c.problema, c.correccion])]), p('', { despues: 60 }));
-    hijos.push(...detalle(s2, 'Detalle del análisis 2 (final)'));
+    hijos.push(...detalle(s2, analisis.length > 2 ? 'Detalle del análisis 2 (hallazgos corregidos)' : 'Detalle del análisis 2 (final)'));
   }
+  analisis.filter((s) => Number(s.etiqueta) > 2).forEach((s) => hijos.push(p(`${nombreAnalisis(s)}: ${s.issues.length ? `${s.issues.length} hallazgos abiertos.` : 'SonarQube no reportó hallazgos abiertos.'}`, { bold: true })));
 
   // Hotspots
   const hot = final.hotspots ?? [];
@@ -155,11 +184,44 @@ function docSonar() {
 
   // Cobertura por archivo
   const archivos = (final.archivos ?? []).map((a) => ({ ruta: a.path ?? a.key, ncloc: Number(a.measures.find((m) => m.metric === 'ncloc')?.value ?? 0), cov: a.measures.find((m) => m.metric === 'coverage')?.value, smells: a.measures.find((m) => m.metric === 'code_smells')?.value, dup: a.measures.find((m) => m.metric === 'duplicated_lines_density')?.value }));
-  hijos.push(h2(`${s2 && correcciones.length ? '3.6' : '3.5'} Cobertura y calidad por archivo`), p('Se listan los archivos con más líneas de código, con la cobertura de pruebas, los code smells y la duplicación de cada uno. Los archivos del frontend no tienen pruebas unitarias; su calidad se valida con las pruebas E2E del documento 04.'));
-  hijos.push(tabla([4400, 1100, 1500, 1500, 1580], [['Archivo', 'Líneas', 'Cobertura', 'Code smells', 'Duplicación'], ...archivos.slice(0, 45).map((a) => [a.ruta, { t: String(a.ncloc), alinear: AlignmentType.RIGHT }, { t: a.cov === undefined ? '—' : `${a.cov} %`, alinear: AlignmentType.RIGHT }, { t: a.smells ?? '0', alinear: AlignmentType.RIGHT }, { t: a.dup === undefined ? '—' : `${a.dup} %`, alinear: AlignmentType.RIGHT }])]));
+  hijos.push(h2(`${s2 && correcciones.length ? '3.6' : '3.5'} Cobertura y calidad por archivo`), p('Se listan los archivos con más líneas de código, con la cobertura de pruebas, los code smells y la duplicación de cada uno. ' + (analisis.length > 2 ? 'Los archivos del frontend se cubren con las pruebas de Vitest (desde el análisis 4) y, además, con las pruebas E2E del documento 04.' : 'Los archivos del frontend no tienen pruebas unitarias; su calidad se valida con las pruebas E2E del documento 04.')));
+  hijos.push(tabla([4400, 1100, 1500, 1500, 1580], [['Archivo', 'Líneas', 'Cobertura', 'Code smells', 'Duplicación'], ...archivos.slice(0, 45).map((a) => [a.ruta, { t: String(a.ncloc), alinear: AlignmentType.RIGHT }, { t: pct(a.cov), alinear: AlignmentType.RIGHT }, { t: a.smells ?? '0', alinear: AlignmentType.RIGHT }, { t: pct(a.dup), alinear: AlignmentType.RIGHT }])]));
+
+  // Evolución de la cobertura
+  if (analisis.length > 2 && cob) {
+    const { backend, frontend } = cob.areas;
+    const lineas = backend.lineasACubrir + frontend.lineasACubrir;
+    const sinCubrir = backend.lineasSinCubrir + frontend.lineasSinCubrir;
+    const der = (t) => ({ t: String(t), alinear: AlignmentType.RIGHT });
+    const fecha = (s) => fmtFecha(s.fin).replace(/,? \d{1,2}:\d{2}.*$/, '');
+    hijos.push(
+      h2(`${s2 && correcciones.length ? '3.7' : '3.6'} Cobertura de pruebas: evolución y estado final`),
+      p(`Cobertura del análisis ${final.etiqueta} (final), por área. La cobertura de líneas cuenta solo líneas; la combinada suma también las ramas de decisión, que es la cifra que reporta SonarQube como cobertura total.`),
+      tabla([2300, 1100, 1550, 1550, 1790, 1790], [
+        ['Área', 'Archivos', 'Líneas por cubrir', 'Líneas sin cubrir', 'Cobertura de líneas', 'Cobertura combinada'],
+        ['Backend (Jest)', der(backend.archivos), der(num(backend.lineasACubrir)), der(num(backend.lineasSinCubrir)), der(pct(backend.coberturaLineas)), der(pct(backend.coberturaCombinada))],
+        ['Frontend (Vitest)', der(frontend.archivos), der(num(frontend.lineasACubrir)), der(num(frontend.lineasSinCubrir)), der(pct(frontend.coberturaLineas)), der(pct(frontend.coberturaCombinada))],
+        [{ t: 'Total del proyecto', bold: true }, der(backend.archivos + frontend.archivos), der(num(lineas)), der(num(sinCubrir)), der(pct((((lineas - sinCubrir) / lineas) * 100).toFixed(1))), { t: pct(medida(final, 'coverage')), bold: true, alinear: AlignmentType.RIGHT }],
+      ]),
+      p('', { despues: 80 }),
+      p('Evolución entre los análisis:', { bold: true }),
+      tabla([2900, 1900, 1650, 1850, 1780], [
+        ['Análisis', 'Fecha', 'Cobertura total', 'Cobertura del código nuevo', 'Quality Gate'],
+        ...analisis.map((s) => [nombreAnalisis(s), fecha(s), der(pct(medida(s, 'coverage'))), der(coberturaNueva(s) ? pct(coberturaNueva(s).actualValue) : '—'), celdaGate(s.gate.status)]),
+      ]),
+      p('', { despues: 80 }),
+      p('Qué se hizo para subir la cobertura:', { bold: true }),
+      ...cob.acciones.map((a) => viñeta(a)),
+      p('', { despues: 40 }),
+      p('Pendientes y recomendaciones:', { bold: true }),
+      ...cob.recomendaciones.map((a) => viñeta(a)),
+    );
+  }
 
   // Evidencias
-  const evidencias = (final.evidencias ?? []).filter((e) => fs.existsSync(path.join(EVID, e.archivo)));
+  const capturaGateRojo = (s3?.evidencias ?? []).filter((e) => e.archivo.includes('tablero')).map((e) => ({ ...e, leyenda: `Anexo, análisis 3 (intermedio, 27 de octubre, ANTES de añadir las pruebas del frontend; no es el resultado final): Quality Gate fallido, la cobertura del código nuevo fue ${pct(coberturaNueva(s3)?.actualValue)} frente al mínimo de ${coberturaNueva(s3)?.errorThreshold ?? 80} %` }));
+  const evidenciasFinal = (final.evidencias ?? []).map((e) => (analisis.length > 2 ? { ...e, leyenda: `Análisis ${final.etiqueta} (final): ${e.leyenda}` } : e));
+  const evidencias = [...evidenciasFinal, ...(analisis.length > 2 && s3 && s3 !== final ? capturaGateRojo : [])].filter((e) => fs.existsSync(path.join(EVID, e.archivo)));
   hijos.push(saltoPagina(), h1('4. Evidencias'));
   if (!evidencias.length) hijos.push(p('No se pudieron capturar las pantallas de SonarQube en esta ejecución.'));
   evidencias.forEach((e, i) => {
@@ -171,7 +233,7 @@ function docSonar() {
     h1('5. Integración con el pipeline (US-20 y US-21)'),
     tabla([3000, 7080], [
       ['Elemento', 'Estado'],
-      ['Job "SonarQube Quality Gate"', 'Definido en .github/workflows/ci-cd.yml: depende de backend y frontend, descarga el lcov y ejecuta sonarqube-scan-action con sonar.qualitygate.wait=true'],
+      ['Job "SonarQube Quality Gate"', 'Definido en .github/workflows/ci-cd.yml: depende de backend y frontend, descarga los reportes lcov de ambos (el del frontend lo genera el job del frontend con npm run test:coverage) y ejecuta sonarqube-scan-action con sonar.qualitygate.wait=true'],
       ['Dependencia del job de Docker', 'La construcción de Docker espera al Quality Gate: un código que no pasa el gate no se despliega'],
       ['Secretos necesarios', 'SONAR_TOKEN (secreto del repositorio) y SONAR_HOST_URL (variable del repositorio), configurados en GitHub → Settings → Secrets and variables → Actions'],
       ['Servidor apagado o sin configurar', 'El primer paso del job consulta /api/server/version. Si el servidor no responde (por ejemplo, un túnel de ngrok cerrado) o faltan la variable o el secreto, el análisis se omite con un aviso en el resumen de la ejecución y el pipeline continúa; si responde, el Quality Gate sigue siendo obligatorio'],
@@ -182,7 +244,7 @@ function docSonar() {
 
     h1('6. Conclusión'),
     p(gateOk
-      ? `El Quality Gate quedó aprobado con ${num(medida(final, 'bugs'))} bugs, ${num(medida(final, 'vulnerabilities'))} vulnerabilidades y ${num(medida(final, 'security_hotspots'))} puntos críticos de seguridad. La cobertura de pruebas del backend es ${medida(final, 'coverage') ?? '—'} % y la duplicación ${medida(final, 'duplicated_lines_density') ?? '—'} %. Quedan ${final.issues.length} hallazgos de mantenibilidad abiertos${final.issues.length ? ' (ver sección 3.3)' : ''}.`
+      ? `El Quality Gate quedó aprobado con ${num(medida(final, 'bugs'))} bugs, ${num(medida(final, 'vulnerabilities'))} vulnerabilidades y ${num(medida(final, 'security_hotspots'))} puntos críticos de seguridad. La cobertura de pruebas ${cob ? 'total ' : 'del backend '}es ${pct(medida(final, 'coverage'))}${cob ? ` (backend ${pct(cob.areas.backend.coberturaLineas)} y frontend ${pct(cob.areas.frontend.coberturaLineas)} de líneas, con una cobertura del código nuevo de ${pct(coberturaNueva(final)?.actualValue)})` : ''} y la duplicación ${pct(medida(final, 'duplicated_lines_density'))}. Quedan ${final.issues.length} hallazgos de mantenibilidad abiertos${final.issues.length ? ' (ver sección 3.3)' : ''}.`
       : `El Quality Gate no quedó aprobado. Hay ${final.issues.length} hallazgos abiertos y ${num(medida(final, 'bugs'))} bugs; se deben corregir antes de integrar.`),
     p(`Criterios de aceptación de US-21 cubiertos: ${HU['US-21'].criterios.length}.`),
   );
@@ -365,9 +427,11 @@ const trabajos = [];
 const sonar = docSonar();
 if (sonar) trabajos.push(guardar(sonar, `${SALIDA}/07_Resultados_SonarQube.docx`));
 else console.log('(sin resultados de SonarQube: ejecute "node sonar.mjs 1")');
-const api = docApi();
+// DOCS=07 regenera solo el documento indicado (por ejemplo, tras un nuevo análisis de SonarQube).
+const quiere = (n) => !process.env.DOCS || process.env.DOCS.split(',').includes(n);
+const api = quiere('08') ? docApi() : null;
 if (api) trabajos.push(guardar(api, `${SALIDA}/08_Verificacion_Documentacion_API.docx`));
-const consolidado = docConsolidado();
+const consolidado = quiere('09') ? docConsolidado() : null;
 if (consolidado) trabajos.push(guardar(consolidado, `${SALIDA}/09_Consolidado_de_Pruebas.docx`));
 await Promise.all(trabajos);
 console.log('Documentos adicionales generados.');
