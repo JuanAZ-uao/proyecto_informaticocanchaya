@@ -7,8 +7,9 @@ module.exports = {
     'plugin:react/jsx-runtime',
     'plugin:react-hooks/recommended',
   ],
-  ignorePatterns: ['dist', '.eslintrc.cjs'],
+  ignorePatterns: ['dist', 'coverage', '.eslintrc.cjs'],
   parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
+  overrides: [{ files: ['tests/**', 'vitest.setup.js'], env: { node: true } }],
   settings: { react: { version: '18.3' } },
   plugins: ['react-refresh'],
   rules: {

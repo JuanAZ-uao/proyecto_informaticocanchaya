@@ -40,9 +40,11 @@ try {
   const lcovContent = fs.readFileSync(inputPath, 'utf8');
 
   // Reemplazar las rutas en las líneas "SF:" (Source File)
-  const updatedLcov = lcovContent.replace(/^SF:(.+)$/gm, (match, p1) => {
+  const updatedLcov = lcovContent.replace(/^SF:(.+)$/gm, (match, rutaOriginal) => {
+    // En Windows los reportes traen barras invertidas; Sonar espera rutas con /
+    const p1 = rutaOriginal.replaceAll('\\', '/');
     // Si la ruta ya tiene el prefijo, no lo duplica
-    if (p1.startsWith(prefix)) return match;
+    if (p1.startsWith(prefix)) return `SF:${p1}`;
     return `SF:${prefix}${p1}`;
   });
 
