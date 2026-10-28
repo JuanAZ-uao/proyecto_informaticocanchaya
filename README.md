@@ -35,15 +35,33 @@ Proyecto Informático 1 — Universidad Autónoma de Occidente, Facultad de Inge
 
 Cada historia de usuario (HU) se desarrolla en su propia rama y entra a la rama de integración del sprint mediante un Pull Request. Nadie hace push directo a las ramas `main` ni `sprint_N`.
 
-```
-main         o--------------------------------------o   versión validada en el Sprint Review
-              \                                    /
-sprint_N       o-----o-----------o------------o---o     integración del sprint (hoy: sprint_4)
-                      \         / \          /
-feature/us-xx-nombre   o---o---o   \        /           una rama por HU (varios commits pequeños)
-                                    \      /
-fix/nombre-del-error                 o----o             corrección de un defecto
-qa/nombre                       o---o                   pruebas y documentación de QA
+```mermaid
+gitGraph
+   commit id: "main"
+   branch sprint_N
+   checkout sprint_N
+   commit id: "inicio del sprint"
+   branch "feature/us-xx-nombre"
+   checkout "feature/us-xx-nombre"
+   commit id: "commit 1"
+   commit id: "commit 2"
+   commit id: "commit 3"
+   checkout sprint_N
+   merge "feature/us-xx-nombre" tag: "PR + CI"
+   branch "fix/nombre-del-error"
+   checkout "fix/nombre-del-error"
+   commit id: "fix 1"
+   commit id: "fix 2"
+   checkout sprint_N
+   merge "fix/nombre-del-error" tag: "PR + CI"
+   branch "qa/nombre"
+   checkout "qa/nombre"
+   commit id: "pruebas QA"
+   commit id: "docs QA"
+   checkout sprint_N
+   merge "qa/nombre" tag: "PR + CI"
+   checkout main
+   merge sprint_N tag: "Sprint Review"
 ```
 
 | Rama | Nombre | Sale de | Se fusiona en | Ejemplo real del repositorio |
