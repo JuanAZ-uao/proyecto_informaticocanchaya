@@ -1,8 +1,8 @@
 {
   "clave": "e2e",
   "titulo": "Pruebas End-to-End (navegador)",
-  "inicio": "2026-10-14T05:56:45.908Z",
-  "fin": "2026-10-14T06:00:06.124Z",
+  "inicio": "2026-10-28T07:48:15.916Z",
+  "fin": "2026-10-28T07:54:28.257Z",
   "casos": [
     {
       "tipo": "End-to-End",
@@ -29,7 +29,7 @@
       "grupo": "Autenticación",
       "titulo": "Registro → inicio de sesión → listado de canchas",
       "objetivo": "Recorrer la puerta de entrada de la aplicación como un visitante nuevo.",
-      "datos": "Laura Pérez QA, e2e.reg.1791957408085@qa.local, teléfono 3105550101.",
+      "datos": "Laura Pérez QA, e2e.reg.1793173697974@qa.local, teléfono 3105550101.",
       "pasos": [
         "Abrir /registro y completar nombre, correo, teléfono y contraseña.",
         "Enviar el formulario.",
@@ -39,7 +39,7 @@
       ],
       "esperado": "La cuenta se crea y redirige a /login con el mensaje \"Cuenta creada correctamente. Ahora inicia sesión.\"; el login lleva a /canchas con 5 canchas, sus fotos cargadas y el nombre del usuario en la barra.",
       "estado": "APROBADA",
-      "duracionMs": 2871,
+      "duracionMs": 13510,
       "resultado": [
         {
           "ok": true,
@@ -80,7 +80,7 @@
           "leyenda": "Listado de canchas tras iniciar sesión"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:56:50.956Z"
+      "ejecutadaEn": "2026-10-28T07:48:31.484Z"
     },
     {
       "tipo": "End-to-End",
@@ -102,7 +102,7 @@
       ],
       "esperado": "El formulario vacío no se envía; la contraseña débil muestra el mensaje de la política; el correo duplicado muestra \"El correo ya está registrado\"; en los tres casos se permanece en /registro.",
       "estado": "APROBADA",
-      "duracionMs": 3089,
+      "duracionMs": 8637,
       "resultado": [
         {
           "ok": true,
@@ -143,7 +143,7 @@
           "leyenda": "Error por correo duplicado"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:56:54.048Z"
+      "ejecutadaEn": "2026-10-28T07:48:40.123Z"
     },
     {
       "tipo": "End-to-End",
@@ -167,7 +167,7 @@
       ],
       "esperado": "Sin sesión se redirige a /login; la contraseña incorrecta muestra \"Correo o contraseña incorrectos\"; la sesión sobrevive a la recarga; tras \"Salir\" se vuelve a pedir login.",
       "estado": "APROBADA",
-      "duracionMs": 1998,
+      "duracionMs": 4221,
       "resultado": [
         {
           "ok": true,
@@ -192,7 +192,7 @@
           "leyenda": "Mensaje genérico de credenciales incorrectas"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:56:56.047Z"
+      "ejecutadaEn": "2026-10-28T07:48:44.345Z"
     },
     {
       "tipo": "End-to-End",
@@ -220,7 +220,7 @@
       ],
       "esperado": "Mensaje neutro idéntico en ambos correos; \"Las contraseñas no coinciden\" con valores distintos; redirige a /login tras el cambio; el login con la nueva funciona; el enlace reutilizado se rechaza.",
       "estado": "APROBADA",
-      "duracionMs": 3984,
+      "duracionMs": 18259,
       "resultado": [
         {
           "ok": true,
@@ -265,7 +265,7 @@
           "leyenda": "Enlace reutilizado rechazado"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:57:00.032Z"
+      "ejecutadaEn": "2026-10-28T07:49:02.605Z"
     },
     {
       "tipo": "End-to-End",
@@ -300,7 +300,7 @@
       ],
       "esperado": "El contador coincide con las tarjetas; cada filtro reduce el listado; sin coincidencias aparece \"No encontramos canchas con esos filtros\"; \"Limpiar\" restaura las 5 canchas.",
       "estado": "APROBADA",
-      "duracionMs": 3519,
+      "duracionMs": 12826,
       "resultado": [
         {
           "ok": true,
@@ -337,7 +337,7 @@
           "leyenda": "Estado vacío del listado"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:57:03.804Z"
+      "ejecutadaEn": "2026-10-28T07:49:16.188Z"
     },
     {
       "tipo": "End-to-End",
@@ -357,7 +357,7 @@
       ],
       "esperado": "La ficha muestra foto (cargada), crédito del autor, precio, descripción, servicios con íconos, horario de los 7 días con el día de hoy resaltado y la tarjeta de reserva.",
       "estado": "APROBADA",
-      "duracionMs": 2279,
+      "duracionMs": 8881,
       "resultado": [
         {
           "ok": true,
@@ -398,7 +398,7 @@
           "leyenda": "Descripción, servicios, horario y tarjeta de reserva"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:57:06.084Z"
+      "ejecutadaEn": "2026-10-28T07:49:25.069Z"
     },
     {
       "tipo": "End-to-End",
@@ -433,7 +433,7 @@
       ],
       "esperado": "16 bloques de 06:00 a 22:00; \"Iniciar reserva\" deshabilitado hasta elegir un bloque; en el día sin horario aparece \"La cancha no tiene horarios disponibles para el día seleccionado.\" y ningún bloque.",
       "estado": "APROBADA",
-      "duracionMs": 4088,
+      "duracionMs": 32548,
       "resultado": [
         {
           "ok": true,
@@ -470,7 +470,7 @@
           "leyenda": "Día sin horario de atención"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:57:10.173Z"
+      "ejecutadaEn": "2026-10-28T07:49:57.618Z"
     },
     {
       "tipo": "End-to-End",
@@ -507,11 +507,11 @@
       ],
       "esperado": "El flujo se completa en 3 pasos y en menos de 2 minutos (objetivo); la ficha no pide nombre ni correo; el resumen muestra cancha, fecha, horario, costo y el usuario de la sesión.",
       "estado": "APROBADA",
-      "duracionMs": 2530,
+      "duracionMs": 9042,
       "resultado": [
         {
           "ok": true,
-          "texto": "Paso 1: del listado al detalle con un solo clic → 0.2 s"
+          "texto": "Paso 1: del listado al detalle con un solo clic → 1.0 s"
         },
         {
           "ok": true,
@@ -519,15 +519,15 @@
         },
         {
           "ok": true,
-          "texto": "El resumen muestra cancha, horario y costo → Resumen de tu selección | Reservando como E2EFLOW Usuario 8 (e2eflow.1791957430175.8@qa.local) | Cancha | Cancha La Rivera | Fecha | Sábado, 17 de octubre de 2026 | Horar"
+          "texto": "El resumen muestra cancha, horario y costo → Resumen de tu selección | Reservando como E2EFLOW Usuario 8 (e2eflow.1793173797623.8@qa.local) | Cancha | Cancha La Rivera | Fecha | Sábado, 31 de octubre de 2026 | Horar"
         },
         {
           "ok": true,
-          "texto": "El resumen toma nombre y correo de la sesión → E2EFLOW Usuario 8 (e2eflow.1791957430175.8@qa.local)"
+          "texto": "El resumen toma nombre y correo de la sesión → E2EFLOW Usuario 8 (e2eflow.1793173797623.8@qa.local)"
         },
         {
           "ok": true,
-          "texto": "El flujo completo tarda menos de 2 minutos → 1.6 s"
+          "texto": "El flujo completo tarda menos de 2 minutos → 6.2 s"
         },
         {
           "ok": true,
@@ -552,7 +552,7 @@
           "leyenda": "Pantalla de confirmación"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:57:12.705Z"
+      "ejecutadaEn": "2026-10-28T07:50:06.665Z"
     },
     {
       "tipo": "End-to-End",
@@ -574,7 +574,7 @@
       ],
       "esperado": "Tras \"Cambiar horario\" la fecha y el bloque siguen elegidos; tras recargar también (y se vuelve a apartar la franja); el reingreso al resumen funciona.",
       "estado": "APROBADA",
-      "duracionMs": 2596,
+      "duracionMs": 8318,
       "resultado": [
         {
           "ok": true,
@@ -595,7 +595,7 @@
           "leyenda": "Después de \"Cambiar horario\": la selección se conserva"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:57:15.302Z"
+      "ejecutadaEn": "2026-10-28T07:50:14.984Z"
     },
     {
       "tipo": "End-to-End",
@@ -610,7 +610,7 @@
       "grupo": "Flujo de reserva",
       "titulo": "Franjas ocupadas y horas pasadas aparecen \"No disponible\"",
       "objetivo": "Verificar que las franjas ya reservadas y las horas de hoy que ya pasaron no se pueden seleccionar.",
-      "datos": "Hoy es 2026-10-14 y la hora actual en Colombia es 00:57.",
+      "datos": "Hoy es 2026-10-28 y la hora actual en Colombia es 02:50.",
       "pasos": [
         "Otro usuario reserva el bloque 11:00 de mañana (por API).",
         "Abrir esa fecha y revisar el bloque 11:00 y uno libre.",
@@ -618,7 +618,7 @@
       ],
       "esperado": "El bloque reservado se ve tachado con \"No disponible\" y está deshabilitado; los bloques libres se pueden elegir; hoy, los bloques cuya hora ya pasó aparecen \"No disponible\".",
       "estado": "APROBADA",
-      "duracionMs": 3330,
+      "duracionMs": 13213,
       "resultado": [
         {
           "ok": true,
@@ -638,7 +638,7 @@
         },
         {
           "ok": null,
-          "texto": "La hora actual (00:57) está fuera del horario de atención: no hay bloques \"pasados\" que comprobar hoy."
+          "texto": "La hora actual (02:50) está fuera del horario de atención: no hay bloques \"pasados\" que comprobar hoy."
         }
       ],
       "evidencias": [
@@ -647,7 +647,7 @@
           "leyenda": "Bloque 11:00 \"No disponible\""
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:57:18.634Z"
+      "ejecutadaEn": "2026-10-28T07:50:28.198Z"
     },
     {
       "tipo": "End-to-End",
@@ -680,7 +680,7 @@
       ],
       "esperado": "En ambos casos aparece \"El horario ya no está disponible\" (mensaje amigable, sin error técnico ni pantalla en blanco), se refrescan las franjas, el bloque queda \"No disponible\" y B puede elegir otra y confirmar.",
       "estado": "APROBADA",
-      "duracionMs": 4147,
+      "duracionMs": 27209,
       "resultado": [
         {
           "ok": true,
@@ -725,7 +725,7 @@
           "leyenda": "Rechazo al confirmar: mensaje claro"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:57:22.784Z"
+      "ejecutadaEn": "2026-10-28T07:50:55.408Z"
     },
     {
       "tipo": "End-to-End",
@@ -762,7 +762,7 @@
       ],
       "esperado": "El botón cambia a \"Verificando...\" y \"Confirmando...\" y queda deshabilitado; el doble clic envía una sola petición y crea una sola reserva; ante el 500 se muestra \"Error interno del servidor\" y nunca la pantalla de éxito.",
       "estado": "APROBADA",
-      "duracionMs": 7687,
+      "duracionMs": 22059,
       "resultado": [
         {
           "ok": true,
@@ -799,7 +799,7 @@
           "leyenda": "Error del servidor: sin pantalla de éxito"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:57:30.471Z"
+      "ejecutadaEn": "2026-10-28T07:51:17.468Z"
     },
     {
       "tipo": "End-to-End",
@@ -826,15 +826,15 @@
       ],
       "esperado": "La confirmación aparece en menos de 2 s con código, cancha, fecha, hora y estado; el temporizador ya no cuenta; \"Ver mis reservas\" lista la reserva con el mismo código y estado \"Confirmada\"; \"Hacer otra reserva\" abre un temporizador nuevo.",
       "estado": "APROBADA",
-      "duracionMs": 2833,
+      "duracionMs": 9942,
       "resultado": [
         {
           "ok": true,
-          "texto": "La confirmación se muestra en menos de 2 segundos → 66 ms"
+          "texto": "La confirmación se muestra en menos de 2 segundos → 515 ms"
         },
         {
           "ok": true,
-          "texto": "Muestra el código de la reserva → CY-5D9D808F"
+          "texto": "Muestra el código de la reserva → CY-486B42BD"
         },
         {
           "ok": true,
@@ -846,7 +846,7 @@
         },
         {
           "ok": true,
-          "texto": "\"Ver mis reservas\" lista la reserva con su código y estado \"Confirmada\" → Cancha La Rivera · Confirmada · Jueves, 22 de octubre de 2026 · 16:00 – 17:00 · Cra 8 # 12-50, Cali · Reserva CY-5D9D808F"
+          "texto": "\"Ver mis reservas\" lista la reserva con su código y estado \"Confirmada\" → Cancha La Rivera · Confirmada · Jueves, 5 de noviembre de 2026 · 16:00 – 17:00 · Cra 8 # 12-50, Cali · Reserva CY-486B42BD"
         },
         {
           "ok": true,
@@ -863,7 +863,7 @@
           "leyenda": "Historial \"Mis reservas\""
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:57:33.305Z"
+      "ejecutadaEn": "2026-10-28T07:51:27.411Z"
     },
     {
       "tipo": "End-to-End",
@@ -887,19 +887,19 @@
       ],
       "esperado": "Se muestra \"Tiempo para reservar: 03:00\" aproximadamente al entrar, con formato mm:ss, que decrece con el tiempo y una barra de progreso.",
       "estado": "APROBADA",
-      "duracionMs": 6195,
+      "duracionMs": 9926,
       "resultado": [
         {
           "ok": true,
-          "texto": "Formato mm:ss → 02:58"
+          "texto": "Formato mm:ss → 02:59"
         },
         {
           "ok": true,
-          "texto": "Al entrar queda cerca de 03:00 → 02:58"
+          "texto": "Al entrar queda cerca de 03:00 → 02:59"
         },
         {
           "ok": true,
-          "texto": "La cuenta regresiva decrece con el tiempo → 178s → 174s"
+          "texto": "La cuenta regresiva decrece con el tiempo → 179s → 174s"
         },
         {
           "ok": true,
@@ -912,7 +912,7 @@
           "leyenda": "Temporizador en marcha"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:57:39.501Z"
+      "ejecutadaEn": "2026-10-28T07:51:37.338Z"
     },
     {
       "tipo": "End-to-End",
@@ -935,11 +935,11 @@
       ],
       "esperado": "El temporizador debe mostrar ≈ 03:00 (hora del servidor) aunque el reloj local esté adelantado; la sincronización de 5 s debe corregir el desfase.",
       "estado": "APROBADA",
-      "duracionMs": 8911,
+      "duracionMs": 11678,
       "resultado": [
         {
           "ok": true,
-          "texto": "Con el reloj local adelantado 2 min el temporizador sigue mostrando ≈ 03:00 → se muestra Tiempo para reservar: 02:52 (172 s)"
+          "texto": "Con el reloj local adelantado 2 min el temporizador sigue mostrando ≈ 03:00 → se muestra Tiempo para reservar: 02:51 (171 s)"
         }
       ],
       "evidencias": [
@@ -948,7 +948,7 @@
           "leyenda": "Temporizador con el reloj local adelantado 2 minutos"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:57:48.413Z"
+      "ejecutadaEn": "2026-10-28T07:51:49.017Z"
     },
     {
       "tipo": "End-to-End",
@@ -971,15 +971,15 @@
       ],
       "esperado": "Ambas pestañas muestran el mismo tiempo (±2 s) en lugar de 03:00 en la nueva; al cerrar una, la otra sigue contando.",
       "estado": "APROBADA",
-      "duracionMs": 11974,
+      "duracionMs": 18176,
       "resultado": [
         {
           "ok": true,
-          "texto": "La segunda pestaña muestra el mismo tiempo, no un 03:00 nuevo → pestaña 1: 170 s · pestaña 2: 170 s"
+          "texto": "La segunda pestaña muestra el mismo tiempo, no un 03:00 nuevo → pestaña 1: 166 s · pestaña 2: 167 s"
         },
         {
           "ok": true,
-          "texto": "Al cerrar una pestaña, la otra sigue contando → 170 s → 168 s"
+          "texto": "Al cerrar una pestaña, la otra sigue contando → 166 s → 164 s"
         }
       ],
       "evidencias": [
@@ -988,7 +988,7 @@
           "leyenda": "Segunda pestaña: tiempo compartido"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:58:00.388Z"
+      "ejecutadaEn": "2026-10-28T07:52:07.195Z"
     },
     {
       "tipo": "End-to-End",
@@ -1016,7 +1016,7 @@
       ],
       "esperado": "B ve 09:00 \"En proceso de reserva\" (deshabilitado); al cambiar A, B ve 09:00 libre y 10:00 en proceso; al confirmar, B ve 10:00 \"No disponible\"; al cancelarse, B lo ve libre; la retención de B se libera para A al cancelar.",
       "estado": "APROBADA",
-      "duracionMs": 5263,
+      "duracionMs": 37194,
       "resultado": [
         {
           "ok": true,
@@ -1053,7 +1053,7 @@
           "leyenda": "Pantalla de B tras confirmar A: 10:00 \"No disponible\""
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:58:05.652Z"
+      "ejecutadaEn": "2026-10-28T07:52:44.390Z"
     },
     {
       "tipo": "End-to-End",
@@ -1076,11 +1076,11 @@
       ],
       "esperado": "La aplicación redirige a /login?redirect=/canchas/:id; tras iniciar sesión vuelve a la misma cancha con la fecha y el bloque que había elegido.",
       "estado": "APROBADA",
-      "duracionMs": 2642,
+      "duracionMs": 7283,
       "resultado": [
         {
           "ok": true,
-          "texto": "Con la sesión vencida redirige a /login con el destino a retomar → /login?redirect=/canchas/f9396948-eccc-438a-810c-0a5deb3be3ee"
+          "texto": "Con la sesión vencida redirige a /login con el destino a retomar → /login?redirect=/canchas/cb25c0e6-605f-4118-8b48-03a6776aa116"
         },
         {
           "ok": true,
@@ -1088,7 +1088,7 @@
         },
         {
           "ok": true,
-          "texto": "Recupera la fecha elegida → 2026-10-27"
+          "texto": "Recupera la fecha elegida → 2026-11-10"
         },
         {
           "ok": true,
@@ -1105,7 +1105,7 @@
           "leyenda": "Flujo retomado tras volver a iniciar sesión"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:58:08.296Z"
+      "ejecutadaEn": "2026-10-28T07:52:51.674Z"
     },
     {
       "tipo": "End-to-End",
@@ -1127,7 +1127,7 @@
       ],
       "esperado": "El flujo se completa sin gestos especiales, la tarjeta de reserva aparece antes que la información en pantallas angostas y no hay scroll horizontal.",
       "estado": "APROBADA",
-      "duracionMs": 3294,
+      "duracionMs": 11148,
       "resultado": [
         {
           "ok": true,
@@ -1156,7 +1156,7 @@
           "leyenda": "Confirmación en celular"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:58:11.591Z"
+      "ejecutadaEn": "2026-10-28T07:53:02.823Z"
     },
     {
       "tipo": "End-to-End",
@@ -1185,7 +1185,7 @@
       ],
       "esperado": "Para una cancha inexistente se muestra \"Cancha no encontrada\" con enlace para volver; si falla la disponibilidad se muestra un aviso y la página sigue utilizable.",
       "estado": "APROBADA",
-      "duracionMs": 1282,
+      "duracionMs": 8606,
       "resultado": [
         {
           "ok": true,
@@ -1214,7 +1214,7 @@
           "leyenda": "Fallo de la API de disponibilidad"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:58:12.874Z"
+      "ejecutadaEn": "2026-10-28T07:53:11.436Z"
     },
     {
       "tipo": "End-to-End",
@@ -1247,11 +1247,11 @@
       ],
       "esperado": "Al quedar 30 s aparece el aviso visual; a los 180 s A ve \"Tu tiempo expiró\" con la selección deshabilitada; B ve liberarse la franja; \"Reiniciar temporizador\" abre una nueva sesión de 3 min con la selección habilitada.",
       "estado": "APROBADA",
-      "duracionMs": 1,
+      "duracionMs": 0,
       "resultado": [
         {
           "ok": true,
-          "texto": "Al inicio el temporizador marca ≈ 03:00 → 177 s"
+          "texto": "Al inicio el temporizador marca ≈ 03:00 → 176 s"
         },
         {
           "ok": true,
@@ -1259,7 +1259,7 @@
         },
         {
           "ok": true,
-          "texto": "Aparece el aviso visual cuando quedan ≈ 30 s → se mostró con 29 s restantes (147 s tras elegir)"
+          "texto": "Aparece el aviso visual cuando quedan ≈ 30 s → se mostró con 29 s restantes (146 s tras elegir)"
         },
         {
           "ok": true,
@@ -1267,7 +1267,7 @@
         },
         {
           "ok": true,
-          "texto": "La expiración ocurre ≈ 30 s después del aviso y justo cuando la cuenta regresiva llega a cero → 30 s después del aviso · la cuenta marcaba 177 s y expiró 178 s después"
+          "texto": "La expiración ocurre ≈ 30 s después del aviso y justo cuando la cuenta regresiva llega a cero → 29 s después del aviso · la cuenta marcaba 176 s y expiró 177 s después"
         },
         {
           "ok": true,
@@ -1312,7 +1312,7 @@
           "leyenda": "A: tras reiniciar, nueva sesión de 3 minutos"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:59:51.666Z"
+      "ejecutadaEn": "2026-10-28T07:53:11.440Z"
     },
     {
       "tipo": "End-to-End",
@@ -1336,7 +1336,7 @@
       ],
       "esperado": "Cero errores inesperados.",
       "estado": "APROBADA",
-      "duracionMs": 0,
+      "duracionMs": 1,
       "resultado": [
         {
           "ok": true,
@@ -1344,7 +1344,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:59:51.667Z"
+      "ejecutadaEn": "2026-10-28T07:53:11.442Z"
     },
     {
       "tipo": "End-to-End",
@@ -1381,7 +1381,7 @@
       ],
       "esperado": "Próximas muestra solo las 2 futuras con su estado; Pasadas muestra 10 por página con \"Completada\" y un control de página 1 de 2 que avanza a la página 2; el filtro deja solo las canceladas; el usuario sin reservas ve \"Aún no tienes reservas\" con el botón \"Reservar una cancha\".",
       "estado": "APROBADA",
-      "duracionMs": 5827,
+      "duracionMs": 47131,
       "resultado": [
         {
           "ok": true,
@@ -1397,7 +1397,7 @@
         },
         {
           "ok": true,
-          "texto": "Cada reserva muestra el código y la cancha → Cancha El Bosque · Confirmada · Jueves, 29 de octubre de 2026 · 08:00 – 09:00 · Av. Roosevelt # 30-10, Cali · Reserva CY-BF6A58A7"
+          "texto": "Cada reserva muestra el código y la cancha → Cancha El Bosque · Confirmada · Jueves, 12 de noviembre de 2026 · 08:00 – 09:00 · Av. Roosevelt # 30-10, Cali · Reserva CY-EDC593D4"
         },
         {
           "ok": true,
@@ -1446,7 +1446,7 @@
           "leyenda": "Estado vacío de Mis reservas"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:59:57.495Z"
+      "ejecutadaEn": "2026-10-28T07:53:58.574Z"
     },
     {
       "tipo": "End-to-End",
@@ -1483,7 +1483,7 @@
       ],
       "esperado": "Las dos primeras reservas se confirman; la tercera muestra \"Ya tienes una reserva en ese horario\" y no se informa éxito; \"Mis reservas\" lista exactamente las dos confirmadas.",
       "estado": "APROBADA",
-      "duracionMs": 5696,
+      "duracionMs": 20971,
       "resultado": [
         {
           "ok": true,
@@ -1520,7 +1520,7 @@
           "leyenda": "Mis reservas con las dos reservas simultáneas"
         }
       ],
-      "ejecutadaEn": "2026-10-14T06:00:03.193Z"
+      "ejecutadaEn": "2026-10-28T07:54:19.550Z"
     },
     {
       "tipo": "End-to-End",
@@ -1545,7 +1545,7 @@
       ],
       "esperado": "La página carga con el título CanchaYa API y las 14 operaciones; sin autorizar, GET /api/canchas responde 401 \"No autenticado\"; tras Authorize con el token responde 200 con la lista de canchas.",
       "estado": "APROBADA",
-      "duracionMs": 2930,
+      "duracionMs": 8706,
       "resultado": [
         {
           "ok": true,
@@ -1590,7 +1590,7 @@
           "leyenda": "Try it out con el token: 200 y lista de canchas"
         }
       ],
-      "ejecutadaEn": "2026-10-14T06:00:06.124Z"
+      "ejecutadaEn": "2026-10-28T07:54:28.257Z"
     }
   ]
 }

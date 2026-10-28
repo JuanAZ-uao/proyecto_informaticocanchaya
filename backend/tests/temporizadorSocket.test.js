@@ -1,7 +1,8 @@
 // Prueba del socket de la sesión de reserva y la retención de franjas (US-17 y US-18):
 // un servidor Socket.IO real con clientes reales; solo los repositorios (base de datos) están simulados.
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'secreto-solo-para-pruebas';
-process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://prueba:prueba@localhost:5432/prueba';
+// Los repositorios están simulados: la base no se usa, solo hace falta que la variable exista (sin credenciales).
+process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://localhost:5432/prueba';
 
 jest.mock('../src/repositories/retencionRepository');
 jest.mock('../src/repositories/reservaRepository');

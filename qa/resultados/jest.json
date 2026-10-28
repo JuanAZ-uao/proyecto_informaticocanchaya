@@ -1,221 +1,56 @@
 {
-  "fecha": "2026-10-14T05:52:56.217Z",
+  "fecha": "2026-10-28T07:41:31.305Z",
   "migracion": true,
-  "duracionMs": 30796,
+  "duracionMs": 65736,
   "resumen": {
-    "suites": 12,
-    "suitesAprobadas": 12,
-    "pruebas": 140,
-    "aprobadas": 140,
+    "suites": 13,
+    "suitesAprobadas": 13,
+    "pruebas": 157,
+    "aprobadas": 157,
     "fallidas": 0,
     "omitidas": 0
   },
   "suites": [
     {
-      "archivo": "tests/openapiContrato.integration.test.js",
-      "estado": "APROBADA",
-      "duracionMs": 10416,
-      "tests": [
-        {
-          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
-          "nombre": "GET /api/health",
-          "estado": "APROBADA",
-          "duracionMs": 20
-        },
-        {
-          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
-          "nombre": "autenticación: errores documentados (409 correo repetido, 401 credenciales, 400 validación)",
-          "estado": "APROBADA",
-          "duracionMs": 429
-        },
-        {
-          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
-          "nombre": "recuperación de contraseña: 200 neutro y 400 con token inválido",
-          "estado": "APROBADA",
-          "duracionMs": 87
-        },
-        {
-          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
-          "nombre": "los endpoints protegidos responden 401 documentado sin token",
-          "estado": "APROBADA",
-          "duracionMs": 66
-        },
-        {
-          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
-          "nombre": "canchas: listado, detalle, 404 y 400",
-          "estado": "APROBADA",
-          "duracionMs": 356
-        },
-        {
-          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
-          "nombre": "disponibilidad y su alias",
-          "estado": "APROBADA",
-          "duracionMs": 73
-        },
-        {
-          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
-          "nombre": "reservas: confirmar (201) con el ejemplo, historial, listado completo y errores 409",
-          "estado": "APROBADA",
-          "duracionMs": 426
-        },
-        {
-          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
-          "nombre": "temporizador: completar sin sesión activa responde el 409 documentado",
-          "estado": "APROBADA",
-          "duracionMs": 25
-        },
-        {
-          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
-          "nombre": "cancelar: 403 de otro usuario, 200, 409 si ya estaba cancelada, 404 y 400",
-          "estado": "APROBADA",
-          "duracionMs": 130
-        }
-      ]
-    },
-    {
-      "archivo": "tests/reservasMultiples.integration.test.js",
-      "estado": "APROBADA",
-      "duracionMs": 2618,
-      "tests": [
-        {
-          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
-          "nombre": "un usuario crea 3 reservas en canchas/horarios distintos y las 3 quedan activas y visibles (prueba de aceptación)",
-          "estado": "APROBADA",
-          "duracionMs": 219
-        },
-        {
-          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
-          "nombre": "rechaza con 409 \"Ya tienes una reserva en ese horario\" si el usuario ya tiene otra reserva confirmada que se solapa, aunque sea en otra cancha",
-          "estado": "APROBADA",
-          "duracionMs": 74
-        },
-        {
-          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
-          "nombre": "reservar la misma franja de la misma cancha sigue bloqueado para cualquier usuario, incluido uno distinto (regresión US-09)",
-          "estado": "APROBADA",
-          "duracionMs": 95
-        },
-        {
-          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
-          "nombre": "cancelar una reserva no afecta a las demás reservas activas del usuario",
-          "estado": "APROBADA",
-          "duracionMs": 212
-        },
-        {
-          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
-          "nombre": "rechaza con 409 y un mensaje claro al superar el máximo de reservas activas (configurado: 5)",
-          "estado": "APROBADA",
-          "duracionMs": 256
-        }
-      ]
-    },
-    {
-      "archivo": "tests/reservasDuplicadas.integration.test.js",
-      "estado": "APROBADA",
-      "duracionMs": 2351,
-      "tests": [
-        {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "ante dos peticiones simultáneas por la misma franja, solo una crea la reserva (201) y la otra recibe 409",
-          "estado": "APROBADA",
-          "duracionMs": 99
-        },
-        {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "al cancelar la reserva ganadora, la franja queda libre y se puede volver a reservar",
-          "estado": "APROBADA",
-          "duracionMs": 57
-        },
-        {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "no deja registros huérfanos: un intento duplicado no inserta filas parciales",
-          "estado": "APROBADA",
-          "duracionMs": 84
-        },
-        {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "US-11: confirma con 201 y devuelve id, código, cancha, fecha, hora y estado \"confirmada\"",
-          "estado": "APROBADA",
-          "duracionMs": 40
-        },
-        {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "US-11: la reserva confirmada aparece de inmediato en el historial del usuario",
-          "estado": "APROBADA",
-          "duracionMs": 15
-        },
-        {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "US-11: sin token no se puede confirmar ni consultar el historial (401)",
-          "estado": "APROBADA",
-          "duracionMs": 15
-        },
-        {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "DEF-03: una reserva fuera del horario de la cancha se rechaza con 400 FUERA_DE_HORARIO",
-          "estado": "APROBADA",
-          "duracionMs": 13
-        },
-        {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "DEF-04: una franja solapada se rechaza y la base de datos impide el solape aunque se intente por SQL",
-          "estado": "APROBADA",
-          "duracionMs": 52
-        },
-        {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "DEF-07: tras 10 inicios de sesión fallidos de una cuenta, el siguiente intento se frena con 429; otra cuenta no se afecta",
-          "estado": "APROBADA",
-          "duracionMs": 189
-        },
-        {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "DEF-08: un origen no permitido por CORS recibe 403 y no un error interno",
-          "estado": "APROBADA",
-          "duracionMs": 5
-        }
-      ]
-    },
-    {
       "archivo": "tests/documentacionApi.test.js",
       "estado": "APROBADA",
-      "duracionMs": 2422,
+      "duracionMs": 10960,
       "tests": [
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "es OpenAPI 3.x y define la autenticación Bearer JWT",
           "estado": "APROBADA",
-          "duracionMs": 4
+          "duracionMs": 17
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "documenta al menos el 90 % de los endpoints implementados y no documenta endpoints que no existen",
           "estado": "APROBADA",
-          "duracionMs": 79
+          "duracionMs": 68
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "define los modelos Usuario, Cancha, Reserva y Error una sola vez en components/schemas",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 4
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "GET /api/health documenta descripción, operationId, etiqueta y una respuesta exitosa",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 2
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "POST /api/auth/registro documenta descripción, operationId, etiqueta y una respuesta exitosa",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 1
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "POST /api/auth/login documenta descripción, operationId, etiqueta y una respuesta exitosa",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 1
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
@@ -233,13 +68,13 @@
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "GET /api/canchas documenta descripción, operationId, etiqueta y una respuesta exitosa",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 5
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "GET /api/canchas/{id} documenta descripción, operationId, etiqueta y una respuesta exitosa",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 2
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
@@ -251,13 +86,13 @@
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "GET /api/canchas/{id}/reservas documenta descripción, operationId, etiqueta y una respuesta exitosa",
           "estado": "APROBADA",
-          "duracionMs": 10
+          "duracionMs": 0
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "POST /api/canchas/{id}/reservas documenta descripción, operationId, etiqueta y una respuesta exitosa",
           "estado": "APROBADA",
-          "duracionMs": 6
+          "duracionMs": 0
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
@@ -269,7 +104,7 @@
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "GET /api/reservas documenta descripción, operationId, etiqueta y una respuesta exitosa",
           "estado": "APROBADA",
-          "duracionMs": 2
+          "duracionMs": 5
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
@@ -281,13 +116,13 @@
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "PATCH /api/reservas/{id}/cancelar documenta descripción, operationId, etiqueta y una respuesta exitosa",
           "estado": "APROBADA",
-          "duracionMs": 3
+          "duracionMs": 4
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "GET /api/canchas protegido: documenta el 401",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 1
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
@@ -305,7 +140,7 @@
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "GET /api/canchas/{id}/reservas protegido: documenta el 401",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 1
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
@@ -353,7 +188,7 @@
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "POST /api/auth/olvide-password con cuerpo: tiene esquema y ejemplo, y documenta el 400",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 4
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
@@ -371,7 +206,7 @@
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "POST /api/canchas/{id}/temporizador/completar con cuerpo: tiene esquema y ejemplo, y documenta el 400",
           "estado": "APROBADA",
-          "duracionMs": 3
+          "duracionMs": 0
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
@@ -389,190 +224,220 @@
           "grupo": "Swagger UI en /api/docs",
           "nombre": "sirve la interfaz HTML",
           "estado": "APROBADA",
-          "duracionMs": 383
+          "duracionMs": 394
         },
         {
           "grupo": "Swagger UI en /api/docs",
           "nombre": "sirve la especificación en JSON apuntando al servidor desde el que se consulta",
           "estado": "APROBADA",
-          "duracionMs": 118
+          "duracionMs": 335
         },
         {
           "grupo": "Swagger UI en /api/docs",
           "nombre": "sirve la especificación en YAML",
           "estado": "APROBADA",
-          "duracionMs": 8
+          "duracionMs": 12
         }
       ]
     },
     {
-      "archivo": "tests/historialReservas.integration.test.js",
+      "archivo": "tests/temporizadorSocket.test.js",
       "estado": "APROBADA",
-      "duracionMs": 1442,
+      "duracionMs": 3630,
       "tests": [
         {
-          "grupo": "Historial de reservas (US-13, integración)",
-          "nombre": "exige autenticación",
+          "grupo": "temporizadorSocket › conexión",
+          "nombre": "rechaza una conexión sin token",
           "estado": "APROBADA",
-          "duracionMs": 5
+          "duracionMs": 157
         },
         {
-          "grupo": "Historial de reservas (US-13, integración)",
-          "nombre": "por defecto lista las próximas del usuario, de la más cercana a la más lejana, sin las de otros",
+          "grupo": "temporizadorSocket › conexión",
+          "nombre": "rechaza una conexión con un token inválido",
+          "estado": "APROBADA",
+          "duracionMs": 24
+        },
+        {
+          "grupo": "temporizadorSocket › conexión",
+          "nombre": "avisa y cierra la conexión si falta el id de la cancha",
+          "estado": "APROBADA",
+          "duracionMs": 44
+        },
+        {
+          "grupo": "temporizadorSocket › conexión",
+          "nombre": "inicia la sesión de 180 s y se la informa al cliente",
           "estado": "APROBADA",
           "duracionMs": 29
         },
         {
-          "grupo": "Historial de reservas (US-13, integración)",
-          "nombre": "las pasadas se listan de la más reciente a la más antigua y las confirmadas ya jugadas salen \"completada\"",
+          "grupo": "temporizadorSocket › retención de franjas",
+          "nombre": "retiene la franja, lo confirma al usuario y avisa a los demás sin decir quién la retuvo",
           "estado": "APROBADA",
-          "duracionMs": 26
+          "duracionMs": 91
         },
         {
-          "grupo": "Historial de reservas (US-13, integración)",
-          "nombre": "filtra por estado y pagina los resultados",
+          "grupo": "temporizadorSocket › retención de franjas",
+          "nombre": "no avisa de la retención al propio usuario que la hizo",
           "estado": "APROBADA",
-          "duracionMs": 45
+          "duracionMs": 194
         },
         {
-          "grupo": "Historial de reservas (US-13, integración)",
-          "nombre": "rechaza con 400 parámetros inválidos",
+          "grupo": "temporizadorSocket › retención de franjas",
+          "nombre": "responde con un error claro si la franja es inválida",
           "estado": "APROBADA",
-          "duracionMs": 31
+          "duracionMs": 23
+        },
+        {
+          "grupo": "temporizadorSocket › retención de franjas",
+          "nombre": "responde FRANJA_RETENIDA si otro usuario ya la retiene",
+          "estado": "APROBADA",
+          "duracionMs": 34
+        },
+        {
+          "grupo": "temporizadorSocket › retención de franjas",
+          "nombre": "oculta los errores internos al cliente",
+          "estado": "APROBADA",
+          "duracionMs": 68
+        },
+        {
+          "grupo": "temporizadorSocket › retención de franjas",
+          "nombre": "libera la franja a pedido del usuario y avisa a los demás",
+          "estado": "APROBADA",
+          "duracionMs": 75
+        },
+        {
+          "grupo": "temporizadorSocket › retención de franjas",
+          "nombre": "informa un error interno si no se puede liberar",
+          "estado": "APROBADA",
+          "duracionMs": 145
+        },
+        {
+          "grupo": "temporizadorSocket › retención de franjas",
+          "nombre": "avisa a los demás cuando una franja se convierte en reserva",
+          "estado": "APROBADA",
+          "duracionMs": 30
+        },
+        {
+          "grupo": "temporizadorSocket › temporizador",
+          "nombre": "reinicia la sesión y le da un nuevo vencimiento al usuario",
+          "estado": "APROBADA",
+          "duracionMs": 15
+        },
+        {
+          "grupo": "temporizadorSocket › temporizador",
+          "nombre": "reenvía la sincronización y el vencimiento de la sesión solo a ese usuario",
+          "estado": "APROBADA",
+          "duracionMs": 119
+        },
+        {
+          "grupo": "temporizadorSocket › temporizador",
+          "nombre": "responde con el error cuando no se puede reiniciar la sesión",
+          "estado": "APROBADA",
+          "duracionMs": 57
+        },
+        {
+          "grupo": "temporizadorSocket › temporizador",
+          "nombre": "avisa al cliente si no se pudo iniciar la sesión",
+          "estado": "APROBADA",
+          "duracionMs": 24
         }
       ]
     },
     {
-      "archivo": "tests/retencionService.test.js",
+      "archivo": "tests/openapiContrato.integration.test.js",
       "estado": "APROBADA",
-      "duracionMs": 250,
+      "duracionMs": 7310,
       "tests": [
         {
-          "grupo": "retencionService (US-18)",
-          "nombre": "retiene la franja hasta el vencimiento de la sesión y avisa a los demás",
+          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
+          "nombre": "GET /api/health",
           "estado": "APROBADA",
-          "duracionMs": 19
+          "duracionMs": 10
         },
         {
-          "grupo": "retencionService (US-18)",
-          "nombre": "al elegir otra franja libera la anterior y retiene la nueva",
+          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
+          "nombre": "autenticación: errores documentados (409 correo repetido, 401 credenciales, 400 validación)",
           "estado": "APROBADA",
-          "duracionMs": 4
+          "duracionMs": 304
         },
         {
-          "grupo": "retencionService (US-18)",
-          "nombre": "volver a retener la misma franja (p. ej. al reconectar) no genera avisos duplicados",
+          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
+          "nombre": "recuperación de contraseña: 200 neutro y 400 con token inválido",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 112
         },
         {
-          "grupo": "retencionService (US-18)",
-          "nombre": "rechaza con FRANJA_RETENIDA si otro usuario ya la retiene (índice único)",
+          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
+          "nombre": "los endpoints protegidos responden 401 documentado sin token",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 32
         },
         {
-          "grupo": "retencionService (US-18)",
-          "nombre": "rechaza con FRANJA_OCUPADA si la franja ya está reservada",
+          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
+          "nombre": "canchas: listado, detalle, 404 y 400",
           "estado": "APROBADA",
-          "duracionMs": 2
+          "duracionMs": 107
         },
         {
-          "grupo": "retencionService (US-18)",
-          "nombre": "rechaza con SESION_EXPIRADA si el usuario no tiene sesión en la cancha",
+          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
+          "nombre": "disponibilidad y su alias",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 59
         },
         {
-          "grupo": "retencionService (US-18)",
-          "nombre": "DEF-09: un payload nulo o que no es un objeto responde DATOS_INVALIDOS (no un error interno)",
+          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
+          "nombre": "reservas: confirmar (201) con el ejemplo, historial, listado completo y errores 409",
           "estado": "APROBADA",
-          "duracionMs": 14
+          "duracionMs": 528
         },
         {
-          "grupo": "retencionService (US-18)",
-          "nombre": "DEF-03: rechaza con FUERA_DE_HORARIO una franja que la cancha no atiende",
+          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
+          "nombre": "temporizador: completar sin sesión activa responde el 409 documentado",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 25
         },
         {
-          "grupo": "retencionService (US-18)",
-          "nombre": "rechaza con HORA_PASADA o DATOS_INVALIDOS ante franjas no válidas",
+          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
+          "nombre": "cancelar: 403 de otro usuario, 200, 409 si ya estaba cancelada, 404 y 400",
           "estado": "APROBADA",
-          "duracionMs": 1
-        },
-        {
-          "grupo": "retencionService (US-18)",
-          "nombre": "cuando la sesión termina (expira o el usuario sale) libera su franja y avisa",
-          "estado": "APROBADA",
-          "duracionMs": 1
-        },
-        {
-          "grupo": "retencionService (US-18)",
-          "nombre": "al confirmar, la retención se convierte en reserva y se avisa \"reservada\" (no \"liberada\")",
-          "estado": "APROBADA",
-          "duracionMs": 0
-        },
-        {
-          "grupo": "retencionService (US-18)",
-          "nombre": "no deja reservar una franja que otro usuario tiene retenida",
-          "estado": "APROBADA",
-          "duracionMs": 1
-        },
-        {
-          "grupo": "retencionService (US-18)",
-          "nombre": "sí deja reservar la franja que el propio usuario retiene",
-          "estado": "APROBADA",
-          "duracionMs": 1
-        },
-        {
-          "grupo": "retencionService (US-18)",
-          "nombre": "lista las franjas retenidas por otros sin exponer quién las retiene",
-          "estado": "APROBADA",
-          "duracionMs": 1
-        },
-        {
-          "grupo": "retencionService (US-18)",
-          "nombre": "el barrido elimina retenciones vencidas y avisa que quedaron libres",
-          "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 119
         }
       ]
     },
     {
       "archivo": "tests/historialReservas.test.js",
       "estado": "APROBADA",
-      "duracionMs": 368,
+      "duracionMs": 489,
       "tests": [
         {
           "grupo": "reservaService.listarMisReservas (US-13)",
           "nombre": "consulta solo las reservas del usuario recibido, con valores por defecto",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 3
         },
         {
           "grupo": "reservaService.listarMisReservas (US-13)",
           "nombre": "calcula el desplazamiento según la página solicitada",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 1
         },
         {
           "grupo": "reservaService.listarMisReservas (US-13)",
           "nombre": "transmite el filtro de estado al repositorio",
           "estado": "APROBADA",
-          "duracionMs": 5
+          "duracionMs": 1
         },
         {
           "grupo": "reservaService.listarMisReservas (US-13)",
           "nombre": "limita el tamaño de página a 50 aunque se pida más",
           "estado": "APROBADA",
-          "duracionMs": 8
+          "duracionMs": 1
         },
         {
           "grupo": "reservaService.listarMisReservas (US-13)",
           "nombre": "devuelve la paginación con el total de páginas calculado",
           "estado": "APROBADA",
-          "duracionMs": 3
+          "duracionMs": 4
         },
         {
           "grupo": "reservaService.listarMisReservas (US-13)",
@@ -583,149 +448,70 @@
       ]
     },
     {
-      "archivo": "tests/horarioReservaService.test.js",
+      "archivo": "tests/reservasMultiples.integration.test.js",
       "estado": "APROBADA",
-      "duracionMs": 267,
+      "duracionMs": 4283,
       "tests": [
         {
-          "grupo": "horarioReservaService.validarFranjaEnHorario",
-          "nombre": "acepta un bloque de 1 hora dentro del horario del día",
+          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
+          "nombre": "un usuario crea 3 reservas en canchas/horarios distintos y las 3 quedan activas y visibles (prueba de aceptación)",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 486
         },
         {
-          "grupo": "horarioReservaService.validarFranjaEnHorario",
-          "nombre": "rechaza horas anteriores a la apertura o posteriores al cierre",
+          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
+          "nombre": "rechaza con 409 \"Ya tienes una reserva en ese horario\" si el usuario ya tiene otra reserva confirmada que se solapa, aunque sea en otra cancha",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 204
         },
         {
-          "grupo": "horarioReservaService.validarFranjaEnHorario",
-          "nombre": "rechaza un día de la semana sin horario",
+          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
+          "nombre": "reservar la misma franja de la misma cancha sigue bloqueado para cualquier usuario, incluido uno distinto (regresión US-09)",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 227
         },
         {
-          "grupo": "horarioReservaService.validarFranjaEnHorario",
-          "nombre": "rechaza franjas que no duran exactamente 1 hora",
+          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
+          "nombre": "cancelar una reserva no afecta a las demás reservas activas del usuario",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 282
         },
         {
-          "grupo": "horarioReservaService.validarFranjaEnHorario",
-          "nombre": "rechaza bloques que no están alineados con la hora de apertura (se solaparían con la cuadrícula del día)",
+          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
+          "nombre": "rechaza con 409 y un mensaje claro al superar el máximo de reservas activas (configurado: 5)",
           "estado": "APROBADA",
-          "duracionMs": 1
-        }
-      ]
-    },
-    {
-      "archivo": "tests/temporizadorReservaService.test.js",
-      "estado": "APROBADA",
-      "duracionMs": 363,
-      "tests": [
-        {
-          "grupo": "temporizadorReservaService",
-          "nombre": "inicia una sesión de 180s para (usuario, cancha) y la guarda en la base",
-          "estado": "APROBADA",
-          "duracionMs": 90
+          "duracionMs": 344
         },
         {
-          "grupo": "temporizadorReservaService",
-          "nombre": "si ya hay una sesión activa, retoma el mismo expiresAt en vez de crear otra",
+          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
+          "nombre": "las reservas ya jugadas (\"completada\") no cuentan para el límite de reservas activas",
           "estado": "APROBADA",
-          "duracionMs": 2
-        },
-        {
-          "grupo": "temporizadorReservaService",
-          "nombre": "US-18: tras un reinicio retoma la sesión guardada con el mismo expiresAt",
-          "estado": "APROBADA",
-          "duracionMs": 1
-        },
-        {
-          "grupo": "temporizadorReservaService",
-          "nombre": "US-18: restaurarSesiones reprograma las sesiones vigentes y luego expiran a su hora",
-          "estado": "APROBADA",
-          "duracionMs": 22
-        },
-        {
-          "grupo": "temporizadorReservaService",
-          "nombre": "completarSesion marca la sesión como completada, detiene el temporizador y lo persiste",
-          "estado": "APROBADA",
-          "duracionMs": 4
-        },
-        {
-          "grupo": "temporizadorReservaService",
-          "nombre": "completarSesion lanza 409 si no hay sesión activa",
-          "estado": "APROBADA",
-          "duracionMs": 1
-        },
-        {
-          "grupo": "temporizadorReservaService",
-          "nombre": "completarSesion es idempotente: completar dos veces sin expirar no lanza error (permite volver atrás y reentrar al panel)",
-          "estado": "APROBADA",
-          "duracionMs": 1
-        },
-        {
-          "grupo": "temporizadorReservaService",
-          "nombre": "al pasar los 180s emite \"expirado\" y \"terminada\", borra la sesión y rechaza completar después",
-          "estado": "APROBADA",
-          "duracionMs": 2
-        },
-        {
-          "grupo": "temporizadorReservaService",
-          "nombre": "emite sincronización periódica cada 5s mientras la sesión está activa",
-          "estado": "APROBADA",
-          "duracionMs": 1
-        },
-        {
-          "grupo": "temporizadorReservaService",
-          "nombre": "cancela la sesión solo cuando se desconecta el último socket (multi-pestaña)",
-          "estado": "APROBADA",
-          "duracionMs": 1
-        },
-        {
-          "grupo": "temporizadorReservaService",
-          "nombre": "US-18: al salir el último socket, tras el lapso de gracia emite \"terminada\" (libera la franja) y borra la sesión",
-          "estado": "APROBADA",
-          "duracionMs": 20
-        },
-        {
-          "grupo": "temporizadorReservaService",
-          "nombre": "DEF-05: si el usuario reconecta dentro del lapso de gracia, la sesión sigue con el mismo expiresAt",
-          "estado": "APROBADA",
-          "duracionMs": 1
-        },
-        {
-          "grupo": "temporizadorReservaService",
-          "nombre": "cancelarSesion detiene el temporizador y libera la clave",
-          "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 266
         }
       ]
     },
     {
       "archivo": "tests/reservaService.test.js",
       "estado": "APROBADA",
-      "duracionMs": 292,
+      "duracionMs": 345,
       "tests": [
         {
           "grupo": "reservaService.crearReserva",
           "nombre": "US-18: rechaza con 409 si otro usuario tiene la franja retenida, sin crear la reserva",
           "estado": "APROBADA",
-          "duracionMs": 16
+          "duracionMs": 2
         },
         {
           "grupo": "reservaService.crearReserva",
           "nombre": "US-18: al confirmar, la retención se convierte en reserva definitiva",
           "estado": "APROBADA",
-          "duracionMs": 2
+          "duracionMs": 1
         },
         {
           "grupo": "reservaService.crearReserva",
           "nombre": "crea la reserva cuando la cancha existe y la franja está libre",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 0
         },
         {
           "grupo": "reservaService.crearReserva",
@@ -737,7 +523,7 @@
           "grupo": "reservaService.crearReserva",
           "nombre": "US-11: al confirmar, finaliza el temporizador del usuario en esa cancha",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 3
         },
         {
           "grupo": "reservaService.crearReserva",
@@ -749,13 +535,13 @@
           "grupo": "reservaService.crearReserva",
           "nombre": "US-11: si el correo falla, la reserva igual queda confirmada",
           "estado": "APROBADA",
-          "duracionMs": 3
+          "duracionMs": 0
         },
         {
           "grupo": "reservaService.crearReserva",
           "nombre": "US-11: si la reserva no se guarda, no envía correo",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 0
         },
         {
           "grupo": "reservaService.crearReserva",
@@ -767,13 +553,13 @@
           "grupo": "reservaService.crearReserva",
           "nombre": "lanza 400 si horaFin no es posterior a horaInicio",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 1
         },
         {
           "grupo": "reservaService.crearReserva",
           "nombre": "US-12: rechaza con 409 si el usuario ya tiene una reserva que se solapa en el horario, sin crearla",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 2
         },
         {
           "grupo": "reservaService.crearReserva",
@@ -785,7 +571,7 @@
           "grupo": "reservaService.crearReserva",
           "nombre": "US-12: rechaza con 409 y mensaje claro si el usuario ya alcanzó el máximo de reservas activas",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 0
         },
         {
           "grupo": "reservaService.crearReserva",
@@ -803,13 +589,13 @@
           "grupo": "reservaService.crearReserva",
           "nombre": "DEF-03: rechaza un día en que la cancha no tiene horario",
           "estado": "APROBADA",
-          "duracionMs": 8
+          "duracionMs": 1
         },
         {
           "grupo": "reservaService.crearReserva",
           "nombre": "DEF-04: rechaza con 400 las franjas que no son de exactamente 1 hora (evita solapes)",
           "estado": "APROBADA",
-          "duracionMs": 3
+          "duracionMs": 6
         },
         {
           "grupo": "reservaService.crearReserva",
@@ -821,13 +607,13 @@
           "grupo": "reservaService.crearReserva",
           "nombre": "convierte la violación de índice único de Postgres (23505) en un 409 amigable",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 7
         },
         {
           "grupo": "reservaService.crearReserva",
           "nombre": "propaga cualquier otro error sin traducirlo a 409",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 1
         },
         {
           "grupo": "reservaService.cancelarReserva",
@@ -851,14 +637,203 @@
           "grupo": "reservaService.cancelarReserva",
           "nombre": "lanza 409 si la reserva ya estaba cancelada",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 7
+        }
+      ]
+    },
+    {
+      "archivo": "tests/reservasDuplicadas.integration.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 2988,
+      "tests": [
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "ante dos peticiones simultáneas por la misma franja, solo una crea la reserva (201) y la otra recibe 409",
+          "estado": "APROBADA",
+          "duracionMs": 214
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "al cancelar la reserva ganadora, la franja queda libre y se puede volver a reservar",
+          "estado": "APROBADA",
+          "duracionMs": 261
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "no deja registros huérfanos: un intento duplicado no inserta filas parciales",
+          "estado": "APROBADA",
+          "duracionMs": 46
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "US-11: confirma con 201 y devuelve id, código, cancha, fecha, hora y estado \"confirmada\"",
+          "estado": "APROBADA",
+          "duracionMs": 88
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "US-11: la reserva confirmada aparece de inmediato en el historial del usuario",
+          "estado": "APROBADA",
+          "duracionMs": 17
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "US-11: sin token no se puede confirmar ni consultar el historial (401)",
+          "estado": "APROBADA",
+          "duracionMs": 8
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "DEF-03: una reserva fuera del horario de la cancha se rechaza con 400 FUERA_DE_HORARIO",
+          "estado": "APROBADA",
+          "duracionMs": 10
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "DEF-04: una franja solapada se rechaza y la base de datos impide el solape aunque se intente por SQL",
+          "estado": "APROBADA",
+          "duracionMs": 147
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "DEF-07: tras 10 inicios de sesión fallidos de una cuenta, el siguiente intento se frena con 429; otra cuenta no se afecta",
+          "estado": "APROBADA",
+          "duracionMs": 128
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "DEF-08: un origen no permitido por CORS recibe 403 y no un error interno",
+          "estado": "APROBADA",
+          "duracionMs": 8
+        }
+      ]
+    },
+    {
+      "archivo": "tests/temporizadorReservaService.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 339,
+      "tests": [
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "inicia una sesión de 180s para (usuario, cancha) y la guarda en la base",
+          "estado": "APROBADA",
+          "duracionMs": 24
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "si ya hay una sesión activa, retoma el mismo expiresAt en vez de crear otra",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "US-18: tras un reinicio retoma la sesión guardada con el mismo expiresAt",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "US-18: restaurarSesiones reprograma las sesiones vigentes y luego expiran a su hora",
+          "estado": "APROBADA",
+          "duracionMs": 3
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "completarSesion marca la sesión como completada, detiene el temporizador y lo persiste",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "completarSesion lanza 409 si no hay sesión activa",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "completarSesion es idempotente: completar dos veces sin expirar no lanza error (permite volver atrás y reentrar al panel)",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "al pasar los 180s emite \"expirado\" y \"terminada\", borra la sesión y rechaza completar después",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "emite sincronización periódica cada 5s mientras la sesión está activa",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "cancela la sesión solo cuando se desconecta el último socket (multi-pestaña)",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "US-18: al salir el último socket, tras el lapso de gracia emite \"terminada\" (libera la franja) y borra la sesión",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "DEF-05: si el usuario reconecta dentro del lapso de gracia, la sesión sigue con el mismo expiresAt",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "temporizadorReservaService",
+          "nombre": "cancelarSesion detiene el temporizador y libera la clave",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        }
+      ]
+    },
+    {
+      "archivo": "tests/historialReservas.integration.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 2410,
+      "tests": [
+        {
+          "grupo": "Historial de reservas (US-13, integración)",
+          "nombre": "exige autenticación",
+          "estado": "APROBADA",
+          "duracionMs": 6
+        },
+        {
+          "grupo": "Historial de reservas (US-13, integración)",
+          "nombre": "por defecto lista las próximas del usuario, de la más cercana a la más lejana, sin las de otros",
+          "estado": "APROBADA",
+          "duracionMs": 177
+        },
+        {
+          "grupo": "Historial de reservas (US-13, integración)",
+          "nombre": "las pasadas se listan de la más reciente a la más antigua y las confirmadas ya jugadas salen \"completada\"",
+          "estado": "APROBADA",
+          "duracionMs": 49
+        },
+        {
+          "grupo": "Historial de reservas (US-13, integración)",
+          "nombre": "filtra por estado y pagina los resultados",
+          "estado": "APROBADA",
+          "duracionMs": 79
+        },
+        {
+          "grupo": "Historial de reservas (US-13, integración)",
+          "nombre": "rechaza con 400 parámetros inválidos",
+          "estado": "APROBADA",
+          "duracionMs": 30
         }
       ]
     },
     {
       "archivo": "tests/fechaHora.test.js",
       "estado": "APROBADA",
-      "duracionMs": 145,
+      "duracionMs": 183,
       "tests": [
         {
           "grupo": "fechaHora",
@@ -882,14 +857,148 @@
           "grupo": "fechaHora",
           "nombre": "trata como pasado un valor de fecha inválido",
           "estado": "APROBADA",
+          "duracionMs": 0
+        }
+      ]
+    },
+    {
+      "archivo": "tests/retencionService.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 266,
+      "tests": [
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "retiene la franja hasta el vencimiento de la sesión y avisa a los demás",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "al elegir otra franja libera la anterior y retiene la nueva",
+          "estado": "APROBADA",
           "duracionMs": 1
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "volver a retener la misma franja (p. ej. al reconectar) no genera avisos duplicados",
+          "estado": "APROBADA",
+          "duracionMs": 3
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "rechaza con FRANJA_RETENIDA si otro usuario ya la retiene (índice único)",
+          "estado": "APROBADA",
+          "duracionMs": 20
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "rechaza con FRANJA_OCUPADA si la franja ya está reservada",
+          "estado": "APROBADA",
+          "duracionMs": 6
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "rechaza con SESION_EXPIRADA si el usuario no tiene sesión en la cancha",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "DEF-09: un payload nulo o que no es un objeto responde DATOS_INVALIDOS (no un error interno)",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "DEF-03: rechaza con FUERA_DE_HORARIO una franja que la cancha no atiende",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "rechaza con HORA_PASADA o DATOS_INVALIDOS ante franjas no válidas",
+          "estado": "APROBADA",
+          "duracionMs": 3
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "cuando la sesión termina (expira o el usuario sale) libera su franja y avisa",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "al confirmar, la retención se convierte en reserva y se avisa \"reservada\" (no \"liberada\")",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "no deja reservar una franja que otro usuario tiene retenida",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "sí deja reservar la franja que el propio usuario retiene",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "lista las franjas retenidas por otros sin exponer quién las retiene",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "retencionService (US-18)",
+          "nombre": "el barrido elimina retenciones vencidas y avisa que quedaron libres",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        }
+      ]
+    },
+    {
+      "archivo": "tests/horarioReservaService.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 188,
+      "tests": [
+        {
+          "grupo": "horarioReservaService.validarFranjaEnHorario",
+          "nombre": "acepta un bloque de 1 hora dentro del horario del día",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "horarioReservaService.validarFranjaEnHorario",
+          "nombre": "rechaza horas anteriores a la apertura o posteriores al cierre",
+          "estado": "APROBADA",
+          "duracionMs": 4
+        },
+        {
+          "grupo": "horarioReservaService.validarFranjaEnHorario",
+          "nombre": "rechaza un día de la semana sin horario",
+          "estado": "APROBADA",
+          "duracionMs": 4
+        },
+        {
+          "grupo": "horarioReservaService.validarFranjaEnHorario",
+          "nombre": "rechaza franjas que no duran exactamente 1 hora",
+          "estado": "APROBADA",
+          "duracionMs": 5
+        },
+        {
+          "grupo": "horarioReservaService.validarFranjaEnHorario",
+          "nombre": "rechaza bloques que no están alineados con la hora de apertura (se solaparían con la cuadrícula del día)",
+          "estado": "APROBADA",
+          "duracionMs": 0
         }
       ]
     },
     {
       "archivo": "tests/corsOrigin.test.js",
       "estado": "APROBADA",
-      "duracionMs": 243,
+      "duracionMs": 170,
       "tests": [
         {
           "grupo": "corsOrigin (DEF-08)",
@@ -907,31 +1016,31 @@
           "grupo": "corsOrigin (DEF-08)",
           "nombre": "verificarOrigen no genera un error: un origen ajeno simplemente no recibe cabeceras CORS",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 2
         },
         {
           "grupo": "corsOrigin (DEF-08)",
           "nombre": "el middleware responde 403 \"Origen no permitido\" (y no un error 500) a un origen ajeno",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 1
         },
         {
           "grupo": "corsOrigin (DEF-08)",
           "nombre": "el middleware deja pasar los orígenes permitidos",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 1
         },
         {
           "grupo": "corsOrigin: llamadas desde el mismo origen (Swagger UI)",
           "nombre": "deja pasar a una página servida por la propia API aunque no sea el origen del frontend",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 0
         },
         {
           "grupo": "corsOrigin: llamadas desde el mismo origen (Swagger UI)",
           "nombre": "sigue rechazando un origen ajeno aunque el Host sea el de la API",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 0
         }
       ]
     }
@@ -939,28 +1048,28 @@
   "cobertura": {
     "total": {
       "lines": {
-        "total": 924,
-        "covered": 657,
+        "total": 925,
+        "covered": 731,
         "skipped": 0,
-        "pct": 71.1
+        "pct": 79.02
       },
       "statements": {
-        "total": 965,
-        "covered": 681,
+        "total": 966,
+        "covered": 758,
         "skipped": 0,
-        "pct": 70.56
+        "pct": 78.46
       },
       "functions": {
-        "total": 187,
-        "covered": 126,
+        "total": 188,
+        "covered": 144,
         "skipped": 0,
-        "pct": 67.37
+        "pct": 76.59
       },
       "branches": {
         "total": 337,
-        "covered": 226,
+        "covered": 241,
         "skipped": 0,
-        "pct": 67.06
+        "pct": 71.51
       },
       "branchesTrue": {
         "total": 0,
@@ -1959,22 +2068,22 @@
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\emailService.js": {
       "lines": {
-        "total": 21,
-        "covered": 18,
+        "total": 22,
+        "covered": 19,
         "skipped": 0,
-        "pct": 85.71
+        "pct": 86.36
       },
       "functions": {
-        "total": 3,
-        "covered": 3,
+        "total": 4,
+        "covered": 4,
         "skipped": 0,
         "pct": 100
       },
       "statements": {
-        "total": 21,
-        "covered": 18,
+        "total": 22,
+        "covered": 19,
         "skipped": 0,
-        "pct": 85.71
+        "pct": 86.36
       },
       "branches": {
         "total": 9,
@@ -2038,27 +2147,27 @@
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\retencionService.js": {
       "lines": {
         "total": 65,
-        "covered": 61,
+        "covered": 63,
         "skipped": 0,
-        "pct": 93.84
+        "pct": 96.92
       },
       "functions": {
         "total": 17,
-        "covered": 15,
+        "covered": 16,
         "skipped": 0,
-        "pct": 88.23
+        "pct": 94.11
       },
       "statements": {
         "total": 73,
-        "covered": 67,
+        "covered": 69,
         "skipped": 0,
-        "pct": 91.78
+        "pct": 94.52
       },
       "branches": {
         "total": 53,
-        "covered": 45,
+        "covered": 46,
         "skipped": 0,
-        "pct": 84.9
+        "pct": 86.79
       }
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\temporizadorReservaService.js": {
@@ -2076,41 +2185,41 @@
       },
       "statements": {
         "total": 89,
-        "covered": 81,
+        "covered": 82,
         "skipped": 0,
-        "pct": 91.01
+        "pct": 92.13
       },
       "branches": {
         "total": 42,
-        "covered": 34,
+        "covered": 35,
         "skipped": 0,
-        "pct": 80.95
+        "pct": 83.33
       }
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\sockets\\temporizadorSocket.js": {
       "lines": {
         "total": 74,
-        "covered": 0,
+        "covered": 71,
         "skipped": 0,
-        "pct": 0
+        "pct": 95.94
       },
       "functions": {
         "total": 19,
-        "covered": 0,
+        "covered": 16,
         "skipped": 0,
-        "pct": 0
+        "pct": 84.21
       },
       "statements": {
         "total": 76,
-        "covered": 0,
+        "covered": 73,
         "skipped": 0,
-        "pct": 0
+        "pct": 96.05
       },
       "branches": {
         "total": 16,
-        "covered": 0,
+        "covered": 13,
         "skipped": 0,
-        "pct": 0
+        "pct": 81.25
       }
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\utils\\ErrorDeAplicacion.js": {

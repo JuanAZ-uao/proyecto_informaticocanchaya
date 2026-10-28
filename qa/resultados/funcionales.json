@@ -1,8 +1,8 @@
 {
   "clave": "funcionales",
   "titulo": "Pruebas funcionales (API REST y Socket.IO)",
-  "inicio": "2026-10-14T05:52:57.625Z",
-  "fin": "2026-10-14T05:56:44.694Z",
+  "inicio": "2026-10-28T07:41:36.417Z",
+  "fin": "2026-10-28T07:48:12.477Z",
   "casos": [
     {
       "tipo": "Funcional",
@@ -23,7 +23,7 @@
       ],
       "esperado": "201 Created con mensaje \"Cuenta creada correctamente\" y el usuario (id, nombre, correo) sin contraseña ni hash.",
       "estado": "APROBADA",
-      "duracionMs": 520,
+      "duracionMs": 624,
       "resultado": [
         {
           "ok": true,
@@ -43,7 +43,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:52:59.648Z"
+      "ejecutadaEn": "2026-10-28T07:41:39.596Z"
     },
     {
       "tipo": "Funcional",
@@ -65,7 +65,7 @@
       ],
       "esperado": "409 Conflict con el mensaje \"El correo ya está registrado\"; solo existe 1 fila con ese correo.",
       "estado": "APROBADA",
-      "duracionMs": 2118,
+      "duracionMs": 5883,
       "resultado": [
         {
           "ok": true,
@@ -81,7 +81,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:01.772Z"
+      "ejecutadaEn": "2026-10-28T07:41:45.480Z"
     },
     {
       "tipo": "Funcional",
@@ -103,7 +103,7 @@
       ],
       "esperado": "Cada intento responde 400 con \"Error de validación\" y la lista de campos con su mensaje; no se crea ningún usuario.",
       "estado": "APROBADA",
-      "duracionMs": 773,
+      "duracionMs": 6577,
       "resultado": [
         {
           "ok": true,
@@ -127,7 +127,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:02.545Z"
+      "ejecutadaEn": "2026-10-28T07:41:52.062Z"
     },
     {
       "tipo": "Funcional",
@@ -147,7 +147,7 @@
       ],
       "esperado": "El valor es un hash bcrypt ($2a/$2b, 60 caracteres) distinto de la contraseña ingresada.",
       "estado": "APROBADA",
-      "duracionMs": 881,
+      "duracionMs": 7017,
       "resultado": [
         {
           "ok": true,
@@ -159,7 +159,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:03.427Z"
+      "ejecutadaEn": "2026-10-28T07:41:59.079Z"
     },
     {
       "tipo": "Funcional",
@@ -179,7 +179,7 @@
       ],
       "esperado": "200 con token JWT (sub = id del usuario, con expiración) y usuario {id, nombre, correo}.",
       "estado": "APROBADA",
-      "duracionMs": 185,
+      "duracionMs": 777,
       "resultado": [
         {
           "ok": true,
@@ -195,7 +195,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:03.612Z"
+      "ejecutadaEn": "2026-10-28T07:41:59.857Z"
     },
     {
       "tipo": "Funcional",
@@ -216,7 +216,7 @@
       ],
       "esperado": "Ambas responden 401 con exactamente el mismo mensaje \"Correo o contraseña incorrectos\".",
       "estado": "APROBADA",
-      "duracionMs": 189,
+      "duracionMs": 265,
       "resultado": [
         {
           "ok": true,
@@ -232,7 +232,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:03.801Z"
+      "ejecutadaEn": "2026-10-28T07:42:00.131Z"
     },
     {
       "tipo": "Funcional",
@@ -255,7 +255,7 @@
       ],
       "esperado": "200 con token válido; 401 en los otros tres casos, con mensaje claro.",
       "estado": "APROBADA",
-      "duracionMs": 25,
+      "duracionMs": 19,
       "resultado": [
         {
           "ok": true,
@@ -275,7 +275,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:03.827Z"
+      "ejecutadaEn": "2026-10-28T07:42:00.155Z"
     },
     {
       "tipo": "Funcional",
@@ -299,7 +299,7 @@
       ],
       "esperado": "200 con el mismo mensaje neutro en ambos casos; solo el correo registrado genera un enlace con token en el log.",
       "estado": "APROBADA",
-      "duracionMs": 3168,
+      "duracionMs": 17049,
       "resultado": [
         {
           "ok": true,
@@ -327,7 +327,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:06.995Z"
+      "ejecutadaEn": "2026-10-28T07:42:17.205Z"
     },
     {
       "tipo": "Funcional",
@@ -352,7 +352,7 @@
       ],
       "esperado": "400 con la contraseña débil; 200 con la válida; login OK solo con la nueva; 400 al reutilizar el enlace y con un token inventado.",
       "estado": "APROBADA",
-      "duracionMs": 1921,
+      "duracionMs": 5382,
       "resultado": [
         {
           "ok": true,
@@ -384,7 +384,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:08.917Z"
+      "ejecutadaEn": "2026-10-28T07:42:22.588Z"
     },
     {
       "tipo": "Funcional",
@@ -406,7 +406,7 @@
       ],
       "esperado": "El primer token se rechaza (400); el segundo, ya vencido, también se rechaza (400).",
       "estado": "APROBADA",
-      "duracionMs": 3046,
+      "duracionMs": 11252,
       "resultado": [
         {
           "ok": true,
@@ -422,7 +422,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:11.964Z"
+      "ejecutadaEn": "2026-10-28T07:42:33.841Z"
     },
     {
       "tipo": "Funcional",
@@ -442,7 +442,7 @@
       ],
       "esperado": "200 con las 5 canchas de ejemplo; cada una con id, nombre, dirección, zona, costoHora, tipo y foto.",
       "estado": "APROBADA",
-      "duracionMs": 7,
+      "duracionMs": 6,
       "resultado": [
         {
           "ok": true,
@@ -458,7 +458,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:11.971Z"
+      "ejecutadaEn": "2026-10-28T07:42:33.848Z"
     },
     {
       "tipo": "Funcional",
@@ -477,7 +477,7 @@
       ],
       "esperado": "401 \"No autenticado\".",
       "estado": "APROBADA",
-      "duracionMs": 2,
+      "duracionMs": 7,
       "resultado": [
         {
           "ok": true,
@@ -485,7 +485,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:11.973Z"
+      "ejecutadaEn": "2026-10-28T07:42:33.856Z"
     },
     {
       "tipo": "Funcional",
@@ -525,7 +525,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:11.979Z"
+      "ejecutadaEn": "2026-10-28T07:42:33.862Z"
     },
     {
       "tipo": "Funcional",
@@ -547,7 +547,7 @@
       ],
       "esperado": "401, 400 y 404 respectivamente, con mensajes claros.",
       "estado": "APROBADA",
-      "duracionMs": 8,
+      "duracionMs": 12,
       "resultado": [
         {
           "ok": true,
@@ -563,7 +563,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:11.988Z"
+      "ejecutadaEn": "2026-10-28T07:42:33.877Z"
     },
     {
       "tipo": "Funcional",
@@ -588,7 +588,7 @@
       ],
       "esperado": "Cada filtro devuelve solo las canchas que lo cumplen; sin coincidencias → 200 con lista vacía.",
       "estado": "APROBADA",
-      "duracionMs": 42,
+      "duracionMs": 41,
       "resultado": [
         {
           "ok": true,
@@ -612,7 +612,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:12.031Z"
+      "ejecutadaEn": "2026-10-28T07:42:33.919Z"
     },
     {
       "tipo": "Funcional",
@@ -634,7 +634,7 @@
       ],
       "esperado": "Cada petición responde 400 con el campo y el motivo.",
       "estado": "APROBADA",
-      "duracionMs": 45,
+      "duracionMs": 15,
       "resultado": [
         {
           "ok": true,
@@ -654,7 +654,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:12.076Z"
+      "ejecutadaEn": "2026-10-28T07:42:33.935Z"
     },
     {
       "tipo": "Funcional",
@@ -684,7 +684,7 @@
       ],
       "esperado": "La cancha sin horario ese día no aparece; las demás sí.",
       "estado": "APROBADA",
-      "duracionMs": 2203,
+      "duracionMs": 9689,
       "resultado": [
         {
           "ok": true,
@@ -704,7 +704,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:14.280Z"
+      "ejecutadaEn": "2026-10-28T07:42:43.626Z"
     },
     {
       "tipo": "Funcional",
@@ -726,7 +726,7 @@
       ],
       "esperado": "Antes: lista vacía. Después: la franja 10:00–11:00 aparece como ocupada. Otra fecha: sigue vacía.",
       "estado": "APROBADA",
-      "duracionMs": 108,
+      "duracionMs": 96,
       "resultado": [
         {
           "ok": true,
@@ -746,7 +746,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:14.389Z"
+      "ejecutadaEn": "2026-10-28T07:42:43.724Z"
     },
     {
       "tipo": "Funcional",
@@ -766,7 +766,7 @@
       ],
       "esperado": "409 Conflict con el mensaje \"El horario ya no está disponible\"; no se crea una segunda reserva.",
       "estado": "APROBADA",
-      "duracionMs": 719,
+      "duracionMs": 3864,
       "resultado": [
         {
           "ok": true,
@@ -786,7 +786,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:15.109Z"
+      "ejecutadaEn": "2026-10-28T07:42:47.589Z"
     },
     {
       "tipo": "Funcional",
@@ -817,7 +817,7 @@
       ],
       "esperado": "Cancelar responde 200 con estado \"cancelada\"; la franja deja de aparecer ocupada; B obtiene 201; en la base quedan 1 cancelada y 1 confirmada.",
       "estado": "APROBADA",
-      "duracionMs": 624,
+      "duracionMs": 2490,
       "resultado": [
         {
           "ok": true,
@@ -837,7 +837,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:15.734Z"
+      "ejecutadaEn": "2026-10-28T07:42:50.082Z"
     },
     {
       "tipo": "Funcional",
@@ -858,7 +858,7 @@
       ],
       "esperado": "Las tres peticiones responden 400 con \"No se pueden reservar fechas u horas pasadas\".",
       "estado": "APROBADA",
-      "duracionMs": 943,
+      "duracionMs": 2653,
       "resultado": [
         {
           "ok": true,
@@ -878,7 +878,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:16.678Z"
+      "ejecutadaEn": "2026-10-28T07:42:52.736Z"
     },
     {
       "tipo": "Funcional",
@@ -909,7 +909,7 @@
       ],
       "esperado": "401 en todos los casos.",
       "estado": "APROBADA",
-      "duracionMs": 115,
+      "duracionMs": 73,
       "resultado": [
         {
           "ok": true,
@@ -929,7 +929,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:16.794Z"
+      "ejecutadaEn": "2026-10-28T07:42:52.810Z"
     },
     {
       "tipo": "Funcional",
@@ -952,7 +952,7 @@
       ],
       "esperado": "400 con el detalle del campo en cada caso de datos; 404 \"Cancha no encontrada\" para el UUID inexistente.",
       "estado": "APROBADA",
-      "duracionMs": 44,
+      "duracionMs": 53,
       "resultado": [
         {
           "ok": true,
@@ -992,7 +992,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:16.839Z"
+      "ejecutadaEn": "2026-10-28T07:42:52.865Z"
     },
     {
       "tipo": "Funcional",
@@ -1013,7 +1013,7 @@
       ],
       "esperado": "El backend debe rechazarla (400 o 409) porque la cancha no atiende a esa hora.",
       "estado": "APROBADA",
-      "duracionMs": 836,
+      "duracionMs": 2555,
       "resultado": [
         {
           "ok": null,
@@ -1033,7 +1033,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:17.675Z"
+      "ejecutadaEn": "2026-10-28T07:42:55.420Z"
     },
     {
       "tipo": "Funcional",
@@ -1066,7 +1066,7 @@
       ],
       "esperado": "Los dos intentos por la API se rechazan (400 o 409); el INSERT directo falla por la restricción de exclusión (ex_reservas_sin_solape); queda una sola reserva.",
       "estado": "APROBADA",
-      "duracionMs": 1325,
+      "duracionMs": 8914,
       "resultado": [
         {
           "ok": true,
@@ -1090,7 +1090,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:19.001Z"
+      "ejecutadaEn": "2026-10-28T07:43:04.335Z"
     },
     {
       "tipo": "Funcional",
@@ -1112,7 +1112,7 @@
       ],
       "esperado": "403 al cancelar una reserva ajena; 404 si no existe; 400 con id mal formado; 409 al cancelar una ya cancelada.",
       "estado": "APROBADA",
-      "duracionMs": 653,
+      "duracionMs": 5424,
       "resultado": [
         {
           "ok": true,
@@ -1140,7 +1140,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:19.655Z"
+      "ejecutadaEn": "2026-10-28T07:43:09.760Z"
     },
     {
       "tipo": "Funcional",
@@ -1161,7 +1161,7 @@
       ],
       "esperado": "El INSERT confirmado falla con \"unique constraint uq_reservas_confirmada_cancha_fecha_hora\"; el INSERT cancelado sí se permite (índice parcial).",
       "estado": "APROBADA",
-      "duracionMs": 2604,
+      "duracionMs": 10456,
       "resultado": [
         {
           "ok": true,
@@ -1178,7 +1178,7 @@
           "texto": "CREATE UNIQUE INDEX uq_reservas_confirmada_cancha_fecha_hora ON public.reservas USING btree (cancha_id, fecha, hora_inicio) WHERE (estado = 'confirmada'::text)"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:53:22.260Z"
+      "ejecutadaEn": "2026-10-28T07:43:20.217Z"
     },
     {
       "tipo": "Funcional",
@@ -1200,7 +1200,7 @@
       ],
       "esperado": "Un 201 y un 409 con \"El horario ya no está disponible\", sin textos técnicos; una sola fila en la base. Se repite 5 veces con franjas distintas.",
       "estado": "APROBADA",
-      "duracionMs": 10008,
+      "duracionMs": 15886,
       "resultado": [
         {
           "ok": true,
@@ -1220,7 +1220,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:32.269Z"
+      "ejecutadaEn": "2026-10-28T07:43:36.104Z"
     },
     {
       "tipo": "Funcional",
@@ -1249,7 +1249,7 @@
       ],
       "esperado": "Una sola reserva creada (201); los demás envíos responden 409; una sola fila en la base.",
       "estado": "APROBADA",
-      "duracionMs": 593,
+      "duracionMs": 3611,
       "resultado": [
         {
           "ok": true,
@@ -1265,7 +1265,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:32.863Z"
+      "ejecutadaEn": "2026-10-28T07:43:39.716Z"
     },
     {
       "tipo": "Funcional",
@@ -1288,7 +1288,7 @@
       ],
       "esperado": "Exactamente 1 respuesta 201 y 24 respuestas 409; 1 sola fila para la franja y ninguna fila parcial.",
       "estado": "APROBADA",
-      "duracionMs": 9159,
+      "duracionMs": 24309,
       "resultado": [
         {
           "ok": true,
@@ -1312,7 +1312,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:42.023Z"
+      "ejecutadaEn": "2026-10-28T07:44:04.026Z"
     },
     {
       "tipo": "Funcional",
@@ -1333,7 +1333,7 @@
       ],
       "esperado": "El total de filas crece solo en 1 (la reserva ganadora).",
       "estado": "APROBADA",
-      "duracionMs": 2546,
+      "duracionMs": 6610,
       "resultado": [
         {
           "ok": true,
@@ -1345,7 +1345,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:44.570Z"
+      "ejecutadaEn": "2026-10-28T07:44:10.639Z"
     },
     {
       "tipo": "Funcional",
@@ -1365,7 +1365,7 @@
       ],
       "esperado": "La reserva queda asociada al usuario del token; el usuarioId del cuerpo se ignora.",
       "estado": "APROBADA",
-      "duracionMs": 1005,
+      "duracionMs": 4976,
       "resultado": [
         {
           "ok": true,
@@ -1381,7 +1381,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:45.576Z"
+      "ejecutadaEn": "2026-10-28T07:44:15.616Z"
     },
     {
       "tipo": "Funcional",
@@ -1402,7 +1402,7 @@
       ],
       "esperado": "201 con reserva {id, codigo CY-XXXXXXXX, cancha{id,nombre,direccion}, fecha, horaInicio, horaFin, estado \"confirmada\"}; en la base estado = confirmada.",
       "estado": "APROBADA",
-      "duracionMs": 735,
+      "duracionMs": 3654,
       "resultado": [
         {
           "ok": true,
@@ -1410,7 +1410,7 @@
         },
         {
           "ok": true,
-          "texto": "Incluye identificador (UUID) y código legible CY-XXXXXXXX → 4a529074… / CY-4A529074"
+          "texto": "Incluye identificador (UUID) y código legible CY-XXXXXXXX → 309b471c… / CY-309B471C"
         },
         {
           "ok": true,
@@ -1418,7 +1418,7 @@
         },
         {
           "ok": true,
-          "texto": "Incluye fecha y hora → 2101-10-06 10:00:00–11:00:00"
+          "texto": "Incluye fecha y hora → 2101-11-16 10:00:00–11:00:00"
         },
         {
           "ok": true,
@@ -1430,7 +1430,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:46.312Z"
+      "ejecutadaEn": "2026-10-28T07:44:19.272Z"
     },
     {
       "tipo": "Funcional",
@@ -1450,7 +1450,7 @@
       ],
       "esperado": "Ninguna respuesta de error incluye \"reserva\"; todas traen \"mensaje\" claro sin detalles técnicos.",
       "estado": "APROBADA",
-      "duracionMs": 49,
+      "duracionMs": 468,
       "resultado": [
         {
           "ok": true,
@@ -1470,7 +1470,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:46.362Z"
+      "ejecutadaEn": "2026-10-28T07:44:19.742Z"
     },
     {
       "tipo": "Funcional",
@@ -1490,23 +1490,23 @@
       ],
       "esperado": "Todas las confirmaciones responden en menos de 2000 ms (objetivo del criterio); p95 por debajo de 1000 ms.",
       "estado": "APROBADA",
-      "duracionMs": 648,
+      "duracionMs": 1284,
       "resultado": [
         {
           "ok": true,
-          "texto": "El máximo es menor a 2000 ms → 36 ms"
+          "texto": "El máximo es menor a 2000 ms → 138 ms"
         },
         {
           "ok": true,
-          "texto": "El p95 es menor a 1000 ms → 36 ms"
+          "texto": "El p95 es menor a 1000 ms → 138 ms"
         },
         {
           "ok": null,
-          "texto": "15 confirmaciones · promedio 20 ms · mediana 19 ms · mínimo 10 ms · máximo 36 ms"
+          "texto": "15 confirmaciones · promedio 51 ms · mediana 39 ms · mínimo 24 ms · máximo 138 ms"
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:47.011Z"
+      "ejecutadaEn": "2026-10-28T07:44:21.027Z"
     },
     {
       "tipo": "Funcional",
@@ -1528,7 +1528,7 @@
       ],
       "esperado": "A ve ambas, ordenadas de la más reciente a la más antigua, con código, cancha, fecha, hora y estado; B ve lista vacía; la cancelada aparece como \"cancelada\".",
       "estado": "APROBADA",
-      "duracionMs": 914,
+      "duracionMs": 1161,
       "resultado": [
         {
           "ok": true,
@@ -1540,7 +1540,7 @@
         },
         {
           "ok": true,
-          "texto": "Cada ítem trae código, cancha y estado \"confirmada\" → CY-C49BBC14 · Cancha El Bosque"
+          "texto": "Cada ítem trae código, cancha y estado \"confirmada\" → CY-B40A4F96 · Cancha El Bosque"
         },
         {
           "ok": true,
@@ -1552,7 +1552,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:47.926Z"
+      "ejecutadaEn": "2026-10-28T07:44:22.190Z"
     },
     {
       "tipo": "Funcional",
@@ -1575,7 +1575,7 @@
       "esperado": "Aparece \"[EMAIL] … Confirmación de reserva\" con el mismo resumen. (El caso de fallo del correo se verifica con la prueba unitaria \"si el correo falla, la reserva igual queda confirmada\".)",
       "notaQA": "No se probó el envío contra un servidor SMTP real porque no hay credenciales configuradas; solo el modo simulado y la prueba unitaria del fallo.",
       "estado": "OBSERVACIÓN",
-      "duracionMs": 1956,
+      "duracionMs": 3718,
       "resultado": [
         {
           "ok": true,
@@ -1583,7 +1583,7 @@
         },
         {
           "ok": true,
-          "texto": "El log contiene el correo de confirmación de esa reserva → [EMAIL] SMTP no configurado. Confirmación de reserva (modo desarrollo) para mail.1791957227927.39@qa.local: CY-CFBE8086 · Cancha Los Cerros · 2101-05-02 13:00 - 14:00"
+          "texto": "El log contiene el correo de confirmación de esa reserva → [EMAIL] SMTP no configurado. Confirmación de reserva (modo desarrollo) para mail.1793173462191.39@qa.local: CY-91536234 · Cancha Los Cerros · 2100-12-06 13:00 - 14:00"
         },
         {
           "ok": true,
@@ -1595,7 +1595,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:53:49.883Z"
+      "ejecutadaEn": "2026-10-28T07:44:25.909Z"
     },
     {
       "tipo": "Funcional",
@@ -1626,7 +1626,7 @@
       ],
       "esperado": "Después de confirmar no llegan más eventos temporizador:sync y la sesión queda en estado \"completado\".",
       "estado": "APROBADA",
-      "duracionMs": 13566,
+      "duracionMs": 15085,
       "resultado": [
         {
           "ok": true,
@@ -1650,7 +1650,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:54:03.450Z"
+      "ejecutadaEn": "2026-10-28T07:44:40.995Z"
     },
     {
       "tipo": "Funcional",
@@ -1673,7 +1673,7 @@
       ],
       "esperado": "Las 4 primeras conexiones fallan con \"No autenticado\" o \"Token inválido o expirado\"; la última se acepta.",
       "estado": "APROBADA",
-      "duracionMs": 139,
+      "duracionMs": 92,
       "resultado": [
         {
           "ok": true,
@@ -1697,7 +1697,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:54:03.590Z"
+      "ejecutadaEn": "2026-10-28T07:44:41.090Z"
     },
     {
       "tipo": "Funcional",
@@ -1719,7 +1719,7 @@
       ],
       "esperado": "temporizador:inicio con expiresAt ≈ ahora + 180 s y estado \"activo\". Sin canchaId: evento temporizador:error y desconexión.",
       "estado": "APROBADA",
-      "duracionMs": 2407,
+      "duracionMs": 3470,
       "resultado": [
         {
           "ok": true,
@@ -1727,7 +1727,7 @@
         },
         {
           "ok": true,
-          "texto": "expiresAt corresponde a 180 s desde el inicio → 179.9 s restantes (66 ms tras conectar)"
+          "texto": "expiresAt corresponde a 180 s desde el inicio → 179.9 s restantes (166 ms tras conectar)"
         },
         {
           "ok": true,
@@ -1743,7 +1743,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:54:05.999Z"
+      "ejecutadaEn": "2026-10-28T07:44:44.561Z"
     },
     {
       "tipo": "Funcional",
@@ -1763,7 +1763,7 @@
       ],
       "esperado": "Al menos 3 eventos separados por 5 s (±0,5 s), todos con el mismo expiresAt del inicio.",
       "estado": "APROBADA",
-      "duracionMs": 17326,
+      "duracionMs": 17712,
       "resultado": [
         {
           "ok": true,
@@ -1771,7 +1771,7 @@
         },
         {
           "ok": true,
-          "texto": "El intervalo entre eventos es de 5 s → 5.00, 5.00 s"
+          "texto": "El intervalo entre eventos es de 5 s → 5.21, 4.80 s"
         },
         {
           "ok": true,
@@ -1779,7 +1779,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:54:23.342Z"
+      "ejecutadaEn": "2026-10-28T07:45:02.291Z"
     },
     {
       "tipo": "Funcional",
@@ -1802,7 +1802,7 @@
       ],
       "esperado": "200 {estado:\"completado\"}; no llegan más temporizador:sync; la sesión queda \"completado\" en la base; el reingreso también responde 200.",
       "estado": "APROBADA",
-      "duracionMs": 8570,
+      "duracionMs": 10494,
       "resultado": [
         {
           "ok": true,
@@ -1822,7 +1822,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:54:31.942Z"
+      "ejecutadaEn": "2026-10-28T07:45:12.787Z"
     },
     {
       "tipo": "Funcional",
@@ -1841,7 +1841,7 @@
       ],
       "esperado": "409 con \"Tu tiempo para reservar expiró…\" y código SESION_EXPIRADA.",
       "estado": "APROBADA",
-      "duracionMs": 317,
+      "duracionMs": 534,
       "resultado": [
         {
           "ok": true,
@@ -1853,7 +1853,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:54:32.261Z"
+      "ejecutadaEn": "2026-10-28T07:45:13.323Z"
     },
     {
       "tipo": "Funcional",
@@ -1875,11 +1875,11 @@
       ],
       "esperado": "Las dos primeras comparten el mismo expiresAt; la de otra cancha tiene uno distinto; hay 2 filas de sesión.",
       "estado": "APROBADA",
-      "duracionMs": 4128,
+      "duracionMs": 5275,
       "resultado": [
         {
           "ok": true,
-          "texto": "La segunda pestaña recibe el mismo expiresAt → 1791957452565 = 1791957452565"
+          "texto": "La segunda pestaña recibe el mismo expiresAt → 1793173693795 = 1793173693795"
         },
         {
           "ok": true,
@@ -1891,7 +1891,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:54:36.391Z"
+      "ejecutadaEn": "2026-10-28T07:45:18.599Z"
     },
     {
       "tipo": "Funcional",
@@ -1913,7 +1913,7 @@
       ],
       "esperado": "Con una pestaña abierta la sesión sigue; al cerrar la última, durante los primeros segundos aún existe (gracia) y pasados ~10 s se elimina de la base; al volver a entrar se crea una sesión nueva de 180 s.",
       "estado": "APROBADA",
-      "duracionMs": 16072,
+      "duracionMs": 18721,
       "resultado": [
         {
           "ok": true,
@@ -1937,7 +1937,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:54:52.465Z"
+      "ejecutadaEn": "2026-10-28T07:45:37.321Z"
     },
     {
       "tipo": "Funcional",
@@ -1961,11 +1961,11 @@
       ],
       "esperado": "El expiresAt recibido al reconectar es el mismo que antes del corte (se recupera el tiempo restante).",
       "estado": "APROBADA",
-      "duracionMs": 13977,
+      "duracionMs": 15640,
       "resultado": [
         {
           "ok": true,
-          "texto": "Al reconectar se recupera el mismo expiresAt → antes 05:57:52.779 · después 05:57:52.779 (diferencia 0.0 s)"
+          "texto": "Al reconectar se recupera el mismo expiresAt → antes 07:48:37.776 · después 07:48:37.776 (diferencia 0.0 s)"
         },
         {
           "ok": true,
@@ -1973,7 +1973,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:55:06.443Z"
+      "ejecutadaEn": "2026-10-28T07:45:52.962Z"
     },
     {
       "tipo": "Funcional",
@@ -1995,7 +1995,7 @@
       ],
       "esperado": "Ambos eventos traen \"ahora\" (milisegundos) con una diferencia menor a 2 s respecto de la hora actual del equipo de pruebas.",
       "estado": "APROBADA",
-      "duracionMs": 5915,
+      "duracionMs": 5960,
       "resultado": [
         {
           "ok": true,
@@ -2003,7 +2003,7 @@
         },
         {
           "ok": true,
-          "texto": "temporizador:sync incluye \"ahora\" → diferencia -37 ms"
+          "texto": "temporizador:sync incluye \"ahora\" → diferencia -27 ms"
         },
         {
           "ok": true,
@@ -2011,7 +2011,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:55:12.359Z"
+      "ejecutadaEn": "2026-10-28T07:45:58.924Z"
     },
     {
       "tipo": "Funcional",
@@ -2032,7 +2032,7 @@
       ],
       "esperado": "El ack trae un nuevo expiresAt (≈ +180 s desde el reinicio) y ambas pestañas reciben temporizador:inicio con ese valor.",
       "estado": "APROBADA",
-      "duracionMs": 6624,
+      "duracionMs": 6872,
       "resultado": [
         {
           "ok": true,
@@ -2048,7 +2048,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:55:18.984Z"
+      "ejecutadaEn": "2026-10-28T07:46:05.798Z"
     },
     {
       "tipo": "Funcional",
@@ -2071,11 +2071,11 @@
       ],
       "esperado": "A recibe ack {ok:true} y retencion:confirmada con expiresAt = vencimiento de su sesión. B recibe disponibilidad:retenida con la franja (sin identificar a A). A no recibe disponibilidad:retenida de su propia retención. Hay 1 fila en retenciones.",
       "estado": "APROBADA",
-      "duracionMs": 1568,
+      "duracionMs": 2412,
       "resultado": [
         {
           "ok": true,
-          "texto": "A recibe el ack {ok:true} con la retención → {\"ok\":true,\"retencion\":{\"fecha\":\"2101-03-05\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\",\"expiresAt\":1791957499784}}"
+          "texto": "A recibe el ack {ok:true} con la retención → {\"ok\":true,\"retencion\":{\"fecha\":\"2102-07-04\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\",\"expiresAt\":1793173746716}}"
         },
         {
           "ok": true,
@@ -2087,11 +2087,11 @@
         },
         {
           "ok": true,
-          "texto": "B recibe disponibilidad:retenida sin recargar → 0 ms después"
+          "texto": "B recibe disponibilidad:retenida sin recargar → -1 ms después"
         },
         {
           "ok": true,
-          "texto": "El aviso solo trae la franja: no revela quién la retiene → {\"canchaId\":\"86254261-a2a7-4b77-b058-8fe68a92b2c2\",\"fecha\":\"2101-03-05\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\"}"
+          "texto": "El aviso solo trae la franja: no revela quién la retiene → {\"canchaId\":\"5c67a052-16d5-49b0-b63b-3203655d5fa0\",\"fecha\":\"2102-07-04\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\"}"
         },
         {
           "ok": true,
@@ -2103,7 +2103,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:55:20.554Z"
+      "ejecutadaEn": "2026-10-28T07:46:08.211Z"
     },
     {
       "tipo": "Funcional",
@@ -2126,7 +2126,7 @@
       ],
       "esperado": "B recibe {ok:false, error:{codigo:\"FRANJA_RETENIDA\", mensaje}}; con otra franja sí puede; en la base la franja tiene un único dueño.",
       "estado": "APROBADA",
-      "duracionMs": 2085,
+      "duracionMs": 2822,
       "resultado": [
         {
           "ok": true,
@@ -2146,7 +2146,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:55:22.640Z"
+      "ejecutadaEn": "2026-10-28T07:46:11.034Z"
     },
     {
       "tipo": "Funcional",
@@ -2169,7 +2169,7 @@
       ],
       "esperado": "B recibe disponibilidad:liberada (10:00) y disponibilidad:retenida (11:00); A conserva una sola fila en la base (11:00).",
       "estado": "APROBADA",
-      "duracionMs": 3130,
+      "duracionMs": 5108,
       "resultado": [
         {
           "ok": true,
@@ -2193,7 +2193,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:55:25.772Z"
+      "ejecutadaEn": "2026-10-28T07:46:16.143Z"
     },
     {
       "tipo": "Funcional",
@@ -2214,7 +2214,7 @@
       ],
       "esperado": "Con retencion:liberar B recibe disponibilidad:liberada de inmediato; al salir de la cancha la recibe tras el lapso de gracia (≈ 10 s); en ambos casos la fila desaparece de retenciones.",
       "estado": "APROBADA",
-      "duracionMs": 12635,
+      "duracionMs": 13164,
       "resultado": [
         {
           "ok": true,
@@ -2238,7 +2238,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:55:38.409Z"
+      "ejecutadaEn": "2026-10-28T07:46:29.309Z"
     },
     {
       "tipo": "Funcional",
@@ -2273,7 +2273,7 @@
       ],
       "esperado": "B recibe disponibilidad:reservada (no liberada); la fila de retenciones desaparece; reservas tiene 1 fila \"confirmada\"; B recibe 409.",
       "estado": "APROBADA",
-      "duracionMs": 3682,
+      "duracionMs": 6432,
       "resultado": [
         {
           "ok": true,
@@ -2313,7 +2313,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:55:42.093Z"
+      "ejecutadaEn": "2026-10-28T07:46:35.743Z"
     },
     {
       "tipo": "Funcional",
@@ -2344,7 +2344,7 @@
       ],
       "esperado": "B recibe 409 FRANJA_RETENIDA en ambos; no se crea reserva; /disponibilidad de B incluye la franja en \"retenidos\", la de A no.",
       "estado": "APROBADA",
-      "duracionMs": 1406,
+      "duracionMs": 2617,
       "resultado": [
         {
           "ok": true,
@@ -2360,7 +2360,7 @@
         },
         {
           "ok": true,
-          "texto": "La disponibilidad de B lista la franja como retenida → [{\"canchaId\":\"86254261-a2a7-4b77-b058-8fe68a92b2c2\",\"fecha\":\"2102-05-08\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\"}]"
+          "texto": "La disponibilidad de B lista la franja como retenida → [{\"canchaId\":\"5c67a052-16d5-49b0-b63b-3203655d5fa0\",\"fecha\":\"2102-06-02\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\"}]"
         },
         {
           "ok": true,
@@ -2372,7 +2372,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:55:43.500Z"
+      "ejecutadaEn": "2026-10-28T07:46:38.363Z"
     },
     {
       "tipo": "Funcional",
@@ -2393,7 +2393,7 @@
       ],
       "esperado": "B recibe disponibilidad:reservada al confirmar y disponibilidad:liberada al cancelar.",
       "estado": "APROBADA",
-      "duracionMs": 688,
+      "duracionMs": 807,
       "resultado": [
         {
           "ok": true,
@@ -2405,7 +2405,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:55:44.190Z"
+      "ejecutadaEn": "2026-10-28T07:46:39.172Z"
     },
     {
       "tipo": "Funcional",
@@ -2427,7 +2427,7 @@
       ],
       "esperado": "Respuestas {ok:false, error:{codigo}}: DATOS_INVALIDOS, DATOS_INVALIDOS, HORA_PASADA y FRANJA_OCUPADA.",
       "estado": "APROBADA",
-      "duracionMs": 549,
+      "duracionMs": 532,
       "resultado": [
         {
           "ok": true,
@@ -2447,7 +2447,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:55:44.741Z"
+      "ejecutadaEn": "2026-10-28T07:46:39.705Z"
     },
     {
       "tipo": "Funcional",
@@ -2469,7 +2469,7 @@
       ],
       "esperado": "1 respuesta ok y 9 con FRANJA_RETENIDA; 1 fila en retenciones; los 9 perdedores reciben exactamente un aviso disponibilidad:retenida.",
       "estado": "APROBADA",
-      "duracionMs": 4867,
+      "duracionMs": 7425,
       "resultado": [
         {
           "ok": true,
@@ -2485,7 +2485,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:55:49.610Z"
+      "ejecutadaEn": "2026-10-28T07:46:47.132Z"
     },
     {
       "tipo": "Funcional",
@@ -2505,7 +2505,7 @@
       ],
       "esperado": "Todos los eventos (temporizador:*, retencion:*, disponibilidad:*) y códigos de error están documentados, con payload.",
       "estado": "APROBADA",
-      "duracionMs": 17,
+      "duracionMs": 9,
       "resultado": [
         {
           "ok": true,
@@ -2525,7 +2525,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:55:49.629Z"
+      "ejecutadaEn": "2026-10-28T07:46:47.143Z"
     },
     {
       "tipo": "Funcional",
@@ -2556,7 +2556,7 @@
       "resultado": [
         {
           "ok": true,
-          "texto": "temporizador:expirado llega a la hora indicada por expiresAt (±2 s) → desfase -0.01 s"
+          "texto": "temporizador:expirado llega a la hora indicada por expiresAt (±2 s) → desfase -0.04 s"
         },
         {
           "ok": true,
@@ -2576,7 +2576,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:56:04.018Z"
+      "ejecutadaEn": "2026-10-28T07:46:47.147Z"
     },
     {
       "tipo": "Funcional",
@@ -2601,7 +2601,7 @@
       "resultado": [
         {
           "ok": true,
-          "texto": "B recibió disponibilidad:liberada de la franja de A → 0.11 s después del vencimiento"
+          "texto": "B recibió disponibilidad:liberada de la franja de A → -0.02 s después del vencimiento"
         },
         {
           "ok": true,
@@ -2609,7 +2609,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:56:04.020Z"
+      "ejecutadaEn": "2026-10-28T07:46:47.150Z"
     },
     {
       "tipo": "Funcional",
@@ -2641,7 +2641,7 @@
       ],
       "esperado": "Sesión y retención siguen en la base; A recibe el MISMO expiresAt al reconectar; la franja sigue retenida para B (FRANJA_RETENIDA); el temporizador sigue sincronizando y A puede continuar.",
       "estado": "APROBADA",
-      "duracionMs": 18664,
+      "duracionMs": 15696,
       "resultado": [
         {
           "ok": true,
@@ -2653,11 +2653,11 @@
         },
         {
           "ok": true,
-          "texto": "El backend vuelve a responder tras el reinicio → 9.8 s"
+          "texto": "El backend vuelve a responder tras el reinicio → 6.8 s"
         },
         {
           "ok": true,
-          "texto": "Al arrancar, el servidor restaura las sesiones guardadas → Sesiones de reserva restauradas: 2"
+          "texto": "Al arrancar, el servidor restaura las sesiones guardadas → Sesiones de reserva restauradas: 12"
         },
         {
           "ok": true,
@@ -2685,7 +2685,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:56:22.686Z"
+      "ejecutadaEn": "2026-10-28T07:47:02.847Z"
     },
     {
       "tipo": "Funcional",
@@ -2707,7 +2707,7 @@
       ],
       "esperado": "Las 3 reservas responden 201; las 3 aparecen como \"confirmada\" en ambos listados; en la base hay 3 filas confirmadas del usuario.",
       "estado": "APROBADA",
-      "duracionMs": 850,
+      "duracionMs": 1499,
       "resultado": [
         {
           "ok": true,
@@ -2727,7 +2727,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:56:23.537Z"
+      "ejecutadaEn": "2026-10-28T07:47:04.348Z"
     },
     {
       "tipo": "Funcional",
@@ -2758,7 +2758,7 @@
       ],
       "esperado": "El segundo intento responde 409 \"Ya tienes una reserva en ese horario\" (codigo RESERVA_SOLAPADA) y no se crea la fila; el bloque contiguo responde 201; el otro usuario obtiene 201.",
       "estado": "APROBADA",
-      "duracionMs": 1092,
+      "duracionMs": 1664,
       "resultado": [
         {
           "ok": true,
@@ -2786,7 +2786,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:56:24.630Z"
+      "ejecutadaEn": "2026-10-28T07:47:06.014Z"
     },
     {
       "tipo": "Funcional",
@@ -2807,7 +2807,7 @@
       ],
       "esperado": "La cancelación responde 200; en el listado quedan 2 \"confirmada\" y 1 \"cancelada\"; la franja cancelada vuelve a poder reservarse.",
       "estado": "APROBADA",
-      "duracionMs": 804,
+      "duracionMs": 1107,
       "resultado": [
         {
           "ok": true,
@@ -2823,7 +2823,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:56:25.436Z"
+      "ejecutadaEn": "2026-10-28T07:47:07.123Z"
     },
     {
       "tipo": "Funcional",
@@ -2845,7 +2845,7 @@
       ],
       "esperado": "Las 3 primeras responden 201; la cuarta 409 con codigo LIMITE_RESERVAS_ALCANZADO y el mensaje \"Ya tienes 3 reservas activas…\"; tras cancelar una, la cuarta se acepta.",
       "estado": "APROBADA",
-      "duracionMs": 4449,
+      "duracionMs": 16355,
       "resultado": [
         {
           "ok": true,
@@ -2877,7 +2877,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:56:29.887Z"
+      "ejecutadaEn": "2026-10-28T07:47:23.481Z"
     },
     {
       "tipo": "Funcional",
@@ -2899,7 +2899,7 @@
       ],
       "esperado": "A ve solo sus 3 reservas, de la fecha más cercana a la más lejana, con id, codigo, canchaNombre, canchaDireccion, fecha, horaInicio, horaFin y estado; B ve solo la suya.",
       "estado": "APROBADA",
-      "duracionMs": 460,
+      "duracionMs": 1157,
       "resultado": [
         {
           "ok": true,
@@ -2907,11 +2907,11 @@
         },
         {
           "ok": true,
-          "texto": "Orden: de la más cercana a la más lejana → 2101-04-19 < 2101-04-22 < 2101-04-25"
+          "texto": "Orden: de la más cercana a la más lejana → 2101-09-27 < 2101-09-30 < 2101-10-03"
         },
         {
           "ok": true,
-          "texto": "Cada reserva trae id, código, cancha, dirección, hora (HH:mm) y estado → {\"id\":\"09acd7e7-a6f3-4a72-a10e-746975ec555b\",\"codigo\":\"CY-09ACD7E7\",\"canchaId\":\"f9396948-eccc-438a-810c-0a5deb3be3ee\",\"canchaNombre\":\"Cancha La Rivera\",\"canchaDireccion\":\"Cra 8 # 12-50, Cali\",\"fecha\":\"2101-04-19\",\"horaInicio\":\"08:00\",\"horaFin\":\"09:00\",\"estado\":\"confirmada\",\"createdAt\":\"2026-10-14T05:56:30.313Z\"}"
+          "texto": "Cada reserva trae id, código, cancha, dirección, hora (HH:mm) y estado → {\"id\":\"7613f974-e056-4c98-91de-08097cc9e420\",\"codigo\":\"CY-7613F974\",\"canchaId\":\"cb25c0e6-605f-4118-8b48-03a6776aa116\",\"canchaNombre\":\"Cancha La Rivera\",\"canchaDireccion\":\"Cra 8 # 12-50, Cali\",\"fecha\":\"2101-09-27\",\"horaInicio\":\"08:00\",\"horaFin\":\"09:00\",\"estado\":\"confirmada\",\"createdAt\":\"2026-10-28T07:47:24.524Z\"}"
         },
         {
           "ok": true,
@@ -2921,10 +2921,10 @@
       "evidencias": [
         {
           "titulo": "Respuesta de GET /api/reservas (usuario A)",
-          "texto": "{\n \"reservas\": [\n  {\n   \"id\": \"09acd7e7-a6f3-4a72-a10e-746975ec555b\",\n   \"codigo\": \"CY-09ACD7E7\",\n   \"canchaId\": \"f9396948-eccc-438a-810c-0a5deb3be3ee\",\n   \"canchaNombre\": \"Cancha La Rivera\",\n   \"canchaDireccion\": \"Cra 8 # 12-50, Cali\",\n   \"fecha\": \"2101-04-19\",\n   \"horaInicio\": \"08:00\",\n   \"horaFin\": \"09:00\",\n   \"estado\": \"confirmada\",\n   \"createdAt\": \"2026-10-14T05:56:30.313Z\"\n  },\n  {\n   \"id\": \"e31b4bf3-7978-497a-b45a-b205c3ff5e25\",\n   \"codigo\": \"CY-E31B4BF3\",\n   \"canchaId\": \"0ebfcbc0-accc-49d4-810a-953b677d49a0\",\n   \"canchaNombre\": \"Cancha El Bosque\",\n   \"canchaDireccion\": \"Av. Roosevelt # 30-10, Cali\",\n   \"fecha\": \"2101-04-22\",\n   \"horaInicio\": \"08:00\",\n   \"horaFin\": \"09:00\",\n   \"estado\": \"confirmada\",\n   \"createdAt\": \"2026-10-14T05:56:30.325Z\"\n  },\n  {\n   \"id\": \"a1a2def7-3e7e-41c9-b8aa-e8c349bce2d6\",\n   \"codigo\": \"CY-A1A2DEF7\",\n   \"canchaId\": \"0ebfcbc0-accc-49d4-810a-953b677d49a0\",\n   \"canchaNombre\": \"Cancha El Bosque\",\n   \"canchaDireccion\": \"Av. Roosevelt # 30-10, Cali\",\n   \"fecha\": \"2101-04-25\",\n   \"horaInicio\": \"08:00\",\n   \"horaFin\": \"09:00\",\n   \"estado\": \"confirmada\",\n   \"createdAt\": \"2026-10-14T05:56:30.302Z\"\n  }\n ],\n \"paginacion\": {\n  \"pagina\": 1,\n  \"limite\": 10,\n  \"total\": 3,\n  \"totalPaginas\": 1\n }\n}"
+          "texto": "{\n \"reservas\": [\n  {\n   \"id\": \"7613f974-e056-4c98-91de-08097cc9e420\",\n   \"codigo\": \"CY-7613F974\",\n   \"canchaId\": \"cb25c0e6-605f-4118-8b48-03a6776aa116\",\n   \"canchaNombre\": \"Cancha La Rivera\",\n   \"canchaDireccion\": \"Cra 8 # 12-50, Cali\",\n   \"fecha\": \"2101-09-27\",\n   \"horaInicio\": \"08:00\",\n   \"horaFin\": \"09:00\",\n   \"estado\": \"confirmada\",\n   \"createdAt\": \"2026-10-28T07:47:24.524Z\"\n  },\n  {\n   \"id\": \"d05b47f8-13d4-42f1-8ba8-9796715b39a9\",\n   \"codigo\": \"CY-D05B47F8\",\n   \"canchaId\": \"9eed9c20-bb77-4bc9-928c-079bd6479cf8\",\n   \"canchaNombre\": \"Cancha El Bosque\",\n   \"canchaDireccion\": \"Av. Roosevelt # 30-10, Cali\",\n   \"fecha\": \"2101-09-30\",\n   \"horaInicio\": \"08:00\",\n   \"horaFin\": \"09:00\",\n   \"estado\": \"confirmada\",\n   \"createdAt\": \"2026-10-28T07:47:24.576Z\"\n  },\n  {\n   \"id\": \"e4c00abf-77ca-47f4-b76a-ebdfa32fad41\",\n   \"codigo\": \"CY-E4C00ABF\",\n   \"canchaId\": \"9eed9c20-bb77-4bc9-928c-079bd6479cf8\",\n   \"canchaNombre\": \"Cancha El Bosque\",\n   \"canchaDireccion\": \"Av. Roosevelt # 30-10, Cali\",\n   \"fecha\": \"2101-10-03\",\n   \"horaInicio\": \"08:00\",\n   \"horaFin\": \"09:00\",\n   \"estado\": \"confirmada\",\n   \"createdAt\": \"2026-10-28T07:47:24.487Z\"\n  }\n ],\n \"paginacion\": {\n  \"pagina\": 1,\n  \"limite\": 10,\n  \"total\": 3,\n  \"totalPaginas\": 1\n }\n}"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:56:30.349Z"
+      "ejecutadaEn": "2026-10-28T07:47:24.639Z"
     },
     {
       "tipo": "Funcional",
@@ -2947,7 +2947,7 @@
       ],
       "esperado": "Pasadas: la más reciente primero, la confirmada como \"completada\" y la cancelada como \"cancelada\"; el filtro devuelve solo ese estado; las próximas no incluyen las pasadas.",
       "estado": "APROBADA",
-      "duracionMs": 1025,
+      "duracionMs": 6163,
       "resultado": [
         {
           "ok": true,
@@ -2959,7 +2959,7 @@
         },
         {
           "ok": true,
-          "texto": "La confirmada ya jugada se muestra \"completada\" y va primero (la más reciente) → 2026-10-11 completada · 2026-10-04 cancelada"
+          "texto": "La confirmada ya jugada se muestra \"completada\" y va primero (la más reciente) → 2026-10-25 completada · 2026-10-18 cancelada"
         },
         {
           "ok": true,
@@ -2991,7 +2991,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:56:31.375Z"
+      "ejecutadaEn": "2026-10-28T07:47:30.804Z"
     },
     {
       "tipo": "Funcional",
@@ -3013,7 +3013,7 @@
       ],
       "esperado": "Página 1: 10 reservas, total 12, totalPaginas 2; página 2: 2 reservas; limite=5 pagina=3: 2 reservas; limite=500 responde 400.",
       "estado": "APROBADA",
-      "duracionMs": 5707,
+      "duracionMs": 16179,
       "resultado": [
         {
           "ok": true,
@@ -3037,7 +3037,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:56:37.083Z"
+      "ejecutadaEn": "2026-10-28T07:47:46.984Z"
     },
     {
       "tipo": "Funcional",
@@ -3059,7 +3059,7 @@
       ],
       "esperado": "Vacío: 200 con reservas [] y total 0, totalPaginas 1; sin token 401; parámetros inválidos 400 con el campo señalado.",
       "estado": "APROBADA",
-      "duracionMs": 231,
+      "duracionMs": 437,
       "resultado": [
         {
           "ok": true,
@@ -3091,7 +3091,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:56:37.316Z"
+      "ejecutadaEn": "2026-10-28T07:47:47.423Z"
     },
     {
       "tipo": "Funcional",
@@ -3114,7 +3114,7 @@
       ],
       "esperado": "Swagger UI responde 200 con HTML; la especificación JSON es openapi 3.x con el esquema bearerAuth (http, bearer, JWT) y el servidor actual como primer servidor; el YAML se puede descargar.",
       "estado": "APROBADA",
-      "duracionMs": 325,
+      "duracionMs": 404,
       "resultado": [
         {
           "ok": true,
@@ -3142,7 +3142,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-10-14T05:56:37.642Z"
+      "ejecutadaEn": "2026-10-28T07:47:47.828Z"
     },
     {
       "tipo": "Funcional",
@@ -3168,7 +3168,7 @@
       ],
       "esperado": "Cobertura ≥ 90 % (se espera 100 %, 14/14); cada operación con descripción, 2xx y ejemplos; modelos Usuario, Cancha, Reserva y Error definidos una vez; 409 con duplicada, solapada, límite y retenida; los 11 eventos de socket descritos.",
       "estado": "APROBADA",
-      "duracionMs": 2890,
+      "duracionMs": 11944,
       "resultado": [
         {
           "ok": true,
@@ -3217,7 +3217,7 @@
           "texto": "> canchaya-backend@1.0.0 docs:cobertura\n> node scripts/coberturaDocumentacion.js\n\nSI  POST   /api/auth/login\nSI  POST   /api/auth/olvide-password\nSI  POST   /api/auth/registro\nSI  POST   /api/auth/restablecer-password\nSI  GET    /api/canchas\nSI  GET    /api/canchas/{id}\nSI  GET    /api/canchas/{id}/disponibilidad\nSI  GET    /api/canchas/{id}/reservas\nSI  POST   /api/canchas/{id}/reservas\nSI  POST   /api/canchas/{id}/temporizador/completar\nSI  GET    /api/health\nSI  GET    /api/reservas\nSI  PATCH  /api/reservas/{id}/cancelar\nSI  GET    /api/reservas/mias\n\nEndpoints implementados: 14\nEndpoints documentados:  14\nCobertura: 100 %"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:56:40.533Z"
+      "ejecutadaEn": "2026-10-28T07:47:59.780Z"
     },
     {
       "tipo": "Funcional",
@@ -3241,7 +3241,7 @@
       ],
       "esperado": "Spectral sin errores ni advertencias; todos los códigos de respuesta obtenidos están documentados; el flujo con los ejemplos funciona; el README enlaza /api/docs y explica cómo actualizar.",
       "estado": "APROBADA",
-      "duracionMs": 4159,
+      "duracionMs": 12695,
       "resultado": [
         {
           "ok": true,
@@ -3302,7 +3302,7 @@
           "texto": "> canchaya-backend@1.0.0 docs:lint\n> spectral lint openapi/openapi.yaml --ruleset .spectral.yaml --fail-severity=warn\n\nNo results with a severity of 'warn' or higher found!"
         }
       ],
-      "ejecutadaEn": "2026-10-14T05:56:44.694Z"
+      "ejecutadaEn": "2026-10-28T07:48:12.477Z"
     }
   ]
 }
