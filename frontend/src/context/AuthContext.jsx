@@ -35,6 +35,7 @@ export function AuthProvider({ children }) {
       token,
       usuario,
       estaAutenticado: Boolean(token),
+      esAdministrador: usuario?.rol === 'administrador',
       cerroSesion,
       login,
       logout,

@@ -44,6 +44,7 @@ async function iniciarSesion({ correo, password }) {
       id: usuario.id,
       nombre: usuario.nombre,
       correo: usuario.correo,
+      rol: usuario.rol,
     },
   };
 }

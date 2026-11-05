@@ -8,4 +8,6 @@ module.exports = {
   obtenerPorId: jest.fn(),
   crear: jest.fn(),
   cancelar: jest.fn(),
+  listarFuturasParaAdmin: jest.fn(),
+  cancelarAdministrativamente: jest.fn(),
 };

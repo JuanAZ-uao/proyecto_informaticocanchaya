@@ -585,3 +585,18 @@ El plan de pruebas y los resultados están en [docs/testing/](docs/testing/), co
 **Resultado de la regresión final: 282 pruebas, 0 fallidas** (140 de Jest, 72 funcionales, 25 E2E, 21 no funcionales y 24 de Docker/pipeline; 7 casos con una observación de mejora). SonarQube: Quality Gate aprobado, 0 bugs, 0 vulnerabilidades, 0 puntos críticos de seguridad y 0 code smells.
 
 La primera ejecución detectó 10 defectos (guardada en [ejecucion-1-inicial](docs/testing/ejecucion-1-inicial/)). Tras unir las historias US-12, US-13 y US-21 aparecieron 5 más (DEF-11 a DEF-15); los 15 están corregidos y verificados. Cada caso documenta la historia de usuario y el criterio que cubre, los pasos, el resultado esperado, el obtenido (incluidos los errores que el sistema debe devolver) y la evidencia. Los scripts que ejecutan las pruebas están en [qa/](qa/README.md) y corren sobre un entorno Docker aislado, sin tocar la base de Neon.
+
+
+## Sprint 5
+
+### US-16 · Cancelación administrativa
+
+Un administrador puede cancelar cualquier reserva futura con al menos 2 horas de anticipación y un motivo obligatorio.
+
+- **Rol:** la tabla `usuarios` tiene la columna `rol` (`usuario` por defecto o `administrador`). El rol se consulta en la base de datos en cada petición a `/api/admin`, no se guarda en el token.
+- **Crear un administrador:** registra la cuenta normalmente y ejecuta `npm run admin:promover -- correo@dominio.com` en `backend/` (después de `npm run migrate`).
+- **Endpoints** (ver Swagger en `/api/docs`):
+  - `GET /api/admin/reservas?canchaId=&fecha=&usuario=` busca reservas futuras por cancha, fecha o usuario (nombre o correo).
+  - `PATCH /api/admin/reservas/{id}/cancelar` con `{ "motivo": "..." }`. Si faltan menos de 2 horas responde 409 con el código `CANCELACION_FUERA_DE_PLAZO` y el motivo de la restricción.
+- **Efectos de cancelar:** la reserva pasa a `cancelada_administrativamente`, la franja queda libre (evento `disponibilidad:liberada`), el usuario recibe un correo con el motivo y se guarda un registro en `cancelaciones_administrativas` (administrador, fecha y hora, motivo) dentro de la misma transacción.
+- **Interfaz:** los administradores ven el enlace "Administración" en la barra y la página `/admin/reservas`.

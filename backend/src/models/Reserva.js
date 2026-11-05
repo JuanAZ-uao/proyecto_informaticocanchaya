@@ -46,8 +46,31 @@ function aHistorial(fila) {
     horaInicio: fila.hora_inicio_texto,
     horaFin: fila.hora_fin_texto,
     estado: fila.estado_visible,
+    // US-16: solo tiene valor en las reservas canceladas por un administrador.
+    motivoCancelacion: fila.motivo_cancelacion ?? null,
     createdAt: fila.created_at,
   };
 }
 
-module.exports = { TABLA, aDominio, codigoReserva, formatearFecha, aHistorial };
+// US-16: vista del administrador, con los datos del usuario titular de la reserva.
+function aAdmin(fila) {
+  if (!fila) return null;
+
+  return {
+    id: fila.id,
+    codigo: codigoReserva(fila.id),
+    canchaId: fila.cancha_id,
+    canchaNombre: fila.cancha_nombre,
+    canchaDireccion: fila.cancha_direccion,
+    usuarioId: fila.usuario_id,
+    usuarioNombre: fila.usuario_nombre,
+    usuarioCorreo: fila.usuario_correo,
+    fecha: fila.fecha_texto,
+    horaInicio: fila.hora_inicio_texto,
+    horaFin: fila.hora_fin_texto,
+    estado: fila.estado,
+    createdAt: fila.created_at,
+  };
+}
+
+module.exports = { TABLA, aDominio, codigoReserva, formatearFecha, aHistorial, aAdmin };
