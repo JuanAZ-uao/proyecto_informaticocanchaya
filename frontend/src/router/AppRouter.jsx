@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import ProtectedRoute from '../components/layout/ProtectedRoute';
+import AdminRoute from '../components/layout/AdminRoute';
 import RegisterPage from '../pages/RegisterPage';
 import LoginPage from '../pages/LoginPage';
 import ForgotPasswordPage from '../pages/ForgotPasswordPage';
@@ -9,6 +10,7 @@ import ResetPasswordPage from '../pages/ResetPasswordPage';
 import CanchasListPage from '../pages/CanchasListPage';
 import CanchaDetallePage from '../pages/CanchaDetallePage';
 import MisReservasPage from '../pages/MisReservasPage';
+import AdminReservasPage from '../pages/AdminReservasPage';
 
 export default function AppRouter() {
   return (
@@ -43,6 +45,14 @@ export default function AppRouter() {
               <ProtectedRoute>
                 <MisReservasPage />
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/reservas"
+            element={
+              <AdminRoute>
+                <AdminReservasPage />
+              </AdminRoute>
             }
           />
           <Route path="*" element={<Navigate to="/canchas" replace />} />

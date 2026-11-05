@@ -61,9 +61,11 @@ async function listarPorUsuario({ usuarioId, periodo = 'proximas', estado = null
               to_char(r.fecha, 'YYYY-MM-DD') AS fecha_texto,
               to_char(r.hora_inicio, 'HH24:MI') AS hora_inicio_texto,
               to_char(r.hora_fin, 'HH24:MI') AS hora_fin_texto,
-              ${ESTADO_VISIBLE} AS estado_visible
+              ${ESTADO_VISIBLE} AS estado_visible,
+              ca.motivo AS motivo_cancelacion
        FROM reservas r
        JOIN canchas c ON c.id = r.cancha_id
+       LEFT JOIN cancelaciones_administrativas ca ON ca.reserva_id = r.id
        WHERE ${donde}
        ORDER BY r.fecha ${orden}, r.hora_inicio ${orden}
        LIMIT $${valores.length + 1} OFFSET $${valores.length + 2}`,
@@ -139,7 +141,90 @@ async function cancelar(id, usuarioId) {
   return Reserva.aDominio(rows[0]);
 }
 
+const ESTADO_CANCELADA_ADMIN = 'cancelada_administrativamente';
+
+// US-16: búsqueda del administrador por cancha, fecha o usuario (nombre o correo). Solo
+// devuelve reservas futuras (que aún no terminan), que son las únicas que se pueden gestionar.
+async function listarFuturasParaAdmin({ canchaId = null, fecha = null, usuario = null, limite = 20, offset = 0 }) {
+  const condiciones = [`${FIN_RESERVA} >= ${AHORA_COLOMBIA}`];
+  const valores = [];
+
+  if (canchaId) {
+    valores.push(canchaId);
+    condiciones.push(`r.cancha_id = $${valores.length}`);
+  }
+
+  if (fecha) {
+    valores.push(fecha);
+    condiciones.push(`r.fecha = $${valores.length}`);
+  }
+
+  if (usuario) {
+    valores.push(`%${usuario.replace(/[\\%_]/g, '\\$&')}%`);
+    condiciones.push(`(u.nombre ILIKE $${valores.length} OR u.correo ILIKE $${valores.length})`);
+  }
+
+  const donde = condiciones.join(' AND ');
+  const desde = `FROM reservas r
+       JOIN canchas c ON c.id = r.cancha_id
+       JOIN usuarios u ON u.id = r.usuario_id`;
+
+  const [{ rows }, { rows: conteo }] = await Promise.all([
+    pool.query(
+      `SELECT r.*, c.nombre AS cancha_nombre, c.direccion AS cancha_direccion,
+              u.nombre AS usuario_nombre, u.correo AS usuario_correo,
+              to_char(r.fecha, 'YYYY-MM-DD') AS fecha_texto,
+              to_char(r.hora_inicio, 'HH24:MI') AS hora_inicio_texto,
+              to_char(r.hora_fin, 'HH24:MI') AS hora_fin_texto
+       ${desde}
+       WHERE ${donde}
+       ORDER BY r.fecha ASC, r.hora_inicio ASC
+       LIMIT $${valores.length + 1} OFFSET $${valores.length + 2}`,
+      [...valores, limite, offset]
+    ),
+    pool.query(`SELECT COUNT(*)::int AS total ${desde} WHERE ${donde}`, valores),
+  ]);
+
+  return { reservas: rows.map(Reserva.aAdmin), total: conteo[0].total };
+}
+
+// US-16: cambia el estado y registra la auditoría en la misma transacción: no puede quedar una
+// reserva cancelada sin su registro (ni un registro sin cancelación). Devuelve null si la reserva
+// ya no estaba confirmada (otra cancelación llegó primero).
+async function cancelarAdministrativamente({ id, administradorId, motivo }) {
+  const cliente = await pool.connect();
+
+  try {
+    await cliente.query('BEGIN');
+
+    const { rows } = await cliente.query(
+      `UPDATE reservas SET estado = $2 WHERE id = $1 AND estado = $3 RETURNING *`,
+      [id, ESTADO_CANCELADA_ADMIN, ESTADO_CONFIRMADA]
+    );
+
+    if (rows.length === 0) {
+      await cliente.query('ROLLBACK');
+      return null;
+    }
+
+    await cliente.query(
+      `INSERT INTO cancelaciones_administrativas (reserva_id, administrador_id, motivo) VALUES ($1, $2, $3)`,
+      [id, administradorId, motivo]
+    );
+
+    await cliente.query('COMMIT');
+    return Reserva.aDominio(rows[0]);
+  } catch (error) {
+    await cliente.query('ROLLBACK');
+    throw error;
+  } finally {
+    cliente.release();
+  }
+}
+
 module.exports = {
+  listarFuturasParaAdmin,
+  cancelarAdministrativamente,
   listarPorCanchaYFecha,
   existeConfirmada,
   existeSolapadaDeUsuario,

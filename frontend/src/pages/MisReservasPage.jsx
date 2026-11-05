@@ -17,12 +17,14 @@ const ESTADOS = [
   { valor: 'confirmada', etiqueta: 'Confirmada' },
   { valor: 'completada', etiqueta: 'Completada' },
   { valor: 'cancelada', etiqueta: 'Cancelada' },
+  { valor: 'cancelada_administrativamente', etiqueta: 'Cancelada administrativamente' },
 ];
 
 const ETIQUETA_ESTADO = {
   confirmada: 'Confirmada',
   completada: 'Completada',
   cancelada: 'Cancelada',
+  cancelada_administrativamente: 'Cancelada administrativamente',
 };
 
 const formateadorFecha = new Intl.DateTimeFormat('es-CO', {
@@ -194,6 +196,12 @@ export default function MisReservasPage() {
                   </li>
                 )}
               </ul>
+
+              {reserva.estado === 'cancelada_administrativamente' && reserva.motivoCancelacion && (
+                <p className="reserva-item-motivo">
+                  <strong>Motivo de la cancelación:</strong> {reserva.motivoCancelacion}
+                </p>
+              )}
 
               <p className="reserva-item-id">
                 Reserva <code>{reserva.codigo ?? reserva.id}</code>

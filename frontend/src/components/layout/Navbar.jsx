@@ -12,7 +12,7 @@ function obtenerIniciales(nombre = '') {
 }
 
 export default function Navbar() {
-  const { estaAutenticado, usuario, logout } = useAuth();
+  const { estaAutenticado, esAdministrador, usuario, logout } = useAuth();
   const navigate = useNavigate();
 
   function handleLogout() {
@@ -41,6 +41,11 @@ export default function Navbar() {
               <NavLink to="/mis-reservas" className="navbar-enlace">
                 Mis reservas
               </NavLink>
+              {esAdministrador && (
+                <NavLink to="/admin/reservas" className="navbar-enlace">
+                  Administración
+                </NavLink>
+              )}
               <span className="navbar-usuario" title={usuario?.correo}>
                 <span className="avatar" aria-hidden="true">
                   {obtenerIniciales(usuario?.nombre)}
