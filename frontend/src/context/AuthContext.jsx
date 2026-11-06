@@ -30,14 +30,26 @@ export function AuthProvider({ children }) {
     setCerroSesion(true);
   }
 
+  // US-27: tras editar el perfil se refrescan los datos guardados (por ejemplo, el nombre de la barra superior).
+  function actualizarUsuario(cambios) {
+    setUsuario((actual) => {
+      const actualizado = { ...actual, ...cambios };
+      localStorage.setItem(USUARIO_KEY, JSON.stringify(actualizado));
+      return actualizado;
+    });
+  }
+
   const value = useMemo(
     () => ({
       token,
       usuario,
       estaAutenticado: Boolean(token),
+      // US-29: solo sirve para mostrar u ocultar el panel; el backend vuelve a comprobar el rol en cada petición.
+      esAdministrador: usuario?.rol === 'administrador',
       cerroSesion,
       login,
       logout,
+      actualizarUsuario,
     }),
     [token, usuario, cerroSesion]
   );

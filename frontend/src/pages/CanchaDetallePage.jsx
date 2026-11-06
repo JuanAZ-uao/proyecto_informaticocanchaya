@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { crearReserva, entrarPanelReserva, obtenerBloquesOcupados, obtenerCanchaPorId } from '../api/canchasApi';
+import { listarMetodosPago } from '../api/perfilApi';
 import extraerMensajeError from '../api/extraerMensajeError';
 import Alerta from '../components/common/Alerta';
 import Icono from '../components/common/Icono';
 import TemporizadorReserva from '../components/canchas/TemporizadorReserva';
 import ConfirmacionReserva from '../components/canchas/ConfirmacionReserva';
+import SelectorMetodoPago from '../components/canchas/SelectorMetodoPago';
 import useAuth from '../hooks/useAuth';
 import useTemporizadorReserva from '../hooks/useTemporizadorReserva';
 import iconoServicio from '../utils/iconoServicio';
@@ -141,6 +143,10 @@ export default function CanchaDetallePage() {
   const [confirmando, setConfirmando] = useState(false);
   const [errorReserva, setErrorReserva] = useState('');
   const [reservaConfirmada, setReservaConfirmada] = useState(null);
+  // US-28: tarjetas guardadas y la elegida para pagar ('' = pagar en la cancha, sin tarjeta).
+  const [metodosPago, setMetodosPago] = useState([]);
+  const [metodoPagoId, setMetodoPagoId] = useState('');
+  const [cargandoMetodos, setCargandoMetodos] = useState(false);
   const [ahora, setAhora] = useState(() => Date.now());
   // Hora del servidor (hora local + desfase informado por el socket): evita errores si el reloj del equipo está mal.
   const ahoraServidor = ahora + desfaseMs;
@@ -243,6 +249,34 @@ export default function CanchaDetallePage() {
       activo = false;
     };
   }, [id, fecha]);
+
+  // Al llegar al resumen se consultan las tarjetas guardadas (enmascaradas) para ofrecerlas como método de pago.
+  useEffect(() => {
+    if (!reservaIniciada || !usuario?.id) return undefined;
+
+    let activo = true;
+    setCargandoMetodos(true);
+
+    async function cargarMetodos() {
+      try {
+        const { data } = await listarMetodosPago(usuario.id);
+        if (!activo) return;
+        setMetodosPago(data.metodosPago);
+        // Si la tarjeta elegida ya no existe (por ejemplo, se eliminó), se vuelve a "pagar en la cancha".
+        setMetodoPagoId((actual) => (data.metodosPago.some((m) => m.id === actual) ? actual : ''));
+      } catch {
+        // Sin tarjetas disponibles se puede reservar igual (pago en la cancha).
+        if (activo) setMetodosPago([]);
+      } finally {
+        if (activo) setCargandoMetodos(false);
+      }
+    }
+
+    void cargarMetodos();
+    return () => {
+      activo = false;
+    };
+  }, [reservaIniciada, usuario?.id]);
 
   const bloquesOcupadosSet = useMemo(
     () => new Set(bloquesOcupados.map((ocupado) => formatearHora(ocupado.horaInicio))),
@@ -457,6 +491,7 @@ export default function CanchaDetallePage() {
         fecha,
         horaInicio: bloqueSeleccionado.horaInicio,
         horaFin: bloqueSeleccionado.horaFin,
+        metodoPagoId,
       });
 
       setReservaConfirmada(data.reserva);
@@ -468,9 +503,14 @@ export default function CanchaDetallePage() {
       setErrorReserva(
         extraerMensajeError(err, 'No fue posible confirmar la reserva. Intenta nuevamente.')
       );
-      setReservaIniciada(false);
-      setBloqueSeleccionado(null);
-      await recargarOcupados(fecha);
+
+      // Un pago rechazado (402) no confirma la reserva pero la franja sigue apartada: se queda en el resumen para
+      // que el usuario reintente con otro método de pago.
+      if (err.response?.status !== 402) {
+        setReservaIniciada(false);
+        setBloqueSeleccionado(null);
+        await recargarOcupados(fecha);
+      }
     } finally {
       setConfirmando(false);
     }
@@ -739,6 +779,7 @@ export default function CanchaDetallePage() {
                   <dd>{formateadorMoneda.format(cancha.costoHora)}</dd>
                 </div>
               </dl>
+              <SelectorMetodoPago metodos={metodosPago} valor={metodoPagoId} onChange={setMetodoPagoId} cargando={cargandoMetodos} deshabilitado={confirmando} />
               <div className="acciones-reserva">
                 <button
                   type="button"

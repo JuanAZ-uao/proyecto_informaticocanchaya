@@ -23,6 +23,8 @@ const crearReservaValidators = [
     .bail()
     .matches(HORA_REGEX)
     .withMessage('horaFin debe tener formato HH:mm'),
+  // US-28: pago opcional con una tarjeta guardada.
+  body('metodoPagoId').optional().isUUID().withMessage('El id del método de pago no es válido'),
 ];
 
 const cancelarReservaValidators = [

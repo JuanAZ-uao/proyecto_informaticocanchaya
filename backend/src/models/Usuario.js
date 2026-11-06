@@ -9,6 +9,7 @@ function aDominio(fila) {
     correo: fila.correo,
     telefono: fila.telefono,
     passwordHash: fila.password_hash,
+    rol: fila.rol,
     createdAt: fila.created_at,
     updatedAt: fila.updated_at,
   };

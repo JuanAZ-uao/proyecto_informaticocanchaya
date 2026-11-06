@@ -19,8 +19,12 @@ export function obtenerBloquesOcupados(id, fecha) {
   return axiosClient.get(`/canchas/${id}/disponibilidad`, { params: { fecha } });
 }
 
-export function crearReserva(id, { fecha, horaInicio, horaFin }) {
-  return axiosClient.post(`/canchas/${id}/reservas`, { fecha, horaInicio, horaFin });
+// metodoPagoId es opcional (US-28): con una tarjeta guardada, el valor de la hora se cobra al confirmar.
+export function crearReserva(id, { fecha, horaInicio, horaFin, metodoPagoId }) {
+  const cuerpo = { fecha, horaInicio, horaFin };
+  if (metodoPagoId) cuerpo.metodoPagoId = metodoPagoId;
+
+  return axiosClient.post(`/canchas/${id}/reservas`, cuerpo);
 }
 
 export function entrarPanelReserva(id, { fecha, horaInicio, horaFin }) {

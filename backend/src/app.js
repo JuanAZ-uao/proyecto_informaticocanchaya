@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const routes = require('./routes');
 const errorHandler = require('./middlewares/errorHandler');
+const env = require('./config/env');
 const verificarOrigen = require('./config/corsOrigin');
 const { rechazarOrigenNoPermitido } = verificarOrigen;
 const { crearRouterDocumentacion, documentacionHabilitada } = require('./config/documentacion');
@@ -10,6 +11,9 @@ const app = express();
 
 // No anunciar la tecnología del servidor (cabecera X-Powered-By).
 app.disable('x-powered-by');
+
+// Detrás de un proxy con TLS (TRUST_PROXY=true), req.secure refleja si la conexión original fue HTTPS.
+if (env.confiarEnProxy) app.set('trust proxy', 1);
 
 app.use(rechazarOrigenNoPermitido);
 app.use(cors({ origin: verificarOrigen }));

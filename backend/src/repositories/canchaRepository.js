@@ -100,6 +100,23 @@ async function eliminarTodas() {
   await pool.query('DELETE FROM canchas');
 }
 
+// Nombres (de la lista dada) que ya existen: el seed de canchas adicionales los usa para no duplicar.
+async function listarNombres(nombres) {
+  const { rows } = await pool.query('SELECT nombre FROM canchas WHERE nombre = ANY($1)', [nombres]);
+  return rows.map((fila) => fila.nombre);
+}
+
+// Canchas de la lista que todavía no tienen ningún horario de atención.
+async function listarSinHorarioPorNombres(nombres) {
+  const { rows } = await pool.query(
+    `SELECT c.id, c.nombre FROM canchas c
+     WHERE c.nombre = ANY($1)
+       AND NOT EXISTS (SELECT 1 FROM horarios_disponibles h WHERE h.cancha_id = c.id)`,
+    [nombres]
+  );
+  return rows;
+}
+
 async function contar() {
   const { rows } = await pool.query('SELECT COUNT(*)::int AS total FROM canchas');
   return rows[0].total;
@@ -111,5 +128,7 @@ module.exports = {
   crearMuchas,
   actualizarPresentacionPorNombre,
   eliminarTodas,
+  listarNombres,
+  listarSinHorarioPorNombres,
   contar,
 };

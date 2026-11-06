@@ -8,6 +8,7 @@ const {
   olvidePasswordValidators,
   restablecerPasswordValidators,
 } = require('../utils/validators/authValidators');
+const { verificarCorreoValidators } = require('../utils/validators/usuarioValidators');
 
 const router = Router();
 
@@ -15,5 +16,6 @@ router.post('/registro', registroValidators, validate, authController.registro);
 router.post('/login', limitarLogin, loginValidators, validate, authController.login);
 router.post('/olvide-password', limitarRecuperacion, olvidePasswordValidators, validate, authController.olvidePassword);
 router.post('/restablecer-password', restablecerPasswordValidators, validate, authController.restablecerPassword);
+router.post('/verificar-correo', verificarCorreoValidators, validate, authController.verificarCorreo);
 
 module.exports = router;

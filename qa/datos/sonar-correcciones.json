@@ -16,5 +16,17 @@
     "archivo": "frontend/src/components/layout/Navbar.jsx y 6 páginas (11 llamadas)",
     "problema": "Llamadas a funciones asíncronas (cargarCancha, cargarOcupados, cargarReservas, cargarCanchas, recargarOcupados) y a navigate() sin await ni catch. Las funciones de carga ya capturan sus errores internamente, así que no había un fallo real, pero una promesa rechazada fuera de ese try/catch quedaría sin tratar.",
     "correccion": "Se marcan explícitamente como ignoradas con el operador void, tal como indica la regla. No cambia el comportamiento."
+  },
+  {
+    "regla": "javascript:S6845 (code smell, mayor)",
+    "archivo": "frontend/src/components/admin/TablaVerificaciones.jsx:30",
+    "problema": "Se había añadido tabIndex={0} al contenedor con scroll horizontal de la tabla de auditoría para que fuera accesible con el teclado, pero la regla indica que tabIndex solo debe ir en elementos interactivos.",
+    "correccion": "En lugar de hacer enfocable un contenedor, la tabla se adapta al ancho (las celdas parten el texto) y ya no necesita scroll horizontal; se retiró el tabIndex y el rol. axe-core sigue sin reportar la violación de accesibilidad."
+  },
+  {
+    "regla": "javascript:S6848 (code smell, mayor)",
+    "archivo": "frontend/src/components/common/ConfirmarDialogo.jsx:37",
+    "problema": "El fondo del diálogo de confirmación cierra el diálogo al hacer clic fuera de él con un manejador de ratón sobre un div, que la regla considera un elemento interactivo no nativo.",
+    "correccion": "Se declaró el fondo con role=\"presentation\" (es solo un atajo de ratón; el teclado ya cierra el diálogo con Escape y con el botón \"Volver\"). Las 238 pruebas del frontend siguen pasando."
   }
 ]

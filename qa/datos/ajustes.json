@@ -108,5 +108,40 @@
     "caso": "NF-06 a NF-19",
     "problema": "En una ejecución intermedia el Docker Desktop se cayó durante la prueba de 250 conexiones, por falta de memoria (el motor tiene 8 GB y estaban encendidos SonarQube, el entorno de desarrollo y el de QA). Todos los casos siguientes fallaron con \"fetch failed\" o con el daemon de Docker apagado.",
     "correccion": "Se apagó SonarQube, se reinició Docker y se repitió el plan completo. Los resultados de este documento son los de la ejecución limpia."
+  },
+  {
+    "caso": "SD-06",
+    "problema": "La prueba esperaba exactamente las 7 tablas de los sprints 1 a 4; el Sprint 5 añade cambios_correo, metodos_pago, pagos y verificaciones_reserva.",
+    "correccion": "La prueba espera ahora las 11 tablas y el índice único del código de reserva. El producto no tenía ningún problema."
+  },
+  {
+    "caso": "SD-18",
+    "problema": "La prueba esperaba la especificación del Sprint 4 (13 rutas, 14 operaciones); la del Sprint 5 tiene 22 rutas y 25 operaciones.",
+    "correccion": "Se actualizaron los totales esperados. El producto no tenía ningún problema."
+  },
+  {
+    "caso": "E2E-25",
+    "problema": "Swagger UI mostraba 25 operaciones y la prueba esperaba 14.",
+    "correccion": "Se actualizó el total esperado."
+  },
+  {
+    "caso": "NF-09",
+    "problema": "La prueba comprobaba que \"las 7 tablas\" seguían existiendo tras los intentos de inyección SQL.",
+    "correccion": "Ahora comprueba las 11 tablas del esquema del Sprint 5."
+  },
+  {
+    "caso": "E2E-07",
+    "problema": "Esperaba 16 bloques (horario de lunes a viernes) pero el día de prueba se calculaba como \"mañana + n\" y podía caer en sábado o domingo, cuyo horario es de 07:00 a 20:00 (13 bloques).",
+    "correccion": "La prueba elige siempre un día hábil. El producto se comportaba bien."
+  },
+  {
+    "caso": "SD-22",
+    "problema": "En dos ejecuciones completas seguidas el \"docker compose up --wait\" posterior a \"down -v\" terminó con error y los pasos siguientes fallaron en cascada; repetido de forma aislada y en la ejecución siguiente el caso pasó, y a mano el entorno levanta bien desde cero.",
+    "correccion": "No se encontró un defecto del producto (el esquema de 11 tablas se aplica solo). Se añadió al mensaje del caso la salida de docker compose para diagnosticar el fallo si vuelve a ocurrir."
+  },
+  {
+    "caso": "F-18-06",
+    "problema": "En una ejecución sobre una base con datos de ejecuciones anteriores, la fecha aleatoria de la prueba coincidió con una reserva ya existente en esa franja (FRANJA_OCUPADA en lugar de FRANJA_RETENIDA).",
+    "correccion": "Se repitió el caso de forma aislada y pasó; las fechas se generan al azar entre 1 500 días, por lo que la coincidencia es poco frecuente."
   }
 ]

@@ -1281,6 +1281,562 @@ await S.caso(
 );
 
 // =====================================================================
+// Sprint 5 — US-14 Cancelación, US-27 Perfil, US-28 Tarjeta y US-29 Verificación de código
+// =====================================================================
+const ANIO_TARJETA = new Date().getFullYear() + 3;
+const tarjeta = (extra = {}) => ({ numero: '4242 4242 4242 4242', titular: 'Ana Pérez', vencimientoMes: 12, vencimientoAnio: ANIO_TARJETA, cvv: '123', ...extra });
+const horaSiguiente = (hora) => `${String(Number(hora) + 1).padStart(2, '0')}:00`;
+const reservarHora = (usuario, cancha, fecha, hora, metodoPagoId) =>
+  api('POST', `/canchas/${cancha.id}/reservas`, { fecha, horaInicio: `${hora}:00`, horaFin: horaSiguiente(hora), ...(metodoPagoId ? { metodoPagoId } : {}) }, usuario.token);
+const guardarTarjeta = (usuario, extra) => api('POST', `/usuarios/${usuario.id}/metodos-pago`, tarjeta(extra), usuario.token);
+const cancelarReserva = (usuario, id) => api('PATCH', `/reservas/${id}/cancelar`, undefined, usuario.token);
+const verificarCodigo = (admin, codigo) => api('POST', '/admin/reservas/verificar', { codigo }, admin.token);
+const usarCodigo = (admin, codigo) => api('POST', `/admin/reservas/${codigo}/usar`, undefined, admin.token);
+
+// Fecha y hora de Colombia dentro de `minutos` minutos, para crear reservas que empiezan pronto.
+const colombiaEn = (minutos) => {
+  const momento = new Date(Date.now() + minutos * 60000 - 5 * 3600e3).toISOString();
+  return { fecha: momento.slice(0, 10), hora: momento.slice(11, 16) };
+};
+const rangoDesdeAhora = (minutos) => {
+  const inicio = colombiaEn(minutos);
+  const fin = colombiaEn(minutos + 15);
+  return { fecha: inicio.fecha, inicio: inicio.hora, fin: fin.fecha === inicio.fecha ? fin.hora : '23:59' };
+};
+const fechaPasadaUnica = () => `${2001 + Math.floor(Math.random() * 19)}-${String(1 + Math.floor(Math.random() * 12)).padStart(2, '0')}-${String(1 + Math.floor(Math.random() * 28)).padStart(2, '0')}`;
+const insertarReservaSql = (usuario, cancha, fecha, inicio, fin, estado = 'confirmada') =>
+  sqlq(`INSERT INTO reservas (cancha_id, usuario_id, fecha, hora_inicio, hora_fin, estado) VALUES ('${cancha.id}', '${usuario.id}', '${fecha}', '${inicio}', '${fin}', '${estado}') RETURNING id || '|' || codigo`).split(/\r?\n/)[0].split('|');
+
+async function crearAdministrador(prefijo = 'admin') {
+  const admin = await crearUsuario(prefijo);
+  sqlq(`UPDATE usuarios SET rol = 'administrador' WHERE id = '${admin.id}'`);
+  return admin;
+}
+
+// Backend adicional contra la misma base, con otra configuración (se elimina al terminar).
+async function conBackendAdicional({ nombre, puerto, env: variables }, fn) {
+  sh(`docker rm -f ${nombre}`);
+  const banderas = Object.entries(variables).map(([k, v]) => `-e ${k}=${v}`).join(' ');
+  const run = dc(`run -d --no-deps --name ${nombre} ${banderas} -e PORT=4001 -p ${puerto}:4001 backend sh -c "exec node src/server.js"`);
+  try {
+    let listo = false;
+    for (let i = 0; i < 40 && !listo; i += 1) {
+      listo = await fetch(`http://localhost:${puerto}/api/health`).then((r) => r.status === 200).catch(() => false);
+      if (!listo) await esperar(500);
+    }
+    return await fn({ iniciado: run.code === 0, listo, url: `http://localhost:${puerto}/api` });
+  } finally {
+    sh(`docker rm -f ${nombre}`);
+  }
+}
+const llamarEn = async (url, metodo, ruta, token, cuerpo, cabeceras = {}) => {
+  const res = await fetch(`${url}${ruta}`, {
+    method: metodo,
+    headers: { ...(cuerpo ? { 'Content-Type': 'application/json' } : {}), Authorization: `Bearer ${token}`, ...cabeceras },
+    body: cuerpo ? JSON.stringify(cuerpo) : undefined,
+  });
+  return { status: res.status, datos: await res.json().catch(() => ({})) };
+};
+
+// ---------------------------------------------------------------------
+// US-14 Cancelación de reserva propia
+// ---------------------------------------------------------------------
+await S.caso(
+  { ...base, id: 'F-14-01', hu: 'US-14', ca: [2], grupo: 'US-14', titulo: 'Cancelar con más de 2 horas: estado "cancelada" y la franja queda disponible de inmediato', objetivo: 'Verificar que cancelar una reserva propia con anticipación cambia su estado y libera la franja para otros usuarios.', pasos: ['Crear una reserva futura.', 'PATCH /api/reservas/:id/cancelar con el dueño.', 'Consultar el estado en la base y la disponibilidad de esa fecha.', 'Otro usuario reserva la misma franja.'], esperado: '200 con reserva.estado "cancelada"; en la base estado = cancelada; la franja ya no figura como ocupada y otro usuario puede reservarla (201).' },
+  async (c) => {
+    const dueno = await crearUsuario('cancela');
+    const otro = await crearUsuario('cancela2');
+    const f = franja(10);
+    const creada = await reservar(dueno, K0, f);
+    c.verifica(creada.status === 201, 'Preparación: la reserva se crea (201)', `HTTP ${creada.status}`);
+    const id = creada.datos.reserva.id;
+    const antes = await disponibilidad(otro, K0, f.fecha);
+    c.verifica(antes.datos.ocupados.some((o) => String(o.horaInicio).startsWith('10:00')), 'Antes de cancelar, la franja figura como ocupada');
+    const r = await cancelarReserva(dueno, id);
+    c.verifica(r.status === 200 && r.datos.reserva.estado === 'cancelada', 'Cancelar responde 200 con estado "cancelada"', `HTTP ${r.status} ${r.datos.reserva?.estado}`);
+    c.verifica(sqlq(`SELECT estado FROM reservas WHERE id='${id}'`) === 'cancelada', 'En la base la reserva quedó "cancelada"');
+    const despues = await disponibilidad(otro, K0, f.fecha);
+    c.verifica(!despues.datos.ocupados.some((o) => String(o.horaInicio).startsWith('10:00')), 'La franja ya no figura como ocupada (liberada de inmediato)');
+    const re = await reservar(otro, K0, f);
+    c.verifica(re.status === 201, 'Otro usuario reserva la misma franja: 201', `HTTP ${re.status}`);
+    c.evidenciaTexto('Respuesta de PATCH /api/reservas/:id/cancelar', JSON.stringify(r.datos, null, 1));
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-14-02', hu: 'US-14', ca: [3], grupo: 'US-14', titulo: 'Menos de 2 horas: la cancelación se bloquea y se explica la restricción (caso de error)', objetivo: 'Verificar la regla de las 2 horas de anticipación, en el borde y en el historial.', pasos: ['Insertar una reserva que empieza en 90 minutos y otra que empieza en 180 minutos.', 'Cancelar la de 90 minutos.', 'Consultar el historial (puedeCancelar).', 'Cancelar la de 180 minutos.'], esperado: 'La de 90 min: 409 CANCELACION_FUERA_DE_PLAZO con mensaje que menciona 2 horas, sigue confirmada, el historial indica puedeCancelar=false. La de 180 min: 200.' },
+  async (c) => {
+    const u = await crearUsuario('plazo');
+    const pronto = rangoDesdeAhora(60 + Math.floor(Math.random() * 50));
+    const lejos = rangoDesdeAhora(150 + Math.floor(Math.random() * 60));
+    const [idPronto] = insertarReservaSql(u, [K1, K2][Math.floor(Math.random() * 2)], pronto.fecha, pronto.inicio, pronto.fin);
+    const [idLejos] = insertarReservaSql(u, K0, lejos.fecha, lejos.inicio, lejos.fin);
+    const r = await cancelarReserva(u, idPronto);
+    c.verifica(r.status === 409 && r.datos.codigo === 'CANCELACION_FUERA_DE_PLAZO', 'Con 90 min de anticipación: 409 CANCELACION_FUERA_DE_PLAZO', `HTTP ${r.status} ${r.datos.codigo}`);
+    c.verifica(/2 horas/.test(r.datos.mensaje), 'El mensaje explica la restricción de 2 horas', r.datos.mensaje);
+    c.verifica(sqlq(`SELECT estado FROM reservas WHERE id='${idPronto}'`) === 'confirmada', 'La reserva sigue confirmada');
+    const h = await api('GET', '/reservas?periodo=proximas&limite=50', undefined, u.token);
+    const porId = Object.fromEntries(h.datos.reservas.map((x) => [x.id, x]));
+    c.verifica(porId[idPronto]?.puedeCancelar === false && porId[idLejos]?.puedeCancelar === true, 'El historial indica puedeCancelar=false (90 min) y true (180 min)', `${porId[idPronto]?.puedeCancelar} / ${porId[idLejos]?.puedeCancelar}`);
+    const ok = await cancelarReserva(u, idLejos);
+    c.verifica(ok.status === 200, 'Con 180 min de anticipación sí se cancela: 200', `HTTP ${ok.status}`);
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-14-03', hu: 'US-14', ca: [4], grupo: 'US-14', titulo: 'Cancelar la reserva de otro usuario: 403 y sin cambios (caso de error)', objetivo: 'Verificar la propiedad de la reserva y los demás errores de la cancelación.', pasos: ['A crea una reserva.', 'B intenta cancelarla.', 'Cancelar sin token, con id inválido y con id inexistente.', 'A la cancela dos veces.'], esperado: 'B: 403 y la reserva sigue confirmada; sin token 401; id inválido 400; inexistente 404; la segunda cancelación de A responde 409.' },
+  async (c) => {
+    const A = await crearUsuario('propia');
+    const B = await crearUsuario('ajena');
+    const creada = await reservar(A, K0, franja(11));
+    const id = creada.datos.reserva.id;
+    const r = await cancelarReserva(B, id);
+    c.verifica(r.status === 403, 'B recibe 403', `HTTP ${r.status}`);
+    c.verifica(sqlq(`SELECT estado FROM reservas WHERE id='${id}'`) === 'confirmada', 'La reserva de A no fue modificada');
+    c.verifica((await api('PATCH', `/reservas/${id}/cancelar`)).status === 401, 'Sin token: 401');
+    c.verifica((await cancelarReserva(A, 'no-es-uuid')).status === 400, 'Identificador inválido: 400');
+    c.verifica((await cancelarReserva(A, UUID_INEXISTENTE)).status === 404, 'Reserva inexistente: 404');
+    c.verifica((await cancelarReserva(A, id)).status === 200, 'A la cancela: 200');
+    const dos = await cancelarReserva(A, id);
+    c.verifica(dos.status === 409, 'Cancelarla otra vez: 409', `HTTP ${dos.status} ${dos.datos.mensaje}`);
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-14-04', hu: 'US-14', ca: [5], grupo: 'US-14', titulo: 'Al cancelar se envía el correo con el detalle de la reserva cancelada', objetivo: 'Verificar la notificación por correo (sin SMTP el entorno la deja en el log del backend) y que un fallo del correo no impide cancelar.', pasos: ['Crear y cancelar una reserva.', 'Buscar en los logs del backend el correo de cancelación.'], esperado: 'El log contiene el correo del usuario, el código, la cancha y el horario de la reserva cancelada.' },
+  async (c) => {
+    const u = await crearUsuario('correo');
+    const creada = await reservar(u, K0, franja(12));
+    const { codigo, cancha } = creada.datos.reserva;
+    const r = await cancelarReserva(u, creada.datos.reserva.id);
+    c.verifica(r.status === 200, 'La cancelación responde 200', `HTTP ${r.status}`);
+    await esperar(800);
+    const linea = logsBackend('5m').split('\n').find((l) => l.includes('Cancelación de reserva') && l.includes(u.correo));
+    c.verifica(Boolean(linea), 'El backend registró el correo de cancelación para el usuario');
+    c.verifica(linea?.includes(codigo) && linea.includes(cancha.nombre) && /12:00 - 13:00/.test(linea), 'El correo incluye código, cancha y horario', linea?.split('): ')[1]);
+    c.evidenciaTexto('Línea del log (correo de cancelación)', linea ?? '(no encontrada)');
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-14-05', hu: 'US-14', hus: ['US-14', 'US-28'], ca: { 'US-14': [2], 'US-28': [4] }, grupo: 'US-14', titulo: 'Cancelar una reserva pagada con tarjeta reembolsa el pago', objetivo: 'Verificar el reembolso total automático al cancelar y que una reserva sin pago se cancela sin reembolso.', pasos: ['Guardar una tarjeta y reservar pagando con ella.', 'Cancelar la reserva.', 'Revisar el reembolso en la respuesta y en la tabla pagos.', 'Cancelar una reserva sin pago.'], esperado: 'La respuesta trae reembolso {estado "reembolsado", monto, marca, ultimos4}; el pago pasa a "reembolsado" con referencia ref_sim_; la reserva sin pago devuelve reembolso null.' },
+  async (c) => {
+    const u = await crearUsuario('reembolso');
+    const tj = await guardarTarjeta(u);
+    const pagada = await reservarHora(u, K0, fechaUnica(), '13', tj.datos.metodoPago.id);
+    c.verifica(pagada.status === 201 && pagada.datos.reserva.pago?.estado === 'aprobado', 'Reserva pagada con la tarjeta: pago aprobado', `HTTP ${pagada.status}`);
+    const r = await cancelarReserva(u, pagada.datos.reserva.id);
+    c.verifica(r.status === 200 && r.datos.reembolso?.estado === 'reembolsado' && r.datos.reembolso.marca === 'Visa' && r.datos.reembolso.ultimos4 === '4242', 'La respuesta informa el reembolso a la Visa ••4242', JSON.stringify(r.datos.reembolso));
+    const fila = sqlq(`SELECT estado || '|' || reembolso_referencia FROM pagos WHERE reserva_id='${pagada.datos.reserva.id}'`);
+    c.verifica(/^reembolsado\|ref_sim_/.test(fila), 'En la tabla pagos queda "reembolsado" con referencia', fila);
+    const sinPago = await reservarHora(u, K1, fechaUnica(), '14');
+    const rs = await cancelarReserva(u, sinPago.datos.reserva.id);
+    c.verifica(rs.status === 200 && rs.datos.reembolso === null, 'Una reserva sin pago se cancela sin reembolso', `HTTP ${rs.status}`);
+  }
+);
+
+// ---------------------------------------------------------------------
+// US-27 Perfil de usuario
+// ---------------------------------------------------------------------
+await S.caso(
+  { ...base, id: 'F-27-01', hu: 'US-27', ca: [1], grupo: 'US-27', titulo: 'Mi perfil: datos actuales cargados y sin datos sensibles', objetivo: 'Verificar que el usuario ve su nombre, correo y teléfono, y que la respuesta no expone la contraseña.', pasos: ['Crear un usuario.', 'GET /api/usuarios/:id con su token.'], esperado: '200 con nombre, correo, teléfono y rol "usuario" correctos; sin contraseña ni hash.' },
+  async (c) => {
+    const u = await crearUsuario('perfil');
+    const r = await api('GET', `/usuarios/${u.id}`, undefined, u.token);
+    c.verifica(r.status === 200, 'Responde 200', `HTTP ${r.status}`);
+    c.verifica(r.datos.usuario.nombre === u.nombre && r.datos.usuario.correo === u.correo && r.datos.usuario.telefono === '3001234567', 'Trae nombre, correo y teléfono actuales', JSON.stringify(r.datos.usuario));
+    c.verifica(r.datos.usuario.rol === 'usuario' && r.datos.usuario.correoPendiente === null, 'Rol "usuario" y sin correo pendiente');
+    c.verifica(!JSON.stringify(r.datos).match(/password|hash/i), 'No contiene contraseña ni hash');
+    c.evidenciaTexto('Respuesta de GET /api/usuarios/:id', JSON.stringify(r.datos, null, 1));
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-27-02', hu: 'US-27', ca: [2], grupo: 'US-27', titulo: 'Editar nombre y teléfono válidos: se persisten', objetivo: 'Verificar la edición del perfil y la normalización del teléfono.', pasos: ['PATCH /api/usuarios/:id con nombre y teléfono válidos.', 'Consultar la base y volver a pedir el perfil.'], esperado: '200 con el mensaje de confirmación y los datos nuevos; la base y el GET posterior los reflejan.' },
+  async (c) => {
+    const u = await crearUsuario('editar');
+    const r = await api('PATCH', `/usuarios/${u.id}`, { nombre: 'Ana María Pérez', telefono: '+57 310 999 8888' }, u.token);
+    c.verifica(r.status === 200 && r.datos.usuario.nombre === 'Ana María Pérez' && r.datos.usuario.telefono === '+573109998888', 'Responde 200 con los datos nuevos (teléfono normalizado)', `HTTP ${r.status} ${JSON.stringify(r.datos.usuario)}`);
+    c.verifica(Boolean(r.datos.mensaje), 'Incluye un mensaje de confirmación', r.datos.mensaje);
+    c.verifica(sqlq(`SELECT nombre || '|' || telefono FROM usuarios WHERE id='${u.id}'`) === 'Ana María Pérez|+573109998888', 'Los cambios quedaron guardados en la base');
+    const g = await api('GET', `/usuarios/${u.id}`, undefined, u.token);
+    c.verifica(g.datos.usuario.nombre === 'Ana María Pérez', 'El perfil posterior muestra el nombre nuevo');
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-27-03', hu: 'US-27', ca: [3], grupo: 'US-27', titulo: 'Teléfono inválido o campo obligatorio vacío: errores por campo y sin guardar (caso de error)', objetivo: 'Verificar la validación del perfil.', pasos: ['PATCH con nombre vacío y teléfono "abc".', 'PATCH solo con teléfono inválido.', 'Consultar la base.'], esperado: '400 con la lista de errores por campo (nombre y telefono); la base conserva los datos originales.' },
+  async (c) => {
+    const u = await crearUsuario('invalido');
+    const a = await api('PATCH', `/usuarios/${u.id}`, { nombre: '', telefono: 'abc' }, u.token);
+    c.verifica(a.status === 400 && a.datos.errores.map((e) => e.campo).sort().join() === 'nombre,telefono', 'Nombre vacío y teléfono "abc": 400 con errores en nombre y telefono', `HTTP ${a.status} ${a.datos.errores?.map((e) => e.campo)}`);
+    const b = await api('PATCH', `/usuarios/${u.id}`, { nombre: 'Nombre Válido', telefono: '12' }, u.token);
+    c.verifica(b.status === 400 && b.datos.errores.map((e) => e.campo).join() === 'telefono', 'Solo el teléfono es inválido: el error señala "telefono"', `HTTP ${b.status}`);
+    c.verifica(sqlq(`SELECT nombre || '|' || telefono FROM usuarios WHERE id='${u.id}'`) === `${u.nombre}|3001234567`, 'No se guardó nada: la base conserva los datos originales');
+    c.evidenciaTexto('Respuesta 400 con errores por campo', JSON.stringify(a.datos, null, 1));
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-27-04', hu: 'US-27', ca: [4], grupo: 'US-27', titulo: 'Cambio de correo: se verifica el nuevo correo antes de aplicarse y no admite duplicados', objetivo: 'Verificar el flujo de cambio de correo con enlace de un solo uso.', pasos: ['Pedir cambiar a un correo ya registrado.', 'Pedir cambiar a un correo nuevo.', 'Comprobar que el correo no cambió y que hay un pendiente.', 'Abrir el enlace enviado al correo nuevo.', 'Reutilizar el enlace; probar un token inventado.', 'Iniciar sesión con el correo nuevo y con el anterior.'], esperado: 'Duplicado: 409. Solicitud: 202 y el correo sigue igual hasta verificar; en la base solo está el hash del token. Verificar: 200 y el correo cambia; el enlace no sirve dos veces ni inventado; el login funciona solo con el correo nuevo.' },
+  async (c) => {
+    const u = await crearUsuario('correo-nuevo');
+    const otro = await crearUsuario('correo-ocupado');
+    const dup = await api('POST', `/usuarios/${u.id}/correo`, { nuevoCorreo: otro.correo }, u.token);
+    c.verifica(dup.status === 409, 'Un correo de otra cuenta se rechaza: 409', `HTTP ${dup.status}`);
+    const nuevo = `nuevo.${Date.now()}@qa.local`;
+    const sol = await api('POST', `/usuarios/${u.id}/correo`, { nuevoCorreo: nuevo }, u.token, { Origin: CFG.WEB });
+    c.verifica(sol.status === 202, 'Solicitar el cambio: 202', `HTTP ${sol.status}`);
+    c.verifica(sqlq(`SELECT correo FROM usuarios WHERE id='${u.id}'`) === u.correo, 'Mientras no se verifique, el correo de la cuenta NO cambia');
+    const perfil = await api('GET', `/usuarios/${u.id}`, undefined, u.token);
+    c.verifica(perfil.datos.usuario.correoPendiente === nuevo, 'El perfil muestra el correo pendiente de verificación', perfil.datos.usuario.correoPendiente);
+    await esperar(600);
+    const enlace = obtenerEnlaceDeLogs(nuevo);
+    c.verifica(Boolean(enlace) && enlace.startsWith(`${CFG.WEB}/verificar-correo?token=`), 'El enlace se envía al correo NUEVO y apunta al frontend', enlace?.replace(/token=.*/, 'token=…'));
+    const token = new URL(enlace).searchParams.get('token');
+    c.verifica(sqlq(`SELECT token_hash FROM cambios_correo WHERE usuario_id='${u.id}' AND used_at IS NULL`) !== token, 'En la base se guarda solo el hash del token, no el token');
+    const ok = await api('POST', '/auth/verificar-correo', { token });
+    c.verifica(ok.status === 200 && ok.datos.correo === nuevo, 'Abrir el enlace aplica el cambio: 200', `HTTP ${ok.status}`);
+    c.verifica(sqlq(`SELECT correo FROM usuarios WHERE id='${u.id}'`) === nuevo, 'Ahora el correo de la cuenta es el nuevo');
+    c.verifica((await api('POST', '/auth/verificar-correo', { token })).status === 400, 'El enlace no se puede reutilizar: 400');
+    c.verifica((await api('POST', '/auth/verificar-correo', { token: 'inventado' })).status === 400, 'Un token inventado: 400');
+    const conNuevo = await api('POST', '/auth/login', { correo: nuevo, password: CFG.password });
+    const conViejo = await api('POST', '/auth/login', { correo: u.correo, password: CFG.password });
+    c.verifica(conNuevo.status === 200 && conViejo.status === 401, 'El login funciona con el correo nuevo y ya no con el anterior', `${conNuevo.status} / ${conViejo.status}`);
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-27-05', hu: 'US-27', ca: [5], grupo: 'US-27', titulo: 'Cambio de contraseña: exige la actual y una nueva que cumpla las reglas', objetivo: 'Verificar el cambio de contraseña y sus rechazos.', pasos: ['PATCH /password con la actual incorrecta.', 'PATCH con una nueva débil.', 'PATCH con datos correctos.', 'Iniciar sesión con la nueva y con la anterior.'], esperado: 'Actual incorrecta: 400 PASSWORD_ACTUAL_INCORRECTA; débil: 400; correcta: 200; login con la nueva 200 y con la anterior 401.' },
+  async (c) => {
+    const u = await crearUsuario('clave');
+    const mala = await api('PATCH', `/usuarios/${u.id}/password`, { passwordActual: 'Equivocada1', nuevaPassword: 'NuevaClave456' }, u.token);
+    c.verifica(mala.status === 400 && mala.datos.codigo === 'PASSWORD_ACTUAL_INCORRECTA', 'Contraseña actual incorrecta: 400 PASSWORD_ACTUAL_INCORRECTA', `HTTP ${mala.status} ${mala.datos.codigo}`);
+    const debil = await api('PATCH', `/usuarios/${u.id}/password`, { passwordActual: CFG.password, nuevaPassword: 'corta' }, u.token);
+    c.verifica(debil.status === 400, 'Nueva contraseña que incumple las reglas: 400', `HTTP ${debil.status}`);
+    const sinActual = await api('PATCH', `/usuarios/${u.id}/password`, { nuevaPassword: 'NuevaClave456' }, u.token);
+    c.verifica(sinActual.status === 400, 'Sin la contraseña actual: 400', `HTTP ${sinActual.status}`);
+    const ok = await api('PATCH', `/usuarios/${u.id}/password`, { passwordActual: CFG.password, nuevaPassword: 'NuevaClave456' }, u.token);
+    c.verifica(ok.status === 200, 'Con la actual y una nueva válida: 200', `HTTP ${ok.status}`);
+    const hash = sqlq(`SELECT password_hash FROM usuarios WHERE id='${u.id}'`);
+    c.verifica(/^\$2[aby]\$/.test(hash), 'La nueva contraseña queda cifrada con bcrypt');
+    const a = await api('POST', '/auth/login', { correo: u.correo, password: 'NuevaClave456' });
+    const b = await api('POST', '/auth/login', { correo: u.correo, password: CFG.password });
+    c.verifica(a.status === 200 && b.status === 401, 'Login con la nueva 200 y con la anterior 401', `${a.status} / ${b.status}`);
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-27-06', hu: 'US-27', ca: [6], grupo: 'US-27', titulo: 'Solo el propietario ve y edita su perfil: lo de otro usuario responde 403 (caso de error)', objetivo: 'Verificar la propiedad del perfil en todas sus rutas y que no se filtran datos.', pasos: ['A intenta GET, PATCH, cambio de contraseña y de correo sobre el perfil de B.', 'Repetir sin token.', 'Consultar la base.'], esperado: '403 en las cuatro rutas, sin datos de B en la respuesta y sin cambios en la base; sin token 401.' },
+  async (c) => {
+    const A = await crearUsuario('intruso');
+    const B = await crearUsuario('victima');
+    const intentos = [
+      ['GET', `/usuarios/${B.id}`, undefined],
+      ['PATCH', `/usuarios/${B.id}`, { nombre: 'Hackeado', telefono: '3009999999' }],
+      ['PATCH', `/usuarios/${B.id}/password`, { passwordActual: CFG.password, nuevaPassword: 'Hackeada123' }],
+      ['POST', `/usuarios/${B.id}/correo`, { nuevoCorreo: 'hack@qa.local' }],
+    ];
+    for (const [metodo, ruta, cuerpo] of intentos) {
+      const r = await api(metodo, ruta, cuerpo, A.token);
+      c.verifica(r.status === 403 && !JSON.stringify(r.datos).includes(B.correo), `${metodo} ${ruta.replace(B.id, ':id')} → 403 sin datos ajenos`, `HTTP ${r.status}`);
+    }
+    c.verifica(sqlq(`SELECT nombre || '|' || correo FROM usuarios WHERE id='${B.id}'`) === `${B.nombre}|${B.correo}`, 'El perfil de B no se modificó');
+    c.verifica((await api('POST', '/auth/login', { correo: B.correo, password: CFG.password })).status === 200, 'B sigue entrando con su contraseña original');
+    c.verifica((await api('GET', `/usuarios/${B.id}`)).status === 401, 'Sin token: 401');
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-27-07', hu: 'US-27', ca: [5], grupo: 'US-27', prioridad: 'Media', titulo: 'Freno a los intentos fallidos de cambio de contraseña (429)', objetivo: 'Verificar que no se puede adivinar la contraseña actual con intentos repetidos.', pasos: ['Enviar 10 intentos con la contraseña actual incorrecta.', 'Enviar un 11.º intento, esta vez con la contraseña correcta.'], esperado: 'Los 10 primeros responden 400; el 11.º responde 429 DEMASIADOS_INTENTOS aunque la clave sea correcta.' },
+  async (c) => {
+    const u = await crearUsuario('freno');
+    const estados = [];
+    for (let i = 0; i < 10; i += 1) estados.push((await api('PATCH', `/usuarios/${u.id}/password`, { passwordActual: 'Equivocada1', nuevaPassword: 'NuevaClave456' }, u.token)).status);
+    c.verifica(estados.every((s) => s === 400), 'Los 10 intentos fallidos responden 400', estados.join(','));
+    const bloqueado = await api('PATCH', `/usuarios/${u.id}/password`, { passwordActual: CFG.password, nuevaPassword: 'NuevaClave456' }, u.token);
+    c.verifica(bloqueado.status === 429 && bloqueado.datos.codigo === 'DEMASIADOS_INTENTOS', 'El intento 11 queda bloqueado: 429 DEMASIADOS_INTENTOS', `HTTP ${bloqueado.status} ${bloqueado.datos.codigo}`);
+  }
+);
+
+// ---------------------------------------------------------------------
+// US-28 Método de pago con tarjeta
+// ---------------------------------------------------------------------
+await S.caso(
+  { ...base, id: 'F-28-01', hu: 'US-28', ca: [1, 3], grupo: 'US-28', titulo: 'Agregar tarjeta válida: se muestra enmascarada y solo se guarda el token', objetivo: 'Verificar el registro de una tarjeta, su enmascarado y que la base nunca guarda el número completo ni el CVV.', pasos: ['POST /api/usuarios/:id/metodos-pago con una Visa de prueba válida.', 'GET del listado.', 'Inspeccionar la fila guardada en metodos_pago.'], esperado: '201 con marca "Visa", últimos 4 "4242" y vencimiento; la fila tiene token tok_sim_… y no contiene el número completo ni existe columna cvv; la API nunca devuelve el token.' },
+  async (c) => {
+    const u = await crearUsuario('tarjeta');
+    const r = await guardarTarjeta(u);
+    c.verifica(r.status === 201 && r.datos.metodoPago.marca === 'Visa' && r.datos.metodoPago.ultimos4 === '4242' && r.datos.metodoPago.vencimiento === `12/${String(ANIO_TARJETA).slice(-2)}`, 'Responde 201 con tarjeta enmascarada (Visa ••4242)', JSON.stringify(r.datos.metodoPago));
+    c.verifica(!JSON.stringify(r.datos).includes('tok_sim') && !JSON.stringify(r.datos).includes('4242424242424242'), 'La respuesta no expone el token ni el número completo');
+    const fila = sqlq(`SELECT row_to_json(m) FROM metodos_pago m WHERE id='${r.datos.metodoPago.id}'`);
+    c.verifica(/"token":"tok_sim_/.test(fila), 'Se guardó el token de la pasarela', fila.match(/"token":"[^"]{0,24}/)?.[0]);
+    c.verifica(!fila.includes('4242424242424242') && !fila.includes('4242 4242 4242 4242') && !/cvv/i.test(fila), 'La fila NO contiene el número completo ni el CVV');
+    const cols = sqlq(`SELECT string_agg(column_name, ',' ORDER BY ordinal_position) FROM information_schema.columns WHERE table_name='metodos_pago'`);
+    c.verifica(!/cvv|numero/.test(cols), 'La tabla ni siquiera tiene columnas para el CVV o el número', cols);
+    const lista = await api('GET', `/usuarios/${u.id}/metodos-pago`, undefined, u.token);
+    c.verifica(lista.status === 200 && lista.datos.metodosPago.length === 1 && !JSON.stringify(lista.datos).includes('tok_sim'), 'El listado muestra la tarjeta enmascarada y sin token');
+    c.evidenciaTexto('Fila guardada en metodos_pago', fila);
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-28-02', hu: 'US-28', ca: [2], grupo: 'US-28', titulo: 'Tarjeta inválida (Luhn, vencida, CVV): se rechaza sin exponer datos (caso de error)', objetivo: 'Verificar las validaciones de la tarjeta y que ningún dato sensible aparece en el error.', pasos: ['Enviar un número que no pasa Luhn.', 'Enviar una tarjeta vencida.', 'Enviar un CVV de longitud incorrecta.', 'Enviar un cuerpo vacío.'], esperado: '400 con el campo erróneo (numero, vencimientoAnio, cvv); la respuesta no repite el número ni el CVV; no se guarda ninguna fila.' },
+  async (c) => {
+    const u = await crearUsuario('tarjeta-mala');
+    const casos = [
+      ['número que no pasa Luhn', { numero: '4242 4242 4242 4241' }, 'numero', '4241'],
+      ['tarjeta vencida', { vencimientoMes: 1, vencimientoAnio: 2020 }, 'vencimientoAnio', null],
+      ['CVV incorrecto', { cvv: '12' }, 'cvv', null],
+    ];
+    for (const [nombre, extra, campo, fragmento] of casos) {
+      const r = await guardarTarjeta(u, extra);
+      const texto = JSON.stringify(r.datos);
+      c.verifica(r.status === 400 && r.datos.errores?.some((e) => e.campo === campo), `${nombre}: 400 señalando "${campo}"`, `HTTP ${r.status}`);
+      c.verifica(!texto.includes('"123"') && !(fragmento && texto.includes(fragmento)), `${nombre}: el error no repite datos sensibles`);
+    }
+    const vacio = await api('POST', `/usuarios/${u.id}/metodos-pago`, {}, u.token);
+    c.verifica(vacio.status === 400, 'Cuerpo vacío: 400', `HTTP ${vacio.status}`);
+    c.verifica(sqlq(`SELECT count(*) FROM metodos_pago WHERE usuario_id='${u.id}'`) === '0', 'No se guardó ninguna tarjeta');
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-28-03', hu: 'US-28', ca: [4], grupo: 'US-28', titulo: 'Reservar pagando con la tarjeta guardada: el cobro se procesa por la pasarela', objetivo: 'Verificar el pago opcional al confirmar una reserva y que sin tarjeta la reserva también se confirma.', pasos: ['Guardar una tarjeta.', 'Reservar enviando metodoPagoId.', 'Revisar la tabla pagos y el historial.', 'Reservar sin metodoPagoId.'], esperado: '201 con reserva.pago {aprobado, monto = costo de la cancha, COP, Visa, 4242}; una fila en pagos; el historial muestra el pago; sin tarjeta 201 con pago null.' },
+  async (c) => {
+    const u = await crearUsuario('paga');
+    const tj = (await guardarTarjeta(u)).datos.metodoPago;
+    const r = await reservarHora(u, K0, fechaUnica(), '15', tj.id);
+    const costo = Number(sqlq(`SELECT costo_hora FROM canchas WHERE id='${K0.id}'`));
+    c.verifica(r.status === 201 && r.datos.reserva.estado === 'confirmada', 'La reserva se confirma: 201', `HTTP ${r.status}`);
+    c.verifica(r.datos.reserva.pago?.estado === 'aprobado' && r.datos.reserva.pago.monto === costo && r.datos.reserva.pago.moneda === 'COP' && r.datos.reserva.pago.marca === 'Visa', 'El pago aparece aprobado por el costo de la cancha', JSON.stringify(r.datos.reserva.pago));
+    c.verifica(sqlq(`SELECT count(*) FROM pagos WHERE reserva_id='${r.datos.reserva.id}' AND estado='aprobado'`) === '1', 'Hay exactamente un pago aprobado en la base');
+    const h = await api('GET', '/reservas?limite=50', undefined, u.token);
+    c.verifica(h.datos.reservas.find((x) => x.id === r.datos.reserva.id)?.pago?.ultimos4 === '4242', 'El historial muestra el pago de la reserva');
+    const sin = await reservarHora(u, K1, fechaUnica(), '15');
+    c.verifica(sin.status === 201 && sin.datos.reserva.pago === null, 'Sin método de pago la reserva se confirma igual (pago opcional)', `HTTP ${sin.status}`);
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-28-04', hu: 'US-28', ca: [6], grupo: 'US-28', titulo: 'Pago rechazado: la reserva NO se confirma y se informa el motivo (caso de error)', objetivo: 'Verificar el rechazo del cobro (tarjeta rechazada y fondos insuficientes) y que la franja sigue libre.', pasos: ['Guardar la tarjeta de prueba rechazada (…0002) y reservar con ella.', 'Repetir con la de fondos insuficientes (…9995).', 'Consultar la base y reservar la misma franja sin pagar.'], esperado: '402 PAGO_RECHAZADO con el motivo en el mensaje; no queda reserva ni pago aprobado; la franja se puede reservar después.' },
+  async (c) => {
+    const u = await crearUsuario('rechazo');
+    const f = franja(16);
+    for (const [numero, motivo] of [['4000 0000 0000 0002', /rechazada/i], ['4000 0000 0000 9995', /fondos insuficientes/i]]) {
+      const tj = (await guardarTarjeta(u, { numero })).datos.metodoPago;
+      const r = await api('POST', `/canchas/${K0.id}/reservas`, { ...f, metodoPagoId: tj.id }, u.token);
+      c.verifica(r.status === 402 && r.datos.codigo === 'PAGO_RECHAZADO' && motivo.test(r.datos.mensaje), `Tarjeta …${numero.slice(-4)}: 402 PAGO_RECHAZADO con el motivo`, `HTTP ${r.status} ${r.datos.mensaje}`);
+    }
+    c.verifica(sqlq(`SELECT count(*) FROM reservas WHERE usuario_id='${u.id}'`) === '0', 'No quedó ninguna reserva confirmada');
+    c.verifica(sqlq(`SELECT count(*) FROM pagos WHERE usuario_id='${u.id}' AND estado='aprobado'`) === '0', 'No quedó ningún pago aprobado');
+    const sin = await reservar(u, K0, f);
+    c.verifica(sin.status === 201, 'La franja quedó libre: se puede reservar sin pagar (201)', `HTTP ${sin.status}`);
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-28-05', hu: 'US-28', ca: [5], grupo: 'US-28', titulo: 'Eliminar la tarjeta: se borra el token y las reservas pagadas no se afectan', objetivo: 'Verificar la baja de la tarjeta y que el historial de pagos se conserva.', pasos: ['Guardar una tarjeta y pagar una reserva con ella.', 'DELETE de la tarjeta.', 'Revisar el listado, la tabla metodos_pago y la reserva pagada.', 'Intentar pagar con la tarjeta eliminada.'], esperado: '200; la fila (y su token) desaparece de metodos_pago y del listado; la reserva sigue confirmada y su pago aprobado con marca y últimos 4; pagar con la tarjeta eliminada responde 404.' },
+  async (c) => {
+    const u = await crearUsuario('baja');
+    const tj = (await guardarTarjeta(u, { numero: '3782 822463 10005', cvv: '1234' })).datos.metodoPago;
+    const pagada = await reservarHora(u, K0, fechaUnica(), '17', tj.id);
+    c.verifica(pagada.status === 201 && pagada.datos.reserva.pago.marca === 'American Express', 'Reserva pagada con una American Express', `HTTP ${pagada.status}`);
+    const del = await api('DELETE', `/usuarios/${u.id}/metodos-pago/${tj.id}`, undefined, u.token);
+    c.verifica(del.status === 200, 'Eliminar la tarjeta: 200', `HTTP ${del.status}`);
+    c.verifica(sqlq(`SELECT count(*) FROM metodos_pago WHERE id='${tj.id}'`) === '0', 'La fila con el token se borró de la base');
+    const lista = await api('GET', `/usuarios/${u.id}/metodos-pago`, undefined, u.token);
+    c.verifica(lista.datos.metodosPago.length === 0, 'Ya no aparece como opción de pago');
+    c.verifica(sqlq(`SELECT estado FROM reservas WHERE id='${pagada.datos.reserva.id}'`) === 'confirmada', 'La reserva ya pagada sigue confirmada');
+    c.verifica(sqlq(`SELECT estado || '|' || marca || '|' || ultimos4 FROM pagos WHERE reserva_id='${pagada.datos.reserva.id}'`) === 'aprobado|American Express|0005', 'Su pago se conserva (aprobado, American Express ••0005)');
+    const otra = await reservarHora(u, K1, fechaUnica(), '17', tj.id);
+    c.verifica(otra.status === 404, 'Pagar con la tarjeta eliminada: 404', `HTTP ${otra.status}`);
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-28-06', hu: 'US-28', ca: [7], grupo: 'US-28', titulo: 'Solo el propietario ve y gestiona sus métodos de pago (caso de error)', objetivo: 'Verificar que las tarjetas de un usuario no son visibles ni usables por otro.', pasos: ['B intenta ver, agregar y eliminar tarjetas de A.', 'B intenta pagar una reserva con la tarjeta de A.', 'Peticiones sin token.'], esperado: 'Ver y agregar sobre otro usuario: 403; eliminar la tarjeta de A desde la cuenta de B: 404 y la tarjeta sigue existiendo; pagar con la tarjeta ajena: 404 sin reserva; sin token 401.' },
+  async (c) => {
+    const A = await crearUsuario('duena');
+    const B = await crearUsuario('curioso');
+    const tj = (await guardarTarjeta(A, { numero: '5555 5555 5555 4444' })).datos.metodoPago;
+    c.verifica((await api('GET', `/usuarios/${A.id}/metodos-pago`, undefined, B.token)).status === 403, 'Ver las tarjetas de A: 403');
+    c.verifica((await api('POST', `/usuarios/${A.id}/metodos-pago`, tarjeta(), B.token)).status === 403, 'Agregar una tarjeta a la cuenta de A: 403');
+    c.verifica((await api('DELETE', `/usuarios/${B.id}/metodos-pago/${tj.id}`, undefined, B.token)).status === 404, 'Eliminar la tarjeta de A usando la cuenta de B: 404');
+    c.verifica(sqlq(`SELECT count(*) FROM metodos_pago WHERE id='${tj.id}'`) === '1', 'La tarjeta de A sigue existiendo');
+    const pago = await reservarHora(B, K0, fechaUnica(), '18', tj.id);
+    c.verifica(pago.status === 404, 'Pagar con la tarjeta de A: 404', `HTTP ${pago.status}`);
+    c.verifica(sqlq(`SELECT count(*) FROM reservas WHERE usuario_id='${B.id}'`) === '0', 'No se creó ninguna reserva ni cobro');
+    c.verifica((await api('GET', `/usuarios/${A.id}/metodos-pago`)).status === 401, 'Sin token: 401');
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-28-08', hu: 'US-28', ca: [1], grupo: 'US-28', prioridad: 'Media', titulo: 'Máximo de 5 tarjetas guardadas por usuario (caso de error)', objetivo: 'Verificar el tope de tarjetas por cuenta y que eliminar una libera el cupo.', pasos: ['Guardar 5 tarjetas distintas.', 'Intentar guardar una sexta.', 'Eliminar una y volver a intentar.'], esperado: 'Las 5 primeras responden 201; la sexta 409 LIMITE_TARJETAS sin guardarse; tras eliminar una, la nueva se acepta.' },
+  async (c) => {
+    const u = await crearUsuario('maxtarjetas');
+    const numeros = ['4242 4242 4242 4242', '5555 5555 5555 4444', '3782 822463 10005', '6011 1111 1111 1117', '4012 8888 8888 1881'];
+    const guardadas = [];
+    for (const numero of numeros) guardadas.push(await guardarTarjeta(u, { numero, cvv: numero.startsWith('3782') ? '1234' : '123' }));
+    c.verifica(guardadas.every((r) => r.status === 201), 'Las 5 primeras tarjetas se guardan: 201', guardadas.map((r) => r.status).join(', '));
+    const sexta = await guardarTarjeta(u, { numero: '4000 0566 5566 5556' });
+    c.verifica(sexta.status === 409 && sexta.datos.codigo === 'LIMITE_TARJETAS', 'La sexta: 409 LIMITE_TARJETAS', `HTTP ${sexta.status} ${sexta.datos.codigo}`);
+    c.verifica(sqlq(`SELECT count(*) FROM metodos_pago WHERE usuario_id='${u.id}'`) === '5', 'En la base siguen 5 tarjetas');
+    await api('DELETE', `/usuarios/${u.id}/metodos-pago/${guardadas[0].datos.metodoPago.id}`, undefined, u.token);
+    const otra = await guardarTarjeta(u, { numero: '4000 0566 5566 5556' });
+    c.verifica(otra.status === 201, 'Tras eliminar una, la nueva se acepta: 201', `HTTP ${otra.status}`);
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-28-07', hu: 'US-28', ca: [7], grupo: 'US-28', prioridad: 'Alta', titulo: 'HTTPS obligatorio en las rutas de tarjetas (426 si la conexión no es segura)', objetivo: 'Verificar la exigencia de HTTPS con EXIGIR_HTTPS_PAGOS=true, detrás de un proxy de confianza y sin él.', pasos: ['Levantar un backend con EXIGIR_HTTPS_PAGOS=true y TRUST_PROXY=true y otro con TRUST_PROXY=false.', 'Pedir las rutas de tarjetas por HTTP simple.', 'Repetir con la cabecera X-Forwarded-Proto: https.'], esperado: 'Por HTTP: 426 HTTPS_REQUERIDO en GET, POST y DELETE sin procesar la tarjeta. Con proxy de confianza y X-Forwarded-Proto https: se acepta (201/200). Sin TRUST_PROXY la cabecera se ignora y sigue el 426.' },
+  async (c) => {
+    const u = await crearUsuario('https');
+    const ruta = `/usuarios/${u.id}/metodos-pago`;
+    await conBackendAdicional({ nombre: 'qa-backend-https', puerto: 4303, env: { EXIGIR_HTTPS_PAGOS: 'true', TRUST_PROXY: 'true' } }, async (b) => {
+      c.verifica(b.iniciado && b.listo, 'Backend con HTTPS obligatorio y proxy de confianza iniciado');
+      const get = await llamarEn(b.url, 'GET', ruta, u.token);
+      const post = await llamarEn(b.url, 'POST', ruta, u.token, tarjeta());
+      const del = await llamarEn(b.url, 'DELETE', `${ruta}/${UUID_INEXISTENTE}`, u.token);
+      c.verifica([get, post, del].every((r) => r.status === 426 && r.datos.codigo === 'HTTPS_REQUERIDO'), 'Por HTTP simple, GET/POST/DELETE responden 426 HTTPS_REQUERIDO', [get, post, del].map((r) => r.status).join(', '));
+      c.verifica(sqlq(`SELECT count(*) FROM metodos_pago WHERE usuario_id='${u.id}'`) === '0', 'La tarjeta enviada por HTTP no se procesó ni se guardó');
+      const seguro = { 'X-Forwarded-Proto': 'https' };
+      const ok = await llamarEn(b.url, 'POST', ruta, u.token, tarjeta(), seguro);
+      c.verifica(ok.status === 201, 'Con X-Forwarded-Proto: https de un proxy de confianza, se acepta: 201', `HTTP ${ok.status}`);
+      c.verifica((await llamarEn(b.url, 'GET', ruta, u.token, undefined, seguro)).status === 200, 'Y el listado responde 200');
+    });
+    await conBackendAdicional({ nombre: 'qa-backend-https2', puerto: 4304, env: { EXIGIR_HTTPS_PAGOS: 'true', TRUST_PROXY: 'false' } }, async (b) => {
+      c.verifica(b.iniciado && b.listo, 'Backend con HTTPS obligatorio SIN proxy de confianza iniciado');
+      const falsa = await llamarEn(b.url, 'GET', ruta, u.token, undefined, { 'X-Forwarded-Proto': 'https' });
+      c.verifica(falsa.status === 426, 'Sin TRUST_PROXY la cabecera X-Forwarded-Proto se ignora (no se puede falsificar): 426', `HTTP ${falsa.status}`);
+    });
+  }
+);
+
+// ---------------------------------------------------------------------
+// US-29 Verificación de código de reserva (administrador)
+// ---------------------------------------------------------------------
+const ADMIN = await crearAdministrador('admin-qa');
+
+await S.caso(
+  { ...base, id: 'F-29-01', hu: 'US-29', ca: [6], grupo: 'US-29', titulo: 'Cada reserva genera un código único que el usuario ve al reservar y en su historial', objetivo: 'Verificar el formato y la unicidad del código y que es el mismo en la confirmación y en el historial.', pasos: ['Crear varias reservas (usuarios distintos).', 'Comparar el código de la confirmación con el del historial.', 'Revisar el índice único en la base.'], esperado: 'Códigos con formato CY-XXXXXXXX, todos distintos, iguales en confirmación e historial; existe un índice único sobre reservas.codigo.' },
+  async (c) => {
+    const u = await crearUsuario('codigo');
+    const creadas = [];
+    for (const h of ['08', '09', '10']) creadas.push((await reservarHora(u, K0, fechaUnica(), h)).datos.reserva);
+    const codigos = creadas.map((x) => x.codigo);
+    c.verifica(codigos.every((x) => /^CY-[0-9A-F]{8}$/.test(x)), 'Todos tienen el formato CY-XXXXXXXX', codigos.join(', '));
+    c.verifica(new Set(codigos).size === codigos.length, 'Son todos distintos');
+    const h = await api('GET', '/reservas?limite=50', undefined, u.token);
+    c.verifica(creadas.every((x) => h.datos.reservas.find((y) => y.id === x.id)?.codigo === x.codigo), 'El historial muestra el mismo código que la confirmación');
+    const indice = sqlq(`SELECT indexdef FROM pg_indexes WHERE indexname='uq_reservas_codigo'`);
+    c.verifica(/UNIQUE/.test(indice), 'Existe el índice único uq_reservas_codigo en la base', indice.slice(0, 90));
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-29-02', hu: 'US-29', ca: [1, 2], grupo: 'US-29', titulo: 'Código de una reserva confirmada y no vencida: "Vigente" con cancha, fecha, horario y usuario', objetivo: 'Verificar la consulta del administrador de una reserva vigente (acepta minúsculas) y que no filtra datos de contacto.', pasos: ['Crear una reserva futura.', 'POST /api/admin/reservas/verificar con el código (también en minúsculas).'], esperado: '200 con estado "vigente", motivo null y la reserva con código, cancha, fecha, horario y nombre del usuario; sin correo ni teléfono.' },
+  async (c) => {
+    const u = await crearUsuario('vigente');
+    const f = franja(9);
+    const { reserva } = (await reservar(u, K0, f)).datos;
+    const r = await verificarCodigo(ADMIN, reserva.codigo.toLowerCase());
+    c.verifica(r.status === 200 && r.datos.estado === 'vigente' && r.datos.motivo === null, 'Estado "vigente" sin motivo', `HTTP ${r.status} ${r.datos.estado}`);
+    const x = r.datos.reserva;
+    c.verifica(x.codigo === reserva.codigo && x.cancha.nombre === K0.nombre && x.fecha === f.fecha && x.horaInicio === '09:00' && x.usuario.nombre === u.nombre, 'Muestra cancha, fecha, horario y nombre del usuario', JSON.stringify(x));
+    c.verifica(!JSON.stringify(r.datos).includes(u.correo) && !JSON.stringify(r.datos).includes('3001234567'), 'No expone el correo ni el teléfono del usuario');
+    c.evidenciaTexto('Respuesta de POST /api/admin/reservas/verificar', JSON.stringify(r.datos, null, 1));
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-29-03', hu: 'US-29', ca: [3], grupo: 'US-29', titulo: 'Reserva cancelada, vencida o usada: "No vigente" con el motivo', objetivo: 'Verificar los tres motivos de no vigencia.', pasos: ['Cancelar una reserva y verificar su código.', 'Insertar una reserva de una fecha pasada y verificar su código.', 'Marcar una reserva como utilizada y verificar su código.'], esperado: 'estado "no_vigente" con motivo "cancelada", "vencida" y "usada" respectivamente.' },
+  async (c) => {
+    const u = await crearUsuario('novigente');
+    const cancelada = (await reservar(u, K0, franja(11))).datos.reserva;
+    await cancelarReserva(u, cancelada.id);
+    const r1 = await verificarCodigo(ADMIN, cancelada.codigo);
+    c.verifica(r1.datos.estado === 'no_vigente' && r1.datos.motivo === 'cancelada', 'Cancelada → no_vigente por "cancelada"', `${r1.datos.estado}/${r1.datos.motivo}`);
+    const [, codigoVencida] = insertarReservaSql(u, K1, fechaPasadaUnica(), '10:00', '11:00');
+    const r2 = await verificarCodigo(ADMIN, codigoVencida);
+    c.verifica(r2.datos.estado === 'no_vigente' && r2.datos.motivo === 'vencida', 'Vencida → no_vigente por "vencida"', `${r2.datos.estado}/${r2.datos.motivo}`);
+    const usada = (await reservar(u, K2, franja(12))).datos.reserva;
+    await usarCodigo(ADMIN, usada.codigo);
+    const r3 = await verificarCodigo(ADMIN, usada.codigo);
+    c.verifica(r3.datos.estado === 'no_vigente' && r3.datos.motivo === 'usada', 'Utilizada → no_vigente por "usada"', `${r3.datos.estado}/${r3.datos.motivo}`);
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-29-04', hu: 'US-29', ca: [4], grupo: 'US-29', titulo: 'Código inexistente o con formato inválido: "Código no encontrado" sin revelar nada (caso de error)', objetivo: 'Verificar que todo código desconocido recibe la misma respuesta neutra, incluidos intentos de inyección.', pasos: ['Verificar CY-00000000, CY-ZZZZZZZZ, "abc", un intento de inyección SQL y un código corto.', 'Verificar sin el campo código.'], esperado: '404 con {mensaje: "Código no encontrado", codigo: "CODIGO_NO_ENCONTRADO"} idéntico en todos los casos.' },
+  async (c) => {
+    for (const codigo of ['CY-00000000', 'CY-ZZZZZZZZ', 'abc', "' OR 1=1 --", 'CY-1234']) {
+      const r = await verificarCodigo(ADMIN, codigo);
+      c.verifica(r.status === 404 && r.datos.mensaje === 'Código no encontrado' && r.datos.codigo === 'CODIGO_NO_ENCONTRADO' && Object.keys(r.datos).length === 2, `"${codigo}" → 404 "Código no encontrado"`, `HTTP ${r.status}`);
+    }
+    const sin = await api('POST', '/admin/reservas/verificar', {}, ADMIN.token);
+    c.verifica(sin.status === 400 || sin.status === 404, 'Sin el campo código la petición se rechaza', `HTTP ${sin.status}`);
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-29-05', hu: 'US-29', ca: [5], grupo: 'US-29', titulo: 'Marcar como utilizada: el código no vuelve a validarse como vigente', objetivo: 'Verificar que una reserva vigente se puede usar una sola vez, incluso con dos administradores a la vez.', pasos: ['Verificar una reserva vigente.', 'Marcarla como utilizada.', 'Verificarla otra vez e intentar marcarla de nuevo.', 'Dos marcados simultáneos sobre otra reserva.'], esperado: 'Primero "vigente"; al marcar 200 y luego "no_vigente/usada"; marcar otra vez 409 RESERVA_NO_VIGENTE; con dos simultáneos exactamente uno obtiene 200 y el otro 409.' },
+  async (c) => {
+    const u = await crearUsuario('usar');
+    const { reserva } = (await reservar(u, K0, franja(13))).datos;
+    c.verifica((await verificarCodigo(ADMIN, reserva.codigo)).datos.estado === 'vigente', 'Antes de usarla: "vigente"');
+    const m = await usarCodigo(ADMIN, reserva.codigo);
+    c.verifica(m.status === 200 && m.datos.motivo === 'usada', 'Marcarla como utilizada: 200', `HTTP ${m.status}`);
+    const v = await verificarCodigo(ADMIN, reserva.codigo);
+    c.verifica(v.datos.estado === 'no_vigente' && v.datos.motivo === 'usada', 'Después: "no_vigente" por "usada"');
+    const otra = await usarCodigo(ADMIN, reserva.codigo);
+    c.verifica(otra.status === 409 && otra.datos.codigo === 'RESERVA_NO_VIGENTE', 'Marcarla otra vez: 409 RESERVA_NO_VIGENTE', `HTTP ${otra.status}`);
+    const { reserva: r2 } = (await reservar(u, K1, franja(13))).datos;
+    const [a, b] = await Promise.all([usarCodigo(ADMIN, r2.codigo), usarCodigo(ADMIN, r2.codigo)]);
+    c.verifica([a.status, b.status].sort().join() === '200,409', 'Dos marcados simultáneos: solo uno lo logra (200 y 409)', `${a.status}, ${b.status}`);
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-29-06', hu: 'US-29', ca: [7], grupo: 'US-29', titulo: 'Solo los administradores usan la verificación; un usuario normal recibe 403 (caso de error)', objetivo: 'Verificar el control de rol, que el rol se lee de la base y que el registro público no crea administradores.', pasos: ['Un usuario sin rol llama a las tres rutas del panel.', 'Repetir sin token.', 'Quitar el rol a un administrador y volver a llamar.', 'Registrarse enviando rol "administrador".'], esperado: '403 en verificar, usar y verificaciones (la reserva no se modifica); sin token 401; un administrador degradado pierde el acceso de inmediato; el registro siempre crea rol "usuario".' },
+  async (c) => {
+    const u = await crearUsuario('normal');
+    const { reserva } = (await reservar(u, K0, franja(14))).datos;
+    const r1 = await verificarCodigo(u, reserva.codigo);
+    const r2 = await usarCodigo(u, reserva.codigo);
+    const r3 = await api('GET', '/admin/verificaciones', undefined, u.token);
+    c.verifica([r1, r2, r3].every((r) => r.status === 403), 'Verificar, usar y listar verificaciones: 403', [r1, r2, r3].map((r) => r.status).join(', '));
+    c.verifica(sqlq(`SELECT usada_at IS NULL FROM reservas WHERE id='${reserva.id}'`) === 't', 'La reserva no fue marcada como utilizada');
+    c.verifica((await api('GET', '/admin/verificaciones')).status === 401, 'Sin token: 401');
+    const temporal = await crearAdministrador('admin-temporal');
+    c.verifica((await api('GET', '/admin/verificaciones', undefined, temporal.token)).status === 200, 'Un administrador entra al panel: 200');
+    sqlq(`UPDATE usuarios SET rol = 'usuario' WHERE id = '${temporal.id}'`);
+    c.verifica((await api('GET', '/admin/verificaciones', undefined, temporal.token)).status === 403, 'Al perder el rol, el mismo token queda sin acceso al instante: 403');
+    const correo = `intruso.${Date.now()}@qa.local`;
+    const reg = await api('POST', '/auth/registro', { nombre: 'Intruso QA', correo, telefono: '3001234567', password: CFG.password, rol: 'administrador' });
+    c.verifica(reg.status === 201 && sqlq(`SELECT rol FROM usuarios WHERE correo='${correo}'`) === 'usuario', 'El registro público ignora el rol enviado: la cuenta es "usuario"');
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-29-07', hu: 'US-29', ca: [8], grupo: 'US-29', titulo: 'Cada verificación queda registrada para auditoría', objetivo: 'Verificar el registro de administrador, código, resultado y fecha, y su consulta.', pasos: ['Verificar un código vigente, marcarlo como usado y verificar uno inexistente.', 'Consultar la tabla verificaciones_reserva.', 'GET /api/admin/verificaciones.'], esperado: 'Tres registros con resultados vigente, marcada_usada y no_encontrado, con el administrador y la fecha; el listado devuelve primero el más reciente.' },
+  async (c) => {
+    const admin = await crearAdministrador('auditor');
+    const u = await crearUsuario('auditada');
+    const { reserva } = (await reservar(u, K0, franja(15))).datos;
+    await verificarCodigo(admin, reserva.codigo);
+    await usarCodigo(admin, reserva.codigo);
+    await verificarCodigo(admin, 'CY-FFFFFFFF');
+    const filas = sqlq(`SELECT string_agg(resultado, ',' ORDER BY created_at) FROM verificaciones_reserva WHERE administrador_id='${admin.id}'`);
+    c.verifica(filas === 'vigente,marcada_usada,no_encontrado', 'La base registra vigente, marcada_usada y no_encontrado', filas);
+    c.verifica(sqlq(`SELECT count(*) FROM verificaciones_reserva WHERE administrador_id='${admin.id}' AND created_at IS NOT NULL AND codigo IS NOT NULL`) === '3', 'Cada registro tiene administrador, código y fecha/hora');
+    const lista = await api('GET', '/admin/verificaciones?limite=10', undefined, admin.token);
+    c.verifica(lista.status === 200 && lista.datos.verificaciones[0].codigo === 'CY-FFFFFFFF' && lista.datos.verificaciones[0].resultado === 'no_encontrado' && lista.datos.verificaciones[0].administrador === admin.nombre, 'El listado muestra primero la más reciente con el nombre del administrador', JSON.stringify(lista.datos.verificaciones[0]));
+    c.evidenciaTexto('Respuesta de GET /api/admin/verificaciones', JSON.stringify(lista.datos.verificaciones.slice(0, 3), null, 1));
+  }
+);
+
+// =====================================================================
 // PIG1-23 Documentación técnica de la API (OpenAPI / Swagger)
 // =====================================================================
 const baseDoc = { ...base, nivel: 'API REST' };

@@ -420,5 +420,102 @@
     "verifican": [
       "NF-13"
     ]
+  },
+  {
+    "id": "DEF-19",
+    "severidad": "Baja",
+    "estadoInicial": "Abierto",
+    "titulo": "En \"Mis reservas\", el filtro \"Completada\" desde la pestaña Próximas mostraba una lista vacía",
+    "hu": "US-13 · CA-2 · CA-6",
+    "casos": [
+      "E2E-23"
+    ],
+    "descripcion": "El filtro por estado se combina con la pestaña activa, y la pantalla abre en \"Próximas\". Una reserva completada es por definición una que ya pasó, así que al elegir \"Completada\" en Próximas (o \"Confirmada\" en Pasadas) el resultado era siempre vacío (\"No hay reservas con ese estado\") sin indicar que había que cambiar de pestaña. El backend respondía correctamente; el problema era de uso. La prueba E2E-23 daba por válido ese comportamiento.",
+    "pasos": [
+      "Abrir \"Mis reservas\" con un usuario que tiene reservas pasadas.",
+      "En la pestaña Próximas, elegir el filtro \"Completada\"."
+    ],
+    "esperado": "Se muestran las reservas completadas del usuario.",
+    "obtenido": "Se mostraba \"No hay reservas con ese estado\".",
+    "impacto": "Bajo: el usuario creía que el historial no tenía reservas completadas.",
+    "recomendacion": "Llevar al usuario a la pestaña donde el estado existe y quitar el filtro cuando deja de aplicar.",
+    "correccion": "Al elegir \"Completada\" la pantalla pasa a Pasadas y al elegir \"Confirmada\" pasa a Próximas; al cambiar de pestaña se quita el filtro que ya no aplica (\"Cancelada\" se conserva). Se añadieron 3 pruebas del frontend y se corrigió E2E-23 para verificar este comportamiento.",
+    "verifican": [
+      "E2E-23"
+    ]
+  },
+  {
+    "id": "DEF-20",
+    "severidad": "Media",
+    "estadoInicial": "Abierto",
+    "titulo": "La barra de navegación del administrador desbordaba la pantalla en anchos pequeños y medianos",
+    "hu": "US-29 · CA-1 · RNF-05",
+    "casos": [
+      "E2E-29",
+      "NF-24"
+    ],
+    "descripcion": "Con sesión de administrador la barra superior tiene un enlace más (\"Administración\"). A 360 px el contenido superaba el ancho de la pantalla en 8 px y a 768 px en 17 px, lo que producía scroll horizontal en todas las pantallas para ese rol. Se detectó al verificar el panel de administración a 360 px (E2E-29) y en la revisión de anchos de NF-24.",
+    "pasos": [
+      "Iniciar sesión con una cuenta de administrador.",
+      "Abrir /admin con una ventana de 360 px (y de 768 px) de ancho.",
+      "Medir el ancho del documento contra el ancho de la ventana."
+    ],
+    "esperado": "Sin scroll horizontal entre 360 y 1920 px (RNF-05).",
+    "obtenido": "El documento medía 368 px en una ventana de 360 px y 785 px en una de 768 px.",
+    "impacto": "Medio: el menú se cortaba y la página se podía desplazar de lado en celulares y tabletas, solo para administradores.",
+    "recomendacion": "Usar un texto corto para el enlace de administración y reducir los márgenes de la barra en pantallas angostas.",
+    "correccion": "El enlace usa el texto corto \"Admin\" por debajo de 860 px, y por debajo de 400 px se reducen el relleno de los enlaces y los márgenes de la barra. E2E-29 y NF-24 confirman que no hay desborde en los 6 anchos probados.",
+    "verifican": [
+      "E2E-29",
+      "NF-24"
+    ]
+  },
+  {
+    "id": "DEF-21",
+    "severidad": "Media",
+    "estadoInicial": "Abierto",
+    "titulo": "El enlace del nombre del usuario (\"Mi perfil\") tenía una etiqueta accesible que no contenía su texto visible",
+    "hu": "US-27 · CA-7 · WCAG 2.5.3",
+    "casos": [
+      "NF-14",
+      "NF-24"
+    ],
+    "descripcion": "El enlace de la barra superior que lleva al perfil mostraba el primer nombre del usuario pero tenía aria-label=\"Mi perfil\". Cuando el nombre accesible no incluye el texto visible, quienes usan control por voz no pueden activar el enlace diciendo lo que ven y los lectores de pantalla anuncian algo distinto. axe-core lo reportó como violación grave (label-content-name-mismatch) en todas las pantallas con sesión.",
+    "pasos": [
+      "Iniciar sesión.",
+      "Ejecutar axe-core (WCAG 2.1 AA) sobre cualquier pantalla con la barra superior."
+    ],
+    "esperado": "Sin violaciones críticas ni graves (NF-14).",
+    "obtenido": "1 violación grave por pantalla: label-content-name-mismatch en .navbar-usuario.",
+    "impacto": "Medio: afecta a usuarios de tecnologías de apoyo en todas las pantallas autenticadas.",
+    "recomendacion": "No sustituir el texto visible con aria-label; añadir el contexto como texto solo para lectores de pantalla.",
+    "correccion": "Se quitó el aria-label y se añadió el texto \"Mi perfil: \" visible solo para lectores de pantalla antes del nombre. NF-14 y NF-24 pasan sin violaciones graves.",
+    "verifican": [
+      "NF-14",
+      "NF-24"
+    ]
+  },
+  {
+    "id": "DEF-22",
+    "severidad": "Baja",
+    "estadoInicial": "Abierto",
+    "titulo": "La tabla de auditoría del panel de administración tenía scroll horizontal sin acceso por teclado",
+    "hu": "US-29 · CA-8 · WCAG 2.1.1",
+    "casos": [
+      "NF-24"
+    ],
+    "descripcion": "En pantallas angostas la tabla de verificaciones se desplaza horizontalmente, pero el contenedor no era enfocable, de modo que quien usa solo el teclado no podía ver las columnas ocultas (axe-core: scrollable-region-focusable).",
+    "pasos": [
+      "Iniciar sesión como administrador y abrir /admin.",
+      "Ejecutar axe-core."
+    ],
+    "esperado": "Toda región con scroll es accesible con el teclado.",
+    "obtenido": "Violación grave scrollable-region-focusable en .tabla-contenedor.",
+    "impacto": "Bajo: afecta solo a administradores que usan teclado en pantallas angostas.",
+    "recomendacion": "Evitar el scroll horizontal (adaptar la tabla al ancho) o, si es inevitable, hacer enfocable la región con scroll.",
+    "correccion": "Las celdas de la tabla ahora parten el texto y se adaptan al ancho disponible, por lo que ya no hay región con scroll horizontal. NF-24 confirma que axe-core no reporta la violación y que no hay desborde entre 360 y 1920 px.",
+    "verifican": [
+      "NF-24"
+    ]
   }
 ]

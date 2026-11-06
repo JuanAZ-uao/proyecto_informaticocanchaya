@@ -1,12 +1,16 @@
 const reservaRepository = require('../repositories/reservaRepository');
 const canchaRepository = require('../repositories/canchaRepository');
 const usuarioRepository = require('../repositories/usuarioRepository');
+const pagoRepository = require('../repositories/pagoRepository');
 const emailService = require('./emailService');
 const temporizadorService = require('./temporizadorReservaService');
 const retencionService = require('./retencionService');
+const metodoPagoService = require('./metodoPagoService');
+const pagoService = require('./pagoService');
+const Pago = require('../models/Pago');
 const { validarFranjaEnHorario } = require('./horarioReservaService');
 const ErrorDeAplicacion = require('../utils/ErrorDeAplicacion');
-const { esMomentoPasado } = require('../utils/fechaHora');
+const { esMomentoPasado, minutosHastaInicio } = require('../utils/fechaHora');
 const env = require('../config/env');
 
 // 23505: índice único (misma franja). 23P01: restricción de exclusión (franjas que se solapan).
@@ -20,7 +24,7 @@ function validarQueNoSeaPasado(fecha, horaInicio) {
   }
 }
 
-async function crearReserva({ canchaId, usuarioId, fecha, horaInicio, horaFin }) {
+async function crearReserva({ canchaId, usuarioId, fecha, horaInicio, horaFin, metodoPagoId }) {
   const cancha = await canchaRepository.obtenerPorId(canchaId);
   if (!cancha) {
     throw new ErrorDeAplicacion('Cancha no encontrada', 404);
@@ -49,12 +53,26 @@ async function crearReserva({ canchaId, usuarioId, fecha, horaInicio, horaFin })
     );
   }
 
+  // US-28: el pago con tarjeta es opcional; si se elige, debe ser una tarjeta propia y vigente.
+  const metodoPago = metodoPagoId ? await metodoPagoService.obtenerParaPagar(usuarioId, metodoPagoId) : null;
+
   // US-18: si otro usuario tiene la franja retenida, no se le puede quitar.
   await retencionService.verificarDisponibleParaReservar(usuarioId, canchaId, fecha, horaInicio);
 
   let reserva;
+  let pagoCobrado = null;
   try {
-    reserva = await reservaRepository.crear({ canchaId, usuarioId, fecha, horaInicio, horaFin });
+    // El cobro ocurre dentro de la misma transacción que crea la reserva: si la pasarela rechaza el
+    // pago (402) la reserva no se guarda, y si se guarda queda con su pago registrado.
+    const cobrar = metodoPago
+      ? async (cliente, nueva) => {
+          const resultado = await pagoService.cobrarReserva(cliente, { reserva: nueva, metodoPago, monto: cancha.costoHora });
+          pagoCobrado = resultado.pago;
+          return resultado.deshacer;
+        }
+      : undefined;
+
+    reserva = await reservaRepository.crear({ canchaId, usuarioId, fecha, horaInicio, horaFin }, cobrar);
   } catch (error) {
     if (CODIGOS_FRANJA_OCUPADA.includes(error.code)) {
       throw new ErrorDeAplicacion('El horario ya no está disponible', 409);
@@ -66,6 +84,7 @@ async function crearReserva({ canchaId, usuarioId, fecha, horaInicio, horaFin })
   const reservaConfirmada = {
     ...reserva,
     cancha: { id: cancha.id, nombre: cancha.nombre, direccion: cancha.direccion },
+    pago: Pago.aPublico(pagoCobrado),
   };
 
   // La reserva ya quedó guardada: el temporizador (US-17) se da por terminado, la
@@ -98,8 +117,30 @@ function enviarCorreoConfirmacion(usuarioId, reserva) {
     });
 }
 
+// US-14: correo con el detalle de la reserva cancelada. Su fallo no deshace la cancelación.
+function enviarCorreoCancelacion(usuarioId, reserva, reembolso) {
+  Promise.all([usuarioRepository.buscarPorId(usuarioId), canchaRepository.obtenerPorId(reserva.canchaId)])
+    .then(([usuario, cancha]) => {
+      if (!usuario || !cancha) return null;
+      return emailService.enviarCorreoCancelacionReserva({
+        para: usuario.correo,
+        nombre: usuario.nombre,
+        reserva: { ...reserva, cancha: { id: cancha.id, nombre: cancha.nombre, direccion: cancha.direccion } },
+        reembolso,
+      });
+    })
+    .catch((error) => {
+      console.error(`[EMAIL] No se pudo enviar la cancelación de ${reserva.codigo}:`, error.message);
+    });
+}
+
 async function listarReservasDeUsuario(usuarioId) {
   return reservaRepository.listarTodasPorUsuario(usuarioId);
+}
+
+function mensajeFueraDePlazo() {
+  const horas = env.horasMinimasCancelacion;
+  return `Solo puedes cancelar una reserva con al menos ${horas} ${horas === 1 ? 'hora' : 'horas'} de anticipación al inicio. Ya no es posible cancelar esta reserva.`;
 }
 
 async function cancelarReserva(id, usuarioId) {
@@ -116,9 +157,33 @@ async function cancelarReserva(id, usuarioId) {
     throw new ErrorDeAplicacion('Esta reserva ya estaba cancelada', 409);
   }
 
-  const cancelada = await reservaRepository.cancelar(id, usuarioId);
-  if (cancelada) retencionService.notificarFranjaLiberada(usuarioId, cancelada);
-  return cancelada;
+  // US-14: solo se puede cancelar con la anticipación mínima (también cubre las reservas que ya empezaron).
+  const minutosRestantes = minutosHastaInicio(reserva.fecha, String(reserva.horaInicio).slice(0, 5));
+  if (!(minutosRestantes >= env.horasMinimasCancelacion * 60)) {
+    throw new ErrorDeAplicacion(mensajeFueraDePlazo(), 409, 'CANCELACION_FUERA_DE_PLAZO');
+  }
+
+  // US-28: si la reserva se pagó con tarjeta, el reembolso se hace dentro de la misma transacción de la cancelación.
+  const pago = await pagoRepository.obtenerPorReserva(id);
+  let reembolsado = null;
+  const reembolsar = pago?.estado === 'aprobado'
+    ? async (cliente) => {
+        reembolsado = await pagoService.reembolsar(cliente, pago);
+      }
+    : undefined;
+
+  const cancelada = await reservaRepository.cancelar(id, usuarioId, reembolsar);
+  if (!cancelada) {
+    // Otra petición la canceló justo antes.
+    throw new ErrorDeAplicacion('Esta reserva ya estaba cancelada', 409);
+  }
+
+  retencionService.notificarFranjaLiberada(usuarioId, cancelada);
+
+  const reembolso = reembolsado ? Pago.aPublico(reembolsado) : null;
+  enviarCorreoCancelacion(usuarioId, cancelada, reembolso);
+
+  return { reserva: cancelada, reembolso };
 }
 
 
@@ -141,6 +206,7 @@ async function listarMisReservas({
     estado,
     limite: limiteSeguro,
     offset: (paginaSegura - 1) * limiteSeguro,
+    minutosMinimosCancelacion: Math.round(env.horasMinimasCancelacion * 60),
   });
 
   return {

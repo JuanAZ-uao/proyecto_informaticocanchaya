@@ -37,9 +37,48 @@ async function actualizarPassword(usuarioId, passwordHash) {
   return Usuario.aDominio(rows[0]);
 }
 
+async function actualizarPerfil(usuarioId, { nombre, telefono }) {
+  const { rows } = await pool.query(
+    `UPDATE usuarios
+     SET nombre = $1, telefono = $2, updated_at = now()
+     WHERE id = $3
+     RETURNING *`,
+    [nombre, telefono, usuarioId]
+  );
+
+  return Usuario.aDominio(rows[0]);
+}
+
+async function actualizarCorreo(usuarioId, correo) {
+  const { rows } = await pool.query(
+    `UPDATE usuarios
+     SET correo = $1, updated_at = now()
+     WHERE id = $2
+     RETURNING *`,
+    [correo.toLowerCase().trim(), usuarioId]
+  );
+
+  return Usuario.aDominio(rows[0]);
+}
+
+async function asignarRol(usuarioId, rol) {
+  const { rows } = await pool.query(
+    `UPDATE usuarios
+     SET rol = $1, updated_at = now()
+     WHERE id = $2
+     RETURNING *`,
+    [rol, usuarioId]
+  );
+
+  return Usuario.aDominio(rows[0]);
+}
+
 module.exports = {
   crear,
+  asignarRol,
   buscarPorCorreo,
   buscarPorId,
   actualizarPassword,
+  actualizarPerfil,
+  actualizarCorreo,
 };

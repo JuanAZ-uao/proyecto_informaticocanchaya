@@ -1,50 +1,758 @@
 {
-  "fecha": "2026-10-28T07:41:31.305Z",
+  "fecha": "2026-11-06T00:52:55.621Z",
   "migracion": true,
-  "duracionMs": 65736,
+  "duracionMs": 30700,
   "resumen": {
-    "suites": 13,
-    "suitesAprobadas": 13,
-    "pruebas": 157,
-    "aprobadas": 157,
+    "suites": 24,
+    "suitesAprobadas": 24,
+    "pruebas": 472,
+    "aprobadas": 472,
     "fallidas": 0,
     "omitidas": 0
   },
   "suites": [
     {
+      "archivo": "tests/perfilPagosAdmin.integration.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 7748,
+      "tests": [
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-27 · perfil",
+          "nombre": "muestra los datos propios y no los de otro usuario (403)",
+          "estado": "APROBADA",
+          "duracionMs": 85
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-27 · perfil",
+          "nombre": "guarda nombre y teléfono válidos y rechaza los inválidos sin guardar nada",
+          "estado": "APROBADA",
+          "duracionMs": 34
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-27 · perfil",
+          "nombre": "cambia la contraseña solo con la actual correcta y la nueva cumple las reglas",
+          "estado": "APROBADA",
+          "duracionMs": 342
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-27 · perfil",
+          "nombre": "el cambio de correo no se aplica hasta verificar el enlace, evita duplicados y el enlace sirve una sola vez",
+          "estado": "APROBADA",
+          "duracionMs": 109
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-28 · métodos de pago",
+          "nombre": "guarda la tarjeta enmascarada y NUNCA el número completo ni el CVV",
+          "estado": "APROBADA",
+          "duracionMs": 85
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-28 · métodos de pago",
+          "nombre": "rechaza número que no pasa Luhn con el error del campo y sin exponer datos sensibles",
+          "estado": "APROBADA",
+          "duracionMs": 7
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-28 · métodos de pago",
+          "nombre": "rechaza tarjeta vencida con el error del campo y sin exponer datos sensibles",
+          "estado": "APROBADA",
+          "duracionMs": 6
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-28 · métodos de pago",
+          "nombre": "rechaza CVV incorrecto con el error del campo y sin exponer datos sensibles",
+          "estado": "APROBADA",
+          "duracionMs": 12
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-28 · métodos de pago",
+          "nombre": "solo el propietario ve y gestiona sus tarjetas",
+          "estado": "APROBADA",
+          "duracionMs": 68
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-28 · métodos de pago",
+          "nombre": "al reservar con la tarjeta, el cobro se procesa y queda registrado con la reserva",
+          "estado": "APROBADA",
+          "duracionMs": 137
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-28 · métodos de pago",
+          "nombre": "si el pago es rechazado (4000 0000 0000 0002) la reserva NO se confirma y se informa el motivo",
+          "estado": "APROBADA",
+          "duracionMs": 136
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-28 · métodos de pago",
+          "nombre": "si el pago es rechazado (4000 0000 0000 9995) la reserva NO se confirma y se informa el motivo",
+          "estado": "APROBADA",
+          "duracionMs": 105
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-28 · métodos de pago",
+          "nombre": "no permite pagar con la tarjeta de otro usuario",
+          "estado": "APROBADA",
+          "duracionMs": 23
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-28 · métodos de pago",
+          "nombre": "al eliminar la tarjeta desaparece como opción, pero las reservas ya pagadas no se ven afectadas",
+          "estado": "APROBADA",
+          "duracionMs": 146
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-14 · cancelación de reserva propia",
+          "nombre": "cancela con más de 2 horas, libera la franja de inmediato y reembolsa el pago",
+          "estado": "APROBADA",
+          "duracionMs": 357
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-14 · cancelación de reserva propia",
+          "nombre": "una reserva sin pago se cancela sin reembolso",
+          "estado": "APROBADA",
+          "duracionMs": 141
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-14 · cancelación de reserva propia",
+          "nombre": "bloquea la cancelación si faltan menos de 2 horas y explica la restricción",
+          "estado": "APROBADA",
+          "duracionMs": 91
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-14 · cancelación de reserva propia",
+          "nombre": "con más de 2 horas de anticipación (hoy) sí se puede cancelar",
+          "estado": "APROBADA",
+          "duracionMs": 42
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-14 · cancelación de reserva propia",
+          "nombre": "no permite cancelar la reserva de otro usuario (403) ni la modifica",
+          "estado": "APROBADA",
+          "duracionMs": 41
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-14 · cancelación de reserva propia",
+          "nombre": "no se puede cancelar dos veces",
+          "estado": "APROBADA",
+          "duracionMs": 143
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-14 · cancelación de reserva propia",
+          "nombre": "el historial indica si todavía se puede cancelar y el estado del pago",
+          "estado": "APROBADA",
+          "duracionMs": 201
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-29 · verificación del código de reserva (administrador)",
+          "nombre": "cada reserva tiene un código único, el mismo que ve el usuario",
+          "estado": "APROBADA",
+          "duracionMs": 92
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-29 · verificación del código de reserva (administrador)",
+          "nombre": "una reserva confirmada que no ha vencido es \"Vigente\", con cancha, fecha, horario y nombre del usuario",
+          "estado": "APROBADA",
+          "duracionMs": 115
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-29 · verificación del código de reserva (administrador)",
+          "nombre": "una reserva cancelada es \"No vigente\" por cancelada",
+          "estado": "APROBADA",
+          "duracionMs": 280
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-29 · verificación del código de reserva (administrador)",
+          "nombre": "una reserva vencida es \"No vigente\" por vencida",
+          "estado": "APROBADA",
+          "duracionMs": 47
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-29 · verificación del código de reserva (administrador)",
+          "nombre": "marcada como utilizada, el código ya no puede validarse como vigente y no se puede marcar otra vez",
+          "estado": "APROBADA",
+          "duracionMs": 341
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-29 · verificación del código de reserva (administrador)",
+          "nombre": "si dos administradores la marcan a la vez, solo uno lo logra",
+          "estado": "APROBADA",
+          "duracionMs": 149
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-29 · verificación del código de reserva (administrador)",
+          "nombre": "un código inexistente o con formato inválido responde \"Código no encontrado\" sin revelar nada",
+          "estado": "APROBADA",
+          "duracionMs": 155
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-29 · verificación del código de reserva (administrador)",
+          "nombre": "un usuario sin rol de administrador recibe 403 en todas las rutas del panel",
+          "estado": "APROBADA",
+          "duracionMs": 117
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-29 · verificación del código de reserva (administrador)",
+          "nombre": "el rol se lee de la base: un usuario que deja de ser administrador pierde el acceso de inmediato",
+          "estado": "APROBADA",
+          "duracionMs": 105
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-29 · verificación del código de reserva (administrador)",
+          "nombre": "cada verificación queda registrada con administrador, código, resultado y fecha",
+          "estado": "APROBADA",
+          "duracionMs": 230
+        },
+        {
+          "grupo": "Perfil, pagos, cancelación y administración (integración) › US-29 · verificación del código de reserva (administrador)",
+          "nombre": "el registro público nunca crea administradores",
+          "estado": "APROBADA",
+          "duracionMs": 168
+        }
+      ]
+    },
+    {
+      "archivo": "tests/reservasMultiples.integration.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 2452,
+      "tests": [
+        {
+          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
+          "nombre": "un usuario crea 3 reservas en canchas/horarios distintos y las 3 quedan activas y visibles (prueba de aceptación)",
+          "estado": "APROBADA",
+          "duracionMs": 219
+        },
+        {
+          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
+          "nombre": "rechaza con 409 \"Ya tienes una reserva en ese horario\" si el usuario ya tiene otra reserva confirmada que se solapa, aunque sea en otra cancha",
+          "estado": "APROBADA",
+          "duracionMs": 137
+        },
+        {
+          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
+          "nombre": "reservar la misma franja de la misma cancha sigue bloqueado para cualquier usuario, incluido uno distinto (regresión US-09)",
+          "estado": "APROBADA",
+          "duracionMs": 108
+        },
+        {
+          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
+          "nombre": "cancelar una reserva no afecta a las demás reservas activas del usuario",
+          "estado": "APROBADA",
+          "duracionMs": 252
+        },
+        {
+          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
+          "nombre": "rechaza con 409 y un mensaje claro al superar el máximo de reservas activas (configurado: 5)",
+          "estado": "APROBADA",
+          "duracionMs": 403
+        },
+        {
+          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
+          "nombre": "las reservas ya jugadas (\"completada\") no cuentan para el límite de reservas activas",
+          "estado": "APROBADA",
+          "duracionMs": 233
+        }
+      ]
+    },
+    {
+      "archivo": "tests/openapiContrato.integration.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 2406,
+      "tests": [
+        {
+          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
+          "nombre": "GET /api/health",
+          "estado": "APROBADA",
+          "duracionMs": 4
+        },
+        {
+          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
+          "nombre": "autenticación: errores documentados (409 correo repetido, 401 credenciales, 400 validación)",
+          "estado": "APROBADA",
+          "duracionMs": 136
+        },
+        {
+          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
+          "nombre": "recuperación de contraseña: 200 neutro y 400 con token inválido",
+          "estado": "APROBADA",
+          "duracionMs": 66
+        },
+        {
+          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
+          "nombre": "los endpoints protegidos responden 401 documentado sin token",
+          "estado": "APROBADA",
+          "duracionMs": 15
+        },
+        {
+          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
+          "nombre": "canchas: listado, detalle, 404 y 400",
+          "estado": "APROBADA",
+          "duracionMs": 64
+        },
+        {
+          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
+          "nombre": "disponibilidad y su alias",
+          "estado": "APROBADA",
+          "duracionMs": 50
+        },
+        {
+          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
+          "nombre": "reservas: confirmar (201) con el ejemplo, historial, listado completo y errores 409",
+          "estado": "APROBADA",
+          "duracionMs": 144
+        },
+        {
+          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
+          "nombre": "temporizador: completar sin sesión activa responde el 409 documentado",
+          "estado": "APROBADA",
+          "duracionMs": 16
+        },
+        {
+          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
+          "nombre": "cancelar: 403 de otro usuario, 200, 409 si ya estaba cancelada, 404 y 400",
+          "estado": "APROBADA",
+          "duracionMs": 57
+        }
+      ]
+    },
+    {
+      "archivo": "tests/reservasDuplicadas.integration.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 1498,
+      "tests": [
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "ante dos peticiones simultáneas por la misma franja, solo una crea la reserva (201) y la otra recibe 409",
+          "estado": "APROBADA",
+          "duracionMs": 75
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "al cancelar la reserva ganadora, la franja queda libre y se puede volver a reservar",
+          "estado": "APROBADA",
+          "duracionMs": 130
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "no deja registros huérfanos: un intento duplicado no inserta filas parciales",
+          "estado": "APROBADA",
+          "duracionMs": 85
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "US-11: confirma con 201 y devuelve id, código, cancha, fecha, hora y estado \"confirmada\"",
+          "estado": "APROBADA",
+          "duracionMs": 48
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "US-11: la reserva confirmada aparece de inmediato en el historial del usuario",
+          "estado": "APROBADA",
+          "duracionMs": 8
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "US-11: sin token no se puede confirmar ni consultar el historial (401)",
+          "estado": "APROBADA",
+          "duracionMs": 8
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "DEF-03: una reserva fuera del horario de la cancha se rechaza con 400 FUERA_DE_HORARIO",
+          "estado": "APROBADA",
+          "duracionMs": 8
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "DEF-04: una franja solapada se rechaza y la base de datos impide el solape aunque se intente por SQL",
+          "estado": "APROBADA",
+          "duracionMs": 56
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "DEF-07: tras 10 inicios de sesión fallidos de una cuenta, el siguiente intento se frena con 429; otra cuenta no se afecta",
+          "estado": "APROBADA",
+          "duracionMs": 67
+        },
+        {
+          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
+          "nombre": "DEF-08: un origen no permitido por CORS recibe 403 y no un error interno",
+          "estado": "APROBADA",
+          "duracionMs": 3
+        }
+      ]
+    },
+    {
+      "archivo": "tests/usuariosYAdmin.http.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 1201,
+      "tests": [
+        {
+          "grupo": "rutas de usuario: autenticación y propiedad",
+          "nombre": "get /api/usuarios/11111111-1111-4111-8111-111111111111 sin token responde 401",
+          "estado": "APROBADA",
+          "duracionMs": 10
+        },
+        {
+          "grupo": "rutas de usuario: autenticación y propiedad",
+          "nombre": "patch /api/usuarios/11111111-1111-4111-8111-111111111111 sin token responde 401",
+          "estado": "APROBADA",
+          "duracionMs": 3
+        },
+        {
+          "grupo": "rutas de usuario: autenticación y propiedad",
+          "nombre": "patch /api/usuarios/11111111-1111-4111-8111-111111111111/password sin token responde 401",
+          "estado": "APROBADA",
+          "duracionMs": 3
+        },
+        {
+          "grupo": "rutas de usuario: autenticación y propiedad",
+          "nombre": "post /api/usuarios/11111111-1111-4111-8111-111111111111/correo sin token responde 401",
+          "estado": "APROBADA",
+          "duracionMs": 3
+        },
+        {
+          "grupo": "rutas de usuario: autenticación y propiedad",
+          "nombre": "get /api/usuarios/11111111-1111-4111-8111-111111111111/metodos-pago sin token responde 401",
+          "estado": "APROBADA",
+          "duracionMs": 5
+        },
+        {
+          "grupo": "rutas de usuario: autenticación y propiedad",
+          "nombre": "post /api/usuarios/11111111-1111-4111-8111-111111111111/metodos-pago sin token responde 401",
+          "estado": "APROBADA",
+          "duracionMs": 3
+        },
+        {
+          "grupo": "rutas de usuario: autenticación y propiedad",
+          "nombre": "delete /api/usuarios/11111111-1111-4111-8111-111111111111/metodos-pago/33333333-3333-4333-8333-333333333333 sin token responde 401",
+          "estado": "APROBADA",
+          "duracionMs": 3
+        },
+        {
+          "grupo": "rutas de usuario: autenticación y propiedad",
+          "nombre": "get /api/usuarios/11111111-1111-4111-8111-111111111111 sobre otro usuario responde 403 y no toca nada",
+          "estado": "APROBADA",
+          "duracionMs": 23
+        },
+        {
+          "grupo": "rutas de usuario: autenticación y propiedad",
+          "nombre": "patch /api/usuarios/11111111-1111-4111-8111-111111111111 sobre otro usuario responde 403 y no toca nada",
+          "estado": "APROBADA",
+          "duracionMs": 6
+        },
+        {
+          "grupo": "rutas de usuario: autenticación y propiedad",
+          "nombre": "patch /api/usuarios/11111111-1111-4111-8111-111111111111/password sobre otro usuario responde 403 y no toca nada",
+          "estado": "APROBADA",
+          "duracionMs": 4
+        },
+        {
+          "grupo": "rutas de usuario: autenticación y propiedad",
+          "nombre": "post /api/usuarios/11111111-1111-4111-8111-111111111111/correo sobre otro usuario responde 403 y no toca nada",
+          "estado": "APROBADA",
+          "duracionMs": 6
+        },
+        {
+          "grupo": "rutas de usuario: autenticación y propiedad",
+          "nombre": "get /api/usuarios/11111111-1111-4111-8111-111111111111/metodos-pago sobre otro usuario responde 403 y no toca nada",
+          "estado": "APROBADA",
+          "duracionMs": 4
+        },
+        {
+          "grupo": "rutas de usuario: autenticación y propiedad",
+          "nombre": "post /api/usuarios/11111111-1111-4111-8111-111111111111/metodos-pago sobre otro usuario responde 403 y no toca nada",
+          "estado": "APROBADA",
+          "duracionMs": 5
+        },
+        {
+          "grupo": "rutas de usuario: autenticación y propiedad",
+          "nombre": "delete /api/usuarios/11111111-1111-4111-8111-111111111111/metodos-pago/33333333-3333-4333-8333-333333333333 sobre otro usuario responde 403 y no toca nada",
+          "estado": "APROBADA",
+          "duracionMs": 8
+        },
+        {
+          "grupo": "perfil (US-27)",
+          "nombre": "GET devuelve el perfil propio",
+          "estado": "APROBADA",
+          "duracionMs": 5
+        },
+        {
+          "grupo": "perfil (US-27)",
+          "nombre": "PATCH guarda nombre y teléfono, quitando espacios, guiones y paréntesis del teléfono",
+          "estado": "APROBADA",
+          "duracionMs": 14
+        },
+        {
+          "grupo": "perfil (US-27)",
+          "nombre": "PATCH rechaza el teléfono inválido \"abc\" con el error del campo",
+          "estado": "APROBADA",
+          "duracionMs": 12
+        },
+        {
+          "grupo": "perfil (US-27)",
+          "nombre": "PATCH rechaza el teléfono inválido \"123\" con el error del campo",
+          "estado": "APROBADA",
+          "duracionMs": 6
+        },
+        {
+          "grupo": "perfil (US-27)",
+          "nombre": "PATCH rechaza el teléfono inválido \"12345678901234567\" con el error del campo",
+          "estado": "APROBADA",
+          "duracionMs": 13
+        },
+        {
+          "grupo": "perfil (US-27)",
+          "nombre": "PATCH rechaza el teléfono inválido \"300-12x-4567\" con el error del campo",
+          "estado": "APROBADA",
+          "duracionMs": 5
+        },
+        {
+          "grupo": "perfil (US-27)",
+          "nombre": "PATCH informa un error por cada campo obligatorio vacío",
+          "estado": "APROBADA",
+          "duracionMs": 10
+        },
+        {
+          "grupo": "perfil (US-27)",
+          "nombre": "PATCH rechaza un nombre de más de 100 caracteres",
+          "estado": "APROBADA",
+          "duracionMs": 7
+        },
+        {
+          "grupo": "perfil (US-27)",
+          "nombre": "PUT del cambio de contraseña valida la política de la nueva y exige la actual",
+          "estado": "APROBADA",
+          "duracionMs": 15
+        },
+        {
+          "grupo": "perfil (US-27)",
+          "nombre": "cambia la contraseña con datos válidos",
+          "estado": "APROBADA",
+          "duracionMs": 5
+        },
+        {
+          "grupo": "perfil (US-27)",
+          "nombre": "si la contraseña actual es incorrecta responde 400 (nunca 401) con el error del campo",
+          "estado": "APROBADA",
+          "duracionMs": 10
+        },
+        {
+          "grupo": "perfil (US-27)",
+          "nombre": "POST del correo exige un correo válido y responde 202 sin cambiarlo todavía",
+          "estado": "APROBADA",
+          "duracionMs": 12
+        },
+        {
+          "grupo": "perfil (US-27)",
+          "nombre": "POST /api/auth/verificar-correo es público y confirma el cambio",
+          "estado": "APROBADA",
+          "duracionMs": 7
+        },
+        {
+          "grupo": "perfil (US-27)",
+          "nombre": "traduce los errores de negocio (409 correo duplicado)",
+          "estado": "APROBADA",
+          "duracionMs": 5
+        },
+        {
+          "grupo": "métodos de pago (US-28)",
+          "nombre": "GET lista las tarjetas enmascaradas del propietario",
+          "estado": "APROBADA",
+          "duracionMs": 8
+        },
+        {
+          "grupo": "métodos de pago (US-28)",
+          "nombre": "POST guarda la tarjeta y la respuesta nunca contiene el número, el CVV ni el token",
+          "estado": "APROBADA",
+          "duracionMs": 6
+        },
+        {
+          "grupo": "métodos de pago (US-28)",
+          "nombre": "POST informa el error de cada campo faltante sin repetir lo recibido",
+          "estado": "APROBADA",
+          "duracionMs": 8
+        },
+        {
+          "grupo": "métodos de pago (US-28)",
+          "nombre": "POST muestra el error por campo de una tarjeta inválida (Luhn, vencida)",
+          "estado": "APROBADA",
+          "duracionMs": 5
+        },
+        {
+          "grupo": "métodos de pago (US-28)",
+          "nombre": "DELETE elimina la tarjeta y valida el id",
+          "estado": "APROBADA",
+          "duracionMs": 10
+        },
+        {
+          "grupo": "métodos de pago (US-28) › HTTPS obligatorio (EXIGIR_HTTPS_PAGOS=true)",
+          "nombre": "rechaza con 426 las rutas de tarjetas que no llegaron por HTTPS, sin procesarlas",
+          "estado": "APROBADA",
+          "duracionMs": 13
+        },
+        {
+          "grupo": "métodos de pago (US-28) › HTTPS obligatorio (EXIGIR_HTTPS_PAGOS=true)",
+          "nombre": "no afecta a las demás rutas (el perfil sigue funcionando)",
+          "estado": "APROBADA",
+          "duracionMs": 8
+        },
+        {
+          "grupo": "administración (US-29)",
+          "nombre": "post /api/admin/reservas/verificar sin token responde 401",
+          "estado": "APROBADA",
+          "duracionMs": 3
+        },
+        {
+          "grupo": "administración (US-29)",
+          "nombre": "post /api/admin/reservas/CY-D1AD1C79/usar sin token responde 401",
+          "estado": "APROBADA",
+          "duracionMs": 3
+        },
+        {
+          "grupo": "administración (US-29)",
+          "nombre": "get /api/admin/verificaciones sin token responde 401",
+          "estado": "APROBADA",
+          "duracionMs": 3
+        },
+        {
+          "grupo": "administración (US-29)",
+          "nombre": "post /api/admin/reservas/verificar con un usuario sin rol de administrador responde 403",
+          "estado": "APROBADA",
+          "duracionMs": 22
+        },
+        {
+          "grupo": "administración (US-29)",
+          "nombre": "post /api/admin/reservas/CY-D1AD1C79/usar con un usuario sin rol de administrador responde 403",
+          "estado": "APROBADA",
+          "duracionMs": 5
+        },
+        {
+          "grupo": "administración (US-29)",
+          "nombre": "get /api/admin/verificaciones con un usuario sin rol de administrador responde 403",
+          "estado": "APROBADA",
+          "duracionMs": 5
+        },
+        {
+          "grupo": "administración (US-29)",
+          "nombre": "un usuario que ya no existe tampoco pasa (403)",
+          "estado": "APROBADA",
+          "duracionMs": 7
+        },
+        {
+          "grupo": "administración (US-29)",
+          "nombre": "si falla la consulta del rol responde el error del servidor",
+          "estado": "APROBADA",
+          "duracionMs": 5
+        },
+        {
+          "grupo": "administración (US-29)",
+          "nombre": "el administrador verifica un código y recibe el resultado",
+          "estado": "APROBADA",
+          "duracionMs": 5
+        },
+        {
+          "grupo": "administración (US-29)",
+          "nombre": "exige que el código venga como texto no vacío",
+          "estado": "APROBADA",
+          "duracionMs": 26
+        },
+        {
+          "grupo": "administración (US-29)",
+          "nombre": "un código inexistente responde 404 \"Código no encontrado\"",
+          "estado": "APROBADA",
+          "duracionMs": 4
+        },
+        {
+          "grupo": "administración (US-29)",
+          "nombre": "marca como utilizada y traduce el 409 cuando ya no está vigente",
+          "estado": "APROBADA",
+          "duracionMs": 11
+        },
+        {
+          "grupo": "administración (US-29)",
+          "nombre": "lista la auditoría con un límite validado",
+          "estado": "APROBADA",
+          "duracionMs": 9
+        },
+        {
+          "grupo": "reservas con pago: validación del método de pago (US-28)",
+          "nombre": "rechaza con 400 un metodoPagoId que no es un UUID",
+          "estado": "APROBADA",
+          "duracionMs": 7
+        }
+      ]
+    },
+    {
+      "archivo": "tests/historialReservas.integration.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 1163,
+      "tests": [
+        {
+          "grupo": "Historial de reservas (US-13, integración)",
+          "nombre": "exige autenticación",
+          "estado": "APROBADA",
+          "duracionMs": 5
+        },
+        {
+          "grupo": "Historial de reservas (US-13, integración)",
+          "nombre": "por defecto lista las próximas del usuario, de la más cercana a la más lejana, sin las de otros",
+          "estado": "APROBADA",
+          "duracionMs": 16
+        },
+        {
+          "grupo": "Historial de reservas (US-13, integración)",
+          "nombre": "las pasadas se listan de la más reciente a la más antigua y las confirmadas ya jugadas salen \"completada\"",
+          "estado": "APROBADA",
+          "duracionMs": 8
+        },
+        {
+          "grupo": "Historial de reservas (US-13, integración)",
+          "nombre": "filtra por estado y pagina los resultados",
+          "estado": "APROBADA",
+          "duracionMs": 22
+        },
+        {
+          "grupo": "Historial de reservas (US-13, integración)",
+          "nombre": "rechaza con 400 parámetros inválidos",
+          "estado": "APROBADA",
+          "duracionMs": 21
+        }
+      ]
+    },
+    {
       "archivo": "tests/documentacionApi.test.js",
       "estado": "APROBADA",
-      "duracionMs": 10960,
+      "duracionMs": 1055,
       "tests": [
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "es OpenAPI 3.x y define la autenticación Bearer JWT",
           "estado": "APROBADA",
-          "duracionMs": 17
+          "duracionMs": 0
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "documenta al menos el 90 % de los endpoints implementados y no documenta endpoints que no existen",
           "estado": "APROBADA",
-          "duracionMs": 68
+          "duracionMs": 8
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "define los modelos Usuario, Cancha, Reserva y Error una sola vez en components/schemas",
           "estado": "APROBADA",
-          "duracionMs": 4
+          "duracionMs": 1
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "GET /api/health documenta descripción, operationId, etiqueta y una respuesta exitosa",
           "estado": "APROBADA",
-          "duracionMs": 2
+          "duracionMs": 1
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "POST /api/auth/registro documenta descripción, operationId, etiqueta y una respuesta exitosa",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 0
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
@@ -56,7 +764,7 @@
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "POST /api/auth/olvide-password documenta descripción, operationId, etiqueta y una respuesta exitosa",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 0
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
@@ -68,13 +776,13 @@
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "GET /api/canchas documenta descripción, operationId, etiqueta y una respuesta exitosa",
           "estado": "APROBADA",
-          "duracionMs": 5
+          "duracionMs": 1
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "GET /api/canchas/{id} documenta descripción, operationId, etiqueta y una respuesta exitosa",
           "estado": "APROBADA",
-          "duracionMs": 2
+          "duracionMs": 0
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
@@ -92,7 +800,7 @@
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "POST /api/canchas/{id}/reservas documenta descripción, operationId, etiqueta y una respuesta exitosa",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 4
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
@@ -104,25 +812,91 @@
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "GET /api/reservas documenta descripción, operationId, etiqueta y una respuesta exitosa",
           "estado": "APROBADA",
-          "duracionMs": 5
+          "duracionMs": 6
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "GET /api/reservas/mias documenta descripción, operationId, etiqueta y una respuesta exitosa",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 0
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "PATCH /api/reservas/{id}/cancelar documenta descripción, operationId, etiqueta y una respuesta exitosa",
           "estado": "APROBADA",
-          "duracionMs": 4
+          "duracionMs": 1
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "POST /api/auth/verificar-correo documenta descripción, operationId, etiqueta y una respuesta exitosa",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "GET /api/usuarios/{id} documenta descripción, operationId, etiqueta y una respuesta exitosa",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "PATCH /api/usuarios/{id} documenta descripción, operationId, etiqueta y una respuesta exitosa",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "PATCH /api/usuarios/{id}/password documenta descripción, operationId, etiqueta y una respuesta exitosa",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "POST /api/usuarios/{id}/correo documenta descripción, operationId, etiqueta y una respuesta exitosa",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "GET /api/usuarios/{id}/metodos-pago documenta descripción, operationId, etiqueta y una respuesta exitosa",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "POST /api/usuarios/{id}/metodos-pago documenta descripción, operationId, etiqueta y una respuesta exitosa",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "DELETE /api/usuarios/{id}/metodos-pago/{metodoId} documenta descripción, operationId, etiqueta y una respuesta exitosa",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "POST /api/admin/reservas/verificar documenta descripción, operationId, etiqueta y una respuesta exitosa",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "POST /api/admin/reservas/{codigo}/usar documenta descripción, operationId, etiqueta y una respuesta exitosa",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "GET /api/admin/verificaciones documenta descripción, operationId, etiqueta y una respuesta exitosa",
+          "estado": "APROBADA",
+          "duracionMs": 1
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "GET /api/canchas protegido: documenta el 401",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 0
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
@@ -134,13 +908,13 @@
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "GET /api/canchas/{id}/disponibilidad protegido: documenta el 401",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 0
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "GET /api/canchas/{id}/reservas protegido: documenta el 401",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 0
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
@@ -174,27 +948,87 @@
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
-          "nombre": "POST /api/auth/registro con cuerpo: tiene esquema y ejemplo, y documenta el 400",
+          "nombre": "GET /api/usuarios/{id} protegido: documenta el 401",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "PATCH /api/usuarios/{id} protegido: documenta el 401",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "PATCH /api/usuarios/{id}/password protegido: documenta el 401",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "POST /api/usuarios/{id}/correo protegido: documenta el 401",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "GET /api/usuarios/{id}/metodos-pago protegido: documenta el 401",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "POST /api/usuarios/{id}/metodos-pago protegido: documenta el 401",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "DELETE /api/usuarios/{id}/metodos-pago/{metodoId} protegido: documenta el 401",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "POST /api/admin/reservas/verificar protegido: documenta el 401",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "POST /api/admin/reservas/{codigo}/usar protegido: documenta el 401",
           "estado": "APROBADA",
           "duracionMs": 1
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
-          "nombre": "POST /api/auth/login con cuerpo: tiene esquema y ejemplo, y documenta el 400",
+          "nombre": "GET /api/admin/verificaciones protegido: documenta el 401",
           "estado": "APROBADA",
           "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "POST /api/auth/registro con cuerpo: tiene esquema y ejemplo, y documenta el 400",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "POST /api/auth/login con cuerpo: tiene esquema y ejemplo, y documenta el 400",
+          "estado": "APROBADA",
+          "duracionMs": 1
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "POST /api/auth/olvide-password con cuerpo: tiene esquema y ejemplo, y documenta el 400",
           "estado": "APROBADA",
-          "duracionMs": 4
+          "duracionMs": 0
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
           "nombre": "POST /api/auth/restablecer-password con cuerpo: tiene esquema y ejemplo, y documenta el 400",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 1
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
@@ -210,9 +1044,45 @@
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
-          "nombre": "documenta los errores del motor de reservas: 409 de duplicada, solapada, límite y retenida",
+          "nombre": "POST /api/auth/verificar-correo con cuerpo: tiene esquema y ejemplo, y documenta el 400",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "PATCH /api/usuarios/{id} con cuerpo: tiene esquema y ejemplo, y documenta el 400",
           "estado": "APROBADA",
           "duracionMs": 1
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "PATCH /api/usuarios/{id}/password con cuerpo: tiene esquema y ejemplo, y documenta el 400",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "POST /api/usuarios/{id}/correo con cuerpo: tiene esquema y ejemplo, y documenta el 400",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "POST /api/usuarios/{id}/metodos-pago con cuerpo: tiene esquema y ejemplo, y documenta el 400",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "POST /api/admin/reservas/verificar con cuerpo: tiene esquema y ejemplo, y documenta el 400",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "Especificación OpenAPI (RNF-07)",
+          "nombre": "documenta los errores del motor de reservas: 409 de duplicada, solapada, límite y retenida",
+          "estado": "APROBADA",
+          "duracionMs": 0
         },
         {
           "grupo": "Especificación OpenAPI (RNF-07)",
@@ -224,282 +1094,781 @@
           "grupo": "Swagger UI en /api/docs",
           "nombre": "sirve la interfaz HTML",
           "estado": "APROBADA",
-          "duracionMs": 394
+          "duracionMs": 75
         },
         {
           "grupo": "Swagger UI en /api/docs",
           "nombre": "sirve la especificación en JSON apuntando al servidor desde el que se consulta",
           "estado": "APROBADA",
-          "duracionMs": 335
+          "duracionMs": 49
         },
         {
           "grupo": "Swagger UI en /api/docs",
           "nombre": "sirve la especificación en YAML",
           "estado": "APROBADA",
-          "duracionMs": 12
+          "duracionMs": 6
         }
       ]
     },
     {
       "archivo": "tests/temporizadorSocket.test.js",
       "estado": "APROBADA",
-      "duracionMs": 3630,
+      "duracionMs": 1143,
       "tests": [
         {
           "grupo": "temporizadorSocket › conexión",
           "nombre": "rechaza una conexión sin token",
           "estado": "APROBADA",
-          "duracionMs": 157
+          "duracionMs": 30
         },
         {
           "grupo": "temporizadorSocket › conexión",
           "nombre": "rechaza una conexión con un token inválido",
           "estado": "APROBADA",
-          "duracionMs": 24
+          "duracionMs": 5
         },
         {
           "grupo": "temporizadorSocket › conexión",
           "nombre": "avisa y cierra la conexión si falta el id de la cancha",
           "estado": "APROBADA",
-          "duracionMs": 44
+          "duracionMs": 12
         },
         {
           "grupo": "temporizadorSocket › conexión",
           "nombre": "inicia la sesión de 180 s y se la informa al cliente",
           "estado": "APROBADA",
-          "duracionMs": 29
+          "duracionMs": 9
         },
         {
           "grupo": "temporizadorSocket › retención de franjas",
           "nombre": "retiene la franja, lo confirma al usuario y avisa a los demás sin decir quién la retuvo",
           "estado": "APROBADA",
-          "duracionMs": 91
+          "duracionMs": 16
         },
         {
           "grupo": "temporizadorSocket › retención de franjas",
           "nombre": "no avisa de la retención al propio usuario que la hizo",
           "estado": "APROBADA",
-          "duracionMs": 194
+          "duracionMs": 175
         },
         {
           "grupo": "temporizadorSocket › retención de franjas",
           "nombre": "responde con un error claro si la franja es inválida",
           "estado": "APROBADA",
-          "duracionMs": 23
+          "duracionMs": 21
         },
         {
           "grupo": "temporizadorSocket › retención de franjas",
           "nombre": "responde FRANJA_RETENIDA si otro usuario ya la retiene",
           "estado": "APROBADA",
-          "duracionMs": 34
+          "duracionMs": 13
         },
         {
           "grupo": "temporizadorSocket › retención de franjas",
           "nombre": "oculta los errores internos al cliente",
           "estado": "APROBADA",
-          "duracionMs": 68
+          "duracionMs": 11
         },
         {
           "grupo": "temporizadorSocket › retención de franjas",
           "nombre": "libera la franja a pedido del usuario y avisa a los demás",
           "estado": "APROBADA",
-          "duracionMs": 75
+          "duracionMs": 14
         },
         {
           "grupo": "temporizadorSocket › retención de franjas",
           "nombre": "informa un error interno si no se puede liberar",
           "estado": "APROBADA",
-          "duracionMs": 145
+          "duracionMs": 17
         },
         {
           "grupo": "temporizadorSocket › retención de franjas",
           "nombre": "avisa a los demás cuando una franja se convierte en reserva",
           "estado": "APROBADA",
-          "duracionMs": 30
+          "duracionMs": 6
         },
         {
           "grupo": "temporizadorSocket › temporizador",
           "nombre": "reinicia la sesión y le da un nuevo vencimiento al usuario",
           "estado": "APROBADA",
-          "duracionMs": 15
+          "duracionMs": 6
         },
         {
           "grupo": "temporizadorSocket › temporizador",
           "nombre": "reenvía la sincronización y el vencimiento de la sesión solo a ese usuario",
           "estado": "APROBADA",
-          "duracionMs": 119
+          "duracionMs": 12
         },
         {
           "grupo": "temporizadorSocket › temporizador",
           "nombre": "responde con el error cuando no se puede reiniciar la sesión",
           "estado": "APROBADA",
-          "duracionMs": 57
+          "duracionMs": 9
         },
         {
           "grupo": "temporizadorSocket › temporizador",
           "nombre": "avisa al cliente si no se pudo iniciar la sesión",
           "estado": "APROBADA",
-          "duracionMs": 24
+          "duracionMs": 6
         }
       ]
     },
     {
-      "archivo": "tests/openapiContrato.integration.test.js",
+      "archivo": "tests/seedCanchasCali.integration.test.js",
       "estado": "APROBADA",
-      "duracionMs": 7310,
+      "duracionMs": 765,
       "tests": [
         {
-          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
-          "nombre": "GET /api/health",
+          "grupo": "Seed de canchas de Cali (integración)",
+          "nombre": "en la primera ejecución crea las canchas con su horario de 7 días",
           "estado": "APROBADA",
-          "duracionMs": 10
+          "duracionMs": 160
         },
         {
-          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
-          "nombre": "autenticación: errores documentados (409 correo repetido, 401 credenciales, 400 validación)",
+          "grupo": "Seed de canchas de Cali (integración)",
+          "nombre": "al repetirlo no duplica nada",
           "estado": "APROBADA",
-          "duracionMs": 304
+          "duracionMs": 6
         },
         {
-          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
-          "nombre": "recuperación de contraseña: 200 neutro y 400 con token inválido",
+          "grupo": "Seed de canchas de Cali (integración)",
+          "nombre": "no modifica las canchas ni las reservas que ya existían",
           "estado": "APROBADA",
-          "duracionMs": 112
+          "duracionMs": 8
         },
         {
-          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
-          "nombre": "los endpoints protegidos responden 401 documentado sin token",
+          "grupo": "Seed de canchas de Cali (integración)",
+          "nombre": "completa el horario de una cancha que lo perdió y no toca las demás",
           "estado": "APROBADA",
-          "duracionMs": 32
+          "duracionMs": 72
         },
         {
-          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
-          "nombre": "canchas: listado, detalle, 404 y 400",
+          "grupo": "Seed de canchas de Cali (integración)",
+          "nombre": "solo crea las canchas que faltan cuando ya existe una parte del catálogo",
           "estado": "APROBADA",
-          "duracionMs": 107
+          "duracionMs": 125
+        }
+      ]
+    },
+    {
+      "archivo": "tests/perfilService.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 432,
+      "tests": [
+        {
+          "grupo": "perfilService › obtenerPerfil",
+          "nombre": "devuelve los datos sin contraseña y sin cambio pendiente",
+          "estado": "APROBADA",
+          "duracionMs": 1
         },
         {
-          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
-          "nombre": "disponibilidad y su alias",
+          "grupo": "perfilService › obtenerPerfil",
+          "nombre": "incluye el correo que espera verificación",
           "estado": "APROBADA",
-          "duracionMs": 59
+          "duracionMs": 1
         },
         {
-          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
-          "nombre": "reservas: confirmar (201) con el ejemplo, historial, listado completo y errores 409",
+          "grupo": "perfilService › obtenerPerfil",
+          "nombre": "lanza 404 si el usuario no existe",
           "estado": "APROBADA",
-          "duracionMs": 528
+          "duracionMs": 0
         },
         {
-          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
-          "nombre": "temporizador: completar sin sesión activa responde el 409 documentado",
+          "grupo": "perfilService › actualizarPerfil",
+          "nombre": "guarda nombre y teléfono y devuelve el perfil actualizado",
           "estado": "APROBADA",
-          "duracionMs": 25
+          "duracionMs": 1
         },
         {
-          "grupo": "Contrato OpenAPI (integración): los ejemplos de la documentación funcionan contra el backend",
-          "nombre": "cancelar: 403 de otro usuario, 200, 409 si ya estaba cancelada, 404 y 400",
+          "grupo": "perfilService › actualizarPerfil",
+          "nombre": "lanza 404 si el usuario no existe",
           "estado": "APROBADA",
-          "duracionMs": 119
+          "duracionMs": 0
+        },
+        {
+          "grupo": "perfilService › cambiarPassword",
+          "nombre": "con la contraseña actual correcta guarda el hash de la nueva",
+          "estado": "APROBADA",
+          "duracionMs": 196
+        },
+        {
+          "grupo": "perfilService › cambiarPassword",
+          "nombre": "rechaza con 400 (no 401) si la actual es incorrecta, y no cambia nada",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "perfilService › cambiarPassword",
+          "nombre": "rechaza una nueva contraseña igual a la actual",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "perfilService › solicitarCambioCorreo",
+          "nombre": "NO cambia el correo: guarda el hash del token y envía el enlace al correo nuevo",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "perfilService › solicitarCambioCorreo",
+          "nombre": "rechaza un correo igual al actual",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "perfilService › solicitarCambioCorreo",
+          "nombre": "rechaza con 409 un correo que ya usa otra cuenta",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "perfilService › confirmarCambioCorreo",
+          "nombre": "aplica el cambio y marca el enlace como usado",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "perfilService › confirmarCambioCorreo",
+          "nombre": "rechaza un enlace inválido, usado o vencido",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "perfilService › confirmarCambioCorreo",
+          "nombre": "si otra cuenta registró ese correo mientras tanto, responde 409 y consume el enlace",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "perfilService › confirmarCambioCorreo",
+          "nombre": "convierte la violación del índice único de Postgres en un 409",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "perfilService › confirmarCambioCorreo",
+          "nombre": "propaga cualquier otro error de la base",
+          "estado": "APROBADA",
+          "duracionMs": 0
         }
       ]
     },
     {
       "archivo": "tests/historialReservas.test.js",
       "estado": "APROBADA",
-      "duracionMs": 489,
+      "duracionMs": 283,
       "tests": [
         {
           "grupo": "reservaService.listarMisReservas (US-13)",
           "nombre": "consulta solo las reservas del usuario recibido, con valores por defecto",
           "estado": "APROBADA",
-          "duracionMs": 3
+          "duracionMs": 1
         },
         {
           "grupo": "reservaService.listarMisReservas (US-13)",
           "nombre": "calcula el desplazamiento según la página solicitada",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 0
         },
         {
           "grupo": "reservaService.listarMisReservas (US-13)",
           "nombre": "transmite el filtro de estado al repositorio",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 0
         },
         {
           "grupo": "reservaService.listarMisReservas (US-13)",
           "nombre": "limita el tamaño de página a 50 aunque se pida más",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 0
         },
         {
           "grupo": "reservaService.listarMisReservas (US-13)",
           "nombre": "devuelve la paginación con el total de páginas calculado",
           "estado": "APROBADA",
-          "duracionMs": 4
+          "duracionMs": 1
         },
         {
           "grupo": "reservaService.listarMisReservas (US-13)",
           "nombre": "con cero reservas devuelve una sola página vacía",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 0
         }
       ]
     },
     {
-      "archivo": "tests/reservasMultiples.integration.test.js",
+      "archivo": "tests/seedCanchasCali.test.js",
       "estado": "APROBADA",
-      "duracionMs": 4283,
+      "duracionMs": 291,
       "tests": [
         {
-          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
-          "nombre": "un usuario crea 3 reservas en canchas/horarios distintos y las 3 quedan activas y visibles (prueba de aceptación)",
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "agrega muchas canchas repartidas en todas las zonas de la ciudad",
           "estado": "APROBADA",
-          "duracionMs": 486
+          "duracionMs": 3
         },
         {
-          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
-          "nombre": "rechaza con 409 \"Ya tienes una reserva en ese horario\" si el usuario ya tiene otra reserva confirmada que se solapa, aunque sea en otra cancha",
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "cada nombre es único y no repite el de las canchas del catálogo base",
           "estado": "APROBADA",
-          "duracionMs": 204
+          "duracionMs": 4
         },
         {
-          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
-          "nombre": "reservar la misma franja de la misma cancha sigue bloqueado para cualquier usuario, incluido uno distinto (regresión US-09)",
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Granada Gol tiene datos completos y coherentes",
           "estado": "APROBADA",
-          "duracionMs": 227
+          "duracionMs": 3
         },
         {
-          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
-          "nombre": "cancelar una reserva no afecta a las demás reservas activas del usuario",
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Versalles tiene datos completos y coherentes",
           "estado": "APROBADA",
-          "duracionMs": 282
+          "duracionMs": 1
         },
         {
-          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
-          "nombre": "rechaza con 409 y un mensaje claro al superar el máximo de reservas activas (configurado: 5)",
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Vipasa Arena tiene datos completos y coherentes",
           "estado": "APROBADA",
-          "duracionMs": 344
+          "duracionMs": 0
         },
         {
-          "grupo": "Reservas múltiples por usuario (US-12, contra Neon real)",
-          "nombre": "las reservas ya jugadas (\"completada\") no cuentan para el límite de reservas activas",
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Menga Norte tiene datos completos y coherentes",
           "estado": "APROBADA",
-          "duracionMs": 266
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha La Flora tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Prados del Norte tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Chipichape Sport tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Floralia Fútbol Club tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Los Álamos tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha La Campiña tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 3
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Alamos Premium tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Torres de Comfandi tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha San Vicente tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Bellavista Norte tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Ciudad Jardín tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Limonar Gol tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Pance Campestre tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 5
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Valle del Lili Arena tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Caney Fútbol tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Capri tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Cuarto de Legua tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Primavera tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Tequendama tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Meléndez tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Los Chorros tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Mayapán tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Quintas de Don Simón tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Refugio Sport tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Alférez Real tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Nueva Tequendama tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha San Antonio tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Normandía tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Santa Rita tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Juanambú tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Aguacatal tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Arboledas tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha El Peñón Gol tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Terrón Colorado tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Los Cámbulos tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Miraflores tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Ciudad Córdoba tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha El Retiro tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Mojica tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Potrero Grande tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Los Lagos tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha El Vergel tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Manuela Beltrán tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Alfonso López tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Marroquín tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Comuneros tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Desepaz tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha San Nicolás tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Sucre tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Obrero tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Junín tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha San Bosco tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha El Piloto tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha Santa Rosa tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "Cancha El Calvario tiene datos completos y coherentes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "las descripciones no se repiten y las fotos existen en el frontend",
+          "estado": "APROBADA",
+          "duracionMs": 7
+        },
+        {
+          "grupo": "catálogo de canchas de Cali",
+          "nombre": "las direcciones tampoco se repiten",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "horarios de atención",
+          "nombre": "el patrón 0 abre y cierra en horas exactas, en bloques de 1 hora",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "horarios de atención",
+          "nombre": "el patrón 1 abre y cierra en horas exactas, en bloques de 1 hora",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "horarios de atención",
+          "nombre": "el patrón 2 abre y cierra en horas exactas, en bloques de 1 hora",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "horarios de atención",
+          "nombre": "el patrón 3 abre y cierra en horas exactas, en bloques de 1 hora",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "horarios de atención",
+          "nombre": "el patrón 4 abre y cierra en horas exactas, en bloques de 1 hora",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "horarios de atención",
+          "nombre": "genera los 7 días de la semana, con horario distinto en fin de semana cuando el patrón lo define",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "horarios de atención",
+          "nombre": "rota los patrones entre las canchas",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "sembrarCanchasCali",
+          "nombre": "selecciona solo las canchas que todavía no existen",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "sembrarCanchasCali",
+          "nombre": "en una base vacía crea todas las canchas y completa el horario de cada una",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "sembrarCanchasCali",
+          "nombre": "repetido: no crea nada ni vuelve a insertar horarios",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "sembrarCanchasCali",
+          "nombre": "solo crea las que faltan y respeta las que ya estaban",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "sembrarCanchasCali",
+          "nombre": "completa el horario de una cancha que quedó sin él por una ejecución interrumpida",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "sembrarCanchasCali",
+          "nombre": "usa el catálogo completo de Cali por defecto",
+          "estado": "APROBADA",
+          "duracionMs": 0
         }
       ]
     },
     {
       "archivo": "tests/reservaService.test.js",
       "estado": "APROBADA",
-      "duracionMs": 345,
+      "duracionMs": 355,
       "tests": [
         {
           "grupo": "reservaService.crearReserva",
           "nombre": "US-18: rechaza con 409 si otro usuario tiene la franja retenida, sin crear la reserva",
           "estado": "APROBADA",
-          "duracionMs": 2
+          "duracionMs": 1
         },
         {
           "grupo": "reservaService.crearReserva",
@@ -511,7 +1880,7 @@
           "grupo": "reservaService.crearReserva",
           "nombre": "crea la reserva cuando la cancha existe y la franja está libre",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 1
         },
         {
           "grupo": "reservaService.crearReserva",
@@ -523,31 +1892,31 @@
           "grupo": "reservaService.crearReserva",
           "nombre": "US-11: al confirmar, finaliza el temporizador del usuario en esa cancha",
           "estado": "APROBADA",
-          "duracionMs": 3
+          "duracionMs": 0
         },
         {
           "grupo": "reservaService.crearReserva",
           "nombre": "US-11: envía el correo de confirmación con el resumen al correo del usuario",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 47
         },
         {
           "grupo": "reservaService.crearReserva",
           "nombre": "US-11: si el correo falla, la reserva igual queda confirmada",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 33
         },
         {
           "grupo": "reservaService.crearReserva",
           "nombre": "US-11: si la reserva no se guarda, no envía correo",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 5
         },
         {
           "grupo": "reservaService.crearReserva",
           "nombre": "lanza 404 si la cancha no existe",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 3
         },
         {
           "grupo": "reservaService.crearReserva",
@@ -559,7 +1928,7 @@
           "grupo": "reservaService.crearReserva",
           "nombre": "US-12: rechaza con 409 si el usuario ya tiene una reserva que se solapa en el horario, sin crearla",
           "estado": "APROBADA",
-          "duracionMs": 2
+          "duracionMs": 0
         },
         {
           "grupo": "reservaService.crearReserva",
@@ -571,7 +1940,7 @@
           "grupo": "reservaService.crearReserva",
           "nombre": "US-12: rechaza con 409 y mensaje claro si el usuario ya alcanzó el máximo de reservas activas",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 1
         },
         {
           "grupo": "reservaService.crearReserva",
@@ -589,13 +1958,13 @@
           "grupo": "reservaService.crearReserva",
           "nombre": "DEF-03: rechaza un día en que la cancha no tiene horario",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 0
         },
         {
           "grupo": "reservaService.crearReserva",
           "nombre": "DEF-04: rechaza con 400 las franjas que no son de exactamente 1 hora (evita solapes)",
           "estado": "APROBADA",
-          "duracionMs": 6
+          "duracionMs": 1
         },
         {
           "grupo": "reservaService.crearReserva",
@@ -607,7 +1976,7 @@
           "grupo": "reservaService.crearReserva",
           "nombre": "convierte la violación de índice único de Postgres (23505) en un 409 amigable",
           "estado": "APROBADA",
-          "duracionMs": 7
+          "duracionMs": 1
         },
         {
           "grupo": "reservaService.crearReserva",
@@ -616,108 +1985,664 @@
           "duracionMs": 1
         },
         {
-          "grupo": "reservaService.cancelarReserva",
-          "nombre": "cancela una reserva confirmada del dueño y libera la franja",
+          "grupo": "reservaService.cancelarReserva (US-14)",
+          "nombre": "cancela una reserva confirmada del dueño, libera la franja y envía el correo",
           "estado": "APROBADA",
           "duracionMs": 1
         },
         {
-          "grupo": "reservaService.cancelarReserva",
-          "nombre": "lanza 404 si la reserva no existe",
+          "grupo": "reservaService.cancelarReserva (US-14)",
+          "nombre": "el fallo del correo no impide la cancelación",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "reservaService.cancelarReserva (US-14)",
+          "nombre": "bloquea con 409 si faltan menos de 2 horas, sin tocar la reserva",
           "estado": "APROBADA",
           "duracionMs": 0
         },
         {
-          "grupo": "reservaService.cancelarReserva",
-          "nombre": "lanza 403 si la reserva es de otro usuario",
+          "grupo": "reservaService.cancelarReserva (US-14)",
+          "nombre": "permite cancelar cuando faltan más de 2 horas",
           "estado": "APROBADA",
           "duracionMs": 1
         },
         {
-          "grupo": "reservaService.cancelarReserva",
+          "grupo": "reservaService.cancelarReserva (US-14)",
+          "nombre": "bloquea la cancelación de una reserva que ya empezó",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "reservaService.cancelarReserva (US-14)",
+          "nombre": "lanza 404 si la reserva no existe",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "reservaService.cancelarReserva (US-14)",
+          "nombre": "lanza 403 si la reserva es de otro usuario y no la modifica",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "reservaService.cancelarReserva (US-14)",
           "nombre": "lanza 409 si la reserva ya estaba cancelada",
           "estado": "APROBADA",
-          "duracionMs": 7
+          "duracionMs": 0
+        },
+        {
+          "grupo": "reservaService.cancelarReserva (US-14)",
+          "nombre": "lanza 409 si otra petición la canceló justo antes",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "reservaService.cancelarReserva (US-14) › con un pago aprobado (US-28)",
+          "nombre": "reembolsa el pago dentro de la cancelación y lo informa",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "reservaService.cancelarReserva (US-14) › con un pago aprobado (US-28)",
+          "nombre": "si el reembolso falla, la reserva no se cancela",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "reservaService.cancelarReserva (US-14) › con un pago aprobado (US-28)",
+          "nombre": "un pago ya reembolsado no se vuelve a reembolsar",
+          "estado": "APROBADA",
+          "duracionMs": 3
+        },
+        {
+          "grupo": "reservaService.crearReserva con pago con tarjeta (US-28)",
+          "nombre": "sin método de pago no cobra nada (el pago sigue siendo opcional)",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "reservaService.crearReserva con pago con tarjeta (US-28)",
+          "nombre": "cobra el valor de la hora con la tarjeta elegida y devuelve el resumen del pago",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "reservaService.crearReserva con pago con tarjeta (US-28)",
+          "nombre": "si el pago es rechazado la reserva no se confirma ni se notifica",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "reservaService.crearReserva con pago con tarjeta (US-28)",
+          "nombre": "no deja pagar con la tarjeta de otro usuario (404)",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "reservaService.crearReserva con pago con tarjeta (US-28)",
+          "nombre": "rechaza con 400 una tarjeta vencida sin intentar el cobro",
+          "estado": "APROBADA",
+          "duracionMs": 1
         }
       ]
     },
     {
-      "archivo": "tests/reservasDuplicadas.integration.test.js",
+      "archivo": "tests/metodoPagoService.test.js",
       "estado": "APROBADA",
-      "duracionMs": 2988,
+      "duracionMs": 246,
       "tests": [
         {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "ante dos peticiones simultáneas por la misma franja, solo una crea la reserva (201) y la otra recibe 409",
+          "grupo": "metodoPagoService › listarMetodosDePago",
+          "nombre": "devuelve las tarjetas enmascaradas, sin token",
           "estado": "APROBADA",
-          "duracionMs": 214
+          "duracionMs": 2
         },
         {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "al cancelar la reserva ganadora, la franja queda libre y se puede volver a reservar",
+          "grupo": "metodoPagoService › agregarMetodoDePago",
+          "nombre": "tokeniza en la pasarela y guarda SOLO token, marca, últimos 4, titular y vencimiento",
           "estado": "APROBADA",
-          "duracionMs": 261
+          "duracionMs": 2
         },
         {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "no deja registros huérfanos: un intento duplicado no inserta filas parciales",
+          "grupo": "metodoPagoService › agregarMetodoDePago",
+          "nombre": "rechaza una tarjeta inválida con el error de cada campo y sin llamar a la pasarela",
           "estado": "APROBADA",
-          "duracionMs": 46
+          "duracionMs": 1
         },
         {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "US-11: confirma con 201 y devuelve id, código, cancha, fecha, hora y estado \"confirmada\"",
+          "grupo": "metodoPagoService › agregarMetodoDePago",
+          "nombre": "rechaza una tarjeta vencida",
           "estado": "APROBADA",
-          "duracionMs": 88
+          "duracionMs": 1
         },
         {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "US-11: la reserva confirmada aparece de inmediato en el historial del usuario",
+          "grupo": "metodoPagoService › agregarMetodoDePago",
+          "nombre": "limita las tarjetas por usuario (409)",
           "estado": "APROBADA",
-          "duracionMs": 17
+          "duracionMs": 0
         },
         {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "US-11: sin token no se puede confirmar ni consultar el historial (401)",
+          "grupo": "metodoPagoService › agregarMetodoDePago",
+          "nombre": "si la pasarela no responde lanza 502 y no guarda nada",
           "estado": "APROBADA",
-          "duracionMs": 8
+          "duracionMs": 1
         },
         {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "DEF-03: una reserva fuera del horario de la cancha se rechaza con 400 FUERA_DE_HORARIO",
+          "grupo": "metodoPagoService › eliminarMetodoDePago",
+          "nombre": "borra el token en la pasarela y luego la tarjeta",
           "estado": "APROBADA",
-          "duracionMs": 10
+          "duracionMs": 2
         },
         {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "DEF-04: una franja solapada se rechaza y la base de datos impide el solape aunque se intente por SQL",
+          "grupo": "metodoPagoService › eliminarMetodoDePago",
+          "nombre": "lanza 404 si la tarjeta no existe o es de otro usuario",
           "estado": "APROBADA",
-          "duracionMs": 147
+          "duracionMs": 1
         },
         {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "DEF-07: tras 10 inicios de sesión fallidos de una cuenta, el siguiente intento se frena con 429; otra cuenta no se afecta",
+          "grupo": "metodoPagoService › eliminarMetodoDePago",
+          "nombre": "si la pasarela falla, conserva la tarjeta y lanza 502",
           "estado": "APROBADA",
-          "duracionMs": 128
+          "duracionMs": 1
         },
         {
-          "grupo": "Bloqueo de reservas duplicadas (concurrencia real en Neon)",
-          "nombre": "DEF-08: un origen no permitido por CORS recibe 403 y no un error interno",
+          "grupo": "metodoPagoService › obtenerParaPagar",
+          "nombre": "devuelve la tarjeta (con su token) si es del usuario y está vigente",
           "estado": "APROBADA",
-          "duracionMs": 8
+          "duracionMs": 0
+        },
+        {
+          "grupo": "metodoPagoService › obtenerParaPagar",
+          "nombre": "lanza 404 si no es suya y 400 si está vencida",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        }
+      ]
+    },
+    {
+      "archivo": "tests/emailService.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 246,
+      "tests": [
+        {
+          "grupo": "sin SMTP configurado (modo desarrollo)",
+          "nombre": "la cancelación solo se imprime en el log, sin saltos de línea inyectados",
+          "estado": "APROBADA",
+          "duracionMs": 6
+        },
+        {
+          "grupo": "sin SMTP configurado (modo desarrollo)",
+          "nombre": "el enlace de verificación se imprime para poder probar el flujo",
+          "estado": "APROBADA",
+          "duracionMs": 7
+        },
+        {
+          "grupo": "con SMTP configurado",
+          "nombre": "el correo de cancelación lleva el detalle de la reserva y el reembolso",
+          "estado": "APROBADA",
+          "duracionMs": 6
+        },
+        {
+          "grupo": "con SMTP configurado",
+          "nombre": "sin pago no menciona ningún reembolso",
+          "estado": "APROBADA",
+          "duracionMs": 4
+        },
+        {
+          "grupo": "con SMTP configurado",
+          "nombre": "escapa el HTML de los datos del usuario para que no pueda inyectar etiquetas",
+          "estado": "APROBADA",
+          "duracionMs": 6
+        },
+        {
+          "grupo": "con SMTP configurado",
+          "nombre": "el correo de verificación se envía al correo nuevo con el enlace escapado",
+          "estado": "APROBADA",
+          "duracionMs": 4
+        }
+      ]
+    },
+    {
+      "archivo": "tests/verificacionReservaService.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 235,
+      "tests": [
+        {
+          "grupo": "verificacionReservaService › verificarCodigo",
+          "nombre": "una reserva confirmada que no ha vencido es \"vigente\", con cancha, fecha, horario y nombre del usuario",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "verificacionReservaService › verificarCodigo",
+          "nombre": "no revela el correo ni el teléfono del usuario",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "verificacionReservaService › verificarCodigo",
+          "nombre": "una reserva cancelada es \"no vigente\" y dice el motivo",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "verificacionReservaService › verificarCodigo",
+          "nombre": "una reserva usada es \"no vigente\" y dice el motivo",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "verificacionReservaService › verificarCodigo",
+          "nombre": "una reserva vencida es \"no vigente\" y dice el motivo",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "verificacionReservaService › verificarCodigo",
+          "nombre": "si se cumplen varios motivos prevalece: cancelada, luego usada, luego vencida",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "verificacionReservaService › verificarCodigo",
+          "nombre": "acepta el código en minúsculas y con espacios",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "verificacionReservaService › verificarCodigo",
+          "nombre": "el código con formato inválido \"CY-XXXXXXXX\" responde \"Código no encontrado\" sin consultar la base",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "verificacionReservaService › verificarCodigo",
+          "nombre": "el código con formato inválido \"D1AD1C79\" responde \"Código no encontrado\" sin consultar la base",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "verificacionReservaService › verificarCodigo",
+          "nombre": "el código con formato inválido \"CY-D1AD1C7\" responde \"Código no encontrado\" sin consultar la base",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "verificacionReservaService › verificarCodigo",
+          "nombre": "el código con formato inválido \"CY-D1AD1C79-EXTRA\" responde \"Código no encontrado\" sin consultar la base",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "verificacionReservaService › verificarCodigo",
+          "nombre": "el código con formato inválido \"\" responde \"Código no encontrado\" sin consultar la base",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "verificacionReservaService › verificarCodigo",
+          "nombre": "el código con formato inválido undefined responde \"Código no encontrado\" sin consultar la base",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "verificacionReservaService › verificarCodigo",
+          "nombre": "el código con formato inválido \"' OR 1=1 --\" responde \"Código no encontrado\" sin consultar la base",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "verificacionReservaService › verificarCodigo",
+          "nombre": "un código con formato válido pero inexistente responde igual, sin datos de otras reservas",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "verificacionReservaService › verificarCodigo",
+          "nombre": "en la auditoría el código escrito se acota y se limpian los caracteres de control",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "verificacionReservaService › verificarCodigo",
+          "nombre": "si no se puede registrar la auditoría, la verificación falla (no queda sin registro)",
+          "estado": "APROBADA",
+          "duracionMs": 16
+        },
+        {
+          "grupo": "verificacionReservaService › marcarComoUsada",
+          "nombre": "marca una reserva vigente como utilizada y lo registra",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "verificacionReservaService › marcarComoUsada",
+          "nombre": "rechaza con 409 una reserva cancelada, sin marcarla",
+          "estado": "APROBADA",
+          "duracionMs": 5
+        },
+        {
+          "grupo": "verificacionReservaService › marcarComoUsada",
+          "nombre": "rechaza con 409 una reserva usada, sin marcarla",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "verificacionReservaService › marcarComoUsada",
+          "nombre": "rechaza con 409 una reserva vencida, sin marcarla",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "verificacionReservaService › marcarComoUsada",
+          "nombre": "si otro administrador la marcó justo antes, responde 409",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "verificacionReservaService › marcarComoUsada",
+          "nombre": "un código inexistente responde 404",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "verificacionReservaService › listarVerificaciones",
+          "nombre": "devuelve las últimas verificaciones del repositorio",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        }
+      ]
+    },
+    {
+      "archivo": "tests/tarjeta.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 212,
+      "tests": [
+        {
+          "grupo": "normalizarNumero y pasaLuhn",
+          "nombre": "quita espacios y guiones",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "normalizarNumero y pasaLuhn",
+          "nombre": "acepta la tarjeta de prueba 4242424242424242",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "normalizarNumero y pasaLuhn",
+          "nombre": "acepta la tarjeta de prueba 5555555555554444",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "normalizarNumero y pasaLuhn",
+          "nombre": "acepta la tarjeta de prueba 378282246310005",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "normalizarNumero y pasaLuhn",
+          "nombre": "acepta la tarjeta de prueba 6011111111111117",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "normalizarNumero y pasaLuhn",
+          "nombre": "rechaza 4242424242424241",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "normalizarNumero y pasaLuhn",
+          "nombre": "rechaza 1234567812345678",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "normalizarNumero y pasaLuhn",
+          "nombre": "rechaza 4242abcd42424242",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "normalizarNumero y pasaLuhn",
+          "nombre": "rechaza ",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "detectarMarca",
+          "nombre": "4242424242424242 es Visa",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "detectarMarca",
+          "nombre": "5555555555554444 es Mastercard",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "detectarMarca",
+          "nombre": "2223003122003222 es Mastercard",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "detectarMarca",
+          "nombre": "378282246310005 es American Express",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "detectarMarca",
+          "nombre": "30569309025904 es Diners Club",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "detectarMarca",
+          "nombre": "6011111111111117 es Discover",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "detectarMarca",
+          "nombre": "devuelve null para una marca desconocida",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "estaVencida",
+          "nombre": "la tarjeta vale hasta el último día de su mes de vencimiento",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "estaVencida",
+          "nombre": "usa la hora de Colombia: a las 02:00 UTC del 1 de julio aún es junio",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "estaVencida",
+          "nombre": "usa la fecha actual cuando no se le pasa una",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "validarTarjeta",
+          "nombre": "acepta una tarjeta válida y devuelve solo marca, últimos 4 y datos normalizados",
+          "estado": "APROBADA",
+          "duracionMs": 2
+        },
+        {
+          "grupo": "validarTarjeta",
+          "nombre": "acepta el año de 2 dígitos como 20AA",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "validarTarjeta",
+          "nombre": "rechaza un número que no cumple Luhn",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "validarTarjeta",
+          "nombre": "rechaza un número de una marca desconocida o con letras",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "validarTarjeta",
+          "nombre": "rechaza una tarjeta vencida",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "validarTarjeta",
+          "nombre": "rechaza el mes 0",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "validarTarjeta",
+          "nombre": "rechaza el mes 13",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "validarTarjeta",
+          "nombre": "rechaza el mes abc",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "validarTarjeta",
+          "nombre": "rechaza un año imposible o demasiado lejano",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "validarTarjeta",
+          "nombre": "rechaza el CVV 12",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "validarTarjeta",
+          "nombre": "rechaza el CVV 12345",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "validarTarjeta",
+          "nombre": "rechaza el CVV abc",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "validarTarjeta",
+          "nombre": "rechaza el CVV ",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "validarTarjeta",
+          "nombre": "rechaza el CVV undefined",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "validarTarjeta",
+          "nombre": "American Express exige CVV de 4 dígitos y las demás de 3",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "validarTarjeta",
+          "nombre": "exige el nombre del titular",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "validarTarjeta",
+          "nombre": "informa todos los campos con error a la vez",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "validarTarjeta",
+          "nombre": "los mensajes de error nunca repiten el número, el CVV ni el titular",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        }
+      ]
+    },
+    {
+      "archivo": "tests/pagoService.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 210,
+      "tests": [
+        {
+          "grupo": "pagoService.cobrarReserva",
+          "nombre": "cobra con el token, registra el pago en la misma transacción y entrega cómo deshacerlo",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "pagoService.cobrarReserva",
+          "nombre": "si el pago es rechazado lanza 402 con el motivo y no registra nada",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "pagoService.cobrarReserva",
+          "nombre": "si la pasarela no responde lanza 502",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "pagoService.cobrarReserva",
+          "nombre": "si se cobró pero no se pudo registrar, devuelve el dinero y propaga el error",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "pagoService.cobrarReserva",
+          "nombre": "si además falla la devolución, igual propaga el error original",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "pagoService.reembolsar",
+          "nombre": "reembolsa en la pasarela y marca el pago como reembolsado",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "pagoService.reembolsar",
+          "nombre": "si la pasarela falla lanza 502 y no marca nada",
+          "estado": "APROBADA",
+          "duracionMs": 1
         }
       ]
     },
     {
       "archivo": "tests/temporizadorReservaService.test.js",
       "estado": "APROBADA",
-      "duracionMs": 339,
+      "duracionMs": 205,
       "tests": [
         {
           "grupo": "temporizadorReservaService",
           "nombre": "inicia una sesión de 180s para (usuario, cancha) y la guarda en la base",
           "estado": "APROBADA",
-          "duracionMs": 24
+          "duracionMs": 3
         },
         {
           "grupo": "temporizadorReservaService",
@@ -729,19 +2654,19 @@
           "grupo": "temporizadorReservaService",
           "nombre": "US-18: tras un reinicio retoma la sesión guardada con el mismo expiresAt",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 0
         },
         {
           "grupo": "temporizadorReservaService",
           "nombre": "US-18: restaurarSesiones reprograma las sesiones vigentes y luego expiran a su hora",
           "estado": "APROBADA",
-          "duracionMs": 3
+          "duracionMs": 1
         },
         {
           "grupo": "temporizadorReservaService",
           "nombre": "completarSesion marca la sesión como completada, detiene el temporizador y lo persiste",
           "estado": "APROBADA",
-          "duracionMs": 2
+          "duracionMs": 3
         },
         {
           "grupo": "temporizadorReservaService",
@@ -759,7 +2684,7 @@
           "grupo": "temporizadorReservaService",
           "nombre": "al pasar los 180s emite \"expirado\" y \"terminada\", borra la sesión y rechaza completar después",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 2
         },
         {
           "grupo": "temporizadorReservaService",
@@ -777,7 +2702,7 @@
           "grupo": "temporizadorReservaService",
           "nombre": "US-18: al salir el último socket, tras el lapso de gracia emite \"terminada\" (libera la franja) y borra la sesión",
           "estado": "APROBADA",
-          "duracionMs": 2
+          "duracionMs": 1
         },
         {
           "grupo": "temporizadorReservaService",
@@ -794,77 +2719,70 @@
       ]
     },
     {
-      "archivo": "tests/historialReservas.integration.test.js",
+      "archivo": "tests/pasarelaPago.test.js",
       "estado": "APROBADA",
-      "duracionMs": 2410,
+      "duracionMs": 231,
       "tests": [
         {
-          "grupo": "Historial de reservas (US-13, integración)",
-          "nombre": "exige autenticación",
-          "estado": "APROBADA",
-          "duracionMs": 6
-        },
-        {
-          "grupo": "Historial de reservas (US-13, integración)",
-          "nombre": "por defecto lista las próximas del usuario, de la más cercana a la más lejana, sin las de otros",
-          "estado": "APROBADA",
-          "duracionMs": 177
-        },
-        {
-          "grupo": "Historial de reservas (US-13, integración)",
-          "nombre": "las pasadas se listan de la más reciente a la más antigua y las confirmadas ya jugadas salen \"completada\"",
-          "estado": "APROBADA",
-          "duracionMs": 49
-        },
-        {
-          "grupo": "Historial de reservas (US-13, integración)",
-          "nombre": "filtra por estado y pagina los resultados",
-          "estado": "APROBADA",
-          "duracionMs": 79
-        },
-        {
-          "grupo": "Historial de reservas (US-13, integración)",
-          "nombre": "rechaza con 400 parámetros inválidos",
-          "estado": "APROBADA",
-          "duracionMs": 30
-        }
-      ]
-    },
-    {
-      "archivo": "tests/fechaHora.test.js",
-      "estado": "APROBADA",
-      "duracionMs": 183,
-      "tests": [
-        {
-          "grupo": "fechaHora",
-          "nombre": "interpreta la fecha y hora en hora de Colombia (UTC-5)",
+          "grupo": "pasarela simulada",
+          "nombre": "tokeniza una tarjeta: el token no contiene el número y devuelve marca y últimos 4",
           "estado": "APROBADA",
           "duracionMs": 1
         },
         {
-          "grupo": "fechaHora",
-          "nombre": "considera pasado un bloque de hoy cuya hora de inicio ya pasó",
-          "estado": "APROBADA",
-          "duracionMs": 1
-        },
-        {
-          "grupo": "fechaHora",
-          "nombre": "no considera pasado un bloque posterior a la hora actual",
-          "estado": "APROBADA",
-          "duracionMs": 1
-        },
-        {
-          "grupo": "fechaHora",
-          "nombre": "trata como pasado un valor de fecha inválido",
+          "grupo": "pasarela simulada",
+          "nombre": "cada tokenización genera un token distinto",
           "estado": "APROBADA",
           "duracionMs": 0
+        },
+        {
+          "grupo": "pasarela simulada",
+          "nombre": "cobra con una tarjeta aprobada y devuelve una referencia",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "pasarela simulada",
+          "nombre": "rechaza la tarjeta ...0002 y simula fondos insuficientes con la ...9995",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "pasarela simulada",
+          "nombre": "rechaza un token que no es de la pasarela o un monto inválido",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "pasarela simulada",
+          "nombre": "reembolsa un cobro conocido y falla con una referencia desconocida",
+          "estado": "APROBADA",
+          "duracionMs": 10
+        },
+        {
+          "grupo": "pasarela simulada",
+          "nombre": "elimina un token válido y no reconoce uno ajeno",
+          "estado": "APROBADA",
+          "duracionMs": 3
+        },
+        {
+          "grupo": "selector de pasarela",
+          "nombre": "usa la pasarela simulada por defecto",
+          "estado": "APROBADA",
+          "duracionMs": 5
+        },
+        {
+          "grupo": "selector de pasarela",
+          "nombre": "falla con un mensaje claro si la pasarela configurada no existe",
+          "estado": "APROBADA",
+          "duracionMs": 14
         }
       ]
     },
     {
       "archivo": "tests/retencionService.test.js",
       "estado": "APROBADA",
-      "duracionMs": 266,
+      "duracionMs": 233,
       "tests": [
         {
           "grupo": "retencionService (US-18)",
@@ -882,19 +2800,19 @@
           "grupo": "retencionService (US-18)",
           "nombre": "volver a retener la misma franja (p. ej. al reconectar) no genera avisos duplicados",
           "estado": "APROBADA",
-          "duracionMs": 3
+          "duracionMs": 1
         },
         {
           "grupo": "retencionService (US-18)",
           "nombre": "rechaza con FRANJA_RETENIDA si otro usuario ya la retiene (índice único)",
           "estado": "APROBADA",
-          "duracionMs": 20
+          "duracionMs": 1
         },
         {
           "grupo": "retencionService (US-18)",
           "nombre": "rechaza con FRANJA_OCUPADA si la franja ya está reservada",
           "estado": "APROBADA",
-          "duracionMs": 6
+          "duracionMs": 1
         },
         {
           "grupo": "retencionService (US-18)",
@@ -906,37 +2824,37 @@
           "grupo": "retencionService (US-18)",
           "nombre": "DEF-09: un payload nulo o que no es un objeto responde DATOS_INVALIDOS (no un error interno)",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 4
         },
         {
           "grupo": "retencionService (US-18)",
           "nombre": "DEF-03: rechaza con FUERA_DE_HORARIO una franja que la cancha no atiende",
           "estado": "APROBADA",
-          "duracionMs": 2
+          "duracionMs": 0
         },
         {
           "grupo": "retencionService (US-18)",
           "nombre": "rechaza con HORA_PASADA o DATOS_INVALIDOS ante franjas no válidas",
           "estado": "APROBADA",
-          "duracionMs": 3
+          "duracionMs": 0
         },
         {
           "grupo": "retencionService (US-18)",
           "nombre": "cuando la sesión termina (expira o el usuario sale) libera su franja y avisa",
           "estado": "APROBADA",
-          "duracionMs": 2
+          "duracionMs": 1
         },
         {
           "grupo": "retencionService (US-18)",
           "nombre": "al confirmar, la retención se convierte en reserva y se avisa \"reservada\" (no \"liberada\")",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 0
         },
         {
           "grupo": "retencionService (US-18)",
           "nombre": "no deja reservar una franja que otro usuario tiene retenida",
           "estado": "APROBADA",
-          "duracionMs": 2
+          "duracionMs": 1
         },
         {
           "grupo": "retencionService (US-18)",
@@ -948,7 +2866,7 @@
           "grupo": "retencionService (US-18)",
           "nombre": "lista las franjas retenidas por otros sin exponer quién las retiene",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 1
         },
         {
           "grupo": "retencionService (US-18)",
@@ -959,33 +2877,82 @@
       ]
     },
     {
+      "archivo": "tests/fechaHora.test.js",
+      "estado": "APROBADA",
+      "duracionMs": 182,
+      "tests": [
+        {
+          "grupo": "fechaHora",
+          "nombre": "interpreta la fecha y hora en hora de Colombia (UTC-5)",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "fechaHora",
+          "nombre": "considera pasado un bloque de hoy cuya hora de inicio ya pasó",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "fechaHora",
+          "nombre": "no considera pasado un bloque posterior a la hora actual",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "fechaHora",
+          "nombre": "trata como pasado un valor de fecha inválido",
+          "estado": "APROBADA",
+          "duracionMs": 1
+        },
+        {
+          "grupo": "fechaHora › minutosHastaInicio (US-14)",
+          "nombre": "cuenta los minutos que faltan para el inicio",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "fechaHora › minutosHastaInicio (US-14)",
+          "nombre": "es negativo si la reserva ya empezó y NaN con una fecha inválida",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        },
+        {
+          "grupo": "fechaHora › minutosHastaInicio (US-14)",
+          "nombre": "usa la hora actual si no se la pasa",
+          "estado": "APROBADA",
+          "duracionMs": 0
+        }
+      ]
+    },
+    {
       "archivo": "tests/horarioReservaService.test.js",
       "estado": "APROBADA",
-      "duracionMs": 188,
+      "duracionMs": 191,
       "tests": [
         {
           "grupo": "horarioReservaService.validarFranjaEnHorario",
           "nombre": "acepta un bloque de 1 hora dentro del horario del día",
           "estado": "APROBADA",
-          "duracionMs": 2
+          "duracionMs": 1
         },
         {
           "grupo": "horarioReservaService.validarFranjaEnHorario",
           "nombre": "rechaza horas anteriores a la apertura o posteriores al cierre",
           "estado": "APROBADA",
-          "duracionMs": 4
+          "duracionMs": 1
         },
         {
           "grupo": "horarioReservaService.validarFranjaEnHorario",
           "nombre": "rechaza un día de la semana sin horario",
           "estado": "APROBADA",
-          "duracionMs": 4
+          "duracionMs": 0
         },
         {
           "grupo": "horarioReservaService.validarFranjaEnHorario",
           "nombre": "rechaza franjas que no duran exactamente 1 hora",
           "estado": "APROBADA",
-          "duracionMs": 5
+          "duracionMs": 0
         },
         {
           "grupo": "horarioReservaService.validarFranjaEnHorario",
@@ -998,7 +2965,7 @@
     {
       "archivo": "tests/corsOrigin.test.js",
       "estado": "APROBADA",
-      "duracionMs": 170,
+      "duracionMs": 214,
       "tests": [
         {
           "grupo": "corsOrigin (DEF-08)",
@@ -1010,13 +2977,13 @@
           "grupo": "corsOrigin (DEF-08)",
           "nombre": "en producción rechaza otros orígenes, incluso localhost con otro puerto",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 1
         },
         {
           "grupo": "corsOrigin (DEF-08)",
           "nombre": "verificarOrigen no genera un error: un origen ajeno simplemente no recibe cabeceras CORS",
           "estado": "APROBADA",
-          "duracionMs": 2
+          "duracionMs": 0
         },
         {
           "grupo": "corsOrigin (DEF-08)",
@@ -1028,13 +2995,13 @@
           "grupo": "corsOrigin (DEF-08)",
           "nombre": "el middleware deja pasar los orígenes permitidos",
           "estado": "APROBADA",
-          "duracionMs": 1
+          "duracionMs": 2
         },
         {
           "grupo": "corsOrigin: llamadas desde el mismo origen (Swagger UI)",
           "nombre": "deja pasar a una página servida por la propia API aunque no sea el origen del frontend",
           "estado": "APROBADA",
-          "duracionMs": 0
+          "duracionMs": 1
         },
         {
           "grupo": "corsOrigin: llamadas desde el mismo origen (Swagger UI)",
@@ -1048,28 +3015,28 @@
   "cobertura": {
     "total": {
       "lines": {
-        "total": 925,
-        "covered": 731,
+        "total": 1477,
+        "covered": 1265,
         "skipped": 0,
-        "pct": 79.02
+        "pct": 85.64
       },
       "statements": {
-        "total": 966,
-        "covered": 758,
+        "total": 1549,
+        "covered": 1321,
         "skipped": 0,
-        "pct": 78.46
+        "pct": 85.28
       },
       "functions": {
-        "total": 188,
-        "covered": 144,
+        "total": 308,
+        "covered": 260,
         "skipped": 0,
-        "pct": 76.59
+        "pct": 84.41
       },
       "branches": {
-        "total": 337,
-        "covered": 241,
+        "total": 568,
+        "covered": 471,
         "skipped": 0,
-        "pct": 71.51
+        "pct": 82.92
       },
       "branchesTrue": {
         "total": 0,
@@ -1080,10 +3047,10 @@
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\app.js": {
       "lines": {
-        "total": 21,
-        "covered": 20,
+        "total": 23,
+        "covered": 22,
         "skipped": 0,
-        "pct": 95.23
+        "pct": 95.65
       },
       "functions": {
         "total": 2,
@@ -1092,14 +3059,14 @@
         "pct": 50
       },
       "statements": {
-        "total": 21,
-        "covered": 20,
+        "total": 24,
+        "covered": 22,
         "skipped": 0,
-        "pct": 95.23
+        "pct": 91.66
       },
       "branches": {
-        "total": 2,
-        "covered": 1,
+        "total": 4,
+        "covered": 2,
         "skipped": 0,
         "pct": 50
       }
@@ -1145,15 +3112,15 @@
       },
       "statements": {
         "total": 19,
-        "covered": 17,
+        "covered": 18,
         "skipped": 0,
-        "pct": 89.47
+        "pct": 94.73
       },
       "branches": {
         "total": 14,
-        "covered": 13,
+        "covered": 14,
         "skipped": 0,
-        "pct": 92.85
+        "pct": 100
       }
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\config\\db.js": {
@@ -1228,30 +3195,56 @@
         "pct": 71.42
       },
       "branches": {
-        "total": 20,
-        "covered": 11,
+        "total": 26,
+        "covered": 17,
         "skipped": 0,
-        "pct": 55
+        "pct": 65.38
       }
     },
-    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\controllers\\authController.js": {
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\controllers\\adminController.js": {
       "lines": {
-        "total": 23,
-        "covered": 21,
+        "total": 14,
+        "covered": 13,
         "skipped": 0,
-        "pct": 91.3
+        "pct": 92.85
       },
       "functions": {
-        "total": 4,
-        "covered": 4,
+        "total": 3,
+        "covered": 3,
         "skipped": 0,
         "pct": 100
       },
       "statements": {
-        "total": 23,
-        "covered": 21,
+        "total": 14,
+        "covered": 13,
         "skipped": 0,
-        "pct": 91.3
+        "pct": 92.85
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\controllers\\authController.js": {
+      "lines": {
+        "total": 29,
+        "covered": 27,
+        "skipped": 0,
+        "pct": 93.1
+      },
+      "functions": {
+        "total": 5,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 29,
+        "covered": 27,
+        "skipped": 0,
+        "pct": 93.1
       },
       "branches": {
         "total": 2,
@@ -1284,6 +3277,32 @@
         "covered": 6,
         "skipped": 0,
         "pct": 75
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\controllers\\metodoPagoController.js": {
+      "lines": {
+        "total": 15,
+        "covered": 14,
+        "skipped": 0,
+        "pct": 93.33
+      },
+      "functions": {
+        "total": 3,
+        "covered": 3,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 15,
+        "covered": 14,
+        "skipped": 0,
+        "pct": 93.33
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
       }
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\controllers\\reservaController.js": {
@@ -1334,6 +3353,32 @@
       "branches": {
         "total": 0,
         "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\controllers\\usuarioController.js": {
+      "lines": {
+        "total": 23,
+        "covered": 21,
+        "skipped": 0,
+        "pct": 91.3
+      },
+      "functions": {
+        "total": 4,
+        "covered": 4,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 23,
+        "covered": 21,
+        "skipped": 0,
+        "pct": 91.3
+      },
+      "branches": {
+        "total": 2,
+        "covered": 2,
         "skipped": 0,
         "pct": 100
       }
@@ -1393,9 +3438,9 @@
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\middlewares\\errorHandler.js": {
       "lines": {
         "total": 5,
-        "covered": 4,
+        "covered": 5,
         "skipped": 0,
-        "pct": 80
+        "pct": 100
       },
       "functions": {
         "total": 1,
@@ -1405,41 +3450,119 @@
       },
       "statements": {
         "total": 5,
-        "covered": 4,
+        "covered": 5,
         "skipped": 0,
-        "pct": 80
+        "pct": 100
       },
       "branches": {
-        "total": 10,
-        "covered": 7,
+        "total": 14,
+        "covered": 14,
         "skipped": 0,
-        "pct": 70
+        "pct": 100
       }
     },
-    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\middlewares\\limitadores.js": {
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\middlewares\\exigirHttps.js": {
       "lines": {
-        "total": 11,
-        "covered": 11,
+        "total": 5,
+        "covered": 5,
         "skipped": 0,
         "pct": 100
       },
       "functions": {
-        "total": 2,
-        "covered": 2,
+        "total": 1,
+        "covered": 1,
         "skipped": 0,
         "pct": 100
       },
       "statements": {
-        "total": 11,
-        "covered": 11,
+        "total": 5,
+        "covered": 5,
         "skipped": 0,
         "pct": 100
       },
       "branches": {
-        "total": 6,
-        "covered": 5,
+        "total": 4,
+        "covered": 4,
         "skipped": 0,
-        "pct": 83.33
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\middlewares\\limitadores.js": {
+      "lines": {
+        "total": 14,
+        "covered": 14,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 3,
+        "covered": 3,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 14,
+        "covered": 14,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 8,
+        "covered": 7,
+        "skipped": 0,
+        "pct": 87.5
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\middlewares\\soloAdministrador.js": {
+      "lines": {
+        "total": 8,
+        "covered": 8,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 1,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 8,
+        "covered": 8,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 2,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\middlewares\\soloPropietario.js": {
+      "lines": {
+        "total": 4,
+        "covered": 4,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 1,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 4,
+        "covered": 4,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 2,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 100
       }
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\middlewares\\validate.js": {
@@ -1520,6 +3643,58 @@
         "pct": 50
       }
     },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\models\\MetodoPago.js": {
+      "lines": {
+        "total": 5,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 2,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 6,
+        "covered": 6,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 2,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\models\\Pago.js": {
+      "lines": {
+        "total": 6,
+        "covered": 6,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 2,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 8,
+        "covered": 8,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 4,
+        "covered": 4,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\models\\PasswordResetToken.js": {
       "lines": {
         "total": 4,
@@ -1566,10 +3741,10 @@
         "pct": 86.66
       },
       "branches": {
-        "total": 6,
-        "covered": 4,
+        "total": 10,
+        "covered": 8,
         "skipped": 0,
-        "pct": 66.66
+        "pct": 80
       }
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\models\\Retencion.js": {
@@ -1624,50 +3799,128 @@
         "pct": 100
       }
     },
-    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\repositories\\canchaRepository.js": {
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\repositories\\cambioCorreoRepository.js": {
       "lines": {
-        "total": 39,
-        "covered": 13,
+        "total": 12,
+        "covered": 12,
         "skipped": 0,
-        "pct": 33.33
+        "pct": 100
       },
       "functions": {
         "total": 6,
-        "covered": 2,
+        "covered": 6,
         "skipped": 0,
-        "pct": 33.33
+        "pct": 100
       },
       "statements": {
-        "total": 39,
+        "total": 13,
         "covered": 13,
         "skipped": 0,
-        "pct": 33.33
+        "pct": 100
+      },
+      "branches": {
+        "total": 2,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\repositories\\canchaRepository.js": {
+      "lines": {
+        "total": 43,
+        "covered": 27,
+        "skipped": 0,
+        "pct": 62.79
+      },
+      "functions": {
+        "total": 9,
+        "covered": 6,
+        "skipped": 0,
+        "pct": 66.66
+      },
+      "statements": {
+        "total": 44,
+        "covered": 28,
+        "skipped": 0,
+        "pct": 63.63
       },
       "branches": {
         "total": 29,
-        "covered": 6,
+        "covered": 17,
         "skipped": 0,
-        "pct": 20.68
+        "pct": 58.62
       }
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\repositories\\horarioRepository.js": {
       "lines": {
         "total": 17,
-        "covered": 5,
+        "covered": 15,
         "skipped": 0,
-        "pct": 29.41
+        "pct": 88.23
       },
       "functions": {
         "total": 2,
-        "covered": 1,
+        "covered": 2,
         "skipped": 0,
-        "pct": 50
+        "pct": 100
       },
       "statements": {
         "total": 17,
+        "covered": 15,
+        "skipped": 0,
+        "pct": 88.23
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\repositories\\metodoPagoRepository.js": {
+      "lines": {
+        "total": 13,
+        "covered": 13,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 5,
         "covered": 5,
         "skipped": 0,
-        "pct": 29.41
+        "pct": 100
+      },
+      "statements": {
+        "total": 13,
+        "covered": 13,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\repositories\\pagoRepository.js": {
+      "lines": {
+        "total": 9,
+        "covered": 9,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 3,
+        "covered": 3,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 9,
+        "covered": 9,
+        "skipped": 0,
+        "pct": 100
       },
       "branches": {
         "total": 0,
@@ -1704,28 +3957,28 @@
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\repositories\\reservaRepository.js": {
       "lines": {
-        "total": 39,
-        "covered": 37,
+        "total": 62,
+        "covered": 58,
         "skipped": 0,
-        "pct": 94.87
+        "pct": 93.54
       },
       "functions": {
-        "total": 10,
-        "covered": 9,
+        "total": 14,
+        "covered": 12,
         "skipped": 0,
-        "pct": 90
+        "pct": 85.71
       },
       "statements": {
-        "total": 40,
-        "covered": 38,
+        "total": 69,
+        "covered": 63,
         "skipped": 0,
-        "pct": 95
+        "pct": 91.3
       },
       "branches": {
-        "total": 10,
-        "covered": 6,
+        "total": 29,
+        "covered": 20,
         "skipped": 0,
-        "pct": 60
+        "pct": 68.96
       }
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\repositories\\retencionRepository.js": {
@@ -1782,22 +4035,74 @@
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\repositories\\usuarioRepository.js": {
       "lines": {
-        "total": 11,
-        "covered": 9,
+        "total": 17,
+        "covered": 15,
         "skipped": 0,
-        "pct": 81.81
+        "pct": 88.23
       },
       "functions": {
-        "total": 4,
-        "covered": 3,
+        "total": 7,
+        "covered": 6,
         "skipped": 0,
-        "pct": 75
+        "pct": 85.71
       },
       "statements": {
-        "total": 11,
-        "covered": 9,
+        "total": 17,
+        "covered": 15,
         "skipped": 0,
-        "pct": 81.81
+        "pct": 88.23
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\repositories\\verificacionRepository.js": {
+      "lines": {
+        "total": 6,
+        "covered": 6,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 3,
+        "covered": 3,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 6,
+        "covered": 6,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 7,
+        "covered": 6,
+        "skipped": 0,
+        "pct": 85.71
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\routes\\adminRoutes.js": {
+      "lines": {
+        "total": 12,
+        "covered": 12,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 12,
+        "covered": 12,
+        "skipped": 0,
+        "pct": 100
       },
       "branches": {
         "total": 0,
@@ -1808,8 +4113,8 @@
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\routes\\authRoutes.js": {
       "lines": {
-        "total": 11,
-        "covered": 11,
+        "total": 13,
+        "covered": 13,
         "skipped": 0,
         "pct": 100
       },
@@ -1820,8 +4125,8 @@
         "pct": 100
       },
       "statements": {
-        "total": 11,
-        "covered": 11,
+        "total": 13,
+        "covered": 13,
         "skipped": 0,
         "pct": 100
       },
@@ -1860,8 +4165,8 @@
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\routes\\index.js": {
       "lines": {
-        "total": 9,
-        "covered": 9,
+        "total": 13,
+        "covered": 13,
         "skipped": 0,
         "pct": 100
       },
@@ -1872,8 +4177,8 @@
         "pct": 100
       },
       "statements": {
-        "total": 9,
-        "covered": 9,
+        "total": 13,
+        "covered": 13,
         "skipped": 0,
         "pct": 100
       },
@@ -1910,12 +4215,38 @@
         "pct": 100
       }
     },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\routes\\usuarioRoutes.js": {
+      "lines": {
+        "total": 19,
+        "covered": 19,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 19,
+        "covered": 19,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\seed\\catalogoCanchas.js": {
       "lines": {
         "total": 2,
-        "covered": 0,
+        "covered": 2,
         "skipped": 0,
-        "pct": 0
+        "pct": 100
       },
       "functions": {
         "total": 0,
@@ -1925,15 +4256,67 @@
       },
       "statements": {
         "total": 2,
-        "covered": 0,
+        "covered": 2,
         "skipped": 0,
-        "pct": 0
+        "pct": 100
       },
       "branches": {
         "total": 0,
         "covered": 0,
         "skipped": 0,
         "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\seed\\catalogoCanchasCali.js": {
+      "lines": {
+        "total": 9,
+        "covered": 9,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 1,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 9,
+        "covered": 9,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\seed\\crearAdministrador.js": {
+      "lines": {
+        "total": 23,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "functions": {
+        "total": 3,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "statements": {
+        "total": 23,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "branches": {
+        "total": 10,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
       }
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\seed\\enriquecerCanchas.js": {
@@ -1962,6 +4345,32 @@
         "pct": 0
       }
     },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\seed\\planCanchasCali.js": {
+      "lines": {
+        "total": 16,
+        "covered": 16,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 6,
+        "covered": 6,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 18,
+        "covered": 18,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 7,
+        "covered": 7,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\seed\\seedCanchas.js": {
       "lines": {
         "total": 20,
@@ -1986,6 +4395,32 @@
         "covered": 0,
         "skipped": 0,
         "pct": 0
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\seed\\seedMasCanchas.js": {
+      "lines": {
+        "total": 13,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "functions": {
+        "total": 3,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "statements": {
+        "total": 13,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 0
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
       }
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\seed\\seedReservas.js": {
@@ -2049,15 +4484,15 @@
       },
       "functions": {
         "total": 6,
-        "covered": 5,
+        "covered": 6,
         "skipped": 0,
-        "pct": 83.33
+        "pct": 100
       },
       "statements": {
         "total": 20,
-        "covered": 18,
+        "covered": 19,
         "skipped": 0,
-        "pct": 90
+        "pct": 95
       },
       "branches": {
         "total": 5,
@@ -2068,28 +4503,28 @@
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\emailService.js": {
       "lines": {
-        "total": 22,
-        "covered": 19,
+        "total": 39,
+        "covered": 37,
         "skipped": 0,
-        "pct": 86.36
+        "pct": 94.87
       },
       "functions": {
-        "total": 4,
-        "covered": 4,
+        "total": 9,
+        "covered": 9,
         "skipped": 0,
         "pct": 100
       },
       "statements": {
-        "total": 22,
-        "covered": 19,
+        "total": 41,
+        "covered": 39,
         "skipped": 0,
-        "pct": 86.36
+        "pct": 95.12
       },
       "branches": {
-        "total": 9,
-        "covered": 4,
+        "total": 15,
+        "covered": 13,
         "skipped": 0,
-        "pct": 44.44
+        "pct": 86.66
       }
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\horarioReservaService.js": {
@@ -2118,30 +4553,134 @@
         "pct": 100
       }
     },
-    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\reservaService.js": {
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\metodoPagoService.js": {
       "lines": {
-        "total": 62,
-        "covered": 60,
+        "total": 34,
+        "covered": 34,
         "skipped": 0,
-        "pct": 96.77
+        "pct": 100
       },
       "functions": {
-        "total": 10,
-        "covered": 8,
+        "total": 5,
+        "covered": 5,
         "skipped": 0,
-        "pct": 80
+        "pct": 100
       },
       "statements": {
-        "total": 64,
-        "covered": 61,
+        "total": 34,
+        "covered": 34,
         "skipped": 0,
-        "pct": 95.31
+        "pct": 100
       },
       "branches": {
-        "total": 26,
-        "covered": 24,
+        "total": 10,
+        "covered": 10,
         "skipped": 0,
-        "pct": 92.3
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\pagoService.js": {
+      "lines": {
+        "total": 23,
+        "covered": 23,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 5,
+        "covered": 5,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 25,
+        "covered": 25,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 2,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\pasarelaPago.js": {
+      "lines": {
+        "total": 12,
+        "covered": 12,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 6,
+        "covered": 6,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 12,
+        "covered": 12,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 2,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\perfilService.js": {
+      "lines": {
+        "total": 53,
+        "covered": 53,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 7,
+        "covered": 7,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 53,
+        "covered": 53,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 20,
+        "covered": 20,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\reservaService.js": {
+      "lines": {
+        "total": 89,
+        "covered": 87,
+        "skipped": 0,
+        "pct": 97.75
+      },
+      "functions": {
+        "total": 16,
+        "covered": 14,
+        "skipped": 0,
+        "pct": 87.5
+      },
+      "statements": {
+        "total": 91,
+        "covered": 87,
+        "skipped": 0,
+        "pct": 95.6
+      },
+      "branches": {
+        "total": 42,
+        "covered": 39,
+        "skipped": 0,
+        "pct": 92.85
       }
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\retencionService.js": {
@@ -2196,6 +4735,58 @@
         "pct": 83.33
       }
     },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\verificacionReservaService.js": {
+      "lines": {
+        "total": 37,
+        "covered": 37,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 10,
+        "covered": 10,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 41,
+        "covered": 41,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 26,
+        "covered": 26,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\services\\pasarelas\\simulada.js": {
+      "lines": {
+        "total": 21,
+        "covered": 21,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 7,
+        "covered": 7,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 25,
+        "covered": 25,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 18,
+        "covered": 18,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\sockets\\temporizadorSocket.js": {
       "lines": {
         "total": 74,
@@ -2224,40 +4815,14 @@
     },
     "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\utils\\ErrorDeAplicacion.js": {
       "lines": {
-        "total": 4,
-        "covered": 4,
-        "skipped": 0,
-        "pct": 100
-      },
-      "functions": {
-        "total": 1,
-        "covered": 1,
-        "skipped": 0,
-        "pct": 100
-      },
-      "statements": {
-        "total": 4,
-        "covered": 4,
-        "skipped": 0,
-        "pct": 100
-      },
-      "branches": {
-        "total": 2,
-        "covered": 1,
-        "skipped": 0,
-        "pct": 50
-      }
-    },
-    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\utils\\fechaHora.js": {
-      "lines": {
         "total": 5,
         "covered": 5,
         "skipped": 0,
         "pct": 100
       },
       "functions": {
-        "total": 2,
-        "covered": 2,
+        "total": 1,
+        "covered": 1,
         "skipped": 0,
         "pct": 100
       },
@@ -2269,7 +4834,33 @@
       },
       "branches": {
         "total": 3,
+        "covered": 2,
+        "skipped": 0,
+        "pct": 66.66
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\utils\\fechaHora.js": {
+      "lines": {
+        "total": 6,
+        "covered": 6,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 3,
         "covered": 3,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 6,
+        "covered": 6,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 4,
+        "covered": 4,
         "skipped": 0,
         "pct": 100
       }
@@ -2336,6 +4927,58 @@
       "functions": {
         "total": 2,
         "covered": 2,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 4,
+        "covered": 4,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\utils\\tarjeta.js": {
+      "lines": {
+        "total": 47,
+        "covered": 47,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 8,
+        "covered": 8,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 52,
+        "covered": 52,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 50,
+        "covered": 49,
+        "skipped": 0,
+        "pct": 98
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\utils\\validators\\adminValidators.js": {
+      "lines": {
+        "total": 4,
+        "covered": 4,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 0,
+        "covered": 0,
         "skipped": 0,
         "pct": 100
       },
@@ -2420,6 +5063,32 @@
       "statements": {
         "total": 8,
         "covered": 8,
+        "skipped": 0,
+        "pct": 100
+      },
+      "branches": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    },
+    "C:\\Users\\Juan AZ\\Desktop\\proyecto informatico\\backend\\src\\utils\\validators\\usuarioValidators.js": {
+      "lines": {
+        "total": 13,
+        "covered": 13,
+        "skipped": 0,
+        "pct": 100
+      },
+      "functions": {
+        "total": 1,
+        "covered": 1,
+        "skipped": 0,
+        "pct": 100
+      },
+      "statements": {
+        "total": 13,
+        "covered": 13,
         "skipped": 0,
         "pct": 100
       },

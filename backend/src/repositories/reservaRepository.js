@@ -42,7 +42,7 @@ const FIN_RESERVA = `(r.fecha + r.hora_fin)`;
 const AHORA_COLOMBIA = `(now() AT TIME ZONE 'America/Bogota')`;
 const ESTADO_VISIBLE = `CASE WHEN r.estado = 'confirmada' AND ${FIN_RESERVA} < ${AHORA_COLOMBIA} THEN 'completada' ELSE r.estado END`;
 
-async function listarPorUsuario({ usuarioId, periodo = 'proximas', estado = null, limite = 10, offset = 0 }) {
+async function listarPorUsuario({ usuarioId, periodo = 'proximas', estado = null, limite = 10, offset = 0, minutosMinimosCancelacion = 120 }) {
   const condiciones = ['r.usuario_id = $1', periodo === 'pasadas' ? `${FIN_RESERVA} < ${AHORA_COLOMBIA}` : `${FIN_RESERVA} >= ${AHORA_COLOMBIA}`];
   const valores = [usuarioId];
 
@@ -61,13 +61,17 @@ async function listarPorUsuario({ usuarioId, periodo = 'proximas', estado = null
               to_char(r.fecha, 'YYYY-MM-DD') AS fecha_texto,
               to_char(r.hora_inicio, 'HH24:MI') AS hora_inicio_texto,
               to_char(r.hora_fin, 'HH24:MI') AS hora_fin_texto,
-              ${ESTADO_VISIBLE} AS estado_visible
+              ${ESTADO_VISIBLE} AS estado_visible,
+              (r.estado = 'confirmada' AND (r.fecha + r.hora_inicio) >= ${AHORA_COLOMBIA} + make_interval(mins => $${valores.length + 3}::int)) AS puede_cancelar,
+              p.estado AS pago_estado, p.monto AS pago_monto, p.moneda AS pago_moneda,
+              p.marca AS pago_marca, p.ultimos4 AS pago_ultimos4
        FROM reservas r
        JOIN canchas c ON c.id = r.cancha_id
+       LEFT JOIN pagos p ON p.reserva_id = r.id
        WHERE ${donde}
        ORDER BY r.fecha ${orden}, r.hora_inicio ${orden}
        LIMIT $${valores.length + 1} OFFSET $${valores.length + 2}`,
-      [...valores, limite, offset]
+      [...valores, limite, offset, minutosMinimosCancelacion]
     ),
     pool.query(`SELECT COUNT(*)::int AS total FROM reservas r WHERE ${donde}`, valores),
   ]);
@@ -104,8 +108,12 @@ async function obtenerPorId(id) {
   return Reserva.aDominio(rows[0]);
 }
 
-async function crear({ canchaId, usuarioId, fecha, horaInicio, horaFin }) {
+// enTransaccion(cliente, reserva) corre después del INSERT y antes del COMMIT (por ejemplo, el cobro del
+// pago): si falla, la reserva no se guarda. Puede devolver una función que deshace su efecto externo si el
+// COMMIT falla después.
+async function crearUnaVez({ canchaId, usuarioId, fecha, horaInicio, horaFin }, enTransaccion) {
   const cliente = await pool.connect();
+  let deshacer = null;
 
   try {
     await cliente.query('BEGIN');
@@ -117,26 +125,98 @@ async function crear({ canchaId, usuarioId, fecha, horaInicio, horaFin }) {
       [canchaId, usuarioId, fecha, horaInicio, horaFin, ESTADO_CONFIRMADA]
     );
 
+    const reserva = Reserva.aDominio(rows[0]);
+    if (enTransaccion) deshacer = (await enTransaccion(cliente, reserva)) ?? null;
+
     await cliente.query('COMMIT');
-    return Reserva.aDominio(rows[0]);
+    return reserva;
   } catch (error) {
     await cliente.query('ROLLBACK');
+    if (deshacer) await deshacer().catch((falla) => console.error('[RESERVA] No se pudo deshacer el cobro:', falla.message));
     throw error;
   } finally {
     cliente.release();
   }
 }
 
-async function cancelar(id, usuarioId) {
+// US-29: el código de reserva (8 caracteres del id) es único por restricción de la base. Dos ids distintos pueden
+// dar el mismo código con una probabilidad ínfima: en ese caso se reintenta con un id nuevo (el INSERT falla
+// antes de ejecutar el cobro, así que reintentar no cobra dos veces).
+const INTENTOS_POR_CODIGO_REPETIDO = 3;
+const INDICE_CODIGO_UNICO = 'uq_reservas_codigo';
+
+async function crear(datos, enTransaccion) {
+  for (let intento = 1; ; intento += 1) {
+    try {
+      return await crearUnaVez(datos, enTransaccion);
+    } catch (error) {
+      if (error.constraint !== INDICE_CODIGO_UNICO || intento >= INTENTOS_POR_CODIGO_REPETIDO) throw error;
+    }
+  }
+}
+
+// US-29: busca una reserva por su código para la verificación del administrador. Devuelve solo lo necesario
+// para mostrarla (cancha, horario y nombre del usuario) y si ya venció, en hora de Colombia.
+async function buscarPorCodigo(codigo) {
   const { rows } = await pool.query(
-    `UPDATE reservas
-     SET estado = 'cancelada'
-     WHERE id = $1 AND usuario_id = $2 AND estado = $3
-     RETURNING *`,
-    [id, usuarioId, ESTADO_CONFIRMADA]
+    `SELECT r.id, r.codigo, r.estado, r.usada_at,
+            to_char(r.fecha, 'YYYY-MM-DD') AS fecha_texto,
+            to_char(r.hora_inicio, 'HH24:MI') AS hora_inicio_texto,
+            to_char(r.hora_fin, 'HH24:MI') AS hora_fin_texto,
+            (${FIN_RESERVA} < ${AHORA_COLOMBIA}) AS vencida,
+            c.nombre AS cancha_nombre, c.direccion AS cancha_direccion,
+            u.nombre AS usuario_nombre
+     FROM reservas r
+     JOIN canchas c ON c.id = r.cancha_id
+     JOIN usuarios u ON u.id = r.usuario_id
+     WHERE r.codigo = $1`,
+    [codigo]
   );
 
-  return Reserva.aDominio(rows[0]);
+  return rows[0] ?? null;
+}
+
+// Marca la reserva como utilizada solo si sigue vigente: confirmada, sin usar y sin vencer. El WHERE hace que dos
+// administradores no puedan marcarla a la vez (solo uno recibe la fila).
+async function marcarUsada(id, administradorId) {
+  const { rows } = await pool.query(
+    `UPDATE reservas r
+     SET usada_at = now(), usada_por = $2
+     WHERE r.id = $1 AND r.estado = $3 AND r.usada_at IS NULL AND ${FIN_RESERVA} >= ${AHORA_COLOMBIA}
+     RETURNING r.usada_at`,
+    [id, administradorId, ESTADO_CONFIRMADA]
+  );
+
+  return rows[0] ?? null;
+}
+
+// enTransaccion(cliente, reserva) corre después de marcarla cancelada y antes del COMMIT (por ejemplo, el
+// reembolso): si falla, la reserva sigue confirmada.
+async function cancelar(id, usuarioId, enTransaccion) {
+  const cliente = await pool.connect();
+
+  try {
+    await cliente.query('BEGIN');
+
+    const { rows } = await cliente.query(
+      `UPDATE reservas
+       SET estado = 'cancelada'
+       WHERE id = $1 AND usuario_id = $2 AND estado = $3
+       RETURNING *`,
+      [id, usuarioId, ESTADO_CONFIRMADA]
+    );
+
+    const cancelada = Reserva.aDominio(rows[0]);
+    if (cancelada && enTransaccion) await enTransaccion(cliente, cancelada);
+
+    await cliente.query('COMMIT');
+    return cancelada;
+  } catch (error) {
+    await cliente.query('ROLLBACK');
+    throw error;
+  } finally {
+    cliente.release();
+  }
 }
 
 module.exports = {
@@ -147,6 +227,8 @@ module.exports = {
   listarPorUsuario,
   listarTodasPorUsuario,
   obtenerPorId,
+  buscarPorCodigo,
+  marcarUsada,
   crear,
   cancelar,
 };

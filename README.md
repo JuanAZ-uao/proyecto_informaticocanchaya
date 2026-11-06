@@ -577,11 +577,76 @@ El plan de pruebas y los resultados están en [docs/testing/](docs/testing/), co
 | [03_Resultados_Pruebas_No_Funcionales.docx](docs/testing/03_Resultados_Pruebas_No_Funcionales.docx) | 21 casos: rendimiento, carga, seguridad, accesibilidad, compatibilidad, fiabilidad y mantenibilidad |
 | [04_Resultados_Pruebas_E2E.docx](docs/testing/04_Resultados_Pruebas_E2E.docx) | 25 flujos en navegador con capturas |
 | [05_Resultados_Smoke_Docker.docx](docs/testing/05_Resultados_Smoke_Docker.docx) | 24 casos de Docker, smoke test y análisis del pipeline |
-| [06_Informe_Resumen_QA_y_Defectos.docx](docs/testing/06_Informe_Resumen_QA_y_Defectos.docx) | Conclusiones, veredicto frente a los criterios de salida y detalle de los 15 defectos |
+| [06_Informe_Resumen_QA_y_Defectos.docx](docs/testing/06_Informe_Resumen_QA_y_Defectos.docx) | Conclusiones, veredicto frente a los criterios de salida y detalle de los 22 defectos |
 | [07_Resultados_SonarQube.docx](docs/testing/07_Resultados_SonarQube.docx) | Análisis estático con SonarQube (US-21): Quality Gate, métricas, hallazgos y correcciones |
 | [08_Verificacion_Documentacion_API.docx](docs/testing/08_Verificacion_Documentacion_API.docx) | Verificación de la documentación OpenAPI/Swagger (PIG1-23) contra sus criterios de aceptación |
 | [09_Consolidado_de_Pruebas.docx](docs/testing/09_Consolidado_de_Pruebas.docx) | Total de pruebas realizadas y listado completo de todas ellas |
 
-**Resultado de la regresión final: 282 pruebas, 0 fallidas** (140 de Jest, 72 funcionales, 25 E2E, 21 no funcionales y 24 de Docker/pipeline; 7 casos con una observación de mejora). SonarQube: Quality Gate aprobado, 0 bugs, 0 vulnerabilidades, 0 puntos críticos de seguridad y 0 code smells.
+**Resultado de la regresión final (Sprint 5): 649 pruebas, 0 fallidas** (472 de Jest, 99 funcionales, 30 E2E, 24 no funcionales y 24 de Docker/pipeline; 6 casos con una observación de mejora). Incluye las historias US-14, US-27, US-28 y US-29. SonarQube: Quality Gate aprobado, 0 bugs, 0 vulnerabilidades, 0 puntos críticos de seguridad, 0 code smells y 95,9 % de cobertura (98,2 % en el código nuevo).
 
-La primera ejecución detectó 10 defectos (guardada en [ejecucion-1-inicial](docs/testing/ejecucion-1-inicial/)). Tras unir las historias US-12, US-13 y US-21 aparecieron 5 más (DEF-11 a DEF-15); los 15 están corregidos y verificados. Cada caso documenta la historia de usuario y el criterio que cubre, los pasos, el resultado esperado, el obtenido (incluidos los errores que el sistema debe devolver) y la evidencia. Los scripts que ejecutan las pruebas están en [qa/](qa/README.md) y corren sobre un entorno Docker aislado, sin tocar la base de Neon.
+La primera ejecución detectó 10 defectos (guardada en [ejecucion-1-inicial](docs/testing/ejecucion-1-inicial/)). Tras unir las historias US-12, US-13 y US-21 aparecieron 5 más (DEF-11 a DEF-15), luego otros 4 (DEF-16 a DEF-19, hallazgos de SonarQube y del historial) y en la regresión del Sprint 5 aparecieron 3 más de interfaz (DEF-20 a DEF-22: desborde del menú del administrador, etiqueta accesible del enlace de perfil y tabla con scroll); los 22 están corregidos y verificados. Cada caso documenta la historia de usuario y el criterio que cubre, los pasos, el resultado esperado, el obtenido (incluidos los errores que el sistema debe devolver) y la evidencia. Los scripts que ejecutan las pruebas están en [qa/](qa/README.md) y corren sobre un entorno Docker aislado, sin tocar la base de Neon.
+
+## Sprint 5
+
+**Historias:** US-14 (cancelación de reserva propia), US-27 (perfil de usuario), US-28 (método de pago con tarjeta) y US-29 (verificación de código de reserva por el administrador).
+
+| ID | Historia de usuario | Qué incluye |
+|---|---|---|
+| US-14 | Cancelación de reserva propia | Botón «Cancelar reserva» con confirmación, regla de **2 horas** de anticipación, correo y aviso en pantalla, reembolso automático si estaba pagada |
+| US-27 | Perfil de usuario | «Mi perfil»: datos personales, cambio de contraseña y cambio de correo con verificación por enlace |
+| US-28 | Método de pago con tarjeta | Tarjetas tokenizadas por una pasarela, pago opcional al reservar y rechazo sin confirmar la reserva |
+| US-29 | Verificación de código de reserva (admin) | Panel de administración: verificar el código, marcar la reserva como utilizada y auditoría |
+
+### US-14 · Cancelación de reserva propia
+
+- Desde «Mis reservas», una reserva confirmada tiene el botón **Cancelar reserva**, que pide confirmación antes de ejecutar la acción.
+- Solo se puede cancelar con **al menos 2 horas** de anticipación al inicio (configurable con `HORAS_MIN_CANCELACION`). Si faltan menos, el sistema bloquea la acción y explica la restricción (`409 CANCELACION_FUERA_DE_PLAZO`). El servidor decide: el historial incluye `puedeCancelar` y la regla se vuelve a comprobar al cancelar.
+- Al cancelar, la franja queda **disponible de inmediato** (los demás usuarios la ven libre en tiempo real) y se muestra un aviso en pantalla; también se envía un **correo** con el detalle.
+- Cancelar la reserva de otro usuario responde **403** y no la modifica.
+- Si la reserva se pagó con tarjeta (US-28), el pago se **reembolsa por completo** dentro de la misma operación; si el reembolso falla, la reserva sigue confirmada.
+
+### US-27 · Perfil de usuario
+
+- Pantalla **Mi perfil** (`/perfil`) con nombre, teléfono y correo, y endpoints `GET/PATCH /api/usuarios/{id}`.
+- Los datos inválidos (teléfono de 7 a 15 dígitos, campos vacíos) no se guardan y el error aparece **junto a cada campo**.
+- **Cambio de correo con verificación:** `POST /api/usuarios/{id}/correo` envía un enlace al correo nuevo y el correo de la cuenta cambia solo cuando se abre (`POST /api/auth/verificar-correo`). Se rechazan los correos que ya usa otra cuenta. Sin SMTP configurado, el enlace se imprime en el log del backend.
+- **Cambio de contraseña:** `PATCH /api/usuarios/{id}/password` exige la contraseña actual y que la nueva cumpla la política (mínimo 8 caracteres, una letra y un número); los intentos fallidos se limitan.
+- Un usuario solo puede ver y editar su propio perfil: con el `id` de otro, el backend responde **403**.
+- La vista es responsive (360 a 1920 px).
+
+### US-28 · Método de pago con tarjeta
+
+- **Seguridad:** el número completo y el CVV **nunca se guardan**. Viajan solo hasta la pasarela, que devuelve un token; en la base de datos quedan el token, la marca y los últimos 4 dígitos. La API solo devuelve la tarjeta enmascarada.
+- **Validación:** número válido según Luhn y de una marca conocida, tarjeta no vencida y CVV correcto, con el error de cada campo y sin repetir los datos ingresados.
+- **Pago opcional:** al confirmar una reserva se puede elegir una tarjeta guardada; el valor de la hora se cobra en la misma operación. Sin tarjeta se reserva como siempre (pago en la cancha). Si el pago es **rechazado** (`402`), la reserva no se confirma y se explica el motivo para reintentar con otro método.
+- Al eliminar una tarjeta se borra el token de la pasarela y deja de ofrecerse; las reservas ya pagadas no se ven afectadas.
+- **HTTPS:** con `EXIGIR_HTTPS_PAGOS=true` las rutas de tarjetas responden `426` si la conexión no es HTTPS (detrás de un proxy con TLS, activar también `TRUST_PROXY=true`). El formulario además se bloquea en una conexión HTTP que no sea localhost.
+- **Pasarela:** por defecto es una **pasarela simulada** (`PASARELA_PAGO=simulada`), sin credenciales ni internet. Tarjetas de prueba: `4242 4242 4242 4242` se aprueba, `4000 0000 0000 0002` la rechaza el banco y `4000 0000 0000 9995` simula fondos insuficientes. Para usar una real (Stripe, Wompi, PayU) basta con añadir un módulo en [backend/src/services/pasarelas](backend/src/services/pasarelas) que cumpla el mismo contrato que [simulada.js](backend/src/services/pasarelas/simulada.js). Con una pasarela real, el formulario de tarjeta debería usar los campos seguros que ella provee, de modo que el número no pase por el servidor.
+
+### US-29 · Verificación de código de reserva (administrador)
+
+- Cada reserva tiene un código único `CY-XXXXXXXX`, garantizado por la base de datos, que se muestra al usuario al confirmar y en su historial.
+- Los administradores ven en el menú **Administración** (`/admin`) la sección «Verificar código de reserva». Al ingresar el código:
+  - **Vigente:** reserva confirmada cuyo horario aún no termina; muestra cancha, fecha, horario y nombre del usuario.
+  - **No vigente:** con el motivo (`vencida`, `cancelada` o `usada`).
+  - **Código no encontrado:** igual para un código inexistente o mal escrito, sin revelar datos de otras reservas.
+- **Marcar como utilizada:** una reserva vigente marcada como utilizada ya no puede validarse como vigente; si dos administradores la marcan a la vez, solo uno lo logra.
+- Solo los usuarios con rol `administrador` pueden usar estas rutas (`403` en otro caso) y no ven la sección. El rol se consulta en la base de datos en cada petición.
+- **Auditoría:** cada verificación queda registrada (administrador, código, resultado y fecha/hora) y se lista en el panel y en `GET /api/admin/verificaciones`.
+- **Crear un administrador** (nunca se hace desde el registro público):
+
+  ```bash
+  # promover una cuenta existente
+  npm run crear:admin -- correo@ejemplo.com
+  # crear una cuenta nueva con rol de administrador
+  ADMIN_PASSWORD='ClaveSegura123' npm run crear:admin -- correo@ejemplo.com "Nombre Apellido"
+  # en Docker
+  docker compose exec backend node src/seed/crearAdministrador.js correo@ejemplo.com
+  ```
+
+### Base de datos y configuración
+
+- El esquema ([backend/src/db/schema.sql](backend/src/db/schema.sql)) agrega las tablas `metodos_pago`, `pagos`, `cambios_correo` y `verificaciones_reserva`, la columna `usuarios.rol`, y en `reservas` las columnas `codigo` (única) y `usada_at`. Es idempotente: se aplica al arrancar el backend en Docker, y en Neon con `npm run migrate`.
+- Variables nuevas (ver [backend/.env.example](backend/.env.example)): `HORAS_MIN_CANCELACION`, `EMAIL_CHANGE_TOKEN_EXPIRES_MIN`, `PASARELA_PAGO`, `EXIGIR_HTTPS_PAGOS` y `TRUST_PROXY`.
+- La API documentada en Swagger (`/api/docs`) incluye los endpoints nuevos: perfil, métodos de pago y administración.
+- **Más canchas de ejemplo en Cali:** `npm run seed:mas-canchas` (en `backend/`) agrega 59 canchas en las zonas Norte, Sur, Oeste, Oriente y Centro, con tipos, precios, servicios y horarios variados. **Solo agrega**: no borra nada y se puede repetir sin duplicar (a diferencia de `seed:canchas`, que reemplaza todo el catálogo y, por la cascada, también las reservas). En Docker: `docker compose exec backend node src/seed/seedMasCanchas.js`. Los nombres y direcciones son inventados, y las fotos reutilizan las 5 del catálogo base.

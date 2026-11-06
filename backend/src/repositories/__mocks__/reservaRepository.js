@@ -6,6 +6,8 @@ module.exports = {
   existeSolapadaDeUsuario: jest.fn(),
   contarActivasPorUsuario: jest.fn(),
   obtenerPorId: jest.fn(),
+  buscarPorCodigo: jest.fn(),
+  marcarUsada: jest.fn(),
   crear: jest.fn(),
   cancelar: jest.fn(),
 };

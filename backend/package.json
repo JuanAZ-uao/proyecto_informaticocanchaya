@@ -11,6 +11,8 @@
     "seed:canchas": "node src/seed/seedCanchas.js",
     "seed:reservas": "node src/seed/seedReservas.js",
     "seed:enriquecer": "node src/seed/enriquecerCanchas.js",
+    "seed:mas-canchas": "node src/seed/seedMasCanchas.js",
+    "crear:admin": "node src/seed/crearAdministrador.js",
     "test": "jest --runInBand --forceExit",
     "test:carga": "node scripts/pruebaCargaSockets.js || echo 'Prueba de carga omitida o archivo no encontrado.'",
     "docs:cobertura": "node scripts/coberturaDocumentacion.js",

@@ -41,6 +41,12 @@ tags:
     description: Crear, confirmar, consultar y cancelar reservas (US-09, US-10, US-11, US-12, US-13).
   - name: Temporizador
     description: Paso intermedio entre elegir la franja y confirmar (US-17, US-18).
+  - name: Perfil
+    description: Ver y editar los datos propios, cambiar la contraseña y cambiar el correo con verificación (US-27).
+  - name: Métodos de pago
+    description: Tarjetas del usuario, tokenizadas por la pasarela de pago; solo se guarda el token, la marca y los últimos 4 dígitos (US-28).
+  - name: Administración
+    description: Panel de administración. Solo para usuarios con rol de administrador (US-29).
   - name: Socket.IO (tiempo real)
     description: |
       Los eventos en tiempo real **no son endpoints HTTP**, por eso no aparecen como operaciones. Se documentan aquí.
@@ -465,6 +471,8 @@ paths:
         6. **Duplicados (US-09):** si la franja ya está reservada, o dos personas confirman a la vez, solo una gana; la otra recibe `409 El horario ya no está disponible`.
 
         Al confirmar, el temporizador del usuario se detiene, los demás usuarios de la cancha reciben `disponibilidad:reservada` y se envía un correo de confirmación sin retrasar la respuesta.
+
+        **Pago con tarjeta (US-28, opcional):** si se envía `metodoPagoId` (una tarjeta propia y vigente), el valor de la hora se cobra a través de la pasarela dentro de la misma operación. Si el pago es rechazado se responde `402 PAGO_RECHAZADO` con el motivo y la reserva **no** se confirma. Sin `metodoPagoId` la reserva se confirma como siempre (pago en la cancha).
       security:
         - bearerAuth: []
       parameters:
@@ -474,14 +482,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FranjaRequest'
+              $ref: '#/components/schemas/ReservaRequest'
             example:
               fecha: '2026-10-22'
               horaInicio: '10:00'
               horaFin: '11:00'
       responses:
         '201':
-          description: Reserva confirmada.
+          description: Reserva confirmada. `reserva.pago` trae el resumen del cobro si se pagó con tarjeta, o `null`.
           content:
             application/json:
               schema:
@@ -490,6 +498,15 @@ paths:
                 properties:
                   reserva:
                     $ref: '#/components/schemas/ReservaConfirmada'
+        '402':
+          description: La pasarela rechazó el pago; la reserva no se confirmó. El mensaje explica el motivo para reintentar con otro método.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                mensaje: 'El pago fue rechazado: Fondos insuficientes. Tu reserva no se confirmó; intenta con otro método de pago.'
+                codigo: PAGO_RECHAZADO
         '400':
           description: Datos inválidos, franja pasada, bloque que no es de 1 hora o fuera del horario de la cancha.
           content:
@@ -744,9 +761,15 @@ paths:
       tags: [Reservas]
       operationId: cancelarReserva
       summary: Cancelar una reserva propia
-      description: >-
-        Cambia el estado a `cancelada` y libera la franja: otros usuarios pueden reservarla
-        y quienes miran la cancha reciben `disponibilidad:liberada`.
+      description: |
+        Cancelación de una reserva propia (US-14). Cambia el estado a `cancelada` y libera la franja de inmediato:
+        otros usuarios pueden reservarla y quienes miran la cancha reciben `disponibilidad:liberada`.
+
+        **Reglas:**
+        - Solo el dueño puede cancelarla (403 si es de otro usuario; no se modifica nada).
+        - Debe faltar **al menos 2 horas** para el inicio (configurable con `HORAS_MIN_CANCELACION`); si faltan menos, o si ya empezó, se bloquea con `409 CANCELACION_FUERA_DE_PLAZO` y un mensaje que explica la restricción.
+        - Si la reserva se pagó con tarjeta (US-28) el pago se **reembolsa por completo** en la misma operación; si el reembolso falla (`502 REEMBOLSO_FALLIDO`) la reserva sigue confirmada.
+        - Se envía un correo con el detalle de la reserva cancelada; su fallo no impide la cancelación.
       security:
         - bearerAuth: []
       parameters:
@@ -760,7 +783,7 @@ paths:
           example: d1ad1c79-85f3-4d01-a0f0-0a7186c8417a
       responses:
         '200':
-          description: Reserva cancelada.
+          description: Reserva cancelada. `reembolso` es el resumen del pago devuelto, o `null` si la reserva no se había pagado con tarjeta.
           content:
             application/json:
               schema:
@@ -769,6 +792,24 @@ paths:
                 properties:
                   reserva:
                     $ref: '#/components/schemas/Reserva'
+                  reembolso:
+                    $ref: '#/components/schemas/PagoResumen'
+              example:
+                reserva:
+                  id: d1ad1c79-85f3-4d01-a0f0-0a7186c8417a
+                  codigo: CY-D1AD1C79
+                  canchaId: b67c4d88-a1fb-45de-830e-dd3bf416a472
+                  usuarioId: 81a157d0-2eda-435a-afb7-17f190edd77a
+                  fecha: '2026-10-22'
+                  horaInicio: '10:00:00'
+                  horaFin: '11:00:00'
+                  estado: cancelada
+                reembolso:
+                  estado: reembolsado
+                  monto: 60000
+                  moneda: COP
+                  marca: Visa
+                  ultimos4: '4242'
         '400':
           $ref: '#/components/responses/ErrorValidacion'
         '401':
@@ -790,13 +831,619 @@ paths:
               example:
                 mensaje: Reserva no encontrada
         '409':
-          description: La reserva ya estaba cancelada.
+          description: La reserva ya estaba cancelada, o faltan menos de 2 horas para su inicio (o ya comenzó).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                yaCancelada:
+                  summary: Ya estaba cancelada
+                  value:
+                    mensaje: Esta reserva ya estaba cancelada
+                fueraDePlazo:
+                  summary: Faltan menos de 2 horas
+                  value:
+                    mensaje: Solo puedes cancelar una reserva con al menos 2 horas de anticipación al inicio. Ya no es posible cancelar esta reserva.
+                    codigo: CANCELACION_FUERA_DE_PLAZO
+        '502':
+          description: No se pudo reembolsar el pago a través de la pasarela; la reserva sigue confirmada y se puede reintentar.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                mensaje: Esta reserva ya estaba cancelada
+                mensaje: No fue posible procesar el reembolso. La reserva no se canceló; intenta de nuevo.
+                codigo: REEMBOLSO_FALLIDO
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/auth/verificar-correo:
+    post:
+      tags: [Autenticación]
+      operationId: verificarCorreo
+      summary: Confirmar un cambio de correo
+      description: |
+        Cierra el cambio de correo de US-27. El usuario abre el enlace que llegó al **correo nuevo**; el frontend envía aquí el `token` de ese enlace.
+        Solo entonces el correo de la cuenta cambia. No requiere sesión, porque el enlace se abre desde el correo.
+
+        El token es de un solo uso y vence (60 minutos por defecto). Si entre la solicitud y la verificación otra cuenta registró ese correo, se responde 409.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerificarCorreoRequest'
+            example:
+              token: 3f2b8d9a1c7e4f60a5b9d8c7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7
+      responses:
+        '200':
+          description: El correo de la cuenta quedó actualizado.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [mensaje, correo]
+                properties:
+                  mensaje:
+                    type: string
+                    example: Correo actualizado correctamente
+                  correo:
+                    type: string
+                    format: email
+                    example: ana.nueva@ejemplo.com
+        '400':
+          description: Falta el token, o el enlace es inválido, ya se usó o expiró.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/ErrorValidacion'
+                  - $ref: '#/components/schemas/Error'
+              example:
+                mensaje: El enlace de verificación es inválido o ha expirado
+        '403':
+          $ref: '#/components/responses/OrigenNoPermitido'
+        '409':
+          description: Otra cuenta ya usa ese correo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                mensaje: El correo ya está registrado
+                codigo: CORREO_DUPLICADO
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/usuarios/{id}:
+    get:
+      tags: [Perfil]
+      operationId: obtenerPerfil
+      summary: Ver mi perfil
+      description: |
+        Devuelve los datos del perfil (nombre, correo y teléfono). Solo el propio usuario puede consultarlos: si el `id` no es el del token se responde 403.
+        Si hay un cambio de correo esperando verificación, `correoPendiente` trae el correo nuevo.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UsuarioId'
+      responses:
+        '200':
+          description: Perfil del usuario.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [usuario]
+                properties:
+                  usuario:
+                    $ref: '#/components/schemas/Perfil'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/UsuarioAjeno'
+        '404':
+          description: La cuenta no existe.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                mensaje: Usuario no encontrado
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+    patch:
+      tags: [Perfil]
+      operationId: actualizarPerfil
+      summary: Editar mi nombre y teléfono
+      description: |
+        Actualiza el nombre y el teléfono (US-27). Ambos son obligatorios; el teléfono debe tener de 7 a 15 dígitos y puede iniciar con `+` (se aceptan espacios, guiones y paréntesis al escribirlo, y se guarda sin ellos).
+        Si algún dato es inválido no se guarda nada y la respuesta 400 indica el error de cada campo. El correo **no** se cambia aquí: use `POST /api/usuarios/{id}/correo`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UsuarioId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PerfilRequest'
+            example:
+              nombre: Ana Pérez
+              telefono: '3001234567'
+      responses:
+        '200':
+          description: Perfil actualizado.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [mensaje, usuario]
+                properties:
+                  mensaje:
+                    type: string
+                    example: Perfil actualizado correctamente
+                  usuario:
+                    $ref: '#/components/schemas/Perfil'
+        '400':
+          $ref: '#/components/responses/ErrorValidacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/UsuarioAjeno'
+        '404':
+          description: La cuenta no existe.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                mensaje: Usuario no encontrado
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/usuarios/{id}/password:
+    patch:
+      tags: [Perfil]
+      operationId: cambiarPassword
+      summary: Cambiar mi contraseña
+      description: |
+        Cambia la contraseña (US-27). Exige la **contraseña actual** y que la nueva cumpla la política (mínimo 8 caracteres, una letra y un número) y sea distinta de la actual.
+        Si la actual no coincide se responde 400 (no 401, para que el navegador no cierre la sesión). Los intentos fallidos se limitan por usuario (429).
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UsuarioId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CambiarPasswordRequest'
+            example:
+              passwordActual: Password123!
+              nuevaPassword: NuevaClave456
+      responses:
+        '200':
+          description: Contraseña actualizada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+              example:
+                mensaje: Contraseña actualizada correctamente
+        '400':
+          description: La nueva contraseña no cumple las reglas, es igual a la actual, o la contraseña actual es incorrecta.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/ErrorValidacion'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                actualIncorrecta:
+                  summary: La contraseña actual no coincide
+                  value:
+                    mensaje: La contraseña actual no es correcta
+                    codigo: PASSWORD_ACTUAL_INCORRECTA
+                    errores:
+                      - campo: passwordActual
+                        mensaje: La contraseña actual no es correcta
+                reglas:
+                  summary: La nueva contraseña no cumple la política
+                  value:
+                    mensaje: Error de validación
+                    errores:
+                      - campo: nuevaPassword
+                        mensaje: La contraseña debe tener mínimo 8 caracteres, incluyendo una letra y un número
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/UsuarioAjeno'
+        '429':
+          $ref: '#/components/responses/DemasiadosIntentos'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/usuarios/{id}/correo:
+    post:
+      tags: [Perfil]
+      operationId: solicitarCambioCorreo
+      summary: Pedir el cambio de mi correo
+      description: |
+        Inicia el cambio de correo (US-27). **El correo no cambia todavía**: se envía un enlace de verificación al correo nuevo y el cambio se aplica cuando el usuario lo abre (`POST /api/auth/verificar-correo`).
+        Se rechaza si el correo nuevo es igual al actual (400) o ya pertenece a otra cuenta (409). Una solicitud nueva reemplaza a la anterior.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UsuarioId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CambiarCorreoRequest'
+            example:
+              nuevoCorreo: ana.nueva@ejemplo.com
+      responses:
+        '202':
+          description: Solicitud aceptada; falta que el usuario confirme desde el correo nuevo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+              example:
+                mensaje: Enviamos un enlace de verificación a ana.nueva@ejemplo.com. Tu correo cambiará cuando lo confirmes.
+        '400':
+          $ref: '#/components/responses/ErrorValidacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/UsuarioAjeno'
+        '409':
+          description: Otra cuenta ya usa ese correo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                mensaje: El correo ya está registrado
+                codigo: CORREO_DUPLICADO
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/usuarios/{id}/metodos-pago:
+    get:
+      tags: [Métodos de pago]
+      operationId: listarMetodosPago
+      summary: Listar mis tarjetas
+      description: |
+        Devuelve las tarjetas guardadas del usuario **enmascaradas** (marca y últimos 4 dígitos). Nunca se devuelve el número completo, el CVV ni el token de la pasarela.
+        Solo el propietario puede verlas (403 en otro caso). Con `EXIGIR_HTTPS_PAGOS=true` exige HTTPS (426).
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UsuarioId'
+      responses:
+        '200':
+          description: Tarjetas del usuario.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [metodosPago]
+                properties:
+                  metodosPago:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MetodoPago'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/UsuarioAjeno'
+        '426':
+          $ref: '#/components/responses/HttpsRequerido'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+    post:
+      tags: [Métodos de pago]
+      operationId: agregarMetodoPago
+      summary: Agregar una tarjeta
+      description: |
+        Registra una tarjeta como método de pago (US-28). El número y el CVV viajan **solo** hasta la pasarela, que devuelve un token; en la base de datos se guarda únicamente el token, la marca y los últimos 4 dígitos.
+
+        **Validaciones** (error 400 con el detalle por campo, sin repetir los datos ingresados): número válido según el algoritmo de Luhn y de una marca reconocida (Visa, Mastercard, American Express, Diners, Discover), tarjeta no vencida, CVV de 3 dígitos (4 en American Express) y titular obligatorio.
+        Se permiten hasta 5 tarjetas por usuario (409). Con `EXIGIR_HTTPS_PAGOS=true` solo se acepta por HTTPS (426).
+
+        Con la pasarela simulada, `4242 4242 4242 4242` se aprueba, `4000 0000 0000 0002` se rechaza y `4000 0000 0000 9995` simula fondos insuficientes.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UsuarioId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TarjetaRequest'
+            example:
+              numero: '4242424242424242'
+              titular: ANA PEREZ
+              vencimientoMes: 12
+              vencimientoAnio: 2030
+              cvv: '123'
+      responses:
+        '201':
+          description: Tarjeta guardada; se muestra enmascarada.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [mensaje, metodoPago]
+                properties:
+                  mensaje:
+                    type: string
+                    example: Tarjeta guardada correctamente
+                  metodoPago:
+                    $ref: '#/components/schemas/MetodoPago'
+        '400':
+          description: Faltan datos o la tarjeta no es válida (Luhn, vencida, CVV). Nunca incluye los datos ingresados.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/ErrorValidacion'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                faltanDatos:
+                  summary: Falta un campo
+                  value:
+                    mensaje: Error de validación
+                    errores:
+                      - campo: cvv
+                        mensaje: El código de seguridad (CVV) es obligatorio
+                tarjetaInvalida:
+                  summary: Número inválido o tarjeta vencida
+                  value:
+                    mensaje: La tarjeta no es válida
+                    codigo: TARJETA_INVALIDA
+                    errores:
+                      - campo: numero
+                        mensaje: El número de tarjeta no es válido
+                      - campo: vencimientoAnio
+                        mensaje: La tarjeta está vencida
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/UsuarioAjeno'
+        '409':
+          description: El usuario ya tiene el máximo de tarjetas guardadas.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                mensaje: Ya tienes 5 tarjetas guardadas. Elimina una para agregar otra.
+                codigo: LIMITE_TARJETAS
+        '426':
+          $ref: '#/components/responses/HttpsRequerido'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '502':
+          description: La pasarela de pago no respondió; no se guardó nada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                mensaje: No fue posible comunicarse con la pasarela de pago. Intenta de nuevo.
+                codigo: PASARELA_NO_DISPONIBLE
+
+  /api/usuarios/{id}/metodos-pago/{metodoId}:
+    delete:
+      tags: [Métodos de pago]
+      operationId: eliminarMetodoPago
+      summary: Eliminar una tarjeta
+      description: |
+        Borra el token de la pasarela y la tarjeta del usuario (US-28). Deja de aparecer como opción de pago; las reservas ya pagadas **no** se ven afectadas (conservan la marca y los últimos 4 dígitos del comprobante).
+        Solo el propietario puede eliminarla (403); si la tarjeta no es suya o no existe, 404.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UsuarioId'
+        - $ref: '#/components/parameters/MetodoPagoId'
+      responses:
+        '200':
+          description: Tarjeta eliminada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+              example:
+                mensaje: Método de pago eliminado
+        '400':
+          $ref: '#/components/responses/ErrorValidacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/UsuarioAjeno'
+        '404':
+          description: La tarjeta no existe o no pertenece al usuario.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                mensaje: Método de pago no encontrado
+        '426':
+          $ref: '#/components/responses/HttpsRequerido'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '502':
+          description: La pasarela no respondió al borrar el token; la tarjeta se conserva y se puede reintentar.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                mensaje: No fue posible comunicarse con la pasarela de pago. Intenta de nuevo.
+                codigo: PASARELA_NO_DISPONIBLE
+
+  /api/admin/reservas/verificar:
+    post:
+      tags: [Administración]
+      operationId: verificarCodigoReserva
+      summary: Verificar un código de reserva
+      description: |
+        Verificación del código de reserva por un administrador (US-29), para saber si una reserva está vigente cuando el usuario llega a usar la cancha.
+        Es solo una **consulta**: no cambia nada. Para dejarla utilizada use `POST /api/admin/reservas/{codigo}/usar`.
+
+        **Resultado:**
+        - `vigente`: reserva confirmada, sin usar y cuyo horario aún no termina. Incluye cancha, fecha, horario y nombre del usuario.
+        - `no_vigente` con `motivo`: `cancelada`, `usada` o `vencida` (si se cumplen varios, prevalece ese orden).
+        - Código con formato inválido o inexistente: `404 Código no encontrado`, siempre el mismo mensaje y sin revelar datos de otras reservas.
+
+        Solo para administradores (403 en otro caso). Cada verificación queda registrada para auditoría (administrador, código, resultado y fecha).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerificarCodigoRequest'
+            example:
+              codigo: CY-D1AD1C79
+      responses:
+        '200':
+          description: Resultado de la verificación.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultadoVerificacion'
+              examples:
+                vigente:
+                  summary: Reserva vigente
+                  value:
+                    estado: vigente
+                    motivo: null
+                    reserva:
+                      id: d1ad1c79-85f3-4d01-a0f0-0a7186c8417a
+                      codigo: CY-D1AD1C79
+                      cancha:
+                        nombre: Cancha El Bosque
+                        direccion: Av. Roosevelt # 30-10, Cali
+                      fecha: '2026-10-22'
+                      horaInicio: '10:00'
+                      horaFin: '11:00'
+                      usuario:
+                        nombre: Ana Pérez
+                      usadaAt: null
+                noVigente:
+                  summary: Reserva cancelada
+                  value:
+                    estado: no_vigente
+                    motivo: cancelada
+                    reserva:
+                      id: d1ad1c79-85f3-4d01-a0f0-0a7186c8417a
+                      codigo: CY-D1AD1C79
+                      cancha:
+                        nombre: Cancha El Bosque
+                        direccion: Av. Roosevelt # 30-10, Cali
+                      fecha: '2026-10-22'
+                      horaInicio: '10:00'
+                      horaFin: '11:00'
+                      usuario:
+                        nombre: Ana Pérez
+                      usadaAt: null
+        '400':
+          $ref: '#/components/responses/ErrorValidacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SoloAdministradores'
+        '404':
+          $ref: '#/components/responses/CodigoNoEncontrado'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/admin/reservas/{codigo}/usar:
+    post:
+      tags: [Administración]
+      operationId: marcarReservaUsada
+      summary: Marcar una reserva como utilizada
+      description: |
+        Deja la reserva como utilizada cuando el usuario ya usó la cancha (US-29). Solo se puede si sigue **vigente**; después de marcarla, el código ya no puede validarse como vigente (`no_vigente`, motivo `usada`).
+        Si dos administradores la marcan a la vez, solo uno lo logra y el otro recibe 409. Queda registrado en la auditoría.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CodigoReserva'
+      responses:
+        '200':
+          description: La reserva quedó marcada como utilizada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultadoVerificacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SoloAdministradores'
+        '404':
+          $ref: '#/components/responses/CodigoNoEncontrado'
+        '409':
+          description: La reserva no está vigente (cancelada, usada o vencida).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                mensaje: La reserva no está vigente (usada); no se puede marcar como utilizada
+                codigo: RESERVA_NO_VIGENTE
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/admin/verificaciones:
+    get:
+      tags: [Administración]
+      operationId: listarVerificaciones
+      summary: Auditoría de verificaciones
+      description: |
+        Últimas verificaciones registradas (US-29), de la más reciente a la más antigua: quién verificó, qué código, con qué resultado y cuándo.
+        `resultado` puede ser `vigente`, `vencida`, `cancelada`, `usada`, `no_encontrado` o `marcada_usada`. Solo para administradores.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limite
+          in: query
+          description: Cuántas verificaciones devolver (1 a 100; 20 por defecto).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Verificaciones recientes.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [verificaciones]
+                properties:
+                  verificaciones:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Verificacion'
+        '400':
+          $ref: '#/components/responses/ErrorValidacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SoloAdministradores'
         '500':
           $ref: '#/components/responses/ErrorInterno'
 
@@ -826,6 +1473,32 @@ components:
         type: string
         format: date
       example: '2026-10-22'
+    UsuarioId:
+      name: id
+      in: path
+      required: true
+      description: Identificador del usuario. Debe ser el del propio token; con otro se responde 403.
+      schema:
+        type: string
+        format: uuid
+      example: 81a157d0-2eda-435a-afb7-17f190edd77a
+    MetodoPagoId:
+      name: metodoId
+      in: path
+      required: true
+      description: Identificador de la tarjeta guardada.
+      schema:
+        type: string
+        format: uuid
+      example: 5b1e8d3c-4f2a-4c7b-9d10-3a6f8e2b7c41
+    CodigoReserva:
+      name: codigo
+      in: path
+      required: true
+      description: Código de la reserva (`CY-` y 8 caracteres hexadecimales).
+      schema:
+        type: string
+      example: CY-D1AD1C79
   responses:
     Disponibilidad:
       description: Franjas ocupadas y retenidas para la fecha.
@@ -893,6 +1566,40 @@ components:
           example:
             mensaje: Demasiados intentos. Espera unos minutos e inténtalo de nuevo.
             codigo: DEMASIADOS_INTENTOS
+    UsuarioAjeno:
+      description: El `id` de la ruta no es el del usuario autenticado, o el origen no está permitido. No se modifica nada.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            mensaje: No tienes permiso para acceder a los datos de otro usuario
+    HttpsRequerido:
+      description: Las operaciones con tarjetas solo se aceptan por HTTPS (con `EXIGIR_HTTPS_PAGOS=true`).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            mensaje: Las operaciones con tarjetas solo se permiten por una conexión segura (HTTPS)
+            codigo: HTTPS_REQUERIDO
+    SoloAdministradores:
+      description: El usuario autenticado no tiene rol de administrador.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            mensaje: Solo los administradores pueden realizar esta acción
+    CodigoNoEncontrado:
+      description: El código no existe o tiene un formato inválido. Es siempre el mismo mensaje, para no revelar datos de otras reservas.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            mensaje: Código no encontrado
+            codigo: CODIGO_NO_ENCONTRADO
     ErrorInterno:
       description: Error inesperado del servidor. El detalle técnico nunca se envía al cliente.
       content:
@@ -924,6 +1631,20 @@ components:
             - LIMITE_RESERVAS_ALCANZADO
             - SESION_EXPIRADA
             - DEMASIADOS_INTENTOS
+            - CANCELACION_FUERA_DE_PLAZO
+            - REEMBOLSO_FALLIDO
+            - PAGO_RECHAZADO
+            - PASARELA_NO_DISPONIBLE
+            - TARJETA_INVALIDA
+            - TARJETA_VENCIDA
+            - LIMITE_TARJETAS
+            - HTTPS_REQUERIDO
+            - PASSWORD_ACTUAL_INCORRECTA
+            - PASSWORD_REPETIDA
+            - CORREO_DUPLICADO
+            - CORREO_SIN_CAMBIO
+            - CODIGO_NO_ENCONTRADO
+            - RESERVA_NO_VIGENTE
     ErrorValidacion:
       type: object
       description: Error 400 de validación, con el detalle por campo.
@@ -966,6 +1687,11 @@ components:
           type: string
           format: email
           example: ana@ejemplo.com
+        rol:
+          type: string
+          enum: [usuario, administrador]
+          description: Rol de la cuenta. Quienes se registran son siempre `usuario`.
+          example: usuario
     RegistroRequest:
       type: object
       required: [nombre, correo, telefono, password]
@@ -1143,6 +1869,8 @@ components:
                 direccion:
                   type: string
                   example: Av. Roosevelt # 30-10, Cali
+            pago:
+              $ref: '#/components/schemas/PagoResumen'
     ReservaHistorial:
       type: object
       description: Reserva tal como aparece en "Mis reservas".
@@ -1176,6 +1904,11 @@ components:
           type: string
           description: La reserva `completada` es una confirmada cuyo horario ya terminó.
           enum: [confirmada, cancelada, completada]
+        puedeCancelar:
+          type: boolean
+          description: "`true` si la reserva está confirmada y faltan al menos 2 horas para su inicio. La regla la decide el servidor."
+        pago:
+          $ref: '#/components/schemas/PagoResumen'
         createdAt:
           type: string
           format: date-time
@@ -1234,3 +1967,245 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FranjaRetenida'
+    PagoResumen:
+      type: object
+      nullable: true
+      description: Resumen de un cobro (o reembolso) de una reserva, o `null` si la reserva no se pagó con tarjeta. No incluye referencias internas de la pasarela.
+      required: [estado, monto, moneda, marca, ultimos4]
+      properties:
+        estado:
+          type: string
+          enum: [aprobado, reembolsado]
+        monto:
+          type: number
+          example: 60000
+        moneda:
+          type: string
+          example: COP
+        marca:
+          type: string
+          example: Visa
+        ultimos4:
+          type: string
+          example: '4242'
+    ReservaRequest:
+      allOf:
+        - $ref: '#/components/schemas/FranjaRequest'
+        - type: object
+          properties:
+            metodoPagoId:
+              type: string
+              format: uuid
+              description: Tarjeta guardada con la que se paga la reserva (opcional). Debe ser del propio usuario y estar vigente.
+              example: 5b1e8d3c-4f2a-4c7b-9d10-3a6f8e2b7c41
+    Perfil:
+      type: object
+      description: Datos del perfil. Nunca incluye la contraseña ni su hash.
+      required: [id, nombre, correo, telefono]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 81a157d0-2eda-435a-afb7-17f190edd77a
+        nombre:
+          type: string
+          example: Ana Pérez
+        correo:
+          type: string
+          format: email
+          example: ana@ejemplo.com
+        telefono:
+          type: string
+          example: '3001234567'
+        rol:
+          type: string
+          enum: [usuario, administrador]
+          example: usuario
+        correoPendiente:
+          type: string
+          format: email
+          nullable: true
+          description: Correo nuevo que espera verificación (solo en `GET`), o `null`.
+    PerfilRequest:
+      type: object
+      required: [nombre, telefono]
+      properties:
+        nombre:
+          type: string
+          maxLength: 100
+          example: Ana Pérez
+        telefono:
+          type: string
+          description: De 7 a 15 dígitos, con un `+` opcional al inicio.
+          example: '3001234567'
+    CambiarPasswordRequest:
+      type: object
+      required: [passwordActual, nuevaPassword]
+      properties:
+        passwordActual:
+          type: string
+          format: password
+          example: Password123!
+        nuevaPassword:
+          type: string
+          format: password
+          description: Mínimo 8 caracteres, con al menos una letra y un número; distinta de la actual.
+          example: NuevaClave456
+    CambiarCorreoRequest:
+      type: object
+      required: [nuevoCorreo]
+      properties:
+        nuevoCorreo:
+          type: string
+          format: email
+          example: ana.nueva@ejemplo.com
+    VerificarCorreoRequest:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          description: Token del enlace enviado al correo nuevo.
+          example: 3f2b8d9a1c7e4f60a5b9d8c7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7
+    TarjetaRequest:
+      type: object
+      description: Datos de la tarjeta. Solo viajan hasta la pasarela; el número completo y el CVV nunca se guardan.
+      required: [numero, titular, vencimientoMes, vencimientoAnio, cvv]
+      properties:
+        numero:
+          type: string
+          description: Número de la tarjeta (se aceptan espacios y guiones).
+          example: '4242424242424242'
+        titular:
+          type: string
+          example: ANA PEREZ
+        vencimientoMes:
+          type: integer
+          minimum: 1
+          maximum: 12
+          example: 12
+        vencimientoAnio:
+          type: integer
+          description: Año de 4 dígitos (o de 2, que se interpreta como 20AA).
+          example: 2030
+        cvv:
+          type: string
+          description: 3 dígitos (4 en American Express).
+          example: '123'
+    MetodoPago:
+      type: object
+      description: Tarjeta enmascarada. No incluye el número completo, el CVV ni el token de la pasarela.
+      required: [id, marca, ultimos4, titular, vencimiento]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 5b1e8d3c-4f2a-4c7b-9d10-3a6f8e2b7c41
+        marca:
+          type: string
+          example: Visa
+        ultimos4:
+          type: string
+          example: '4242'
+        titular:
+          type: string
+          example: ANA PEREZ
+        vencimiento:
+          type: string
+          description: Mes y año (`MM/AA`).
+          example: 12/30
+        createdAt:
+          type: string
+          format: date-time
+    VerificarCodigoRequest:
+      type: object
+      required: [codigo]
+      properties:
+        codigo:
+          type: string
+          description: Código de la reserva (`CY-` y 8 caracteres hexadecimales). Se ignoran mayúsculas y espacios.
+          example: CY-D1AD1C79
+    ReservaVerificada:
+      type: object
+      description: Datos de la reserva que ve el administrador al verificar. Solo el nombre del usuario, nunca su correo ni su teléfono.
+      required: [id, codigo, cancha, fecha, horaInicio, horaFin, usuario]
+      properties:
+        id:
+          type: string
+          format: uuid
+        codigo:
+          type: string
+          example: CY-D1AD1C79
+        cancha:
+          type: object
+          required: [nombre]
+          properties:
+            nombre:
+              type: string
+              example: Cancha El Bosque
+            direccion:
+              type: string
+              example: Av. Roosevelt # 30-10, Cali
+        fecha:
+          type: string
+          format: date
+          example: '2026-10-22'
+        horaInicio:
+          type: string
+          example: '10:00'
+        horaFin:
+          type: string
+          example: '11:00'
+        usuario:
+          type: object
+          required: [nombre]
+          properties:
+            nombre:
+              type: string
+              example: Ana Pérez
+        usadaAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Momento en que se marcó como utilizada, o `null`.
+    ResultadoVerificacion:
+      type: object
+      required: [estado, reserva]
+      properties:
+        estado:
+          type: string
+          enum: [vigente, no_vigente]
+        motivo:
+          type: string
+          nullable: true
+          description: Por qué no es vigente (`vencida`, `cancelada` o `usada`); `null` si es vigente.
+          enum: [vencida, cancelada, usada, null]
+        reserva:
+          $ref: '#/components/schemas/ReservaVerificada'
+    Verificacion:
+      type: object
+      description: Un registro de auditoría.
+      required: [id, codigo, resultado, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        administrador:
+          type: string
+          nullable: true
+          description: Nombre del administrador que verificó.
+          example: Admin CanchaYa
+        codigo:
+          type: string
+          description: Código tal como lo escribió el administrador.
+          example: CY-D1AD1C79
+        resultado:
+          type: string
+          enum: [vigente, vencida, cancelada, usada, no_encontrado, marcada_usada]
+        reservaCodigo:
+          type: string
+          nullable: true
+          description: Código de la reserva encontrada, o `null` si no existía.
+        createdAt:
+          type: string
+          format: date-time

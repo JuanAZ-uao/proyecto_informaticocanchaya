@@ -15,3 +15,8 @@ export function solicitarRecuperacion({ correo }) {
 export function restablecerPassword({ token, nuevaPassword }) {
   return axiosClient.post('/auth/restablecer-password', { token, nuevaPassword });
 }
+
+// US-27: confirma el cambio de correo con el token del enlace que llegó al correo nuevo.
+export function verificarCorreo({ token }) {
+  return axiosClient.post('/auth/verificar-correo', { token });
+}
