@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   obtenerBloquesOcupados: vi.fn(),
   crearReserva: vi.fn(),
   entrarPanelReserva: vi.fn(),
+  listarMetodosPago: vi.fn(),
   temporizador: null,
   opciones: null,
 }));
@@ -16,6 +17,7 @@ vi.mock('../src/api/canchasApi', () => ({
   crearReserva: mocks.crearReserva,
   entrarPanelReserva: mocks.entrarPanelReserva,
 }));
+vi.mock('../src/api/perfilApi', () => ({ listarMetodosPago: mocks.listarMetodosPago }));
 vi.mock('../src/hooks/useTemporizadorReserva', () => ({
   default: (_canchaId, _token, opciones) => {
     mocks.opciones = opciones;
@@ -55,13 +57,13 @@ const reservaConfirmada = {
 
 const libres = { data: { ocupados: [], retenidos: [] } };
 
-function renderizar() {
-  return renderConRuta(<CanchaDetallePage />, { ruta: '/canchas/c1', patron: '/canchas/:id' });
+function renderizar(opciones = {}) {
+  return renderConRuta(<CanchaDetallePage />, { ruta: '/canchas/c1', patron: '/canchas/:id', ...opciones });
 }
 
 // Abre la página, elige una fecha futura (así los bloques no dependen de la hora actual) y espera los bloques.
-async function abrirPagina() {
-  const resultado = renderizar();
+async function abrirPagina(opciones) {
+  const resultado = renderizar(opciones);
   await screen.findByRole('heading', { level: 1, name: 'Cancha El Bosque' });
   fireEvent.change(screen.getByLabelText(/Fecha/), { target: { value: FECHA } });
   await screen.findByRole('button', { name: /06:00 - 07:00/ });
@@ -86,6 +88,7 @@ describe('CanchaDetallePage', () => {
     mocks.obtenerBloquesOcupados.mockResolvedValue(libres);
     mocks.entrarPanelReserva.mockResolvedValue({ data: { estado: 'completado' } });
     mocks.crearReserva.mockResolvedValue({ data: { reserva: reservaConfirmada } });
+    mocks.listarMetodosPago.mockResolvedValue({ data: { metodosPago: [] } });
     mocks.temporizador = {
       expiresAt: Date.now() + 180000,
       expirado: false,
@@ -349,7 +352,7 @@ describe('CanchaDetallePage', () => {
 
       expect(await screen.findByText('¡Reserva confirmada!')).toBeInTheDocument();
       expect(screen.getByText('CY-ABCD1234')).toBeInTheDocument();
-      expect(mocks.crearReserva).toHaveBeenCalledWith('c1', { fecha: FECHA, horaInicio: '06:00', horaFin: '07:00' });
+      expect(mocks.crearReserva).toHaveBeenCalledWith('c1', { fecha: FECHA, horaInicio: '06:00', horaFin: '07:00', metodoPagoId: '' });
       expect(JSON.parse(sessionStorage.getItem(CLAVE_FLUJO)).bloqueSeleccionado).toBeNull();
     });
 
@@ -568,6 +571,107 @@ describe('CanchaDetallePage', () => {
       expect(await screen.findByText('¡Reserva confirmada!')).toBeInTheDocument();
       guardar.mockRestore();
       borrar.mockRestore();
+    });
+  });
+
+  describe('método de pago con tarjeta (US-28)', () => {
+    const CON_USUARIO = { auth: { usuario: { id: 'u1', nombre: 'Ana Pérez', correo: 'ana@correo.com' } } };
+    const visa = { id: 'm1', marca: 'Visa', ultimos4: '4242', titular: 'ANA', vencimiento: '12/30' };
+    const master = { id: 'm2', marca: 'Mastercard', ultimos4: '4444', titular: 'ANA', vencimiento: '01/31' };
+
+    async function irAlResumen() {
+      await abrirPagina(CON_USUARIO);
+      await elegirBloque();
+      await entrarAlResumen();
+    }
+
+    beforeEach(() => {
+      mocks.listarMetodosPago.mockResolvedValue({ data: { metodosPago: [visa, master] } });
+    });
+
+    it('ofrece pagar en la cancha por defecto y las tarjetas guardadas enmascaradas', async () => {
+      await irAlResumen();
+
+      expect(await screen.findByRole('radio', { name: /Visa ···· 4242/ })).toBeInTheDocument();
+      expect(screen.getByRole('radio', { name: /Mastercard ···· 4444/ })).toBeInTheDocument();
+      expect(screen.getByRole('radio', { name: 'Pagar en la cancha' })).toBeChecked();
+      expect(mocks.listarMetodosPago).toHaveBeenCalledWith('u1');
+    });
+
+    it('al confirmar con una tarjeta elegida envía su id y muestra el pago aprobado', async () => {
+      mocks.crearReserva.mockResolvedValue({
+        data: { reserva: { ...reservaConfirmada, pago: { estado: 'aprobado', monto: 60000, moneda: 'COP', marca: 'Visa', ultimos4: '4242' } } },
+      });
+      await irAlResumen();
+
+      await userEvent.click(await screen.findByRole('radio', { name: /Visa ···· 4242/ }));
+      await userEvent.click(screen.getByRole('button', { name: 'Confirmar reserva' }));
+
+      expect(mocks.crearReserva).toHaveBeenCalledWith('c1', { fecha: FECHA, horaInicio: '06:00', horaFin: '07:00', metodoPagoId: 'm1' });
+      expect(await screen.findByText('¡Reserva confirmada!')).toBeInTheDocument();
+      expect(screen.getByText(/Aprobado · Visa ···· 4242/)).toBeInTheDocument();
+    });
+
+    it('sin tarjeta elegida reserva como siempre, sin método de pago', async () => {
+      await irAlResumen();
+      await screen.findByRole('radio', { name: /Visa ···· 4242/ });
+
+      await userEvent.click(screen.getByRole('button', { name: 'Confirmar reserva' }));
+
+      expect(mocks.crearReserva).toHaveBeenCalledWith('c1', expect.objectContaining({ metodoPagoId: '' }));
+      expect(await screen.findByText('¡Reserva confirmada!')).toBeInTheDocument();
+      expect(screen.queryByText(/Aprobado ·/)).not.toBeInTheDocument();
+    });
+
+    it('si el pago es rechazado la reserva no se confirma, se explica el motivo y se puede reintentar con otro método', async () => {
+      mocks.crearReserva.mockRejectedValueOnce(
+        errorHttp(402, { codigo: 'PAGO_RECHAZADO', mensaje: 'El pago fue rechazado: Fondos insuficientes. Tu reserva no se confirmó; intenta con otro método de pago.' })
+      );
+      await irAlResumen();
+      await userEvent.click(await screen.findByRole('radio', { name: /Visa ···· 4242/ }));
+
+      await userEvent.click(screen.getByRole('button', { name: 'Confirmar reserva' }));
+
+      expect(await screen.findByText(/El pago fue rechazado: Fondos insuficientes/)).toBeInTheDocument();
+      expect(screen.queryByText('¡Reserva confirmada!')).not.toBeInTheDocument();
+      // se queda en el resumen, con la franja apartada, para elegir otro método
+      expect(screen.getByRole('button', { name: 'Confirmar reserva' })).toBeEnabled();
+      expect(mocks.temporizador.liberarFranja).not.toHaveBeenCalled();
+
+      await userEvent.click(screen.getByRole('radio', { name: /Mastercard ···· 4444/ }));
+      await userEvent.click(screen.getByRole('button', { name: 'Confirmar reserva' }));
+
+      expect(mocks.crearReserva).toHaveBeenLastCalledWith('c1', expect.objectContaining({ metodoPagoId: 'm2' }));
+      expect(await screen.findByText('¡Reserva confirmada!')).toBeInTheDocument();
+    });
+
+    it('sin tarjetas guardadas invita a agregar una en el perfil', async () => {
+      mocks.listarMetodosPago.mockResolvedValue({ data: { metodosPago: [] } });
+      await irAlResumen();
+
+      expect(await screen.findByRole('link', { name: 'Agrega una tarjeta en tu perfil' })).toHaveAttribute('href', '/perfil');
+    });
+
+    it('si no se pueden cargar las tarjetas igual se puede reservar pagando en la cancha', async () => {
+      mocks.listarMetodosPago.mockRejectedValue(errorHttp(500, { mensaje: 'Error interno' }));
+      await irAlResumen();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Confirmar reserva' }));
+
+      expect(await screen.findByText('¡Reserva confirmada!')).toBeInTheDocument();
+    });
+
+    it('si la tarjeta elegida ya no existe al volver a consultar, vuelve a pagar en la cancha', async () => {
+      await irAlResumen();
+      await userEvent.click(await screen.findByRole('radio', { name: /Visa ···· 4242/ }));
+      mocks.listarMetodosPago.mockResolvedValue({ data: { metodosPago: [master] } });
+
+      // volver a la selección y entrar de nuevo al resumen
+      await userEvent.click(screen.getByRole('button', { name: /Cambiar horario/ }));
+      await entrarAlResumen();
+
+      await waitFor(() => expect(screen.getByRole('radio', { name: 'Pagar en la cancha' })).toBeChecked());
+      expect(screen.queryByRole('radio', { name: /Visa ···· 4242/ })).not.toBeInTheDocument();
     });
   });
 });

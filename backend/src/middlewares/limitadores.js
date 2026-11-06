@@ -3,6 +3,7 @@ const { rateLimit, ipKeyGenerator } = require('express-rate-limit');
 const VENTANA_MS = 15 * 60 * 1000;
 const MAX_LOGIN = Number(process.env.RATE_LIMIT_LOGIN_MAX || 10);
 const MAX_RECUPERACION = Number(process.env.RATE_LIMIT_RECUPERACION_MAX || 5);
+const MAX_CAMBIO_PASSWORD = Number(process.env.RATE_LIMIT_CAMBIO_PASSWORD_MAX || 10);
 
 // El límite se aplica por IP y correo: quien falla muchas veces con una cuenta queda frenado
 // para esa cuenta, sin bloquear a los demás usuarios que comparten la misma IP.
@@ -24,4 +25,12 @@ const base = { windowMs: VENTANA_MS, keyGenerator: claveIpYCorreo, handler: resp
 const limitarLogin = rateLimit({ ...base, limit: MAX_LOGIN, skipSuccessfulRequests: true });
 const limitarRecuperacion = rateLimit({ ...base, limit: MAX_RECUPERACION });
 
-module.exports = { limitarLogin, limitarRecuperacion };
+// US-27: el cambio de contraseña pide la actual; se limitan los intentos fallidos por usuario (va después de authMiddleware).
+const limitarCambioPassword = rateLimit({
+  ...base,
+  keyGenerator: (req) => `usuario:${req.usuarioId}`,
+  limit: MAX_CAMBIO_PASSWORD,
+  skipSuccessfulRequests: true,
+});
+
+module.exports = { limitarLogin, limitarRecuperacion, limitarCambioPassword };

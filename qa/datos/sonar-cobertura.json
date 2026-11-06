@@ -1,18 +1,44 @@
 {
-  "fuente": "API de SonarQube (/api/measures/component_tree) sobre el análisis 4, 27 de octubre de 2026",
+  "fuente": "API de SonarQube (/api/measures/component_tree) sobre el análisis 5, 5 de noviembre de 2026",
   "areas": {
-    "backend": { "archivos": 51, "lineasACubrir": 882, "lineasSinCubrir": 122, "coberturaLineas": 86.2, "coberturaCombinada": 82.8 },
-    "frontend": { "archivos": 30, "lineasACubrir": 2019, "lineasSinCubrir": 24, "coberturaLineas": 98.8, "coberturaCombinada": 98.2 }
+    "backend": {
+      "archivos": 79,
+      "lineasACubrir": 1392,
+      "lineasSinCubrir": 103,
+      "coberturaLineas": 92.6,
+      "coberturaCombinada": 90.7
+    },
+    "frontend": {
+      "archivos": 46,
+      "lineasACubrir": 2968,
+      "lineasSinCubrir": 24,
+      "coberturaLineas": 99.2,
+      "coberturaCombinada": 98.7
+    }
   },
-  "lineasNuevas": { "3": 26, "4": 35 },
+  "lineasNuevas": {
+    "3": 26,
+    "4": 35,
+    "5": 1520
+  },
   "pruebas": {
-    "backend": { "jest": 157, "suites": 13, "nuevas": 16, "archivoNuevo": "backend/tests/temporizadorSocket.test.js" },
-    "frontend": { "vitest": 147, "archivos": 9, "herramienta": "Vitest 2 con Testing Library y jsdom (cobertura con V8)" }
+    "backend": {
+      "jest": 472,
+      "suites": 24,
+      "nuevas": 315,
+      "archivoNuevo": "backend/tests/perfilPagosAdmin.integration.test.js (y 13 archivos más del Sprint 5)"
+    },
+    "frontend": {
+      "vitest": 238,
+      "archivos": 12,
+      "herramienta": "Vitest 2 con Testing Library y jsdom (cobertura con V8)"
+    }
   },
   "acciones": [
     "El frontend no tenía ninguna prueba automática: sus 562 líneas por cubrir figuraban sin cubrir (0 %). Se añadió Vitest con Testing Library y 147 pruebas en 9 archivos: autenticación, rutas protegidas, listado de canchas, detalle de la cancha con el flujo completo de reserva, historial «Mis reservas», temporizador, hook del socket y router.",
     "El socket de reservas del backend (temporizadorSocket.js, 74 líneas) no tenía pruebas. Se añadieron 16 pruebas con un servidor Socket.IO real: conexión y autenticación, retención de franjas, avisos en tiempo real a los demás usuarios, reinicio del temporizador y manejo de errores.",
-    "El pipeline ahora ejecuta las pruebas del frontend con cobertura (npm run test:coverage), publica su reporte lcov y el job de SonarQube lo descarga junto con el del backend. Antes recibía un reporte vacío para el frontend."
+    "El pipeline ahora ejecuta las pruebas del frontend con cobertura (npm run test:coverage), publica su reporte lcov y el job de SonarQube lo descarga junto con el del backend. Antes recibía un reporte vacío para el frontend.",
+    "Sprint 5 (análisis 5): las 4 historias nuevas (cancelación con reembolso, perfil, tarjetas tokenizadas y verificación de códigos) llegaron con sus pruebas: 315 pruebas nuevas en el backend (unitarias, HTTP y de integración con PostgreSQL) y 91 en el frontend. El código nuevo (1 520 líneas por cubrir) quedó con 98,2 % de cobertura frente al mínimo de 80 % y el Quality Gate se aprobó sin hallazgos nuevos."
   ],
   "recomendaciones": [
     "Los repositorios de acceso a datos (canchaRepository, horarioRepository, retencionRepository, sesionReservaRepository) son lo menos cubierto del backend; hoy solo los ejercitan las pruebas de integración. Conviene añadir pruebas unitarias con el cliente de base de datos simulado.",

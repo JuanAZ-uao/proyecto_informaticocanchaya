@@ -11,4 +11,9 @@ function esMomentoPasado(fecha, hora, ahora = Date.now()) {
   return Number.isNaN(momento.getTime()) || momento.getTime() <= ahora;
 }
 
-module.exports = { aMomentoColombia, esMomentoPasado };
+// Minutos que faltan para el inicio de la reserva (negativo si ya comenzó). NaN si la fecha no es válida.
+function minutosHastaInicio(fecha, hora, ahora = Date.now()) {
+  return (aMomentoColombia(fecha, hora).getTime() - ahora) / 60000;
+}
+
+module.exports = { aMomentoColombia, esMomentoPasado, minutosHastaInicio };

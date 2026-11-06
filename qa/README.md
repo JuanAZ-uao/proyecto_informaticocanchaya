@@ -21,7 +21,7 @@ Todo corre en un proyecto de Docker Compose **aislado** (`canchaya-qa`, API en e
 ## Requisitos
 
 - Node.js 22 y Docker Desktop encendido (con `docker compose`).
-- Puertos 4300, 8380, 5434, 5435 (cobertura para SonarQube) y 9000 (SonarQube) libres. La prueba de límite de reservas usa temporalmente el 4301 y la de documentación el 4302.
+- Puertos 4300, 8380, 5434, 5435 (cobertura para SonarQube) y 9000 (SonarQube) libres. La prueba de límite de reservas usa temporalmente el 4301, la de documentación el 4302 y la de HTTPS obligatorio (US-28) el 4303 y el 4304.
 
 ## Cómo ejecutarlas
 

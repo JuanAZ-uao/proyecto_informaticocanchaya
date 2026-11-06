@@ -10,6 +10,9 @@ import ResetPasswordPage from '../pages/ResetPasswordPage';
 import CanchasListPage from '../pages/CanchasListPage';
 import CanchaDetallePage from '../pages/CanchaDetallePage';
 import MisReservasPage from '../pages/MisReservasPage';
+import PerfilPage from '../pages/PerfilPage';
+import VerificarCorreoPage from '../pages/VerificarCorreoPage';
+import AdminPage from '../pages/AdminPage';
 import AdminReservasPage from '../pages/AdminReservasPage';
 
 export default function AppRouter() {
@@ -23,6 +26,7 @@ export default function AppRouter() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/olvide-password" element={<ForgotPasswordPage />} />
           <Route path="/restablecer-password" element={<ResetPasswordPage />} />
+          <Route path="/verificar-correo" element={<VerificarCorreoPage />} />
           <Route
             path="/canchas"
             element={
@@ -45,6 +49,22 @@ export default function AppRouter() {
               <ProtectedRoute>
                 <MisReservasPage />
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/perfil"
+            element={
+              <ProtectedRoute>
+                <PerfilPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminPage />
+              </AdminRoute>
             }
           />
           <Route

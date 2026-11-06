@@ -42,16 +42,18 @@ export default function Navbar() {
                 Mis reservas
               </NavLink>
               {esAdministrador && (
-                <NavLink to="/admin/reservas" className="navbar-enlace">
-                  Administración
+                <NavLink to="/admin" className="navbar-enlace" aria-label="Administración">
+                  <span className="navbar-texto-largo">Administración</span>
+                  <span className="navbar-texto-corto" aria-hidden="true">Admin</span>
                 </NavLink>
               )}
-              <span className="navbar-usuario" title={usuario?.correo}>
+              <NavLink to="/perfil" className="navbar-usuario" title={usuario?.correo}>
                 <span className="avatar" aria-hidden="true">
                   {obtenerIniciales(usuario?.nombre)}
                 </span>
+                <span className="sr-only">Mi perfil: </span>
                 <span className="navbar-nombre">{usuario?.nombre?.split(' ')[0]}</span>
-              </span>
+              </NavLink>
               <button type="button" className="navbar-salir" onClick={handleLogout}>
                 <Icono nombre="salir" tamano={16} />
                 <span>Salir</span>

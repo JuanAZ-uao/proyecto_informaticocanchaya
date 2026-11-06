@@ -28,6 +28,7 @@ function aDominio(fila) {
     horaInicio: fila.hora_inicio,
     horaFin: fila.hora_fin,
     estado: fila.estado,
+    usadaAt: fila.usada_at ?? null,
     createdAt: fila.created_at,
   };
 }
@@ -46,6 +47,11 @@ function aHistorial(fila) {
     horaInicio: fila.hora_inicio_texto,
     horaFin: fila.hora_fin_texto,
     estado: fila.estado_visible,
+    // US-14: el servidor decide si todavía hay tiempo de cancelar (la regla de anticipación vive solo en el backend).
+    puedeCancelar: Boolean(fila.puede_cancelar),
+    pago: fila.pago_estado
+      ? { estado: fila.pago_estado, monto: Number(fila.pago_monto), moneda: fila.pago_moneda, marca: fila.pago_marca, ultimos4: fila.pago_ultimos4 }
+      : null,
     // US-16: solo tiene valor en las reservas canceladas por un administrador.
     motivoCancelacion: fila.motivo_cancelacion ?? null,
     createdAt: fila.created_at,

@@ -8,6 +8,8 @@ function errorHandler(err, req, res, next) { // eslint-disable-line no-unused-va
   res.status(statusCode).json({
     mensaje: statusCode === 500 ? 'Error interno del servidor' : err.message,
     ...(statusCode !== 500 && err.codigo ? { codigo: err.codigo } : {}),
+    // Errores por campo (por ejemplo, los de una tarjeta inválida), con el mismo formato que la validación de entrada.
+    ...(statusCode !== 500 && err.errores ? { errores: err.errores } : {}),
   });
 }
 

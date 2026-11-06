@@ -11,6 +11,12 @@ const browser = await chromium.launch();
 const erroresConsola = [];
 let diaE2E = 1;
 const proximoDia = () => fechaCO((diaE2E += 1));
+// Entre semana el horario es de 06:00 a 22:00 y el fin de semana de 07:00 a 20:00: los casos que cuentan bloques usan un día hábil.
+const proximoDiaHabil = () => {
+  let fecha = proximoDia();
+  while ([0, 6].includes(new Date(`${fecha}T00:00:00`).getDay())) fecha = proximoDia();
+  return fecha;
+};
 
 // ---------- Helpers ----------
 async function abrirSesion(usuario, { viewport = { width: 1366, height: 900 }, movil = false, init } = {}) {
@@ -336,7 +342,7 @@ await S.caso(
   { ...base, id: 'E2E-07', hu: 'US-07', hus: ['US-07', 'US-08'], ca: { 'US-07': [1, 2, 3], 'US-08': [2, 3] }, grupo: 'Catálogo', titulo: 'Selección de fecha y bloques de 1 hora; día sin horario', objetivo: 'Verificar que se ofrecen bloques de 1 hora dentro del horario, que "Iniciar reserva" se habilita solo con un bloque libre y que un día sin horario no ofrece bloques.', datos: 'Se elimina temporalmente el horario de un día de una cancha en la base de pruebas.', pasos: ['Abrir la cancha y elegir una fecha futura.', 'Revisar los bloques y el estado del botón.', 'Seleccionar un bloque.', 'Elegir una fecha cuyo día de la semana no tiene horario.'], esperado: '16 bloques de 06:00 a 22:00; "Iniciar reserva" deshabilitado hasta elegir un bloque; en el día sin horario aparece "La cancha no tiene horarios disponibles para el día seleccionado." y ningún bloque.' },
   async (c) => {
     const { context, page } = await abrirSesion(U1);
-    const fecha = proximoDia();
+    const fecha = proximoDiaHabil();
     await abrirCancha(page, K4, fecha);
     const bloques = await page.locator('.bloque-horario').allInnerTexts();
     c.verifica(bloques.length === 16 && bloques[0].startsWith('06:00 - 07:00') && bloques.at(-1).startsWith('21:00 - 22:00'), 'Se ofrecen 16 bloques de 1 hora, de 06:00 a 22:00', `${bloques.length} bloques`);
@@ -811,7 +817,7 @@ await S.caso(
 // Historial de reservas (US-13) y Reservas múltiples (US-12)
 // =====================================================================
 await S.caso(
-  { ...base, id: 'E2E-23', hu: 'US-13', hus: ['US-13', 'US-12'], ca: { 'US-13': [1, 2, 3, 4, 5, 6], 'US-12': [5] }, grupo: 'Historial', titulo: 'Pantalla "Mis reservas": pestañas, estados, filtro, paginación y estado vacío', objetivo: 'Verificar en el navegador el historial del usuario con varias reservas: próximas y pasadas, estado "Completada", filtro por estado, paginación y el mensaje cuando no hay reservas.', pasos: ['Preparar un usuario con 2 reservas futuras (una cancelada) y 12 pasadas.', 'Abrir /mis-reservas y revisar la pestaña "Próximas".', 'Cambiar a "Pasadas" y revisar los estados y la paginación.', 'Filtrar por "Cancelada".', 'Entrar con un usuario sin reservas.'], esperado: 'Próximas muestra solo las 2 futuras con su estado; Pasadas muestra 10 por página con "Completada" y un control de página 1 de 2 que avanza a la página 2; el filtro deja solo las canceladas; el usuario sin reservas ve "Aún no tienes reservas" con el botón "Reservar una cancha".' },
+  { ...base, id: 'E2E-23', hu: 'US-13', hus: ['US-13', 'US-12'], ca: { 'US-13': [1, 2, 3, 4, 5, 6], 'US-12': [5] }, grupo: 'Historial', titulo: 'Pantalla "Mis reservas": pestañas, estados, filtro, paginación y estado vacío', objetivo: 'Verificar en el navegador el historial del usuario con varias reservas: próximas y pasadas, estado "Completada", filtro por estado, paginación y el mensaje cuando no hay reservas.', pasos: ['Preparar un usuario con 2 reservas futuras (una cancelada) y 12 pasadas.', 'Abrir /mis-reservas y revisar la pestaña "Próximas".', 'Cambiar a "Pasadas" y revisar los estados y la paginación.', 'Filtrar por "Cancelada".', 'Filtrar por "Completada" estando en Próximas.', 'Filtrar por "Cancelada" en Pasadas.', 'Entrar con un usuario sin reservas.'], esperado: 'Próximas muestra solo las 2 futuras con su estado; Pasadas muestra 10 por página con "Completada" y un control de página 1 de 2 que avanza a la página 2; el filtro deja solo las canceladas; el filtro "Completada" cambia solo a la pestaña Pasadas y muestra las completadas; un filtro sin resultados muestra "No hay reservas con ese estado"; el usuario sin reservas ve "Aún no tienes reservas" con el botón "Reservar una cancha".' },
   async (c) => {
     const U = await crearUsuario('e2ehist');
     const dia = proximoDia();
@@ -846,7 +852,11 @@ await S.caso(
     await page.selectOption('select[aria-label="Filtrar por estado"]', 'cancelada');
     await page.waitForFunction(() => document.querySelectorAll('.reserva-item').length === 1);
     c.verifica(/Cancelada/.test(await page.locator('.reserva-item').first().innerText()), 'El filtro "Cancelada" deja solo la reserva cancelada');
+    // "Completada" solo existe entre las pasadas: el filtro lleva a esa pestaña en vez de mostrar una lista vacía.
     await page.selectOption('select[aria-label="Filtrar por estado"]', 'completada');
+    await page.waitForFunction(() => document.querySelectorAll('.reserva-item').length === 10);
+    c.verifica((await page.locator('button[role="tab"][aria-selected="true"]').innerText()).trim() === 'Pasadas' && (await page.locator('.reserva-item').allInnerTexts()).every((x) => /Completada/.test(x)), 'El filtro "Completada" cambia a la pestaña Pasadas y muestra las reservas completadas');
+    await page.selectOption('select[aria-label="Filtrar por estado"]', 'cancelada');
     await page.waitForSelector('.estado-vacio');
     c.verifica(/No hay reservas con ese estado/.test(await page.locator('.estado-vacio').innerText()), 'Un filtro sin resultados muestra "No hay reservas con ese estado"');
     await c.captura(page, 'Filtro sin resultados');
@@ -916,7 +926,7 @@ await S.caso(
     await page.waitForSelector('.swagger-ui .opblock');
     c.verifica(/CanchaYa API/.test(await page.locator('.swagger-ui .info .title').innerText()), 'El título de la documentación es "CanchaYa API"');
     const operaciones = await page.locator('.swagger-ui .opblock').count();
-    c.verifica(operaciones === 14, 'Swagger UI lista las 14 operaciones', `${operaciones}`);
+    c.verifica(operaciones === 25, 'Swagger UI lista las 25 operaciones', `${operaciones}`);
     const etiquetas = await page.locator('.swagger-ui .opblock-tag').allInnerTexts();
     c.verifica(['Sistema', 'Autenticación', 'Canchas', 'Reservas', 'Temporizador', 'Socket.IO (tiempo real)'].every((e) => etiquetas.some((t) => t.includes(e))), 'Están las etiquetas, incluida "Socket.IO (tiempo real)"', etiquetas.map((t) => t.split('\n')[0]).join(' · '));
     await c.captura(page, 'Swagger UI: vista general de la documentación');
@@ -947,6 +957,335 @@ await S.caso(
     c.verifica(conAuth.estado === '200' && /"canchas"/.test(conAuth.cuerpo), 'Con el token, GET /api/canchas responde 200 con la lista de canchas', `${conAuth.estado}`);
     await c.captura(page, 'Try it out con el token: 200 y lista de canchas', '#operations-Canchas-listarCanchas');
     await context.close();
+  }
+);
+
+// =====================================================================
+// Sprint 5 — US-14 Cancelación, US-27 Perfil, US-28 Tarjeta y US-29 Verificación de código
+// =====================================================================
+const fechaPasadaUnica = () => `${2001 + Math.floor(Math.random() * 19)}-${String(1 + Math.floor(Math.random() * 12)).padStart(2, '0')}-${String(1 + Math.floor(Math.random() * 28)).padStart(2, '0')}`;
+const diaLejano = () => fechaCO(100 + Math.floor(Math.random() * 3000));
+const colombiaEn = (minutos) => {
+  const momento = new Date(Date.now() + minutos * 60000 - 5 * 3600e3).toISOString();
+  return { fecha: momento.slice(0, 10), hora: momento.slice(11, 16) };
+};
+const rangoDesdeAhora = (minutos) => {
+  const inicio = colombiaEn(minutos);
+  const fin = colombiaEn(minutos + 15);
+  return { fecha: inicio.fecha, inicio: inicio.hora, fin: fin.fecha === inicio.fecha ? fin.hora : '23:59' };
+};
+const reservaApi = (usuario, cancha, fecha, hora) =>
+  api('POST', `/canchas/${cancha.id}/reservas`, { fecha, horaInicio: `${hora}:00`, horaFin: `${String(Number(hora) + 1).padStart(2, '0')}:00` }, usuario.token);
+const sinScrollHorizontal = (page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
+const ANIO_TARJETA = new Date().getFullYear() + 3;
+const seccion = (page, id) => page.locator(`section[aria-labelledby="${id}"]`);
+
+// Un administrador: se crea la cuenta, se le asigna el rol y se vuelve a iniciar sesión para que la sesión traiga el rol.
+async function crearAdministradorE2E(prefijo) {
+  const cuenta = await crearUsuario(prefijo);
+  sqlq(`UPDATE usuarios SET rol = 'administrador' WHERE id = '${cuenta.id}'`);
+  const login = await api('POST', '/auth/login', { correo: cuenta.correo, password: cuenta.password });
+  return { ...cuenta, token: login.datos.token, usuario: login.datos.usuario };
+}
+
+await S.caso(
+  { ...base, id: 'E2E-26', hu: 'US-14', ca: [1, 2, 3, 5], grupo: 'Cancelación', titulo: 'Cancelar una reserva desde "Mis reservas": confirmación, aviso y regla de las 2 horas', objetivo: 'Verificar en el navegador el flujo de cancelación: diálogo de confirmación, conservar la reserva, cancelarla, aviso en pantalla, franja liberada y bloqueo cuando faltan menos de 2 horas.', pasos: ['Crear dos reservas futuras y una que empieza en 90 minutos.', 'En "Mis reservas" pulsar "Cancelar reserva" y elegir "No, conservarla".', 'Pulsar de nuevo y confirmar con "Sí, cancelar reserva".', 'Pulsar "Cancelar reserva" en la que empieza en 90 minutos.'], esperado: 'Aparece un diálogo de confirmación; conservarla no cambia nada; confirmar muestra un aviso, la reserva queda "Cancelada" sin botón y su franja vuelve a estar libre; la de 90 minutos muestra el mensaje de la restricción de 2 horas y sigue confirmada.' },
+  async (c) => {
+    const U = await crearUsuario('e2ecancela');
+    const dia = diaLejano();
+    const r1 = await reservaApi(U, K0, dia, '08');
+    const r2 = await reservaApi(U, K0, dia, '09');
+    const pronto = rangoDesdeAhora(60 + Math.floor(Math.random() * 50));
+    const [idPronto, codigoPronto] = sqlq(`INSERT INTO reservas (cancha_id, usuario_id, fecha, hora_inicio, hora_fin) VALUES ('${[K1, K2, K3, K4][Math.floor(Math.random() * 4)].id}', '${U.id}', '${pronto.fecha}', '${pronto.inicio}', '${pronto.fin}') RETURNING id || '|' || codigo`).split(/\r?\n/)[0].split('|');
+    c.verifica(r1.status === 201 && r2.status === 201 && Boolean(idPronto), 'Preparación: 2 reservas futuras y 1 que empieza en 90 minutos');
+    const codigo1 = r1.datos.reserva.codigo;
+
+    const { context, page } = await abrirSesion(U);
+    await page.goto(`${CFG.WEB}/mis-reservas`);
+    await page.waitForSelector('.reserva-item');
+    const item = (codigo) => page.locator('.reserva-item', { hasText: codigo });
+
+    await item(codigo1).locator('button:has-text("Cancelar reserva")').click();
+    await page.waitForSelector('[role="dialog"]');
+    const dialogo = await page.locator('[role="dialog"]').innerText();
+    c.verifica(/¿Cancelar esta reserva\?/.test(dialogo) && dialogo.includes(codigo1) && dialogo.includes(K0.nombre), 'Al pulsar "Cancelar reserva" se pide confirmar, mostrando cancha y código', dialogo.replace(/\n+/g, ' · ').slice(0, 120));
+    await c.captura(page, 'Diálogo de confirmación antes de cancelar', '[role="dialog"]');
+    await page.click('button:has-text("No, conservarla")');
+    await page.waitForSelector('[role="dialog"]', { state: 'detached' });
+    c.verifica(/Confirmada/.test(await item(codigo1).innerText()) && sqlq(`SELECT estado FROM reservas WHERE id='${r1.datos.reserva.id}'`) === 'confirmada', 'Elegir "No, conservarla" cierra el diálogo y no cambia la reserva');
+
+    await item(codigo1).locator('button:has-text("Cancelar reserva")').click();
+    await page.click('button:has-text("Sí, cancelar reserva")');
+    await page.waitForSelector('.mensaje-exito');
+    const aviso = await page.locator('.mensaje-exito').first().innerText();
+    c.verifica(/cancelad/i.test(aviso), 'Se muestra un aviso en pantalla de que la reserva fue cancelada', aviso.replace(/\n+/g, ' '));
+    await page.waitForFunction((cod) => [...document.querySelectorAll('.reserva-item')].find((el) => el.innerText.includes(cod))?.innerText.includes('Cancelada'), codigo1);
+    c.verifica((await item(codigo1).locator('button:has-text("Cancelar reserva")').count()) === 0, 'La reserva queda "Cancelada" y ya no ofrece el botón de cancelar');
+    c.verifica(sqlq(`SELECT estado FROM reservas WHERE id='${r1.datos.reserva.id}'`) === 'cancelada', 'En la base la reserva quedó "cancelada"');
+    const disp = await api('GET', `/canchas/${K0.id}/disponibilidad?fecha=${dia}`, undefined, U.token);
+    c.verifica(!disp.datos.ocupados.some((o) => String(o.horaInicio).startsWith('08:00')) && disp.datos.ocupados.some((o) => String(o.horaInicio).startsWith('09:00')), 'La franja de las 08:00 quedó libre y la de las 09:00 (no cancelada) sigue ocupada');
+    await c.captura(page, 'Aviso de cancelación y reserva marcada como Cancelada');
+
+    await item(codigoPronto).locator('button:has-text("Cancelar reserva")').click();
+    await item(codigoPronto).locator('.mensaje-error').waitFor();
+    const bloqueo = await item(codigoPronto).locator('.mensaje-error').innerText();
+    c.verifica(/2 horas/.test(bloqueo) && (await page.locator('[role="dialog"]').count()) === 0, 'Con menos de 2 horas no se abre el diálogo y se explica la restricción', bloqueo.replace(/\n+/g, ' '));
+    c.verifica(sqlq(`SELECT estado FROM reservas WHERE id='${idPronto}'`) === 'confirmada', 'La reserva de 90 minutos sigue confirmada');
+    await c.captura(page, 'Cancelación bloqueada: faltan menos de 2 horas');
+    await context.close();
+  }
+);
+
+await S.caso(
+  { ...base, id: 'E2E-27', hu: 'US-27', ca: [1, 2, 3, 4, 5, 7], grupo: 'Perfil', titulo: 'Mi perfil: ver y editar datos, cambiar correo (con verificación) y contraseña, y vista responsive', objetivo: 'Recorrer el perfil en el navegador: datos cargados, edición válida e inválida, cambio de correo con enlace de verificación, cambio de contraseña y diseño entre 360 y 1920 px.', pasos: ['Abrir "Mi perfil" desde la barra superior.', 'Editar nombre y teléfono; probar datos inválidos.', 'Pedir cambiar el correo (uno ya usado y uno nuevo) y abrir el enlace enviado.', 'Cambiar la contraseña con la actual equivocada y luego correcta.', 'Revisar el perfil a 360 y 1920 px.'], esperado: 'El perfil trae los datos actuales; los válidos se guardan con confirmación; los inválidos muestran errores por campo; el correo cambia solo tras abrir el enlace; la contraseña exige la actual; no hay scroll horizontal en ningún ancho.' },
+  async (c) => {
+    const U = await crearUsuario('e2eperfil');
+    const otro = await crearUsuario('e2eocupado');
+    const { context, page } = await abrirSesion(U);
+    await page.goto(`${CFG.WEB}/canchas`);
+    await page.waitForSelector('.tarjeta-cancha, .estado-vacio, h1');
+    await page.click('a.navbar-usuario');
+    await page.waitForURL(`${CFG.WEB}/perfil`);
+    await page.waitForFunction(() => document.querySelector('input[name="nombre"]')?.value);
+    c.verifica((await page.locator('input[name="nombre"]').inputValue()) === U.nombre && (await page.locator('input[name="telefono"]').inputValue()) === '3001234567', 'Desde la barra superior se abre "Mi perfil" con nombre y teléfono actuales');
+    c.verifica((await seccion(page, 'titulo-correo').innerText()).includes(U.correo), 'Muestra el correo actual');
+    await c.captura(page, 'Mi perfil con los datos cargados');
+
+    await page.fill('input[name="nombre"]', 'Laura Gómez QA');
+    await page.fill('input[name="telefono"]', '3105550199');
+    await page.click('button:has-text("Guardar cambios")');
+    await seccion(page, 'titulo-datos').locator('.mensaje-exito').waitFor();
+    c.verifica(sqlq(`SELECT nombre || '|' || telefono FROM usuarios WHERE id='${U.id}'`) === 'Laura Gómez QA|3105550199', 'Los cambios válidos se guardan y se muestra la confirmación');
+
+    await page.fill('input[name="nombre"]', '');
+    await page.fill('input[name="telefono"]', 'abc');
+    await page.click('button:has-text("Guardar cambios")');
+    await seccion(page, 'titulo-datos').locator('.campo-error').first().waitFor();
+    const erroresCampo = await seccion(page, 'titulo-datos').locator('.campo-error').allInnerTexts();
+    c.verifica(erroresCampo.length === 2, 'Nombre vacío y teléfono inválido: un mensaje de error por cada campo', erroresCampo.join(' | '));
+    c.verifica(sqlq(`SELECT nombre || '|' || telefono FROM usuarios WHERE id='${U.id}'`) === 'Laura Gómez QA|3105550199', 'No se guardó nada con datos inválidos');
+    await c.captura(page, 'Errores de validación por campo', '[aria-labelledby="titulo-datos"]');
+
+    await page.fill('input[name="nuevoCorreo"]', otro.correo);
+    await page.click('button:has-text("Enviar enlace de verificación")');
+    await seccion(page, 'titulo-correo').locator('.campo-error, .mensaje-error').first().waitFor();
+    c.verifica(/registrad|existe|uso/i.test(await seccion(page, 'titulo-correo').locator('.campo-error, .mensaje-error').first().innerText()), 'Un correo de otra cuenta se rechaza con un mensaje');
+    const nuevo = `e2e.nuevo.${Date.now()}@qa.local`;
+    await page.fill('input[name="nuevoCorreo"]', nuevo);
+    await page.click('button:has-text("Enviar enlace de verificación")');
+    await seccion(page, 'titulo-correo').locator('.perfil-pendiente').waitFor();
+    c.verifica((await seccion(page, 'titulo-correo').locator('.perfil-pendiente').innerText()).includes(nuevo) && sqlq(`SELECT correo FROM usuarios WHERE id='${U.id}'`) === U.correo, 'El perfil indica el correo pendiente de verificación y el de la cuenta no cambia todavía');
+    await c.captura(page, 'Cambio de correo pendiente de verificación', '[aria-labelledby="titulo-correo"]');
+    await esperar(700);
+    const linea = [...logsBackend('5m').matchAll(/\[EMAIL\] Para: (\S+) -> (\S+)/g)].filter((m) => m[1] === nuevo).pop();
+    c.verifica(Boolean(linea) && linea[2].startsWith(`${CFG.WEB}/verificar-correo?token=`), 'El enlace de verificación se envió al correo nuevo', linea?.[2].replace(/token=.*/, 'token=…'));
+    await page.goto(linea[2]);
+    await page.waitForSelector('.mensaje-exito');
+    c.verifica(sqlq(`SELECT correo FROM usuarios WHERE id='${U.id}'`) === nuevo, 'Al abrir el enlace el correo de la cuenta cambia al nuevo');
+    await c.captura(page, 'Correo verificado');
+
+    await page.goto(`${CFG.WEB}/perfil`);
+    await page.waitForFunction(() => document.querySelector('input[name="nombre"]')?.value);
+    await page.fill('input[name="passwordActual"]', 'Equivocada1');
+    await page.fill('input[name="nuevaPassword"]', 'NuevaClave456');
+    await page.fill('input[name="confirmar"]', 'NuevaClave456');
+    await page.click('button:has-text("Cambiar contraseña")');
+    await seccion(page, 'titulo-password').locator('.campo-error, .mensaje-error').first().waitFor();
+    c.verifica((await api('POST', '/auth/login', { correo: nuevo, password: CFG.password })).status === 200, 'Con la contraseña actual equivocada se rechaza y la contraseña no cambia');
+    await page.fill('input[name="passwordActual"]', CFG.password);
+    await page.fill('input[name="nuevaPassword"]', 'NuevaClave456');
+    await page.fill('input[name="confirmar"]', 'NuevaClave456');
+    await page.click('button:has-text("Cambiar contraseña")');
+    await seccion(page, 'titulo-password').locator('.mensaje-exito').waitFor();
+    c.verifica((await api('POST', '/auth/login', { correo: nuevo, password: 'NuevaClave456' })).status === 200, 'Con la actual correcta se cambia y se puede iniciar sesión con la nueva');
+
+    for (const [ancho, alto] of [[360, 800], [768, 900], [1920, 1080]]) {
+      await page.setViewportSize({ width: ancho, height: alto });
+      await page.goto(`${CFG.WEB}/perfil`);
+      await page.waitForFunction(() => document.querySelector('input[name="nombre"]')?.value);
+      c.verifica(await sinScrollHorizontal(page), `A ${ancho} px no hay scroll horizontal`);
+      if (ancho !== 768) await c.captura(page, `Mi perfil a ${ancho} px`);
+    }
+    await context.close();
+  }
+);
+
+await S.caso(
+  { ...base, id: 'E2E-28', hu: 'US-28', hus: ['US-28', 'US-14'], ca: { 'US-28': [1, 2, 3, 4, 5, 6], 'US-14': [2] }, grupo: 'Pagos', titulo: 'Tarjeta: guardar, pagar una reserva, pago rechazado y eliminar', objetivo: 'Recorrer en el navegador el método de pago con tarjeta: validación, tarjeta enmascarada, pago al confirmar, rechazo con reintento y eliminación sin afectar lo ya pagado.', pasos: ['En el perfil, intentar guardar una tarjeta inválida y luego una válida.', 'Reservar una cancha eligiendo esa tarjeta.', 'Reservar con una tarjeta que la pasarela rechaza y reintentar pagando en la cancha.', 'Eliminar la tarjeta y revisar "Mis reservas".'], esperado: 'La inválida muestra errores sin guardarse; la válida aparece como "Visa ···· 4242" sin número completo; el pago aprobado se ve en la confirmación; el rechazo no confirma y permite reintentar; eliminar la tarjeta no altera la reserva pagada.' },
+  async (c) => {
+    const U = await crearUsuario('e2etarjeta');
+    const { context, page } = await abrirSesion(U);
+    await page.goto(`${CFG.WEB}/perfil`);
+    await page.waitForSelector('.perfil-vacio');
+    c.verifica(/Aún no tienes tarjetas guardadas/.test(await seccion(page, 'titulo-tarjetas').innerText()), 'Sin tarjetas: "Aún no tienes tarjetas guardadas"');
+
+    const formulario = seccion(page, 'titulo-tarjetas');
+    await formulario.locator('input[name="numero"]').fill('4242424242424241');
+    await formulario.locator('input[name="titular"]').fill('Ana Pérez');
+    await formulario.locator('input[name="vencimiento"]').fill('0120');
+    await formulario.locator('input[name="cvv"]').fill('12');
+    await formulario.locator('button:has-text("Guardar tarjeta")').click();
+    await formulario.locator('.campo-error').first().waitFor();
+    const errores = await formulario.locator('.campo-error').allInnerTexts();
+    c.verifica(errores.length >= 2 && !errores.join(' ').includes('4242424242424241'), 'Una tarjeta inválida muestra errores por campo sin repetir el número', errores.join(' | '));
+    c.verifica(sqlq(`SELECT count(*) FROM metodos_pago WHERE usuario_id='${U.id}'`) === '0', 'No se guardó la tarjeta inválida');
+    await c.captura(page, 'Tarjeta inválida: errores por campo', '[aria-labelledby="titulo-tarjetas"]');
+
+    await formulario.locator('input[name="numero"]').fill('4242424242424242');
+    await formulario.locator('input[name="vencimiento"]').fill(`12${String(ANIO_TARJETA).slice(-2)}`);
+    await formulario.locator('input[name="cvv"]').fill('123');
+    await formulario.locator('button:has-text("Guardar tarjeta")').click();
+    await formulario.locator('.lista-tarjetas').waitFor();
+    const textoTarjeta = await formulario.locator('.tarjeta-guardada').first().innerText();
+    c.verifica(/Visa/.test(textoTarjeta) && textoTarjeta.includes('4242') && !textoTarjeta.includes('4242 4242 4242 4242') && !textoTarjeta.includes('4242424242424242'), 'La tarjeta se muestra enmascarada: marca y últimos 4 dígitos', textoTarjeta.replace(/\n+/g, ' · '));
+    c.verifica((await formulario.locator('input[name="numero"]').inputValue()) === '' && (await formulario.locator('input[name="cvv"]').inputValue()) === '', 'El formulario se limpia: el número y el CVV no quedan en pantalla');
+    const filaTarjeta = sqlq(`SELECT row_to_json(m) FROM metodos_pago m WHERE usuario_id='${U.id}'`);
+    c.verifica(/"token":"tok_sim_/.test(filaTarjeta) && !filaTarjeta.includes('4242424242424242'), 'En la base solo hay token, marca y últimos 4 dígitos');
+    await c.captura(page, 'Tarjeta guardada y enmascarada', '[aria-labelledby="titulo-tarjetas"]');
+
+    const dia = diaLejano();
+    await abrirCancha(page, K0, dia);
+    await elegirBloque(page, '10:00');
+    await page.click('button:has-text("Iniciar reserva")');
+    await page.waitForSelector('.resumen-reserva');
+    const opciones = await page.locator('.selector-pago').innerText();
+    c.verifica(/Pagar en la cancha/.test(opciones) && /Visa ···· 4242/.test(opciones), 'Al confirmar se ofrece "Pagar en la cancha" y la tarjeta guardada', opciones.replace(/\n+/g, ' · '));
+    await c.captura(page, 'Selector de método de pago en el resumen', '.selector-pago');
+    await page.locator('.opcion-pago', { hasText: 'Visa ···· 4242' }).click();
+    await page.click('button:has-text("Confirmar reserva")');
+    await page.waitForSelector('.confirmacion-reserva');
+    const confirmacion = await page.locator('.confirmacion-reserva').innerText();
+    c.verifica(/Aprobado · Visa ···· 4242/.test(confirmacion), 'La confirmación muestra el pago aprobado con la tarjeta', confirmacion.replace(/\n+/g, ' · ').slice(0, 160));
+    c.verifica(sqlq(`SELECT count(*) FROM pagos WHERE usuario_id='${U.id}' AND estado='aprobado'`) === '1', 'Hay un pago aprobado en la base');
+    await c.captura(page, 'Confirmación con el pago aprobado');
+
+    // Una tarjeta que la pasarela de pruebas rechaza (…0002), agregada por API para ir directo al pago.
+    const rechazada = await api('POST', `/usuarios/${U.id}/metodos-pago`, { numero: '4000 0000 0000 0002', titular: 'Ana Pérez', vencimientoMes: 12, vencimientoAnio: ANIO_TARJETA, cvv: '123' }, U.token);
+    await abrirCancha(page, K0, dia);
+    await elegirBloque(page, '11:00');
+    await page.click('button:has-text("Iniciar reserva")');
+    await page.waitForSelector('.resumen-reserva');
+    await page.locator('.opcion-pago', { hasText: '···· 0002' }).click();
+    await page.click('button:has-text("Confirmar reserva")');
+    await page.locator('.mensaje-error').first().waitFor();
+    const motivo = await page.locator('.mensaje-error').first().innerText();
+    c.verifica(/rechazad/i.test(motivo) && (await page.locator('.confirmacion-reserva').count()) === 0 && (await page.locator('.resumen-reserva').count()) === 1, 'El pago rechazado no confirma la reserva, informa el motivo y conserva el resumen', motivo.replace(/\n+/g, ' '));
+    c.verifica(rechazada.status === 201 && sqlq(`SELECT count(*) FROM reservas WHERE usuario_id='${U.id}' AND hora_inicio='11:00'`) === '0', 'No se creó la reserva de las 11:00');
+    await c.captura(page, 'Pago rechazado: motivo y opción de reintentar');
+    await page.locator('.opcion-pago', { hasText: 'Pagar en la cancha' }).click();
+    await page.click('button:has-text("Confirmar reserva")');
+    await page.waitForSelector('.confirmacion-reserva');
+    c.verifica(sqlq(`SELECT count(*) FROM reservas WHERE usuario_id='${U.id}' AND hora_inicio='11:00'`) === '1', 'Al reintentar con "Pagar en la cancha" la reserva se confirma');
+
+    await page.goto(`${CFG.WEB}/perfil`);
+    await page.waitForSelector('.lista-tarjetas');
+    await page.click('button[aria-label="Eliminar la tarjeta Visa terminada en 4242"]');
+    await page.waitForSelector('[role="dialog"]');
+    c.verifica(/¿Eliminar esta tarjeta\?/.test(await page.locator('[role="dialog"]').innerText()), 'Eliminar pide confirmación');
+    await page.click('button:has-text("Sí, eliminar")');
+    await page.waitForFunction(() => !document.body.innerText.includes('Visa ···· 4242'));
+    c.verifica(sqlq(`SELECT count(*) FROM metodos_pago WHERE usuario_id='${U.id}' AND ultimos4='4242'`) === '0', 'Se borró la tarjeta (y su token) de la base');
+    await page.goto(`${CFG.WEB}/mis-reservas`);
+    await page.waitForSelector('.reserva-item');
+    const pagada = await page.locator('.reserva-item', { hasText: '10:00' }).first().innerText();
+    c.verifica(/Pagada · Visa ···· 4242/.test(pagada) && /Confirmada/.test(pagada), 'La reserva ya pagada sigue confirmada y conserva su pago', pagada.replace(/\n+/g, ' · ').slice(0, 160));
+    await c.captura(page, 'Mis reservas: reserva pagada tras eliminar la tarjeta');
+
+    // Al cancelar una reserva pagada, el diálogo avisa del reembolso.
+    const V = await crearUsuario('e2ereembolso');
+    const tj = await api('POST', `/usuarios/${V.id}/metodos-pago`, { numero: '5555 5555 5555 4444', titular: 'Luis Díaz', vencimientoMes: 12, vencimientoAnio: ANIO_TARJETA, cvv: '123' }, V.token);
+    const rp = await api('POST', `/canchas/${K0.id}/reservas`, { fecha: diaLejano(), horaInicio: '14:00', horaFin: '15:00', metodoPagoId: tj.datos.metodoPago.id }, V.token);
+    const sv = await abrirSesion(V);
+    await sv.page.goto(`${CFG.WEB}/mis-reservas`);
+    await sv.page.waitForSelector('.reserva-item');
+    await sv.page.click('button:has-text("Cancelar reserva")');
+    await sv.page.waitForSelector('[role="dialog"]');
+    c.verifica(/reembolsaremos/i.test(await sv.page.locator('[role="dialog"]').innerText()), 'El diálogo de cancelación avisa que se reembolsará el pago');
+    await sv.page.click('button:has-text("Sí, cancelar reserva")');
+    await sv.page.waitForSelector('.mensaje-exito');
+    c.verifica(rp.status === 201 && /reembols/i.test(await sv.page.locator('.mensaje-exito').first().innerText()) && sqlq(`SELECT estado FROM pagos WHERE reserva_id='${rp.datos.reserva.id}'`) === 'reembolsado', 'Al cancelar, el aviso informa el reembolso y el pago queda "reembolsado"');
+    await c.captura(sv.page, 'Cancelación de una reserva pagada con aviso de reembolso');
+    await sv.context.close();
+    await context.close();
+  }
+);
+
+await S.caso(
+  { ...base, id: 'E2E-29', hu: 'US-29', ca: [1, 2, 3, 4, 5, 6, 7, 8], grupo: 'Administración', titulo: 'Panel de administración: verificar códigos, marcar como utilizada y auditoría', objetivo: 'Verificar en el navegador el panel del administrador: los cuatro resultados de la verificación, el marcado como utilizada, la tabla de auditoría y que un usuario normal no ve la sección.', pasos: ['Un usuario normal busca el enlace de administración y abre /admin.', 'El administrador abre el panel y verifica un código vigente, lo marca como utilizado y lo vuelve a verificar.', 'Verifica una cancelada, una vencida y un código inexistente.', 'Revisa la tabla de verificaciones y el ancho de 360 px.'], esperado: 'El usuario normal no ve la sección y /admin lo devuelve a las canchas; el administrador ve "Vigente" con cancha, fecha, horario y usuario; tras marcarla queda "No vigente" (usada); cancelada y vencida son "No vigente" con su motivo; el inexistente es "Código no encontrado"; todo queda en la tabla.' },
+  async (c) => {
+    const jugador = await crearUsuario('e2ejugador');
+    const admin = await crearAdministradorE2E('e2eadmin');
+    const dia = diaLejano();
+    const vigente = (await reservaApi(jugador, K0, dia, '08')).datos.reserva;
+    const cancelada = (await reservaApi(jugador, K0, dia, '09')).datos.reserva;
+    await api('PATCH', `/reservas/${cancelada.id}/cancelar`, undefined, jugador.token);
+    const [, codigoVencida] = sqlq(`INSERT INTO reservas (cancha_id, usuario_id, fecha, hora_inicio, hora_fin) VALUES ('${K1.id}', '${jugador.id}', '${fechaPasadaUnica()}', '10:00', '11:00') RETURNING id || '|' || codigo`).split(/\r?\n/)[0].split('|');
+
+    const sj = await abrirSesion(jugador);
+    await sj.page.goto(`${CFG.WEB}/canchas`);
+    await sj.page.waitForSelector('nav[aria-label="Principal"]');
+    c.verifica((await sj.page.locator('a[aria-label="Administración"]').count()) === 0, 'Un usuario normal no ve el enlace de administración');
+    await sj.page.goto(`${CFG.WEB}/admin`);
+    await sj.page.waitForURL(`${CFG.WEB}/canchas`);
+    c.verifica((await sj.page.locator('#codigo-reserva').count()) === 0, 'Al abrir /admin lo devuelve a las canchas y no ve la sección de verificación');
+    await sj.context.close();
+
+    const { context, page } = await abrirSesion(admin);
+    await page.goto(`${CFG.WEB}/canchas`);
+    await page.waitForSelector('nav[aria-label="Principal"]');
+    await page.click('a[aria-label="Administración"]');
+    await page.waitForURL(`${CFG.WEB}/admin`);
+    c.verifica(/Verificar código de reserva/.test(await page.locator('#titulo-verificar').innerText()), 'El administrador ve la sección "Verificar código de reserva" con su campo');
+    await c.captura(page, 'Panel de administración');
+
+    const verificar = async (codigo) => {
+      await page.fill('#codigo-reserva', codigo);
+      await page.click('button:has-text("Verificar")');
+      await page.waitForSelector('.resultado-codigo');
+      return page.locator('.resultado-codigo').innerText();
+    };
+
+    let texto = await verificar(vigente.codigo);
+    c.verifica(/Vigente/.test(texto) && texto.includes(K0.nombre) && texto.includes(jugador.nombre) && /08:00 - 09:00/.test(texto), 'Código vigente: "Vigente" con cancha, horario y nombre del usuario', texto.replace(/\n+/g, ' · ').slice(0, 170));
+    await c.captura(page, 'Resultado: Vigente', '.resultado-codigo');
+    await page.click('button:has-text("Marcar como utilizada")');
+    await page.waitForSelector('.mensaje-exito');
+    texto = await page.locator('.resultado-codigo').innerText();
+    c.verifica(/No vigente/.test(texto) && /usada/i.test(texto), 'Marcada como utilizada: pasa a "No vigente" por "usada"', texto.replace(/\n+/g, ' · ').slice(0, 120));
+    c.verifica((await page.locator('button:has-text("Marcar como utilizada")').count()) === 0, 'Ya no ofrece marcarla otra vez');
+    texto = await verificar(vigente.codigo);
+    c.verifica(/No vigente/.test(texto) && /usada/i.test(texto), 'Verificarla otra vez ya no la da por vigente');
+
+    texto = await verificar(cancelada.codigo);
+    c.verifica(/No vigente/.test(texto) && /cancelada/i.test(texto), 'Reserva cancelada: "No vigente" por "cancelada"');
+    texto = await verificar(codigoVencida);
+    c.verifica(/No vigente/.test(texto) && /vencida/i.test(texto), 'Reserva vencida: "No vigente" por "vencida"');
+    await c.captura(page, 'Resultado: No vigente por vencida', '.resultado-codigo');
+    texto = await verificar('CY-00000000');
+    c.verifica(/Código no encontrado/.test(texto) && !/Cancha|Usuario/.test(texto), 'Código inexistente: "Código no encontrado" sin datos de ninguna reserva');
+    texto = await verificar("' OR 1=1 --");
+    c.verifica(/Código no encontrado/.test(texto), 'Un texto con formato inválido también da "Código no encontrado"');
+
+    await page.waitForSelector('.tabla-auditoria tbody tr');
+    const filas = await page.locator('.tabla-auditoria tbody tr').allInnerTexts();
+    c.verifica(filas.length >= 6 && filas.some((f) => f.includes(vigente.codigo)) && filas.some((f) => f.includes(admin.nombre)), 'La tabla de auditoría registra las verificaciones con administrador y código', `${filas.length} filas`);
+    await c.captura(page, 'Tabla de auditoría de verificaciones', '.tabla-auditoria');
+
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.reload();
+    await page.waitForSelector('#codigo-reserva');
+    c.verifica(await sinScrollHorizontal(page), 'A 360 px el panel no tiene scroll horizontal');
+    await c.captura(page, 'Panel de administración a 360 px');
+    await context.close();
+  }
+);
+
+await S.caso(
+  { ...base, id: 'E2E-30', hu: 'US-27', hus: ['US-27', 'US-28', 'US-29', 'US-14'], ca: {}, grupo: 'Transversal', prioridad: 'Media', titulo: 'Sin errores de JavaScript inesperados en los flujos del Sprint 5', objetivo: 'Verificar que cancelación, perfil, tarjetas y panel de administración no provocaron errores no controlados en el navegador.', pasos: ['Revisar los errores de consola y de página acumulados en E2E-26 a E2E-29.'], esperado: 'Ningún error de JavaScript inesperado; solo los mensajes de red 4xx provocados a propósito (validaciones, rechazos, 403, 404, 402).' },
+  async (c) => {
+    const esperados = /status of (400|401|402|403|404|409|426|429|500)|Failed to load resource/;
+    const inesperados = erroresConsola.filter((e) => !esperados.test(e));
+    c.verifica(inesperados.length === 0, 'No hubo errores de JavaScript inesperados', inesperados.length ? inesperados.slice(0, 5).join(' | ') : `${erroresConsola.length} mensajes de red esperados (4xx provocados por las pruebas)`);
   }
 );
 

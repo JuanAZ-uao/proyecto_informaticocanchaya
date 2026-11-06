@@ -21,6 +21,13 @@ function paraLog(valor) {
   return String(valor).replace(/[\r\n\t]+/g, ' ');
 }
 
+// Los datos escritos por el usuario (nombre, cancha) se insertan en HTML: se escapan para que no puedan inyectar etiquetas.
+function escaparHtml(valor) {
+  return String(valor).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+}
+
+const formatearMonto = (monto, moneda) => `${new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 }).format(monto)} ${moneda}`;
+
 async function enviarCorreoRecuperacion({ para, enlaceRestablecimiento }) {
   const asunto = 'CanchaYa - Recuperación de contraseña';
   const html = `
@@ -72,14 +79,50 @@ async function enviarCorreoConfirmacionReserva({ para, nombre, reserva }) {
   });
 }
 
-// El motivo lo escribe un administrador: se escapa antes de insertarlo en el HTML del correo.
-function escaparHtml(valor) {
-  return String(valor)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
+// US-14: detalle de la reserva cancelada (y del reembolso, si estaba pagada).
+async function enviarCorreoCancelacionReserva({ para, nombre, reserva, reembolso }) {
+  const horario = `${reserva.horaInicio.slice(0, 5)} - ${reserva.horaFin.slice(0, 5)}`;
+  const asunto = `CanchaYa - Reserva cancelada ${reserva.codigo}`;
+  const lineaReembolso = reembolso
+    ? `<p>Se reembolsó ${escaparHtml(formatearMonto(reembolso.monto, reembolso.moneda))} a tu tarjeta ${escaparHtml(reembolso.marca)} terminada en ${escaparHtml(reembolso.ultimos4)}.</p>`
+    : '';
+  const html = `
+    <p>Hola ${escaparHtml(nombre)}, tu reserva fue cancelada y el horario quedó disponible para otros usuarios.</p>
+    <ul>
+      <li><strong>Código:</strong> ${escaparHtml(reserva.codigo)}</li>
+      <li><strong>Cancha:</strong> ${escaparHtml(reserva.cancha.nombre)} (${escaparHtml(reserva.cancha.direccion)})</li>
+      <li><strong>Fecha:</strong> ${escaparHtml(reserva.fecha)}</li>
+      <li><strong>Hora:</strong> ${escaparHtml(horario)}</li>
+      <li><strong>Estado:</strong> cancelada</li>
+    </ul>
+    ${lineaReembolso}
+  `;
+
+  if (!transportador) {
+    console.log(`[EMAIL] SMTP no configurado. Cancelación de reserva (modo desarrollo) para ${paraLog(para)}: ${reserva.codigo} · ${paraLog(reserva.cancha.nombre)} · ${reserva.fecha} ${horario}`);
+    return { simulado: true };
+  }
+
+  return transportador.sendMail({ from: env.smtp.from, to: para, subject: asunto, html });
+}
+
+// US-27: enlace para confirmar que el nuevo correo es del usuario; el cambio no se aplica hasta abrirlo.
+async function enviarCorreoVerificacionCorreo({ para, nombre, enlaceVerificacion }) {
+  const asunto = 'CanchaYa - Confirma tu nuevo correo';
+  const html = `
+    <p>Hola ${escaparHtml(nombre)}, recibimos una solicitud para usar este correo en tu cuenta de CanchaYa.</p>
+    <p>Para confirmarlo, abre el siguiente enlace (válido por un tiempo limitado):</p>
+    <p><a href="${escaparHtml(enlaceVerificacion)}">${escaparHtml(enlaceVerificacion)}</a></p>
+    <p>Si no pediste este cambio, ignora este correo: tu cuenta seguirá con el correo anterior.</p>
+  `;
+
+  if (!transportador) {
+    console.log('[EMAIL] SMTP no configurado. Enlace de verificación de correo (modo desarrollo):');
+    console.log(`[EMAIL] Para: ${paraLog(para)} -> ${paraLog(enlaceVerificacion)}`);
+    return { simulado: true };
+  }
+
+  return transportador.sendMail({ from: env.smtp.from, to: para, subject: asunto, html });
 }
 
 // US-16: aviso al usuario de que un administrador canceló su reserva, con el motivo.
@@ -112,4 +155,10 @@ async function enviarCorreoCancelacionAdministrativa({ para, nombre, reserva, mo
   });
 }
 
-module.exports = { enviarCorreoRecuperacion, enviarCorreoConfirmacionReserva, enviarCorreoCancelacionAdministrativa };
+module.exports = {
+  enviarCorreoRecuperacion,
+  enviarCorreoConfirmacionReserva,
+  enviarCorreoCancelacionReserva,
+  enviarCorreoVerificacionCorreo,
+  enviarCorreoCancelacionAdministrativa,
+};

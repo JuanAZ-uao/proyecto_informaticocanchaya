@@ -90,15 +90,16 @@ if (fase === '1') {
   );
 
   await S.caso(
-    { ...base, id: 'SD-06', hu: 'US-19', ca: [3], titulo: 'El esquema de la base se aplica solo al arrancar el backend', objetivo: 'Verificar que no hace falta ejecutar migraciones a mano: al iniciar, el backend crea tablas, índices únicos y restricciones.', pasos: ['Leer los logs del backend.', 'Consultar las tablas del esquema public en el Postgres del contenedor.', 'Consultar los índices únicos de reservas y retenciones.'], esperado: 'Logs con "[MIGRATE] Esquema aplicado correctamente"; existen las 7 tablas y los índices únicos de US-09 y US-18.' },
+    { ...base, id: 'SD-06', hu: 'US-19', ca: [3], titulo: 'El esquema de la base se aplica solo al arrancar el backend', objetivo: 'Verificar que no hace falta ejecutar migraciones a mano: al iniciar, el backend crea tablas, índices únicos y restricciones.', pasos: ['Leer los logs del backend.', 'Consultar las tablas del esquema public en el Postgres del contenedor.', 'Consultar los índices únicos de reservas y retenciones.'], esperado: 'Logs con "[MIGRATE] Esquema aplicado correctamente"; existen las 11 tablas y los índices únicos de US-09, US-18 y US-29.' },
     async (c) => {
       const logs = logsBackend('30m');
       c.verifica(/\[MIGRATE\] Esquema aplicado correctamente/.test(logs), 'El log muestra que el esquema se aplicó automáticamente');
       const tablas = sql("SELECT string_agg(tablename, ',' ORDER BY tablename) FROM pg_tables WHERE schemaname='public'");
-      const esperadas = ['canchas', 'horarios_disponibles', 'password_reset_tokens', 'reservas', 'retenciones', 'sesiones_reserva', 'usuarios'];
-      c.verifica(JSON.stringify(tablas.split(',')) === JSON.stringify(esperadas), 'Existen las 7 tablas del modelo', tablas);
+      const esperadas = ['cambios_correo', 'canchas', 'horarios_disponibles', 'metodos_pago', 'pagos', 'password_reset_tokens', 'reservas', 'retenciones', 'sesiones_reserva', 'usuarios', 'verificaciones_reserva'];
+      c.verifica(JSON.stringify(tablas.split(',')) === JSON.stringify(esperadas), 'Existen las 11 tablas del modelo (7 de los sprints 1 a 4 y 4 del Sprint 5)', tablas);
       const idx = sql("SELECT string_agg(indexname, ', ' ORDER BY indexname) FROM pg_indexes WHERE schemaname='public' AND indexname LIKE 'uq_%'");
       c.verifica(/uq_reservas_confirmada_cancha_fecha_hora/.test(idx), 'Índice único parcial de reservas confirmadas (US-09)', idx);
+      c.verifica(/uq_reservas_codigo/.test(idx), 'Índice único del código de reserva (US-29)', idx);
       const def = sql("SELECT indexdef FROM pg_indexes WHERE indexname='uq_reservas_confirmada_cancha_fecha_hora'");
       c.verifica(/WHERE \(estado = 'confirmada'/.test(def), 'El índice es parcial: solo aplica a reservas con estado confirmada', def);
       c.verifica(/uq_retenciones_franja/.test(sql("SELECT string_agg(conname, ',') FROM pg_constraint WHERE conname LIKE 'uq_retenciones%'")), 'Restricciones únicas de retenciones (US-18)');
@@ -266,7 +267,8 @@ if (fase === '1') {
       const ui = await fetch(`${CFG.SOCKET}/api/docs/`);
       c.verifica(ui.status === 200 && /swagger-ui/.test(await ui.text()), 'GET /api/docs/ responde 200 con Swagger UI en el contenedor', `HTTP ${ui.status}`);
       const json = await fetch(`${CFG.SOCKET}/api/docs/openapi.json`).then((r) => r.json());
-      c.verifica(/^3\./.test(json.openapi) && Object.keys(json.paths).length === 13, 'La imagen incluye la especificación OpenAPI (13 rutas, 14 operaciones)', `${json.openapi}, ${Object.keys(json.paths).length} rutas`);
+      const operaciones = Object.values(json.paths).flatMap((o) => ['get', 'post', 'patch', 'put', 'delete'].filter((m) => o[m]));
+      c.verifica(/^3\./.test(json.openapi) && Object.keys(json.paths).length === 22 && operaciones.length === 25, 'La imagen incluye la especificación OpenAPI (22 rutas, 25 operaciones)', `${json.openapi}, ${Object.keys(json.paths).length} rutas, ${operaciones.length} operaciones`);
       const propio = await fetch(`${CFG.SOCKET}/api/health`, { headers: { Origin: CFG.SOCKET } });
       c.verifica(propio.status === 200, 'Una llamada con Origin igual al del propio backend (Try it out) no es bloqueada', `HTTP ${propio.status}`);
       const ajeno = await fetch(`${CFG.SOCKET}/api/health`, { headers: { Origin: 'http://sitio-malicioso.example' } });
@@ -380,16 +382,16 @@ if (fase === '2') {
   );
 
   await S.caso(
-    { ...base, id: 'SD-22', hu: 'US-19', ca: [3, 4], titulo: 'Entorno limpio: "down -v" borra los datos y el esquema se recrea solo', objetivo: 'Verificar que eliminar el volumen deja la base vacía y que al volver a levantar el esquema se aplica automáticamente.', pasos: ['Ejecutar "docker compose down -v".', 'Ejecutar "up -d --wait".', 'Contar usuarios y verificar las tablas.'], esperado: 'Base vacía (0 usuarios) con las 7 tablas creadas automáticamente.' },
+    { ...base, id: 'SD-22', hu: 'US-19', ca: [3, 4], titulo: 'Entorno limpio: "down -v" borra los datos y el esquema se recrea solo', objetivo: 'Verificar que eliminar el volumen deja la base vacía y que al volver a levantar el esquema se aplica automáticamente.', pasos: ['Ejecutar "docker compose down -v".', 'Ejecutar "up -d --wait".', 'Contar usuarios y verificar las tablas.'], esperado: 'Base vacía (0 usuarios) con las 11 tablas creadas automáticamente.' },
     async (c) => {
       const down = dc('down -v', { timeout: 180000 });
       c.verifica(down.code === 0, 'docker compose down -v termina sin errores');
       const vol = sh(`docker volume ls -q --filter name=${P}_db-data`).stdout.trim();
       c.verifica(vol === '', 'El volumen db-data fue eliminado', vol || 'sin volumen');
       const up = dc('up -d --wait --wait-timeout 300', { timeout: 420000 });
-      c.verifica(up.code === 0, 'El entorno vuelve a levantar desde cero');
+      c.verifica(up.code === 0, 'El entorno vuelve a levantar desde cero', up.out.trim().split(/\r?\n/).slice(-3).join(' | '));
       c.verifica(sql('SELECT count(*) FROM usuarios') === '0', 'La base quedó vacía (0 usuarios)');
-      c.verifica(sql("SELECT count(*) FROM pg_tables WHERE schemaname='public'") === '7', 'El esquema se aplicó automáticamente (7 tablas)');
+      c.verifica(sql("SELECT count(*) FROM pg_tables WHERE schemaname='public'") === '11', 'El esquema se aplicó automáticamente (11 tablas)');
       void id;
     }
   );

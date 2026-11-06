@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { cancelarReservaAdmin, obtenerReservasAdmin } from '../api/adminApi';
 import { obtenerCanchas } from '../api/canchasApi';
 import extraerMensajeError from '../api/extraerMensajeError';
+import AdminNav from '../components/admin/AdminNav';
 import Alerta from '../components/common/Alerta';
 import Icono from '../components/common/Icono';
 
@@ -153,6 +154,8 @@ export default function AdminReservasPage() {
           </span>
         )}
       </div>
+
+      <AdminNav />
 
       <form className="admin-filtros" onSubmit={buscar} aria-label="Filtros de reservas">
         <div className="campo">

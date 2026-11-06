@@ -203,7 +203,7 @@ await S.caso(
     const t0 = Date.now();
     const sleep = await api('GET', `/canchas/${encodeURIComponent(K0.id + "'; SELECT pg_sleep(5);--")}`, undefined, U.token);
     c.verifica(sleep.status === 400 && Date.now() - t0 < 3000, 'Id de cancha con SQL: 400 inmediato (sin ejecutar pg_sleep)', `HTTP ${sleep.status} en ${Date.now() - t0} ms`);
-    c.verifica(sqlq("SELECT count(*) FROM pg_tables WHERE schemaname='public'") === '7', 'Las 7 tablas siguen existiendo');
+    c.verifica(sqlq("SELECT count(*) FROM pg_tables WHERE schemaname='public'") === '11', 'Las 11 tablas siguen existiendo');
     const xss = '<img src=x onerror=alert(1)>';
     const correo = `xss.${Date.now()}@qa.local`;
     const reg = await api('POST', '/auth/registro', { nombre: xss, correo, telefono: '3000000000', password: CFG.password });
@@ -526,6 +526,188 @@ await S.caso(
     const g = j.cobertura?.total;
     if (g) c.nota(`Cobertura global del backend: líneas ${g.lines.pct} % · sentencias ${g.statements.pct} % · funciones ${g.functions.pct} % · ramas ${g.branches.pct} %`);
     c.evidenciaTexto('Cobertura por archivo (líneas)', tabla(Object.entries(j.cobertura ?? {}).filter(([f]) => f !== 'total').map(([f, v]) => [f.replace(/^.*backend[\\/]/, ''), `${v.lines.pct} %`, `${v.lines.covered}/${v.lines.total}`])));
+  }
+);
+
+// =====================================================================
+// Sprint 5 — rendimiento, seguridad y accesibilidad de cancelación, perfil, tarjetas y panel de administración
+// =====================================================================
+const ANIO_TARJETA = new Date().getFullYear() + 3;
+const tarjetaNF = (extra = {}) => ({ numero: '4242 4242 4242 4242', titular: 'Ana Pérez', vencimientoMes: 12, vencimientoAnio: ANIO_TARJETA, cvv: '123', ...extra });
+async function crearAdministradorNF(prefijo) {
+  const cuenta = await crearUsuario(prefijo);
+  sqlq(`UPDATE usuarios SET rol = 'administrador' WHERE id = '${cuenta.id}'`);
+  const login = await api('POST', '/auth/login', { correo: cuenta.correo, password: cuenta.password });
+  return { ...cuenta, token: login.datos.token, usuario: login.datos.usuario };
+}
+
+await S.caso(
+  { ...base, id: 'NF-22', hu: 'US-27', ca: [], grupo: 'Rendimiento', rnf: 'RNF-01', nivel: 'API REST', titulo: 'Tiempos de respuesta de los endpoints del Sprint 5 (p95 < 2 s)', objetivo: 'Medir la latencia del perfil, las tarjetas, el pago al reservar, la cancelación con reembolso y la verificación de códigos.', datos: 'Entorno Docker aislado, usuario y administrador nuevos, tarjeta de prueba Visa.', pasos: ['Medir cada endpoint en secuencia (entre 15 y 40 solicitudes).', 'Calcular p50, p95 y máximo.'], esperado: 'El p95 de cada endpoint es menor de 2 s y no hay errores 5xx.' },
+  async (c) => {
+    const u = await crearUsuario('nfpagos');
+    const admin = await crearAdministradorNF('nfadmin');
+    const tj = (await api('POST', `/usuarios/${u.id}/metodos-pago`, tarjetaNF(), u.token)).datos.metodoPago;
+    const { reserva } = (await api('POST', `/canchas/${K0.id}/reservas`, { fecha: fechaUnica(), horaInicio: '08:00', horaFin: '09:00' }, u.token)).datos;
+    let hora = 6;
+    const reservarPagando = (usuario) => {
+      hora += 1;
+      return api('POST', `/canchas/${K1.id}/reservas`, { fecha: fechaUnica(), horaInicio: `${String(hora % 12 + 8).padStart(2, '0')}:00`, horaFin: `${String(hora % 12 + 9).padStart(2, '0')}:00`, metodoPagoId: tj.id }, usuario.token);
+    };
+    const e = [
+      ['GET /api/usuarios/:id', 40, () => api('GET', `/usuarios/${u.id}`, undefined, u.token)],
+      ['PATCH /api/usuarios/:id', 20, (i) => api('PATCH', `/usuarios/${u.id}`, { nombre: `Usuario NF ${i}`, telefono: '3001234567' }, u.token)],
+      ['GET /api/usuarios/:id/metodos-pago', 40, () => api('GET', `/usuarios/${u.id}/metodos-pago`, undefined, u.token)],
+      ['GET /api/reservas (con pago y puedeCancelar)', 40, () => api('GET', '/reservas?limite=50', undefined, u.token)],
+      ['POST /api/admin/reservas/verificar', 40, () => api('POST', '/admin/reservas/verificar', { codigo: reserva.codigo }, admin.token)],
+      ['GET /api/admin/verificaciones', 20, () => api('GET', '/admin/verificaciones?limite=50', undefined, admin.token)],
+      ['POST /api/canchas/:id/reservas (pagando con tarjeta)', 12, () => reservarPagando(u)],
+    ];
+    const filas = [['Endpoint', 'n', 'p50', 'p95', 'máx', 'errores 5xx']];
+    for (const [nombre, n, fn] of e) {
+      const r = await medir(n, fn);
+      filas.push([nombre, n, ms(r.p50), ms(r.p95), ms(r.max), r.errores]);
+      c.verifica(r.p95 < 2000 && r.errores === 0, `${nombre}: p95 ${ms(r.p95)} (< 2000 ms), sin errores`, `p50 ${ms(r.p50)} · máx ${ms(r.max)}`);
+    }
+    const cancelables = (await api('GET', '/reservas?limite=50', undefined, u.token)).datos.reservas.filter((x) => x.puedeCancelar).slice(0, 8);
+    const tiempos = [];
+    for (const x of cancelables) tiempos.push((await api('PATCH', `/reservas/${x.id}/cancelar`, undefined, u.token)).ms);
+    filas.push(['PATCH /api/reservas/:id/cancelar (con reembolso)', tiempos.length, ms(pct(tiempos, 0.5)), ms(pct(tiempos, 0.95)), ms(Math.max(...tiempos)), 0]);
+    c.verifica(tiempos.length >= 5 && pct(tiempos, 0.95) < 2000, `Cancelar con reembolso: p95 ${ms(pct(tiempos, 0.95))} (< 2000 ms)`, `${tiempos.length} cancelaciones`);
+    c.evidenciaTexto('Latencias medidas', tabla(filas));
+  }
+);
+
+await S.caso(
+  { ...base, id: 'NF-23', hu: 'US-28', ca: [3, 7], grupo: 'Seguridad', rnf: 'RNF-03 · Datos de pago', nivel: 'API REST + UI + logs', titulo: 'Seguridad de tarjetas, roles y entradas del Sprint 5', objetivo: 'Verificar que los datos de tarjeta no quedan en los registros ni en las respuestas, que el rol no se puede escalar con el token y que las entradas maliciosas del perfil y del panel no se ejecutan.', datos: 'Tarjeta de prueba 4242…, token firmado con el secreto del entorno de pruebas, nombres con HTML y SQL.', pasos: ['Guardar una tarjeta, pagar y cancelar; buscar el número, el CVV y el token en los logs del backend.', 'Forjar un token con la clave correcta y el claim rol=administrador para un usuario normal.', 'Enviar SQL y HTML en el perfil y verificar el panel de administración en el navegador.', 'Revisar que ninguna respuesta incluye hashes ni tokens.'], esperado: 'Ni el número completo, ni el CVV, ni el token de la pasarela aparecen en los logs ni en las respuestas; un claim "rol" en el JWT no concede acceso (se lee de la base); el SQL no altera las tablas; el HTML se muestra como texto y no se ejecuta.' },
+  async (c) => {
+    const u = await crearUsuario('nfseg');
+    const tj = (await api('POST', `/usuarios/${u.id}/metodos-pago`, tarjetaNF({ cvv: '987' }), u.token)).datos.metodoPago;
+    const token = sqlq(`SELECT token FROM metodos_pago WHERE id='${tj.id}'`);
+    const pagada = await api('POST', `/canchas/${K2.id}/reservas`, { fecha: fechaUnica(), horaInicio: '08:00', horaFin: '09:00', metodoPagoId: tj.id }, u.token);
+    await api('PATCH', `/reservas/${pagada.datos.reserva.id}/cancelar`, undefined, u.token);
+    await api('POST', `/usuarios/${u.id}/metodos-pago`, tarjetaNF({ numero: '4242 4242 4242 4241' }), u.token);
+    await esperar(800);
+    const logs = logsBackend('30m');
+    c.verifica(/tok_sim_/.test(token), 'Preparación: tarjeta guardada, reserva pagada y cancelada (con reembolso)');
+    c.verifica(!logs.includes('4242424242424242') && !logs.includes('4242 4242 4242 4242'), 'El número completo de la tarjeta no aparece en los logs del backend');
+    c.verifica(!logs.includes(token), 'El token de la pasarela no aparece en los logs');
+    c.verifica(!/"cvv"|cvv=987|\b987\b.*cvv/i.test(logs), 'El CVV no aparece en los logs');
+    const respuestas = JSON.stringify([
+      (await api('GET', `/usuarios/${u.id}`, undefined, u.token)).datos,
+      (await api('GET', `/usuarios/${u.id}/metodos-pago`, undefined, u.token)).datos,
+      (await api('GET', '/reservas?limite=50', undefined, u.token)).datos,
+      pagada.datos,
+    ]);
+    c.verifica(!respuestas.includes(token) && !/password|hash|tok_sim|4242424242424242/i.test(respuestas), 'Ninguna respuesta expone el token, el número completo, contraseñas ni hashes');
+
+    const payload = jwt.decode(u.token);
+    const forjado = jwt.sign({ sub: payload.sub, rol: 'administrador', role: 'admin' }, CFG.jwtSecret, { expiresIn: '1h' });
+    const r1 = await api('GET', '/admin/verificaciones', undefined, forjado);
+    c.verifica(r1.status === 403, 'Un JWT bien firmado con el claim rol="administrador" NO da acceso al panel (el rol se lee de la base): 403', `HTTP ${r1.status}`);
+    const ajeno = jwt.sign({ sub: payload.sub, rol: 'administrador' }, 'otro-secreto-cualquiera', { expiresIn: '1h' });
+    c.verifica((await api('GET', '/admin/verificaciones', undefined, ajeno)).status === 401, 'Un JWT firmado con otro secreto: 401');
+
+    const sqli = "Robert'); DROP TABLE usuarios;--";
+    const p1 = await api('PATCH', `/usuarios/${u.id}`, { nombre: sqli, telefono: '3001234567' }, u.token);
+    const p2 = await api('PATCH', `/usuarios/${u.id}`, { nombre: 'Normal', telefono: "3001234567'; DROP TABLE pagos;--" }, u.token);
+    c.verifica(p1.status === 200 && p2.status === 400, 'El SQL en el nombre se guarda como texto (200) y en el teléfono se rechaza (400)', `${p1.status} / ${p2.status}`);
+    c.verifica(sqlq("SELECT count(*) FROM pg_tables WHERE schemaname='public'") === '11' && sqlq(`SELECT nombre FROM usuarios WHERE id='${u.id}'`) === sqli, 'Las 11 tablas siguen existiendo y el nombre quedó guardado literalmente');
+    const inyeccion = await api('POST', '/admin/reservas/verificar', { codigo: "CY-00000000' OR '1'='1" }, (await crearAdministradorNF('nfadmin2')).token);
+    c.verifica(inyeccion.status === 404, 'SQL en el código de reserva: 404 "Código no encontrado"', `HTTP ${inyeccion.status}`);
+
+    // XSS: el nombre con HTML se muestra como texto en el perfil y en el resultado del panel de administración.
+    const xss = '<img src=x onerror=alert(1)>';
+    const victima = await crearUsuario('nfxss');
+    await api('PATCH', `/usuarios/${victima.id}`, { nombre: xss, telefono: '3001234567' }, victima.token);
+    const { reserva } = (await api('POST', `/canchas/${K0.id}/reservas`, { fecha: fechaUnica(), horaInicio: '09:00', horaFin: '10:00' }, victima.token)).datos;
+    const admin = await crearAdministradorNF('nfadmin3');
+    const browser = await chromium.launch();
+    let dialogo = false;
+    const sesion = async (usuario) => {
+      const ctx = await browser.newContext({ viewport: { width: 1366, height: 900 } });
+      const page = await ctx.newPage();
+      page.on('dialog', async (d) => { dialogo = true; await d.dismiss(); });
+      await page.goto(`${CFG.WEB}/login`);
+      await page.evaluate(([t, x]) => { localStorage.setItem('canchaya_token', t); localStorage.setItem('canchaya_usuario', x); }, [usuario.token, JSON.stringify(usuario.usuario)]);
+      return { ctx, page };
+    };
+    const sv = await sesion({ ...victima, usuario: { ...victima.usuario, nombre: xss } });
+    await sv.page.goto(`${CFG.WEB}/perfil`);
+    await sv.page.waitForFunction(() => document.querySelector('input[name="nombre"]')?.value);
+    await sv.page.waitForTimeout(500);
+    c.verifica((await sv.page.locator('input[name="nombre"]').inputValue()) === xss && (await sv.page.locator('main img[src="x"], .perfil img[src="x"]').count()) === 0, 'En el perfil el HTML del nombre es solo texto del campo (no se interpreta)');
+    await sv.ctx.close();
+    const sa = await sesion(admin);
+    await sa.page.goto(`${CFG.WEB}/admin`);
+    await sa.page.fill('#codigo-reserva', reserva.codigo);
+    await sa.page.click('button:has-text("Verificar")');
+    await sa.page.waitForSelector('.resultado-codigo');
+    await sa.page.waitForTimeout(500);
+    const textoResultado = await sa.page.locator('.resultado-codigo').innerText();
+    c.verifica(textoResultado.includes(xss) && (await sa.page.locator('.resultado-codigo img').count()) === 0 && !dialogo, 'En el panel de administración el nombre con HTML se muestra como texto y no se ejecuta ningún script', textoResultado.replace(/\n+/g, ' · ').slice(0, 130));
+    await sa.page.screenshot({ path: path.join(OUT, 'evidencias', 'NF-23-1.jpg'), type: 'jpeg', quality: 72 });
+    c.adjuntar('NF-23-1.jpg', 'Panel de administración mostrando como texto un nombre con HTML');
+    await sa.ctx.close();
+    await browser.close();
+  }
+);
+
+await S.caso(
+  { ...base, id: 'NF-24', hu: 'US-27', ca: [7], grupo: 'Usabilidad y accesibilidad', rnf: 'RNF-05 · WCAG 2.1 AA', nivel: 'UI (axe-core + Chromium)', titulo: 'Accesibilidad y diseño responsive de "Mi perfil" y del panel de administración', objetivo: 'Auditar con axe-core y revisar entre 360 y 1920 px las dos pantallas nuevas del Sprint 5.', datos: 'Usuario con una tarjeta guardada y administrador con una verificación hecha.', pasos: ['Abrir /perfil y /admin con cada rol.', 'Ejecutar axe-core (WCAG 2.0/2.1 A y AA).', 'Medir el desborde horizontal a 360, 390, 768, 1024, 1366 y 1920 px.'], esperado: 'Sin violaciones críticas ni graves y sin desborde horizontal en ningún ancho.' },
+  async (c) => {
+    const usuario = await crearUsuario('nfa11y');
+    await api('POST', `/usuarios/${usuario.id}/metodos-pago`, tarjetaNF(), usuario.token);
+    const admin = await crearAdministradorNF('nfa11yadmin');
+    const jugada = (await api('POST', `/canchas/${K0.id}/reservas`, { fecha: fechaUnica(), horaInicio: '10:00', horaFin: '11:00' }, usuario.token)).datos.reserva;
+    await api('POST', '/admin/reservas/verificar', { codigo: jugada.codigo }, admin.token);
+    const browser = await chromium.launch();
+    const pantallas = [['Mi perfil', '/perfil', usuario, 'section.perfil-seccion'], ['Panel de administración', '/admin', admin, '#codigo-reserva']];
+    const anchos = [360, 390, 768, 1024, 1366, 1920];
+    const filas = [['Pantalla', ...anchos.map((a) => `${a} px`)]];
+    const resumen = [['Pantalla', 'Crítico', 'Grave', 'Moderado', 'Leve']];
+    const detalles = [];
+    let problemas = 0;
+    let graves = 0;
+    for (const [nombre, ruta, quien, sel] of pantallas) {
+      const fila = [nombre];
+      for (const ancho of anchos) {
+        const ctx = await browser.newContext({ viewport: { width: ancho, height: 900 } });
+        const page = await ctx.newPage();
+        await page.goto(`${CFG.WEB}/login`);
+        await page.evaluate(([t, x]) => { localStorage.setItem('canchaya_token', t); localStorage.setItem('canchaya_usuario', x); }, [quien.token, JSON.stringify(quien.usuario)]);
+        await page.goto(`${CFG.WEB}${ruta}`);
+        await page.waitForSelector(sel, { timeout: 8000 }).catch(() => {});
+        await page.waitForTimeout(900);
+        const d = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+        const visible = await page.locator(sel).first().isVisible().catch(() => false);
+        const bien = d <= 0 && visible;
+        if (!bien) problemas += 1;
+        fila.push(bien ? 'OK' : `FALLO (desborde ${d}px)`);
+        if (ancho === 1366) {
+          await page.addScriptTag({ path: axePath });
+          const res = await page.evaluate(() => window.axe.run(document, { runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] }));
+          const cuenta = (imp) => res.violations.filter((v) => v.impact === imp).length;
+          resumen.push([nombre, cuenta('critical'), cuenta('serious'), cuenta('moderate'), cuenta('minor')]);
+          graves += cuenta('critical') + cuenta('serious');
+          res.violations.forEach((v) => detalles.push(`[${nombre}] ${v.impact?.toUpperCase()} · ${v.id}: ${v.help} (${v.nodes.length} elemento/s)  p. ej. ${v.nodes[0].target.join(' ')}`));
+        }
+        if (ancho === 360 || ancho === 1920) {
+          const archivo = `NF-24-${nombre.startsWith('Mi') ? 'perfil' : 'admin'}-${ancho}.jpg`;
+          await page.screenshot({ path: path.join(OUT, 'evidencias', archivo), type: 'jpeg', quality: 60 });
+          c.adjuntar(archivo, `${nombre} a ${ancho} px de ancho`);
+        }
+        await ctx.close();
+      }
+      filas.push(fila);
+    }
+    await browser.close();
+    c.verifica(problemas === 0, `Las ${pantallas.length * anchos.length} combinaciones de pantalla y ancho se ven correctamente`, `${problemas} con problemas`);
+    c.verifica(graves === 0, 'Ninguna pantalla tiene violaciones de accesibilidad críticas o graves', `${graves} violaciones críticas/graves`);
+    c.evidenciaTexto('Resultado por pantalla y ancho', tabla(filas));
+    c.evidenciaTexto('Violaciones de axe-core por pantalla', tabla(resumen));
+    if (detalles.length) c.evidenciaTexto('Detalle de las violaciones', detalles.join('\n'));
+    const leves = detalles.filter((d) => /MODERATE|MINOR/.test(d)).length;
+    if (leves) c.observacion(`${leves} violación(es) de impacto moderado/leve para revisar (ver detalle).`);
   }
 );
 

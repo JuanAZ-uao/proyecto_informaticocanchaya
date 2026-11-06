@@ -13,9 +13,11 @@ export function crearAuth(sobrescribir = {}) {
     token: 'token-de-prueba',
     usuario: { nombre: 'Ana Pérez', correo: 'ana@correo.com' },
     estaAutenticado: true,
+    esAdministrador: false,
     cerroSesion: false,
     login: vi.fn(),
     logout: vi.fn(),
+    actualizarUsuario: vi.fn(),
     ...sobrescribir,
   };
 }

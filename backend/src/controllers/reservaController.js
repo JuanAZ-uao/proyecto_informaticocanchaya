@@ -2,7 +2,7 @@ const reservaService = require('../services/reservaService');
 
 async function crear(req, res, next) {
   try {
-    const { fecha, horaInicio, horaFin } = req.body;
+    const { fecha, horaInicio, horaFin, metodoPagoId } = req.body;
 
     const reserva = await reservaService.crearReserva({
       canchaId: req.params.id,
@@ -10,6 +10,7 @@ async function crear(req, res, next) {
       fecha,
       horaInicio,
       horaFin,
+      metodoPagoId,
     });
 
     return res.status(201).json({ reserva });
@@ -20,8 +21,8 @@ async function crear(req, res, next) {
 
 async function cancelar(req, res, next) {
   try {
-    const reserva = await reservaService.cancelarReserva(req.params.id, req.usuarioId);
-    return res.status(200).json({ reserva });
+    const { reserva, reembolso } = await reservaService.cancelarReserva(req.params.id, req.usuarioId);
+    return res.status(200).json({ reserva, reembolso });
   } catch (error) {
     return next(error);
   }
