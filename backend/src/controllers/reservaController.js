@@ -54,4 +54,29 @@ async function listarHistorial(req, res, next) {
   }
 }
 
-module.exports = { crear, cancelar, listarMias, listarHistorial };
+// US-16: búsqueda de reservas futuras por cancha, fecha o usuario (solo administradores).
+async function listarParaAdmin(req, res, next) {
+  try {
+    const { canchaId, fecha, usuario, pagina, limite } = req.query;
+    const resultado = await reservaService.listarReservasAdmin({ canchaId, fecha, usuario, pagina, limite });
+    return res.status(200).json(resultado);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+// US-16: cancelación administrativa con motivo obligatorio.
+async function cancelarComoAdmin(req, res, next) {
+  try {
+    const reserva = await reservaService.cancelarReservaComoAdmin({
+      id: req.params.id,
+      administradorId: req.administrador.id,
+      motivo: req.body.motivo,
+    });
+    return res.status(200).json({ reserva });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+module.exports = { crear, cancelar, listarMias, listarHistorial, listarParaAdmin, cancelarComoAdmin };

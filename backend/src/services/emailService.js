@@ -125,9 +125,40 @@ async function enviarCorreoVerificacionCorreo({ para, nombre, enlaceVerificacion
   return transportador.sendMail({ from: env.smtp.from, to: para, subject: asunto, html });
 }
 
+// US-16: aviso al usuario de que un administrador canceló su reserva, con el motivo.
+async function enviarCorreoCancelacionAdministrativa({ para, nombre, reserva, motivo }) {
+  const horario = `${reserva.horaInicio.slice(0, 5)} - ${reserva.horaFin.slice(0, 5)}`;
+  const asunto = `CanchaYa - Reserva cancelada ${reserva.codigo}`;
+  const html = `
+    <p>Hola ${escaparHtml(nombre)}, lamentamos informarte que un administrador canceló tu reserva.</p>
+    <ul>
+      <li><strong>Código:</strong> ${escaparHtml(reserva.codigo)}</li>
+      <li><strong>Cancha:</strong> ${escaparHtml(reserva.cancha.nombre)} (${escaparHtml(reserva.cancha.direccion)})</li>
+      <li><strong>Fecha:</strong> ${escaparHtml(reserva.fecha)}</li>
+      <li><strong>Hora:</strong> ${horario}</li>
+      <li><strong>Estado:</strong> cancelada administrativamente</li>
+    </ul>
+    <p><strong>Motivo de la cancelación:</strong> ${escaparHtml(motivo)}</p>
+    <p>Puedes reservar otra franja disponible desde CanchaYa.</p>
+  `;
+
+  if (!transportador) {
+    console.log(`[EMAIL] SMTP no configurado. Cancelación administrativa (modo desarrollo) para ${paraLog(para)}: ${paraLog(reserva.codigo)} · motivo: ${paraLog(motivo)}`);
+    return { simulado: true };
+  }
+
+  return transportador.sendMail({
+    from: env.smtp.from,
+    to: para,
+    subject: asunto,
+    html,
+  });
+}
+
 module.exports = {
   enviarCorreoRecuperacion,
   enviarCorreoConfirmacionReserva,
   enviarCorreoCancelacionReserva,
   enviarCorreoVerificacionCorreo,
+  enviarCorreoCancelacionAdministrativa,
 };

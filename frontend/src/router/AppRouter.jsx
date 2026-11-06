@@ -13,6 +13,7 @@ import MisReservasPage from '../pages/MisReservasPage';
 import PerfilPage from '../pages/PerfilPage';
 import VerificarCorreoPage from '../pages/VerificarCorreoPage';
 import AdminPage from '../pages/AdminPage';
+import AdminReservasPage from '../pages/AdminReservasPage';
 
 export default function AppRouter() {
   return (
@@ -63,6 +64,14 @@ export default function AppRouter() {
             element={
               <AdminRoute>
                 <AdminPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/reservas"
+            element={
+              <AdminRoute>
+                <AdminReservasPage />
               </AdminRoute>
             }
           />

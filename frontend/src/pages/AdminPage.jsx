@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { listarVerificaciones } from '../api/adminApi';
 import extraerMensajeError from '../api/extraerMensajeError';
+import AdminNav from '../components/admin/AdminNav';
 import TablaVerificaciones from '../components/admin/TablaVerificaciones';
 import VerificadorCodigo from '../components/admin/VerificadorCodigo';
 
@@ -35,6 +36,8 @@ export default function AdminPage() {
           <p className="texto-ayuda">Verifica las reservas cuando los usuarios llegan a usar la cancha.</p>
         </div>
       </div>
+
+      <AdminNav />
 
       <div className="admin-grid">
         <VerificadorCodigo onActividad={cargar} />

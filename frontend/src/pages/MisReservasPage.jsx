@@ -19,6 +19,7 @@ const ESTADOS = [
   { valor: 'confirmada', etiqueta: 'Confirmada' },
   { valor: 'completada', etiqueta: 'Completada' },
   { valor: 'cancelada', etiqueta: 'Cancelada' },
+  { valor: 'cancelada_administrativamente', etiqueta: 'Cancelada administrativamente' },
 ];
 
 // Una reserva confirmada cuyo horario ya terminó se muestra como "completada": por eso cada uno de
@@ -29,7 +30,7 @@ const ETIQUETA_ESTADO = {
   confirmada: 'Confirmada',
   completada: 'Completada',
   cancelada: 'Cancelada',
-  cancelada_administrativamente: 'Cancelada por administración',
+  cancelada_administrativamente: 'Cancelada administrativamente',
 };
 
 // US-14: el servidor decide si todavía se puede cancelar (`puedeCancelar`) y vuelve a comprobarlo al cancelar.
@@ -269,6 +270,12 @@ export default function MisReservasPage() {
                   </li>
                 )}
               </ul>
+
+              {reserva.estado === 'cancelada_administrativamente' && reserva.motivoCancelacion && (
+                <p className="reserva-item-motivo">
+                  <strong>Motivo de la cancelación:</strong> {reserva.motivoCancelacion}
+                </p>
+              )}
 
               <div className="reserva-item-pie">
                 <p className="reserva-item-id">

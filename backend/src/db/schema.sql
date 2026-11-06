@@ -60,6 +60,7 @@ ALTER TABLE reservas ADD COLUMN IF NOT EXISTS estado TEXT NOT NULL DEFAULT 'conf
 ALTER TABLE reservas ALTER COLUMN estado SET DEFAULT 'confirmada';
 ALTER TABLE reservas DROP CONSTRAINT IF EXISTS chk_reservas_estado;
 UPDATE reservas SET estado = 'confirmada' WHERE estado = 'activa';
+-- US-16: 'cancelada_administrativamente' es la cancelación hecha por un administrador.
 ALTER TABLE reservas ADD CONSTRAINT chk_reservas_estado CHECK (estado IN ('confirmada', 'cancelada', 'cancelada_administrativamente'));
 
 -- Antes de exigir unicidad solo entre reservas vigentes, se elimina la restricción
@@ -184,6 +185,7 @@ CREATE INDEX IF NOT EXISTS idx_pagos_usuario_id ON pagos (usuario_id);
 
 -- US-29: roles. Todo usuario nuevo es "usuario"; un administrador se crea o se promueve con
 -- `npm run crear:admin` (nunca desde el registro público).
+-- US-16: rol del usuario. Solo un administrador puede cancelar reservas ajenas.
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS rol TEXT NOT NULL DEFAULT 'usuario';
 ALTER TABLE usuarios DROP CONSTRAINT IF EXISTS chk_usuarios_rol;
 ALTER TABLE usuarios ADD CONSTRAINT chk_usuarios_rol CHECK (rol IN ('usuario', 'administrador'));
@@ -222,3 +224,14 @@ CREATE TABLE IF NOT EXISTS verificaciones_reserva (
 );
 
 CREATE INDEX IF NOT EXISTS idx_verificaciones_reserva_created_at ON verificaciones_reserva (created_at DESC);
+-- US-16: auditoría de las cancelaciones administrativas (quién, cuándo y por qué).
+-- Sin ON DELETE CASCADE sobre el administrador: el registro de auditoría debe conservarse.
+CREATE TABLE IF NOT EXISTS cancelaciones_administrativas (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  reserva_id UUID NOT NULL REFERENCES reservas(id) ON DELETE CASCADE,
+  administrador_id UUID NOT NULL REFERENCES usuarios(id),
+  motivo TEXT NOT NULL CHECK (length(btrim(motivo)) > 0),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_cancelaciones_admin_reserva ON cancelaciones_administrativas (reserva_id);

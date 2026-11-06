@@ -10,7 +10,7 @@ const pagoService = require('./pagoService');
 const Pago = require('../models/Pago');
 const { validarFranjaEnHorario } = require('./horarioReservaService');
 const ErrorDeAplicacion = require('../utils/ErrorDeAplicacion');
-const { esMomentoPasado, minutosHastaInicio } = require('../utils/fechaHora');
+const { esMomentoPasado, minutosHastaInicio, aMomentoColombia } = require('../utils/fechaHora');
 const env = require('../config/env');
 
 // 23505: índice único (misma franja). 23P01: restricción de exclusión (franjas que se solapan).
@@ -153,7 +153,8 @@ async function cancelarReserva(id, usuarioId) {
     throw new ErrorDeAplicacion('No tienes permiso para cancelar esta reserva', 403);
   }
 
-  if (reserva.estado === 'cancelada') {
+  // Cubre 'cancelada' y 'cancelada_administrativamente' (US-16): solo se cancela una confirmada.
+  if (reserva.estado !== 'confirmada') {
     throw new ErrorDeAplicacion('Esta reserva ya estaba cancelada', 409);
   }
 
@@ -186,6 +187,107 @@ async function cancelarReserva(id, usuarioId) {
   return { reserva: cancelada, reembolso };
 }
 
+
+// US-16: el administrador solo puede cancelar con al menos 2 horas de anticipación.
+const ANTICIPACION_MINIMA_CANCELACION_ADMIN_MS = 2 * 60 * 60 * 1000;
+const MOTIVO_MAXIMO = 500;
+const RESERVAS_ADMIN_POR_PAGINA = 20;
+
+async function listarReservasAdmin({ canchaId, fecha, usuario, pagina = 1, limite = RESERVAS_ADMIN_POR_PAGINA }) {
+  const limiteSeguro = Math.min(Math.max(limite, 1), MAXIMO_POR_PAGINA);
+  const paginaSegura = Math.max(pagina, 1);
+
+  const { reservas, total } = await reservaRepository.listarFuturasParaAdmin({
+    canchaId: canchaId || null,
+    fecha: fecha || null,
+    usuario: usuario ? usuario.trim() : null,
+    limite: limiteSeguro,
+    offset: (paginaSegura - 1) * limiteSeguro,
+  });
+
+  return {
+    reservas,
+    paginacion: {
+      pagina: paginaSegura,
+      limite: limiteSeguro,
+      total,
+      totalPaginas: Math.max(1, Math.ceil(total / limiteSeguro)),
+    },
+  };
+}
+
+async function cancelarReservaComoAdmin({ id, administradorId, motivo, ahora = Date.now() }) {
+  const motivoLimpio = typeof motivo === 'string' ? motivo.trim() : '';
+  if (!motivoLimpio) {
+    throw new ErrorDeAplicacion('El motivo de la cancelación es obligatorio', 400, 'MOTIVO_OBLIGATORIO');
+  }
+  if (motivoLimpio.length > MOTIVO_MAXIMO) {
+    throw new ErrorDeAplicacion(`El motivo no puede superar los ${MOTIVO_MAXIMO} caracteres`, 400, 'MOTIVO_OBLIGATORIO');
+  }
+
+  const reserva = await reservaRepository.obtenerPorId(id);
+  if (!reserva) {
+    throw new ErrorDeAplicacion('Reserva no encontrada', 404);
+  }
+
+  if (reserva.estado !== 'confirmada') {
+    throw new ErrorDeAplicacion('Esta reserva ya estaba cancelada', 409);
+  }
+
+  const inicio = aMomentoColombia(reserva.fecha, String(reserva.horaInicio).slice(0, 5));
+  if (inicio.getTime() - ahora < ANTICIPACION_MINIMA_CANCELACION_ADMIN_MS) {
+    throw new ErrorDeAplicacion(
+      'No se puede cancelar: faltan menos de 2 horas para el inicio de la reserva (o ya comenzó)',
+      409,
+      'CANCELACION_FUERA_DE_PLAZO'
+    );
+  }
+
+  // US-28: una reserva pagada con tarjeta se reembolsa por completo también cuando la cancela un administrador.
+  const pago = await pagoRepository.obtenerPorReserva(id);
+  const reembolsar = pago?.estado === 'aprobado'
+    ? async (cliente) => {
+        await pagoService.reembolsar(cliente, pago);
+      }
+    : undefined;
+
+  const cancelada = await reservaRepository.cancelarAdministrativamente(
+    {
+      id,
+      administradorId,
+      motivo: motivoLimpio,
+    },
+    reembolsar
+  );
+  if (!cancelada) {
+    throw new ErrorDeAplicacion('Esta reserva ya estaba cancelada', 409);
+  }
+
+  // La cancelación ya quedó guardada: ni el aviso en tiempo real ni el correo pueden deshacerla.
+  retencionService.notificarFranjaLiberada(cancelada.usuarioId, cancelada);
+  enviarCorreoCancelacionAdministrativa(cancelada, motivoLimpio);
+
+  return cancelada;
+}
+
+function enviarCorreoCancelacionAdministrativa(reserva, motivo) {
+  Promise.all([usuarioRepository.buscarPorId(reserva.usuarioId), canchaRepository.obtenerPorId(reserva.canchaId)])
+    .then(([usuario, cancha]) => {
+      if (!usuario) return null;
+      return emailService.enviarCorreoCancelacionAdministrativa({
+        para: usuario.correo,
+        nombre: usuario.nombre,
+        reserva: {
+          ...reserva,
+          cancha: { id: reserva.canchaId, nombre: cancha?.nombre ?? '', direccion: cancha?.direccion ?? '' },
+        },
+        motivo,
+      });
+    })
+    .catch((error) => {
+      console.error(`[EMAIL] No se pudo enviar la cancelación de ${reserva.codigo}:`, error.message);
+    });
+}
 
 const RESERVAS_POR_PAGINA = 10;
 const MAXIMO_POR_PAGINA = 50;
@@ -220,4 +322,12 @@ async function listarMisReservas({
   };
 }
 
-module.exports = { crearReserva, cancelarReserva, listarReservasDeUsuario, validarQueNoSeaPasado, listarMisReservas };
+module.exports = {
+  crearReserva,
+  cancelarReserva,
+  listarReservasDeUsuario,
+  validarQueNoSeaPasado,
+  listarMisReservas,
+  listarReservasAdmin,
+  cancelarReservaComoAdmin,
+};

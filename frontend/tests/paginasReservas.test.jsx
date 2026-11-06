@@ -84,6 +84,24 @@ function reservaDe(numero, sobrescribir = {}) {
 const paginacion = (sobrescribir = {}) => ({ pagina: 1, limite: 10, total: 2, totalPaginas: 1, ...sobrescribir });
 
 describe('MisReservasPage', () => {
+  it('US-16: muestra el motivo solo en la reserva cancelada administrativamente', async () => {
+    api.obtenerMisReservas.mockResolvedValue({
+      data: {
+        reservas: [
+          reservaDe(1, { estado: 'cancelada_administrativamente', motivoCancelacion: 'La cancha estará en mantenimiento' }),
+          reservaDe(2, { estado: 'cancelada', motivoCancelacion: null }),
+          reservaDe(3),
+        ],
+        paginacion: paginacion({ total: 3 }),
+      },
+    });
+    renderConRuta(<MisReservasPage />);
+
+    expect(await screen.findByText('Cancelada administrativamente', { selector: 'span.estado-reserva' })).toBeInTheDocument();
+    expect(screen.getByText('La cancha estará en mantenimiento')).toBeInTheDocument();
+    expect(screen.getAllByText(/Motivo de la cancelación/)).toHaveLength(1);
+  });
+
   it('lista las reservas con cancha, fecha, hora, estado y código', async () => {
     api.obtenerMisReservas.mockResolvedValue({
       data: { reservas: [reservaDe(1), reservaDe(2, { estado: 'cancelada', canchaDireccion: null })], paginacion: paginacion() },

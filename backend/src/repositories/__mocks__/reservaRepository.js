@@ -10,4 +10,6 @@ module.exports = {
   marcarUsada: jest.fn(),
   crear: jest.fn(),
   cancelar: jest.fn(),
+  listarFuturasParaAdmin: jest.fn(),
+  cancelarAdministrativamente: jest.fn(),
 };

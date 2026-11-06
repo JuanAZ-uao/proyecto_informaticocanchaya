@@ -401,6 +401,51 @@ if (!tieneEntorno) {
       });
     });
 
+    // ------------------------------------------------------------------ US-16 + US-28
+    describe('US-16 · cancelación administrativa de una reserva pagada con tarjeta', () => {
+      it('la cancela con motivo, libera la franja, reembolsa el pago y deja la auditoría', async () => {
+        const metodo = await guardarTarjeta(usuarios.luis, { numero: '4012 8888 8888 1881' });
+        const creada = await reservar(usuarios.luis, '17:00', '18:00', metodo.id, '2099-11-01');
+        expect(creada.status).toBe(201);
+        const id = creada.body.reserva.id;
+
+        const cancelada = await con(request(app).patch(`/api/admin/reservas/${id}/cancelar`).send({ motivo: 'Mantenimiento de la cancha' }), usuarios.admin);
+
+        expect(cancelada.status).toBe(200);
+        expect(cancelada.body.reserva.estado).toBe('cancelada_administrativamente');
+        const { rows: pago } = await pool.query('SELECT estado, reembolso_referencia FROM pagos WHERE reserva_id = $1', [id]);
+        expect(pago[0].estado).toBe('reembolsado');
+        expect(pago[0].reembolso_referencia).toMatch(/^ref_sim_/);
+        const { rows: auditoria } = await pool.query('SELECT administrador_id, motivo FROM cancelaciones_administrativas WHERE reserva_id = $1', [id]);
+        expect(auditoria).toEqual([{ administrador_id: usuarios.admin.id, motivo: 'Mantenimiento de la cancha' }]);
+
+        // la franja queda libre y el usuario ve el motivo en su historial
+        const otro = await reservar(usuarios.ana, '17:00', '18:00', null, '2099-11-01');
+        expect(otro.status).toBe(201);
+        const historial = await con(request(app).get('/api/reservas').query({ limite: 50 }), usuarios.luis);
+        expect(historial.body.reservas.find((x) => x.id === id)).toMatchObject({ estado: 'cancelada_administrativamente', motivoCancelacion: 'Mantenimiento de la cancha', puedeCancelar: false });
+      });
+
+      it('exige motivo y rol de administrador, y una reserva cancelada así ya no se puede cancelar de nuevo', async () => {
+        const creada = await reservar(usuarios.luis, '18:00', '19:00', null, '2099-11-02');
+        const id = creada.body.reserva.id;
+
+        const sinMotivo = await con(request(app).patch(`/api/admin/reservas/${id}/cancelar`).send({}), usuarios.admin);
+        expect(sinMotivo.status).toBe(400);
+        const noAdmin = await con(request(app).patch(`/api/admin/reservas/${id}/cancelar`).send({ motivo: 'x' }), usuarios.ana);
+        expect(noAdmin.status).toBe(403);
+
+        expect((await con(request(app).patch(`/api/admin/reservas/${id}/cancelar`).send({ motivo: 'Imprevisto' }), usuarios.admin)).status).toBe(200);
+        expect((await con(request(app).patch(`/api/reservas/${id}/cancelar`), usuarios.luis)).status).toBe(409);
+        expect((await verificarAdmin(id)).body).toMatchObject({ estado: 'no_vigente', motivo: 'cancelada' });
+      });
+
+      async function verificarAdmin(id) {
+        const { rows } = await pool.query('SELECT codigo FROM reservas WHERE id = $1', [id]);
+        return con(request(app).post('/api/admin/reservas/verificar').send({ codigo: rows[0].codigo }), usuarios.admin);
+      }
+    });
+
     // ------------------------------------------------------------------ US-29
     describe('US-29 · verificación del código de reserva (administrador)', () => {
       const verificar = (usuario, codigo) => con(request(app).post('/api/admin/reservas/verificar').send({ codigo }), usuario);

@@ -597,6 +597,18 @@ La primera ejecución detectó 10 defectos (guardada en [ejecucion-1-inicial](do
 | US-28 | Método de pago con tarjeta | Tarjetas tokenizadas por una pasarela, pago opcional al reservar y rechazo sin confirmar la reserva |
 | US-29 | Verificación de código de reserva (admin) | Panel de administración: verificar el código, marcar la reserva como utilizada y auditoría |
 
+### US-16 · Cancelación administrativa
+
+Un administrador puede cancelar cualquier reserva futura con al menos 2 horas de anticipación y un motivo obligatorio.
+
+- **Rol:** la tabla `usuarios` tiene la columna `rol` (`usuario` por defecto o `administrador`). El rol se consulta en la base de datos en cada petición a `/api/admin`, no se guarda en el token.
+- **Crear un administrador:** `npm run admin:promover -- correo@dominio.com` convierte en administrador una cuenta ya registrada; `npm run crear:admin -- correo@dominio.com` hace lo mismo y, si la cuenta no existe, la crea (ver US-29). En ambos casos, después de `npm run migrate`.
+- **Endpoints** (ver Swagger en `/api/docs`):
+  - `GET /api/admin/reservas?canchaId=&fecha=&usuario=` busca reservas futuras por cancha, fecha o usuario (nombre o correo).
+  - `PATCH /api/admin/reservas/{id}/cancelar` con `{ "motivo": "..." }`. Si faltan menos de 2 horas responde 409 con el código `CANCELACION_FUERA_DE_PLAZO` y el motivo de la restricción.
+- **Efectos de cancelar:** la reserva pasa a `cancelada_administrativamente`, la franja queda libre (evento `disponibilidad:liberada`), el usuario recibe un correo con el motivo y se guarda un registro en `cancelaciones_administrativas` (administrador, fecha y hora, motivo) dentro de la misma transacción.
+- **Interfaz:** los administradores ven el enlace "Administración" en la barra, que abre el panel `/admin` (verificación de códigos, US-29) con un acceso a `/admin/reservas` (cancelación de reservas, US-16).
+
 ### US-14 · Cancelación de reserva propia
 
 - Desde «Mis reservas», una reserva confirmada tiene el botón **Cancelar reserva**, que pide confirmación antes de ejecutar la acción.
