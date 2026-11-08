@@ -217,7 +217,7 @@ function docPlan() {
   const hijos = [];
   hijos.push(
     h1('1. Introducción'),
-    p('Este documento define el plan de pruebas de calidad (QA) de CanchaYa para la versión desarrollada hasta el Sprint 4: qué se prueba, con qué estrategia, en qué entorno, con qué criterios se considera aprobada una prueba y cómo se registran los resultados. Los resultados de la ejecución se documentan en los archivos 02 a 06 de esta misma carpeta.'),
+    p('Este documento define el plan de pruebas de calidad (QA) de CanchaYa para la versión desarrollada hasta el Sprint 5: qué se prueba, con qué estrategia, en qué entorno, con qué criterios se considera aprobada una prueba y cómo se registran los resultados. Los resultados de la ejecución se documentan en los archivos 02 a 06 de esta misma carpeta.'),
     h2('1.1 Objetivos'),
     viñeta('Verificar que cada historia de usuario (HU) cumple sus criterios de aceptación (CA), con trazabilidad entre HU, criterio y caso de prueba.'),
     viñeta('Comprobar los requisitos no funcionales: rendimiento (RNF-01), seguridad (RNF-03), responsive (RNF-05), fiabilidad y mantenibilidad.'),
@@ -234,6 +234,8 @@ function docPlan() {
     p('', { despues: 80 }),
     h2('2.2 Fuera del alcance'),
     viñeta('US-21 (SonarQube): su análisis se documenta aparte, en el documento 07 (Resultados del análisis con SonarQube); en el pipeline requiere los secretos SONAR_TOKEN y SONAR_HOST_URL, que configura el equipo.'),
+    viñeta('Pasarela de pago real: el Sprint 5 usa una pasarela simulada (sin credenciales ni cobros reales) detrás de una interfaz intercambiable; se prueba el flujo completo (tokenización, cobro, rechazo, reembolso), pero no la integración con un proveedor externo.'),
+    viñeta('Certificado TLS real: la exigencia de HTTPS en las rutas de tarjetas se prueba con la cabecera X-Forwarded-Proto de un proxy de confianza; el cifrado del canal lo aporta el proxy o el hosting en producción.'),
     viñeta('Envío real de correos por SMTP: no hay credenciales configuradas; se prueba el modo simulado y la tolerancia a fallos mediante pruebas unitarias.'),
     viñeta('Ejecución remota de GitHub Actions: solo corre en los servidores de GitHub. QA verifica el workflow de forma estática y localmente, y se anexa la evidencia que aportó el equipo.'),
     viñeta('Dispositivos móviles físicos y navegadores antiguos; pruebas de penetración profundas; pruebas de carga superiores a 250 conexiones; pruebas de usabilidad con usuarios reales.'),

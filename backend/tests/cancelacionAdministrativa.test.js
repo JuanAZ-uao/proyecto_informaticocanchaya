@@ -5,6 +5,7 @@ process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://sin:uso@loc
 jest.mock('../src/config/db', () => ({ query: jest.fn(), connect: jest.fn(), on: jest.fn() }));
 jest.mock('../src/repositories/canchaRepository');
 jest.mock('../src/repositories/reservaRepository');
+jest.mock('../src/repositories/pagoRepository');
 jest.mock('../src/repositories/horarioRepository');
 jest.mock('../src/repositories/sesionReservaRepository');
 jest.mock('../src/repositories/usuarioRepository', () => ({ buscarPorId: jest.fn() }));
@@ -27,6 +28,8 @@ const usuarioRepository = require('../src/repositories/usuarioRepository');
 const emailService = require('../src/services/emailService');
 const retencionService = require('../src/services/retencionService');
 const reservaService = require('../src/services/reservaService');
+const pagoRepository = require('../src/repositories/pagoRepository');
+const pagoService = require('../src/services/pagoService');
 
 const esperarTareasPendientes = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -62,6 +65,40 @@ describe('reservaService.cancelarReservaComoAdmin (US-16)', () => {
   const cancelar = (extra = {}) =>
     reservaService.cancelarReservaComoAdmin({ id: RESERVA_ID, administradorId: ADMIN_ID, motivo: 'Mantenimiento', ahora: AHORA, ...extra });
 
+  it('reembolsa por completo (dentro de la misma transacción) una reserva pagada con tarjeta que cancela un administrador', async () => {
+    const pago = { id: 'pago-1', estado: 'aprobado', reservaId: RESERVA_ID };
+    const cliente = { query: jest.fn() };
+    const reembolsarSpy = jest.spyOn(pagoService, 'reembolsar').mockResolvedValue({ ...pago, estado: 'reembolsado' });
+    pagoRepository.obtenerPorReserva.mockResolvedValue(pago);
+    reservaRepository.obtenerPorId.mockResolvedValue(reservaConfirmada('12:00:00'));
+    reservaRepository.cancelarAdministrativamente.mockImplementation(async (datos, enTransaccion) => {
+      await enTransaccion(cliente);
+      return { ...reservaConfirmada('12:00:00'), estado: 'cancelada_administrativamente' };
+    });
+
+    await cancelar();
+    await esperarTareasPendientes();
+
+    expect(reembolsarSpy).toHaveBeenCalledWith(cliente, pago);
+    reembolsarSpy.mockRestore();
+  });
+
+  it('si el reembolso falla, la cancelación administrativa no se confirma', async () => {
+    const pago = { id: 'pago-1', estado: 'aprobado', reservaId: RESERVA_ID };
+    const reembolsarSpy = jest.spyOn(pagoService, 'reembolsar').mockRejectedValue(new Error('pasarela caída'));
+    pagoRepository.obtenerPorReserva.mockResolvedValue(pago);
+    reservaRepository.obtenerPorId.mockResolvedValue(reservaConfirmada('12:00:00'));
+    reservaRepository.cancelarAdministrativamente.mockImplementation(async (datos, enTransaccion) => {
+      await enTransaccion({});
+      return { ...reservaConfirmada('12:00:00'), estado: 'cancelada_administrativamente' };
+    });
+
+    await expect(cancelar()).rejects.toThrow('pasarela caída');
+    expect(retencionService.notificarFranjaLiberada).not.toHaveBeenCalled();
+    expect(emailService.enviarCorreoCancelacionAdministrativa).not.toHaveBeenCalled();
+    reembolsarSpy.mockRestore();
+  });
+
   it('cancela una reserva con más de 2 horas de anticipación, notifica y envía el correo con el motivo', async () => {
     reservaRepository.obtenerPorId.mockResolvedValue(reservaConfirmada('12:00:00'));
     reservaRepository.cancelarAdministrativamente.mockResolvedValue({
@@ -77,7 +114,7 @@ describe('reservaService.cancelarReservaComoAdmin (US-16)', () => {
       id: RESERVA_ID,
       administradorId: ADMIN_ID,
       motivo: 'Mantenimiento',
-    });
+    }, undefined);
     expect(retencionService.notificarFranjaLiberada).toHaveBeenCalledWith(USUARIO_ID, reserva);
     expect(emailService.enviarCorreoCancelacionAdministrativa).toHaveBeenCalledWith(
       expect.objectContaining({ para: 'ana@test.local', motivo: 'Mantenimiento' })
@@ -276,7 +313,7 @@ describe('Rutas /api/admin/reservas (US-16)', () => {
       id: RESERVA_ID,
       administradorId: ADMIN_ID,
       motivo: 'Cancha en mantenimiento',
-    });
+    }, undefined);
     await esperarTareasPendientes();
   });
 });

@@ -1,9 +1,13 @@
 | Método | Ruta | Documentado |
 |---|---|---|
+| POST | `/api/admin/reservas/{codigo}/usar` | Sí |
+| POST | `/api/admin/reservas/verificar` | Sí |
+| GET | `/api/admin/verificaciones` | Sí |
 | POST | `/api/auth/login` | Sí |
 | POST | `/api/auth/olvide-password` | Sí |
 | POST | `/api/auth/registro` | Sí |
 | POST | `/api/auth/restablecer-password` | Sí |
+| POST | `/api/auth/verificar-correo` | Sí |
 | GET | `/api/canchas` | Sí |
 | GET | `/api/canchas/{id}` | Sí |
 | GET | `/api/canchas/{id}/disponibilidad` | Sí |
@@ -14,5 +18,12 @@
 | GET | `/api/reservas` | Sí |
 | PATCH | `/api/reservas/{id}/cancelar` | Sí |
 | GET | `/api/reservas/mias` | Sí |
+| GET | `/api/usuarios/{id}` | Sí |
+| PATCH | `/api/usuarios/{id}` | Sí |
+| POST | `/api/usuarios/{id}/correo` | Sí |
+| GET | `/api/usuarios/{id}/metodos-pago` | Sí |
+| POST | `/api/usuarios/{id}/metodos-pago` | Sí |
+| DELETE | `/api/usuarios/{id}/metodos-pago/{metodoId}` | Sí |
+| PATCH | `/api/usuarios/{id}/password` | Sí |
 
-**14 de 14 endpoints documentados (100 %).**
+**25 de 25 endpoints documentados (100 %).**

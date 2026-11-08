@@ -1,4 +1,5 @@
 const authService = require('../services/authService');
+const perfilService = require('../services/perfilService');
 
 async function registro(req, res, next) {
   try {
@@ -51,4 +52,16 @@ async function restablecerPassword(req, res, next) {
   }
 }
 
-module.exports = { registro, login, olvidePassword, restablecerPassword };
+// US-27: el enlace que llega al correo nuevo confirma el cambio.
+async function verificarCorreo(req, res, next) {
+  try {
+    const { token } = req.body;
+    const { correo } = await perfilService.confirmarCambioCorreo({ token });
+
+    return res.status(200).json({ mensaje: 'Correo actualizado correctamente', correo });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+module.exports = { registro, login, olvidePassword, restablecerPassword, verificarCorreo };

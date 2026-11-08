@@ -7,6 +7,8 @@ import useAuth from '../src/hooks/useAuth';
 import ProtectedRoute from '../src/components/layout/ProtectedRoute';
 import Navbar from '../src/components/layout/Navbar';
 import Footer from '../src/components/layout/Footer';
+import ConfirmarDialogo from '../src/components/common/ConfirmarDialogo';
+import Campo from '../src/components/common/Campo';
 import { renderConRuta } from './helpers';
 
 const envolver = ({ children }) => <AuthProvider>{children}</AuthProvider>;
@@ -107,5 +109,85 @@ describe('Footer', () => {
       </MemoryRouter>
     );
     expect(screen.getByText(new RegExp(String(new Date().getFullYear())))).toBeInTheDocument();
+  });
+});
+
+describe('AuthProvider: rol y actualización del usuario (US-27, US-29)', () => {
+  it('reconoce al administrador por el rol del usuario guardado', () => {
+    localStorage.setItem('canchaya_token', 'tok');
+    localStorage.setItem('canchaya_usuario', JSON.stringify({ nombre: 'Admin', rol: 'administrador' }));
+
+    const { result } = renderHook(() => useAuth(), { wrapper: envolver });
+
+    expect(result.current.esAdministrador).toBe(true);
+  });
+
+  it('un usuario común o sin rol no es administrador', () => {
+    localStorage.setItem('canchaya_token', 'tok');
+    localStorage.setItem('canchaya_usuario', JSON.stringify({ nombre: 'Ana', rol: 'usuario' }));
+    expect(renderHook(() => useAuth(), { wrapper: envolver }).result.current.esAdministrador).toBe(false);
+
+    localStorage.setItem('canchaya_usuario', JSON.stringify({ nombre: 'Ana' }));
+    expect(renderHook(() => useAuth(), { wrapper: envolver }).result.current.esAdministrador).toBe(false);
+  });
+
+  it('actualizarUsuario mezcla los cambios y los guarda en el navegador', () => {
+    const { result } = renderHook(() => useAuth(), { wrapper: envolver });
+    act(() => result.current.login('tok', { id: 'u1', nombre: 'Ana', correo: 'ana@correo.com', rol: 'usuario' }));
+
+    act(() => result.current.actualizarUsuario({ nombre: 'Ana María' }));
+
+    expect(result.current.usuario).toEqual({ id: 'u1', nombre: 'Ana María', correo: 'ana@correo.com', rol: 'usuario' });
+    expect(JSON.parse(localStorage.getItem('canchaya_usuario')).nombre).toBe('Ana María');
+  });
+});
+
+describe('ConfirmarDialogo', () => {
+  it('enfoca la opción segura al abrirse y llama a confirmar y cancelar', async () => {
+    const onConfirmar = vi.fn();
+    const onCancelar = vi.fn();
+    render(
+      <ConfirmarDialogo titulo="¿Seguro?" textoConfirmar="Sí" textoCancelar="No" onConfirmar={onConfirmar} onCancelar={onCancelar}>
+        <p>Detalle</p>
+      </ConfirmarDialogo>
+    );
+
+    expect(screen.getByRole('dialog', { name: '¿Seguro?' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'No' })).toHaveFocus();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Sí' }));
+    await userEvent.click(screen.getByRole('button', { name: 'No' }));
+
+    expect(onConfirmar).toHaveBeenCalledTimes(1);
+    expect(onCancelar).toHaveBeenCalledTimes(1);
+  });
+
+  it('muestra el error y usa el estilo de peligro cuando se pide', () => {
+    render(
+      <ConfirmarDialogo titulo="Eliminar" peligro error="Falló" onConfirmar={() => {}} onCancelar={() => {}}>
+        <p>Detalle</p>
+      </ConfirmarDialogo>
+    );
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Falló');
+    expect(screen.getByRole('button', { name: 'Confirmar' })).toHaveClass('boton-peligro');
+  });
+});
+
+describe('Campo', () => {
+  it('asocia la etiqueta, la ayuda y el error con el input', () => {
+    render(<Campo etiqueta="Teléfono" ayuda="De 7 a 15 dígitos" error="El teléfono no es válido" defaultValue="abc" />);
+
+    const input = screen.getByLabelText('Teléfono');
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(input).toHaveAccessibleDescription('El teléfono no es válido De 7 a 15 dígitos');
+  });
+
+  it('sin error ni ayuda no marca el campo como inválido', () => {
+    render(<Campo etiqueta="Nombre" />);
+
+    const input = screen.getByLabelText('Nombre');
+    expect(input).not.toHaveAttribute('aria-invalid');
+    expect(input).not.toHaveAttribute('aria-describedby');
   });
 });

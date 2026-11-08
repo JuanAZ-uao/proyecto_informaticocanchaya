@@ -11,6 +11,8 @@ export default defineConfig({
     setupFiles: ['./vitest.setup.js'],
     include: ['tests/**/*.test.{js,jsx}'],
     clearMocks: true,
+    // Las pruebas de formularios simulan muchas pulsaciones; con la cobertura activada pueden pasar de los 5 s por defecto.
+    testTimeout: 20000,
     coverage: {
       provider: 'v8',
       all: true,

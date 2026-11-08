@@ -21,6 +21,8 @@ describe('reservaService.listarMisReservas (US-13)', () => {
       estado: null,
       limite: 10,
       offset: 0,
+      // US-14: el historial pide al repositorio si todavía hay tiempo de cancelar (2 horas por defecto).
+      minutosMinimosCancelacion: 120,
     });
   });
 

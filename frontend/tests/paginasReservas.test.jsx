@@ -149,6 +149,63 @@ describe('MisReservasPage', () => {
     await waitFor(() => expect(api.obtenerMisReservas).toHaveBeenLastCalledWith(expect.objectContaining({ estado: '' })));
   });
 
+  it('al filtrar por "Completada" desde Próximas cambia a la pestaña Pasadas', async () => {
+    api.obtenerMisReservas.mockResolvedValue({ data: { reservas: [], paginacion: paginacion({ total: 0 }) } });
+    renderConRuta(<MisReservasPage />);
+    await screen.findByText('Aún no tienes reservas');
+    expect(screen.getByRole('tab', { name: 'Próximas' })).toHaveAttribute('aria-selected', 'true');
+
+    api.obtenerMisReservas.mockResolvedValue({
+      data: { reservas: [reservaDe(1, { estado: 'completada' })], paginacion: paginacion({ total: 1 }) },
+    });
+    await userEvent.selectOptions(screen.getByLabelText('Filtrar por estado'), 'completada');
+
+    await waitFor(() =>
+      expect(api.obtenerMisReservas).toHaveBeenLastCalledWith({ periodo: 'pasadas', estado: 'completada', pagina: 1, limite: 10 })
+    );
+    expect(screen.getByRole('tab', { name: 'Pasadas' })).toHaveAttribute('aria-selected', 'true');
+    expect(await screen.findByText('Completada', { selector: 'span.estado-reserva' })).toBeInTheDocument();
+    expect(screen.queryByText('No hay reservas con ese estado')).not.toBeInTheDocument();
+  });
+
+  it('al filtrar por "Confirmada" desde Pasadas vuelve a la pestaña Próximas', async () => {
+    api.obtenerMisReservas.mockResolvedValue({ data: { reservas: [], paginacion: paginacion({ total: 0 }) } });
+    renderConRuta(<MisReservasPage />);
+    await screen.findByText('Aún no tienes reservas');
+    await userEvent.click(screen.getByRole('tab', { name: 'Pasadas' }));
+    await waitFor(() => expect(screen.getByRole('tab', { name: 'Pasadas' })).toHaveAttribute('aria-selected', 'true'));
+
+    await userEvent.selectOptions(screen.getByLabelText('Filtrar por estado'), 'confirmada');
+
+    await waitFor(() =>
+      expect(api.obtenerMisReservas).toHaveBeenLastCalledWith({ periodo: 'proximas', estado: 'confirmada', pagina: 1, limite: 10 })
+    );
+    expect(screen.getByRole('tab', { name: 'Próximas' })).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('al pasar a otra pestaña quita el filtro que ya no aplica, pero conserva "Cancelada"', async () => {
+    api.obtenerMisReservas.mockResolvedValue({ data: { reservas: [], paginacion: paginacion({ total: 0 }) } });
+    renderConRuta(<MisReservasPage />);
+    await screen.findByText('Aún no tienes reservas');
+
+    // "Completada" lleva a Pasadas; al volver a Próximas ese filtro se quita
+    await userEvent.selectOptions(screen.getByLabelText('Filtrar por estado'), 'completada');
+    await waitFor(() => expect(screen.getByRole('tab', { name: 'Pasadas' })).toHaveAttribute('aria-selected', 'true'));
+    await userEvent.click(screen.getByRole('tab', { name: 'Próximas' }));
+    await waitFor(() =>
+      expect(api.obtenerMisReservas).toHaveBeenLastCalledWith({ periodo: 'proximas', estado: '', pagina: 1, limite: 10 })
+    );
+    expect(screen.getByLabelText('Filtrar por estado')).toHaveValue('');
+
+    // "Cancelada" existe en ambas pestañas: se conserva al cambiar
+    await userEvent.selectOptions(screen.getByLabelText('Filtrar por estado'), 'cancelada');
+    await userEvent.click(screen.getByRole('tab', { name: 'Pasadas' }));
+    await waitFor(() =>
+      expect(api.obtenerMisReservas).toHaveBeenLastCalledWith({ periodo: 'pasadas', estado: 'cancelada', pagina: 1, limite: 10 })
+    );
+    expect(screen.getByLabelText('Filtrar por estado')).toHaveValue('cancelada');
+  });
+
   it('pagina las listas largas', async () => {
     api.obtenerMisReservas.mockResolvedValue({
       data: { reservas: [reservaDe(1)], paginacion: paginacion({ total: 25, totalPaginas: 3 }) },

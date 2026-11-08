@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import Icono from '../common/Icono';
-import { formatearFechaLarga, formatearHora } from '../../utils/formato';
+import { formatearFechaLarga, formatearHora, formateadorMoneda } from '../../utils/formato';
 
 export default function ConfirmacionReserva({ reserva, onHacerOtraReserva }) {
   return (
@@ -39,6 +39,14 @@ export default function ConfirmacionReserva({ reserva, onHacerOtraReserva }) {
             <span className="insignia insignia-estado insignia-confirmada">Confirmada</span>
           </dd>
         </div>
+        {reserva.pago && (
+          <div>
+            <dt>Pago</dt>
+            <dd>
+              Aprobado · {reserva.pago.marca} ···· {reserva.pago.ultimos4} · {formateadorMoneda.format(reserva.pago.monto)}
+            </dd>
+          </div>
+        )}
       </dl>
 
       <div className="acciones-reserva">

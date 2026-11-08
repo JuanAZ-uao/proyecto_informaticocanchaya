@@ -42,12 +42,13 @@ function docSonar() {
   const s2 = leer('sonar-2');
   const s3 = leer('sonar-3');
   const s4 = leer('sonar-4');
-  const analisis = [s1, s2, s3, s4].filter(Boolean);
-  const final = s4 ?? s3 ?? s2 ?? s1;
+  const s5 = leer('sonar-5');
+  const analisis = [s1, s2, s3, s4, s5].filter(Boolean);
+  const final = s5 ?? s4 ?? s3 ?? s2 ?? s1;
   if (!final) return null;
   const correcciones = leerDatos('sonar-correcciones');
   const cob = leerObjeto('sonar-cobertura');
-  const ETIQUETAS = { 1: 'línea base', 2: 'hallazgos corregidos', 3: 'frontend sin pruebas', 4: 'final' };
+  const ETIQUETAS = { 1: 'línea base', 2: 'hallazgos corregidos', 3: 'frontend sin pruebas', 4: 'cobertura final', 5: 'Sprint 5' };
   const nombreAnalisis = (s) => `Análisis ${s.etiqueta} (${ETIQUETAS[s.etiqueta] ?? 'intermedio'})`;
   const coberturaNueva = (s) => s?.gate?.conditions?.find((c) => c.metricKey === 'new_coverage');
   const pct = (v) => (v === undefined || v === null ? '—' : `${String(v).replace('.', ',')} %`);
@@ -142,7 +143,7 @@ function docSonar() {
     const n2 = coberturaNueva(s2);
     const n3 = coberturaNueva(s3);
     const n4 = coberturaNueva(s4 ?? final);
-    hijos.push(p([{ text: 'Cómo leer estas condiciones. ', bold: true }, `El Quality Gate por defecto de SonarQube (Sonar way) evalúa solo el código nuevo (new_*), es decir, lo cambiado desde la versión de referencia. En el análisis 2 el código nuevo era de solo unas pocas líneas y SonarQube ignoró la condición de cobertura (${pct(n2?.actualValue)}) por la muestra tan pequeña. En el análisis 3 (27 de octubre) había ${cob.lineasNuevas['3']} líneas nuevas por cubrir, todas del frontend, que no tenía ninguna prueba: la cobertura del código nuevo fue ${pct(n3?.actualValue)} frente al mínimo de ${n3?.errorThreshold ?? 80} % y el Quality Gate falló. Tras añadir las pruebas del frontend (análisis 4), la cobertura del código nuevo subió a ${pct(n4?.actualValue)} sobre ${cob.lineasNuevas['4']} líneas nuevas y el Quality Gate se aprobó. La cobertura total del proyecto pasó de ${pct(medida(s3, 'coverage'))} a ${pct(medida(final, 'coverage'))} (sección 3.7).`]));
+    hijos.push(p([{ text: 'Cómo leer estas condiciones. ', bold: true }, `El Quality Gate por defecto de SonarQube (Sonar way) evalúa solo el código nuevo (new_*), es decir, lo cambiado desde la versión de referencia. En el análisis 2 el código nuevo era de solo unas pocas líneas y SonarQube ignoró la condición de cobertura (${pct(n2?.actualValue)}) por la muestra tan pequeña. En el análisis 3 (27 de octubre) había ${cob.lineasNuevas['3']} líneas nuevas por cubrir, todas del frontend, que no tenía ninguna prueba: la cobertura del código nuevo fue ${pct(n3?.actualValue)} frente al mínimo de ${n3?.errorThreshold ?? 80} % y el Quality Gate falló. Tras añadir las pruebas del frontend (análisis 4), la cobertura del código nuevo subió a ${pct(n4?.actualValue)} sobre ${cob.lineasNuevas['4']} líneas nuevas y el Quality Gate se aprobó. ${s5 ? ` En el análisis 5 (Sprint 5: cancelación, perfil, tarjetas y verificación de códigos) la cobertura del código nuevo fue ${pct(coberturaNueva(s5)?.actualValue)} sobre ${cob.lineasNuevas['5']} líneas nuevas.` : ''} La cobertura total del proyecto pasó de ${pct(medida(s3, 'coverage'))} a ${pct(medida(final, 'coverage'))} (sección 3.7).`]));
   } else {
     hijos.push(p([{ text: 'Cómo leer estas condiciones. ', bold: true }, 'El Quality Gate por defecto de SonarQube (Sonar way) evalúa solo el código nuevo (new_*). En un análisis con pocos cambios, SonarQube puede marcar una condición como aprobada aunque su valor sea bajo: en el análisis 2 el código nuevo fue de solo 12 líneas por cubrir y 18 líneas nuevas (ver el tablero en la sección 4), con una cobertura del 8,3 % sobre ellas, y el gate no exige el umbral con una muestra tan pequeña. Por eso este documento reporta también la cobertura global del backend, que es la cifra que sirve para decidir dónde reforzar las pruebas: ' + `${medida(final, 'coverage') ?? '—'} % en total, con el frontend sin pruebas unitarias; se recomienda aumentarla en los próximos sprints.`]));
   }
@@ -196,7 +197,7 @@ function docSonar() {
     const fecha = (s) => fmtFecha(s.fin).replace(/,? \d{1,2}:\d{2}.*$/, '');
     hijos.push(
       h2(`${s2 && correcciones.length ? '3.7' : '3.6'} Cobertura de pruebas: evolución y estado final`),
-      p(`Cobertura del análisis ${final.etiqueta} (final), por área. La cobertura de líneas cuenta solo líneas; la combinada suma también las ramas de decisión, que es la cifra que reporta SonarQube como cobertura total.`),
+      p(`Cobertura del análisis ${final.etiqueta} (último), por área. La cobertura de líneas cuenta solo líneas; la combinada suma también las ramas de decisión, que es la cifra que reporta SonarQube como cobertura total.`),
       tabla([2300, 1100, 1550, 1550, 1790, 1790], [
         ['Área', 'Archivos', 'Líneas por cubrir', 'Líneas sin cubrir', 'Cobertura de líneas', 'Cobertura combinada'],
         ['Backend (Jest)', der(backend.archivos), der(num(backend.lineasACubrir)), der(num(backend.lineasSinCubrir)), der(pct(backend.coberturaLineas)), der(pct(backend.coberturaCombinada))],
@@ -311,7 +312,7 @@ function docApi() {
   }
   hijos.push(
     h1('4. Qué contiene la documentación'),
-    viñeta('14 operaciones en 6 grupos: Sistema, Autenticación, Canchas, Reservas, Temporizador y Socket.IO (tiempo real).'),
+    viñeta('25 operaciones en 9 grupos: Sistema, Autenticación, Canchas, Reservas, Temporizador, Perfil, Métodos de pago, Administración y Socket.IO (tiempo real).'),
     viñeta('Cada operación: resumen, descripción, parámetros, esquema del cuerpo con ejemplo y respuestas (200/201, 400, 401, 403, 404, 409, 429 y 500 según aplique) con ejemplos.'),
     viñeta('Modelos reutilizables en components/schemas: Usuario, Cancha, Reserva, Error, ErrorValidacion, ReservaConfirmada, ReservaHistorial, Paginacion, entre otros.'),
     viñeta('Autenticación Bearer JWT (bearerAuth) y botón Authorize operativo.'),
@@ -412,7 +413,7 @@ function docConsolidado() {
   const fechas = casosQa.map((c) => c.ejecutadaEn).sort((x, y) => x.localeCompare(y));
   return documento({
     titulo: 'Consolidado de Todas las Pruebas',
-    subtitulo: 'Resumen y listado completo de las pruebas ejecutadas — Sprint 4',
+    subtitulo: 'Resumen y listado completo de las pruebas ejecutadas — Sprint 5',
     meta: [
       ...META_BASE,
       ['Fecha de ejecución', fechas.length ? fmtFecha(fechas[0]) : '—'],
