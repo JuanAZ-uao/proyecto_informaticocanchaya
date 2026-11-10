@@ -5,7 +5,7 @@ on:
     branches: [main, develop, "sprint_*"]
   push:
     # Ramas de trabajo del equipo: feature/..., fix/..., qa/... y las de historias US-XX...
-    branches: [main, develop, "sprint_*", "feature/**", "fix/**", "qa/**", "US-**"]
+    branches: [main, develop, "sprint_*", "feature/**", "fix/**", "qa/**", "US-**", "Pipeline-CI/**"]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -233,10 +233,10 @@ jobs:
   deploy-local:
     name: Desplegar en entorno local
     needs: docker
-    # Rama de despliegue actual: sprint_4 (cambiarla aquí cuando avance el proyecto).
+    # Rama de despliegue actual: sprint_5.
     # Solo en push, nunca en pull_request, para que código de un PR no se ejecute
     # en la máquina del runner.
-    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/sprint_4'
+    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/sprint_5'
     runs-on: self-hosted
     env:
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
