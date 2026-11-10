@@ -11,6 +11,12 @@ Proyecto Informático 1 — Universidad Autónoma de Occidente, Facultad de Inge
 
 **Docente:** Jorge Gonzalez Rivera
 
+## Documentación de entrega — Sprint 5
+
+- [Manual de usuario](docs/manual-usuario.md)
+- [Documentación técnica final y despliegue](docs/documentacion-tecnica-final.md)
+- [Evidencias del pipeline CI/CD](docs/evidencias-pipeline-cicd.md)
+
 ---
 
 ## Descripción del proyecto y stack tecnológico
@@ -535,7 +541,7 @@ El pipeline ejecuta los pasos 2 y 3 en el job *Backend - lint y pruebas* (US-20)
 
 ### US-20 · Pipeline CI/CD con Docker
 
-El pipeline está en [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml). Corre en cada PR a `main`, `develop` y `sprint_*`, y en cada push a esas ramas y a `feature/**` y `fix/**`.
+El pipeline está en [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml). Corre en cada PR dirigido a `main`, `develop` o `sprint_*`, y en cada push a esas ramas, `feature/**`, `fix/**`, `qa/**`, `US-**` y `Pipeline-CI/**`.
 
 | Job | Qué hace |
 | --- | --- |
@@ -543,7 +549,7 @@ El pipeline está en [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml).
 | Frontend - lint y build | `npm ci`, `npm run lint` (ESLint sobre `.js` y `.jsx`) y `npm run build`. |
 | Docker - build y smoke test | Construye las imágenes, levanta todo con `docker compose` y ejecuta [scripts/smoke-test.sh](scripts/smoke-test.sh): health, frontend, rutas SPA, CORS, 401 sin token, registro, login y listado de canchas. Después corre la prueba de carga de sockets con 100 conexiones (US-18). |
 | SonarQube Quality Gate | Analiza backend y frontend con la cobertura de Jest y espera el resultado del Quality Gate. Necesita la variable `SONAR_HOST_URL` y el secreto `SONAR_TOKEN`. Si el servidor no responde (por ejemplo, un túnel de ngrok apagado) o faltan esos datos, el análisis se omite con un aviso y el pipeline continúa. |
-| Desplegar en entorno local | Solo en push a `sprint_4` (rama de despliegue actual), en un self-hosted runner: `docker compose up -d --build`. |
+| Desplegar en entorno local | Solo en push a `sprint_5`, en un self-hosted runner: `docker compose up -d --build --wait --wait-timeout 180`. |
 
 ### Evidencias
 
@@ -588,11 +594,13 @@ La primera ejecución detectó 10 defectos (guardada en [ejecucion-1-inicial](do
 
 ## Sprint 5
 
-**Historias:** US-14 (cancelación de reserva propia), US-27 (perfil de usuario), US-28 (método de pago con tarjeta) y US-29 (verificación de código de reserva por el administrador).
+**Historias:** US-14 (cancelación de reserva propia), US-15 (gestión de canchas, pendiente de integración en el backend activo), US-16 (cancelación administrativa), US-27 (perfil de usuario), US-28 (método de pago con tarjeta) y US-29 (verificación de código de reserva por el administrador).
 
 | ID | Historia de usuario | Qué incluye |
 |---|---|---|
 | US-14 | Cancelación de reserva propia | Botón «Cancelar reserva» con confirmación, regla de **2 horas** de anticipación, correo y aviso en pantalla, reembolso automático si estaba pagada |
+| US-15 | Gestión de canchas | El módulo de rutas agregado no está montado en el router activo; revisar la nota de integración en la [documentación técnica final](docs/documentacion-tecnica-final.md) antes de habilitarlo |
+| US-16 | Cancelación administrativa | Buscar reservas futuras y cancelarlas con motivo; se notifica al usuario y se audita la operación |
 | US-27 | Perfil de usuario | «Mi perfil»: datos personales, cambio de contraseña y cambio de correo con verificación por enlace |
 | US-28 | Método de pago con tarjeta | Tarjetas tokenizadas por una pasarela, pago opcional al reservar y rechazo sin confirmar la reserva |
 | US-29 | Verificación de código de reserva (admin) | Panel de administración: verificar el código, marcar la reserva como utilizada y auditoría |
