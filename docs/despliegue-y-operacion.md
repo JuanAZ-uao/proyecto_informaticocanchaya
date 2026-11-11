@@ -72,7 +72,7 @@ Staging y producción tienen **variables y secretos distintos** (JWT, base de da
    | --- | --- |
    | `DATABASE_URL` | La cadena de Neon del paso 4A.1. |
    | `CORS_ORIGIN` | `https://<dominio-frontend-en-vercel>`. Si aún no existe, un valor temporal y se corrige luego (*Environment*). Solo el frontend de producción. |
-   | `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | Datos del proveedor de correo (necesarios para recuperar contraseña y cambiar el correo). Pueden quedar vacíos y completarse después. |
+   | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` | Datos del proveedor de correo. **`SMTP_PORT=2525`:** el plan gratuito de Render bloquea los puertos SMTP habituales (25, 465 y 587), así que hay que usar el 2525 que ofrecen los proveedores de correo transaccional (necesarios para recuperar contraseña y cambiar el correo). Pueden quedar vacíos y completarse después. |
 
    `JWT_SECRET` lo genera Render (`generateValue`), `PORT` la inyecta Render y el backend la lee. El resto de variables (`NODE_ENV`, `TRUST_PROXY`, `EXIGIR_HTTPS_PAGOS`, `API_DOCS_HABILITADA=false`, `SEED_INICIAL=true`, `LOG_CORREO_DETALLE=false`) ya vienen del blueprint.
 3. *Settings → Build & Deploy → Auto-Deploy*: debe quedar **«After CI Checks Pass»**: Render solo despliega cuando el workflow *CI/CD* del commit termina en verde.
