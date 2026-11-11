@@ -306,7 +306,33 @@ async function cancelarAdministrativamente({ id, administradorId, motivo }, enTr
   }
 }
 
+// US-15: reservas confirmadas que todavía no terminan en una cancha (se muestran al advertir antes de desactivarla).
+async function listarFuturasConfirmadasDeCancha(canchaId, limite = 20) {
+  const { rows } = await pool.query(
+    `SELECT r.*, u.nombre AS usuario_nombre, u.correo AS usuario_correo,
+            to_char(r.fecha, 'YYYY-MM-DD') AS fecha_texto,
+            to_char(r.hora_inicio, 'HH24:MI') AS hora_inicio_texto,
+            to_char(r.hora_fin, 'HH24:MI') AS hora_fin_texto
+     FROM reservas r
+     JOIN usuarios u ON u.id = r.usuario_id
+     WHERE r.cancha_id = $1 AND r.estado = $2 AND ${FIN_RESERVA} >= ${AHORA_COLOMBIA}
+     ORDER BY r.fecha ASC, r.hora_inicio ASC
+     LIMIT $3`,
+    [canchaId, ESTADO_CONFIRMADA, limite]
+  );
+
+  return rows.map((fila) => ({
+    id: fila.id,
+    codigo: fila.codigo,
+    usuarioNombre: fila.usuario_nombre,
+    fecha: fila.fecha_texto,
+    horaInicio: fila.hora_inicio_texto,
+    horaFin: fila.hora_fin_texto,
+  }));
+}
+
 module.exports = {
+  listarFuturasConfirmadasDeCancha,
   listarFuturasParaAdmin,
   cancelarAdministrativamente,
   listarPorCanchaYFecha,

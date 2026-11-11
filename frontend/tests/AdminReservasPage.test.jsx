@@ -65,7 +65,7 @@ describe('AdminReservasPage (US-16)', () => {
 
   it('exige un motivo antes de cancelar y no llama a la API sin él', async () => {
     renderConRuta(<AdminReservasPage />, admin);
-    await userEvent.click(await screen.findByRole('button', { name: /Cancelar la reserva CY-AAAA1111/ }));
+    await userEvent.click(await screen.findByRole('button', { name: /Cancelar reserva CY-AAAA1111/ }));
 
     const dialogo = screen.getByRole('dialog');
     await userEvent.type(within(dialogo).getByLabelText('Motivo de la cancelación'), '   ');
@@ -78,7 +78,7 @@ describe('AdminReservasPage (US-16)', () => {
   it('cancela con el motivo, avisa del correo y recarga la lista', async () => {
     api.cancelarReservaAdmin.mockResolvedValue({ data: { reserva: { ...reserva, estado: 'cancelada_administrativamente' } } });
     renderConRuta(<AdminReservasPage />, admin);
-    await userEvent.click(await screen.findByRole('button', { name: /Cancelar la reserva CY-AAAA1111/ }));
+    await userEvent.click(await screen.findByRole('button', { name: /Cancelar reserva CY-AAAA1111/ }));
 
     await userEvent.type(screen.getByLabelText('Motivo de la cancelación'), 'Mantenimiento de la cancha');
     api.obtenerReservasAdmin.mockResolvedValue(respuesta([{ ...reserva, estado: 'cancelada_administrativamente' }]));
@@ -89,7 +89,7 @@ describe('AdminReservasPage (US-16)', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(await screen.findByText('Cancelada administrativamente')).toBeInTheDocument();
     // Una reserva ya cancelada no se puede volver a cancelar.
-    expect(screen.queryByRole('button', { name: /Cancelar la reserva/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Cancelar reserva CY-/ })).not.toBeInTheDocument();
   });
 
   it('si faltan menos de 2 horas, muestra el motivo del bloqueo y deja el diálogo abierto', async () => {
@@ -97,7 +97,7 @@ describe('AdminReservasPage (US-16)', () => {
       errorHttp(409, { mensaje: 'No se puede cancelar: faltan menos de 2 horas para el inicio de la reserva (o ya comenzó)' })
     );
     renderConRuta(<AdminReservasPage />, admin);
-    await userEvent.click(await screen.findByRole('button', { name: /Cancelar la reserva CY-AAAA1111/ }));
+    await userEvent.click(await screen.findByRole('button', { name: /Cancelar reserva CY-AAAA1111/ }));
 
     await userEvent.type(screen.getByLabelText('Motivo de la cancelación'), 'Imprevisto');
     await userEvent.click(screen.getByRole('button', { name: 'Confirmar cancelación' }));
@@ -108,7 +108,7 @@ describe('AdminReservasPage (US-16)', () => {
 
   it('el botón Volver cierra el diálogo sin cancelar', async () => {
     renderConRuta(<AdminReservasPage />, admin);
-    await userEvent.click(await screen.findByRole('button', { name: /Cancelar la reserva CY-AAAA1111/ }));
+    await userEvent.click(await screen.findByRole('button', { name: /Cancelar reserva CY-AAAA1111/ }));
     await userEvent.click(screen.getByRole('button', { name: 'Volver' }));
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();

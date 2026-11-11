@@ -203,7 +203,7 @@ await S.caso(
     const t0 = Date.now();
     const sleep = await api('GET', `/canchas/${encodeURIComponent(K0.id + "'; SELECT pg_sleep(5);--")}`, undefined, U.token);
     c.verifica(sleep.status === 400 && Date.now() - t0 < 3000, 'Id de cancha con SQL: 400 inmediato (sin ejecutar pg_sleep)', `HTTP ${sleep.status} en ${Date.now() - t0} ms`);
-    c.verifica(sqlq("SELECT count(*) FROM pg_tables WHERE schemaname='public'") === '11', 'Las 11 tablas siguen existiendo');
+    c.verifica(sqlq("SELECT count(*) FROM pg_tables WHERE schemaname='public'") === '12', 'Las 12 tablas siguen existiendo');
     const xss = '<img src=x onerror=alert(1)>';
     const correo = `xss.${Date.now()}@qa.local`;
     const reg = await api('POST', '/auth/registro', { nombre: xss, correo, telefono: '3000000000', password: CFG.password });
@@ -500,8 +500,17 @@ await S.caso(
     if (hCO < 6 || hCO > 18) { c.nota('La hora actual no permite el escenario (se necesita entre las 06:00 y las 18:59 de Colombia).'); return; }
     const pasada = await api('POST', `/canchas/${K2.id}/reservas`, { fecha: fechaCO(0), horaInicio: `${String(hCO - 1).padStart(2, '0')}:00`, horaFin: `${String(hCO).padStart(2, '0')}:00` }, U.token);
     c.verifica(pasada.status === 400, `Hoy ${String(hCO - 1).padStart(2, '0')}:00 (ya pasó en Colombia): 400`, `HTTP ${pasada.status}`);
-    const futura = await api('POST', `/canchas/${K2.id}/reservas`, { fecha: fechaCO(0), horaInicio: `${String(hCO + 1).padStart(2, '0')}:00`, horaFin: `${String(hCO + 2).padStart(2, '0')}:00` }, U.token);
-    c.verifica(futura.status === 201, `Hoy ${String(hCO + 1).padStart(2, '0')}:00 (futura en Colombia): 201`, `HTTP ${futura.status}`);
+    // Otras pruebas reservan franjas de hoy que empiezan pronto: se usa la primera hora futura libre (un 409 por ocupada no es lo que se prueba).
+    let futura;
+    let horaFutura = hCO + 1;
+    for (const cancha of [K2, K1, K0]) {
+      for (horaFutura = hCO + 1; horaFutura <= 19; horaFutura += 1) {
+        futura = await api('POST', `/canchas/${cancha.id}/reservas`, { fecha: fechaCO(0), horaInicio: `${String(horaFutura).padStart(2, '0')}:00`, horaFin: `${String(horaFutura + 1).padStart(2, '0')}:00` }, U.token);
+        if (futura.status !== 409) break;
+      }
+      if (futura?.status !== 409) break;
+    }
+    c.verifica(futura.status === 201, `Hoy ${String(horaFutura).padStart(2, '0')}:00 (futura en Colombia): 201`, `HTTP ${futura.status}`);
     if (futura.status === 201) await api('PATCH', `/reservas/${futura.datos.reserva.id}/cancelar`, undefined, U.token);
   }
 );
@@ -611,7 +620,7 @@ await S.caso(
     const p1 = await api('PATCH', `/usuarios/${u.id}`, { nombre: sqli, telefono: '3001234567' }, u.token);
     const p2 = await api('PATCH', `/usuarios/${u.id}`, { nombre: 'Normal', telefono: "3001234567'; DROP TABLE pagos;--" }, u.token);
     c.verifica(p1.status === 200 && p2.status === 400, 'El SQL en el nombre se guarda como texto (200) y en el teléfono se rechaza (400)', `${p1.status} / ${p2.status}`);
-    c.verifica(sqlq("SELECT count(*) FROM pg_tables WHERE schemaname='public'") === '11' && sqlq(`SELECT nombre FROM usuarios WHERE id='${u.id}'`) === sqli, 'Las 11 tablas siguen existiendo y el nombre quedó guardado literalmente');
+    c.verifica(sqlq("SELECT count(*) FROM pg_tables WHERE schemaname='public'") === '12' && sqlq(`SELECT nombre FROM usuarios WHERE id='${u.id}'`) === sqli, 'Las 12 tablas siguen existiendo y el nombre quedó guardado literalmente');
     const inyeccion = await api('POST', '/admin/reservas/verificar', { codigo: "CY-00000000' OR '1'='1" }, (await crearAdministradorNF('nfadmin2')).token);
     c.verifica(inyeccion.status === 404, 'SQL en el código de reserva: 404 "Código no encontrado"', `HTTP ${inyeccion.status}`);
 
@@ -653,7 +662,7 @@ await S.caso(
 );
 
 await S.caso(
-  { ...base, id: 'NF-24', hu: 'US-27', ca: [7], grupo: 'Usabilidad y accesibilidad', rnf: 'RNF-05 · WCAG 2.1 AA', nivel: 'UI (axe-core + Chromium)', titulo: 'Accesibilidad y diseño responsive de "Mi perfil" y del panel de administración', objetivo: 'Auditar con axe-core y revisar entre 360 y 1920 px las dos pantallas nuevas del Sprint 5.', datos: 'Usuario con una tarjeta guardada y administrador con una verificación hecha.', pasos: ['Abrir /perfil y /admin con cada rol.', 'Ejecutar axe-core (WCAG 2.0/2.1 A y AA).', 'Medir el desborde horizontal a 360, 390, 768, 1024, 1366 y 1920 px.'], esperado: 'Sin violaciones críticas ni graves y sin desborde horizontal en ningún ancho.' },
+  { ...base, id: 'NF-24', hu: 'US-27', ca: [7], grupo: 'Usabilidad y accesibilidad', rnf: 'RNF-05 · WCAG 2.1 AA', nivel: 'UI (axe-core + Chromium)', titulo: 'Accesibilidad y diseño responsive de "Mi perfil" y de las pantallas de administración', objetivo: 'Auditar con axe-core y revisar entre 360 y 1920 px las pantallas nuevas del Sprint 5: perfil, verificación de códigos, gestión de canchas y administración de reservas.', datos: 'Usuario con una tarjeta guardada y administrador con una verificación hecha.', pasos: ['Abrir /perfil y /admin con cada rol.', 'Ejecutar axe-core (WCAG 2.0/2.1 A y AA).', 'Medir el desborde horizontal a 360, 390, 768, 1024, 1366 y 1920 px.'], esperado: 'Sin violaciones críticas ni graves y sin desborde horizontal en ningún ancho.' },
   async (c) => {
     const usuario = await crearUsuario('nfa11y');
     await api('POST', `/usuarios/${usuario.id}/metodos-pago`, tarjetaNF(), usuario.token);
@@ -661,7 +670,7 @@ await S.caso(
     const jugada = (await api('POST', `/canchas/${K0.id}/reservas`, { fecha: fechaUnica(), horaInicio: '10:00', horaFin: '11:00' }, usuario.token)).datos.reserva;
     await api('POST', '/admin/reservas/verificar', { codigo: jugada.codigo }, admin.token);
     const browser = await chromium.launch();
-    const pantallas = [['Mi perfil', '/perfil', usuario, 'section.perfil-seccion'], ['Panel de administración', '/admin', admin, '#codigo-reserva']];
+    const pantallas = [['Mi perfil', '/perfil', usuario, 'section.perfil-seccion'], ['Panel de administración', '/admin', admin, '#codigo-reserva'], ['Gestión de canchas', '/admin/canchas', admin, '.lista-canchas-admin'], ['Administración de reservas', '/admin/reservas', admin, '.admin-filtros']];
     const anchos = [360, 390, 768, 1024, 1366, 1920];
     const filas = [['Pantalla', ...anchos.map((a) => `${a} px`)]];
     const resumen = [['Pantalla', 'Crítico', 'Grave', 'Moderado', 'Leve']];
@@ -692,7 +701,7 @@ await S.caso(
           res.violations.forEach((v) => detalles.push(`[${nombre}] ${v.impact?.toUpperCase()} · ${v.id}: ${v.help} (${v.nodes.length} elemento/s)  p. ej. ${v.nodes[0].target.join(' ')}`));
         }
         if (ancho === 360 || ancho === 1920) {
-          const archivo = `NF-24-${nombre.startsWith('Mi') ? 'perfil' : 'admin'}-${ancho}.jpg`;
+          const archivo = `NF-24-${nombre.replace(/[^a-z]/gi, '').toLowerCase()}-${ancho}.jpg`;
           await page.screenshot({ path: path.join(OUT, 'evidencias', archivo), type: 'jpeg', quality: 60 });
           c.adjuntar(archivo, `${nombre} a ${ancho} px de ancho`);
         }

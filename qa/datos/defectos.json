@@ -517,5 +517,110 @@
     "verifican": [
       "NF-24"
     ]
+  },
+  {
+    "id": "DEF-23",
+    "severidad": "Alta",
+    "estadoInicial": "Abierto",
+    "titulo": "US-15 (gestión de canchas) llegó a sprint_5 como código inutilizable: no incumplía un criterio, incumplía todos",
+    "hu": "US-15 · CA-1 a CA-6",
+    "casos": [
+      "F-15-01",
+      "F-15-02",
+      "F-15-03",
+      "F-15-04",
+      "F-15-05",
+      "F-15-06",
+      "E2E-31"
+    ],
+    "descripcion": "El módulo entregado (canchas.routes.js, canchas.controller.js y authAdmin.js) estaba escrito con ES Modules y Sequelize (`import { Op } from \"sequelize\"`, `models/index.js`), tecnologías que el backend no usa (CommonJS y `pg`), comprobaba un rol `ADMIN` que no existe (el rol real es `administrador`) y nunca se montó en el router. Ninguna de sus rutas respondía, no había pantalla de administración y la propia documentación lo reconocía como pendiente. Por tanto ninguno de los seis criterios de aceptación de US-15 se podía cumplir.",
+    "pasos": [
+      "Iniciar sesión como administrador.",
+      "Intentar crear una cancha con POST /api/admin/canchas o desde la interfaz."
+    ],
+    "esperado": "La cancha se crea, aparece en el catálogo y se puede editar, desactivar y reactivar (CA-1 a CA-6).",
+    "obtenido": "404: la ruta no existe y no hay interfaz de gestión; el módulo entregado ni siquiera arrancaría si se montara.",
+    "impacto": "Alto: la historia de usuario marcada como \"Listo\" en el tablero no tenía ninguna funcionalidad disponible.",
+    "recomendacion": "Implementar la gestión de canchas sobre la arquitectura real (rutas, servicio, repositorio y validadores con pg), con interfaz y pruebas, y retirar el módulo inutilizable.",
+    "correccion": "Se implementó US-15 completa: 6 endpoints en /api/admin/canchas (listar, consultar, crear, editar, desactivar con confirmación explícita y reactivar), validaciones por campo (precio > 0, cierre posterior a la apertura), pantalla /admin/canchas, bloqueo de nuevas reservas (409 CANCHA_NO_DISPONIBLE) y de su detalle público (404) en canchas desactivadas, documentación OpenAPI y manual. Se eliminó el módulo inutilizable. Cubierta por 14 pruebas del frontend, 32 del backend sin base de datos, 8 de integración con SQL real, 6 casos funcionales y un E2E.",
+    "verifican": [
+      "F-15-01",
+      "F-15-02",
+      "F-15-03",
+      "F-15-04",
+      "F-15-05",
+      "F-15-06",
+      "E2E-31"
+    ]
+  },
+  {
+    "id": "DEF-24",
+    "severidad": "Alta",
+    "estadoInicial": "Abierto",
+    "titulo": "Una reserva pagada con tarjeta que cancelaba un administrador no se reembolsaba",
+    "hu": "US-16 · CA-2 · US-28",
+    "casos": [
+      "F-16-05"
+    ],
+    "descripcion": "La cancelación propia (US-14) reembolsa el pago dentro de la misma transacción, pero la cancelación administrativa (US-16), desarrollada en paralelo, solo cambiaba el estado de la reserva. Si el administrador cancelaba una reserva ya pagada, el usuario perdía su dinero: el pago seguía \"aprobado\" aunque la reserva estuviera cancelada. El defecto apareció al unir ambas historias.",
+    "pasos": [
+      "El usuario guarda una tarjeta y reserva pagando con ella.",
+      "Un administrador cancela la reserva con un motivo.",
+      "Consultar la tabla pagos."
+    ],
+    "esperado": "El pago queda reembolsado.",
+    "obtenido": "El pago seguía aprobado.",
+    "impacto": "Alto: pérdida de dinero para el usuario en un imprevisto causado por el propio negocio.",
+    "recomendacion": "Reutilizar el mismo reembolso transaccional que la cancelación propia y que, si falla, la cancelación no se confirme.",
+    "correccion": "cancelarAdministrativamente recibe ahora una función que reembolsa en la misma transacción; si el reembolso falla, la cancelación se revierte y no se notifica. Cubierto por 2 pruebas unitarias, 2 de integración con SQL real y el caso F-16-05.",
+    "verifican": [
+      "F-16-05"
+    ]
+  },
+  {
+    "id": "DEF-25",
+    "severidad": "Media",
+    "estadoInicial": "Abierto",
+    "titulo": "En \"Administración de reservas\" la etiqueta accesible del botón de cancelar no contenía su texto visible",
+    "hu": "US-16 · WCAG 2.5.3",
+    "casos": [
+      "NF-24"
+    ],
+    "descripcion": "Cada botón mostraba \"Cancelar reserva\" pero su aria-label era \"Cancelar la reserva CY-XXXXXXXX\", que no contiene esa frase literal. Quien usa control por voz no puede activar el botón diciendo lo que ve. axe-core lo reportó como violación grave (label-content-name-mismatch) en los 16 botones de la lista.",
+    "pasos": [
+      "Abrir /admin/reservas con una cuenta de administrador.",
+      "Ejecutar axe-core (WCAG 2.1 AA)."
+    ],
+    "esperado": "Sin violaciones críticas ni graves.",
+    "obtenido": "16 elementos con label-content-name-mismatch.",
+    "impacto": "Medio: afecta a usuarios de tecnologías de apoyo en la pantalla de cancelación administrativa.",
+    "recomendacion": "Que la etiqueta accesible comience con el texto visible.",
+    "correccion": "La etiqueta pasó a \"Cancelar reserva CY-XXXXXXXX\", que contiene el texto visible y sigue identificando la reserva. Se actualizaron las pruebas que la buscaban.",
+    "verifican": [
+      "NF-24"
+    ]
+  },
+  {
+    "id": "DEF-26",
+    "severidad": "Baja",
+    "estadoInicial": "Abierto",
+    "titulo": "En \"Administración de reservas\" los correos largos desbordaban la pantalla a 360 px",
+    "hu": "US-16 · RNF-05",
+    "casos": [
+      "NF-24"
+    ],
+    "descripcion": "La línea \"Nombre (correo)\" de cada reserva no partía los correos largos, de modo que con direcciones de unos 40 caracteres el contenido superaba el ancho de la pantalla en 8 a 17 px y aparecía scroll horizontal en celulares.",
+    "pasos": [
+      "Abrir /admin/reservas a 360 px con reservas de usuarios con correos largos.",
+      "Medir el desborde horizontal."
+    ],
+    "esperado": "Sin scroll horizontal entre 360 y 1920 px (RNF-05).",
+    "obtenido": "El documento medía 377 px en una ventana de 360 px.",
+    "impacto": "Bajo: molestia de uso en celular solo para administradores.",
+    "recomendacion": "Permitir que el texto largo parta línea.",
+    "correccion": "Los datos de cada reserva ahora parten el texto largo (overflow-wrap) y respetan el ancho disponible. NF-24 confirma 0 px de desborde en los 6 anchos probados para las 4 pantallas de administración y perfil.",
+    "verifican": [
+      "NF-24"
+    ]
   }
 ]

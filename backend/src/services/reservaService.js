@@ -30,6 +30,11 @@ async function crearReserva({ canchaId, usuarioId, fecha, horaInicio, horaFin, m
     throw new ErrorDeAplicacion('Cancha no encontrada', 404);
   }
 
+  // US-15: una cancha desactivada no admite nuevas reservas (las que ya tenía se conservan).
+  if (!cancha.disponible) {
+    throw new ErrorDeAplicacion('Esta cancha no está disponible para reservas', 409, 'CANCHA_NO_DISPONIBLE');
+  }
+
   validarQueNoSeaPasado(fecha, horaInicio);
 
   if (horaFin <= horaInicio) {

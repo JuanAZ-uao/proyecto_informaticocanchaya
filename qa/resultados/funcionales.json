@@ -1,8 +1,8 @@
 {
   "clave": "funcionales",
   "titulo": "Pruebas funcionales (API REST y Socket.IO)",
-  "inicio": "2026-11-06T00:52:56.178Z",
-  "fin": "2026-11-06T01:10:29.301Z",
+  "inicio": "2026-11-11T18:40:47.675Z",
+  "fin": "2026-11-11T19:33:07.458Z",
   "casos": [
     {
       "tipo": "Funcional",
@@ -23,7 +23,7 @@
       ],
       "esperado": "201 Created con mensaje \"Cuenta creada correctamente\" y el usuario (id, nombre, correo) sin contraseña ni hash.",
       "estado": "APROBADA",
-      "duracionMs": 198,
+      "duracionMs": 282,
       "resultado": [
         {
           "ok": true,
@@ -43,7 +43,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:52:57.087Z"
+      "ejecutadaEn": "2026-11-11T18:40:48.624Z"
     },
     {
       "tipo": "Funcional",
@@ -65,7 +65,7 @@
       ],
       "esperado": "409 Conflict con el mensaje \"El correo ya está registrado\"; solo existe 1 fila con ese correo.",
       "estado": "APROBADA",
-      "duracionMs": 925,
+      "duracionMs": 693,
       "resultado": [
         {
           "ok": true,
@@ -81,7 +81,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:52:58.014Z"
+      "ejecutadaEn": "2026-11-11T18:40:49.318Z"
     },
     {
       "tipo": "Funcional",
@@ -103,7 +103,7 @@
       ],
       "esperado": "Cada intento responde 400 con \"Error de validación\" y la lista de campos con su mensaje; no se crea ningún usuario.",
       "estado": "APROBADA",
-      "duracionMs": 411,
+      "duracionMs": 276,
       "resultado": [
         {
           "ok": true,
@@ -127,7 +127,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:52:58.426Z"
+      "ejecutadaEn": "2026-11-11T18:40:49.595Z"
     },
     {
       "tipo": "Funcional",
@@ -147,7 +147,7 @@
       ],
       "esperado": "El valor es un hash bcrypt ($2a/$2b, 60 caracteres) distinto de la contraseña ingresada.",
       "estado": "APROBADA",
-      "duracionMs": 506,
+      "duracionMs": 508,
       "resultado": [
         {
           "ok": true,
@@ -159,7 +159,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:52:58.933Z"
+      "ejecutadaEn": "2026-11-11T18:40:50.103Z"
     },
     {
       "tipo": "Funcional",
@@ -179,7 +179,7 @@
       ],
       "esperado": "200 con token JWT (sub = id del usuario, con expiración) y usuario {id, nombre, correo}.",
       "estado": "APROBADA",
-      "duracionMs": 97,
+      "duracionMs": 90,
       "resultado": [
         {
           "ok": true,
@@ -195,7 +195,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:52:59.030Z"
+      "ejecutadaEn": "2026-11-11T18:40:50.195Z"
     },
     {
       "tipo": "Funcional",
@@ -216,7 +216,7 @@
       ],
       "esperado": "Ambas responden 401 con exactamente el mismo mensaje \"Correo o contraseña incorrectos\".",
       "estado": "APROBADA",
-      "duracionMs": 104,
+      "duracionMs": 101,
       "resultado": [
         {
           "ok": true,
@@ -232,7 +232,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:52:59.134Z"
+      "ejecutadaEn": "2026-11-11T18:40:50.297Z"
     },
     {
       "tipo": "Funcional",
@@ -255,7 +255,7 @@
       ],
       "esperado": "200 con token válido; 401 en los otros tres casos, con mensaje claro.",
       "estado": "APROBADA",
-      "duracionMs": 16,
+      "duracionMs": 17,
       "resultado": [
         {
           "ok": true,
@@ -275,7 +275,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:52:59.151Z"
+      "ejecutadaEn": "2026-11-11T18:40:50.314Z"
     },
     {
       "tipo": "Funcional",
@@ -299,7 +299,7 @@
       ],
       "esperado": "200 con el mismo mensaje neutro en ambos casos; solo el correo registrado genera un enlace con token en el log.",
       "estado": "APROBADA",
-      "duracionMs": 1902,
+      "duracionMs": 1886,
       "resultado": [
         {
           "ok": true,
@@ -327,7 +327,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:01.054Z"
+      "ejecutadaEn": "2026-11-11T18:40:52.201Z"
     },
     {
       "tipo": "Funcional",
@@ -352,7 +352,7 @@
       ],
       "esperado": "400 con la contraseña débil; 200 con la válida; login OK solo con la nueva; 400 al reutilizar el enlace y con un token inventado.",
       "estado": "APROBADA",
-      "duracionMs": 1330,
+      "duracionMs": 1305,
       "resultado": [
         {
           "ok": true,
@@ -384,7 +384,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:02.384Z"
+      "ejecutadaEn": "2026-11-11T18:40:53.507Z"
     },
     {
       "tipo": "Funcional",
@@ -406,7 +406,7 @@
       ],
       "esperado": "El primer token se rechaza (400); el segundo, ya vencido, también se rechaza (400).",
       "estado": "APROBADA",
-      "duracionMs": 1884,
+      "duracionMs": 1872,
       "resultado": [
         {
           "ok": true,
@@ -422,7 +422,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:04.269Z"
+      "ejecutadaEn": "2026-11-11T18:40:55.380Z"
     },
     {
       "tipo": "Funcional",
@@ -458,7 +458,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:04.274Z"
+      "ejecutadaEn": "2026-11-11T18:40:55.385Z"
     },
     {
       "tipo": "Funcional",
@@ -485,7 +485,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:04.276Z"
+      "ejecutadaEn": "2026-11-11T18:40:55.388Z"
     },
     {
       "tipo": "Funcional",
@@ -505,7 +505,7 @@
       ],
       "esperado": "200 con nombre, dirección, zona, costo, descripción, servicios y horarios por día (diaSemana 0-6, horaInicio < horaFin).",
       "estado": "APROBADA",
-      "duracionMs": 8,
+      "duracionMs": 6,
       "resultado": [
         {
           "ok": true,
@@ -525,7 +525,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:04.285Z"
+      "ejecutadaEn": "2026-11-11T18:40:55.394Z"
     },
     {
       "tipo": "Funcional",
@@ -547,7 +547,7 @@
       ],
       "esperado": "401, 400 y 404 respectivamente, con mensajes claros.",
       "estado": "APROBADA",
-      "duracionMs": 7,
+      "duracionMs": 8,
       "resultado": [
         {
           "ok": true,
@@ -563,7 +563,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:04.293Z"
+      "ejecutadaEn": "2026-11-11T18:40:55.402Z"
     },
     {
       "tipo": "Funcional",
@@ -588,7 +588,7 @@
       ],
       "esperado": "Cada filtro devuelve solo las canchas que lo cumplen; sin coincidencias → 200 con lista vacía.",
       "estado": "APROBADA",
-      "duracionMs": 27,
+      "duracionMs": 25,
       "resultado": [
         {
           "ok": true,
@@ -612,7 +612,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:04.321Z"
+      "ejecutadaEn": "2026-11-11T18:40:55.427Z"
     },
     {
       "tipo": "Funcional",
@@ -634,7 +634,7 @@
       ],
       "esperado": "Cada petición responde 400 con el campo y el motivo.",
       "estado": "APROBADA",
-      "duracionMs": 11,
+      "duracionMs": 10,
       "resultado": [
         {
           "ok": true,
@@ -654,7 +654,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:04.333Z"
+      "ejecutadaEn": "2026-11-11T18:40:55.437Z"
     },
     {
       "tipo": "Funcional",
@@ -684,7 +684,7 @@
       ],
       "esperado": "La cancha sin horario ese día no aparece; las demás sí.",
       "estado": "APROBADA",
-      "duracionMs": 912,
+      "duracionMs": 916,
       "resultado": [
         {
           "ok": true,
@@ -704,7 +704,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:05.246Z"
+      "ejecutadaEn": "2026-11-11T18:40:56.356Z"
     },
     {
       "tipo": "Funcional",
@@ -726,7 +726,7 @@
       ],
       "esperado": "Antes: lista vacía. Después: la franja 10:00–11:00 aparece como ocupada. Otra fecha: sigue vacía.",
       "estado": "APROBADA",
-      "duracionMs": 69,
+      "duracionMs": 61,
       "resultado": [
         {
           "ok": true,
@@ -746,7 +746,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:05.316Z"
+      "ejecutadaEn": "2026-11-11T18:40:56.418Z"
     },
     {
       "tipo": "Funcional",
@@ -766,7 +766,7 @@
       ],
       "esperado": "409 Conflict con el mensaje \"El horario ya no está disponible\"; no se crea una segunda reserva.",
       "estado": "APROBADA",
-      "duracionMs": 381,
+      "duracionMs": 354,
       "resultado": [
         {
           "ok": true,
@@ -786,7 +786,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:05.698Z"
+      "ejecutadaEn": "2026-11-11T18:40:56.772Z"
     },
     {
       "tipo": "Funcional",
@@ -817,7 +817,7 @@
       ],
       "esperado": "Cancelar responde 200 con estado \"cancelada\"; la franja deja de aparecer ocupada; B obtiene 201; en la base quedan 1 cancelada y 1 confirmada.",
       "estado": "APROBADA",
-      "duracionMs": 454,
+      "duracionMs": 428,
       "resultado": [
         {
           "ok": true,
@@ -837,7 +837,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:06.153Z"
+      "ejecutadaEn": "2026-11-11T18:40:57.201Z"
     },
     {
       "tipo": "Funcional",
@@ -858,7 +858,7 @@
       ],
       "esperado": "Las tres peticiones responden 400 con \"No se pueden reservar fechas u horas pasadas\".",
       "estado": "APROBADA",
-      "duracionMs": 300,
+      "duracionMs": 357,
       "resultado": [
         {
           "ok": true,
@@ -878,7 +878,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:06.454Z"
+      "ejecutadaEn": "2026-11-11T18:40:57.559Z"
     },
     {
       "tipo": "Funcional",
@@ -909,7 +909,7 @@
       ],
       "esperado": "401 en todos los casos.",
       "estado": "APROBADA",
-      "duracionMs": 52,
+      "duracionMs": 61,
       "resultado": [
         {
           "ok": true,
@@ -929,7 +929,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:06.507Z"
+      "ejecutadaEn": "2026-11-11T18:40:57.621Z"
     },
     {
       "tipo": "Funcional",
@@ -952,7 +952,7 @@
       ],
       "esperado": "400 con el detalle del campo en cada caso de datos; 404 \"Cancha no encontrada\" para el UUID inexistente.",
       "estado": "APROBADA",
-      "duracionMs": 34,
+      "duracionMs": 29,
       "resultado": [
         {
           "ok": true,
@@ -992,7 +992,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:06.542Z"
+      "ejecutadaEn": "2026-11-11T18:40:57.651Z"
     },
     {
       "tipo": "Funcional",
@@ -1013,7 +1013,7 @@
       ],
       "esperado": "El backend debe rechazarla (400 o 409) porque la cancha no atiende a esa hora.",
       "estado": "APROBADA",
-      "duracionMs": 320,
+      "duracionMs": 303,
       "resultado": [
         {
           "ok": null,
@@ -1033,7 +1033,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:06.863Z"
+      "ejecutadaEn": "2026-11-11T18:40:57.955Z"
     },
     {
       "tipo": "Funcional",
@@ -1066,7 +1066,7 @@
       ],
       "esperado": "Los dos intentos por la API se rechazan (400 o 409); el INSERT directo falla por la restricción de exclusión (ex_reservas_sin_solape); queda una sola reserva.",
       "estado": "APROBADA",
-      "duracionMs": 636,
+      "duracionMs": 609,
       "resultado": [
         {
           "ok": true,
@@ -1090,7 +1090,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:07.500Z"
+      "ejecutadaEn": "2026-11-11T18:40:58.565Z"
     },
     {
       "tipo": "Funcional",
@@ -1112,7 +1112,7 @@
       ],
       "esperado": "403 al cancelar una reserva ajena; 404 si no existe; 400 con id mal formado; 409 al cancelar una ya cancelada.",
       "estado": "APROBADA",
-      "duracionMs": 325,
+      "duracionMs": 377,
       "resultado": [
         {
           "ok": true,
@@ -1140,7 +1140,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:07.826Z"
+      "ejecutadaEn": "2026-11-11T18:40:58.943Z"
     },
     {
       "tipo": "Funcional",
@@ -1161,7 +1161,7 @@
       ],
       "esperado": "El INSERT confirmado falla con \"unique constraint uq_reservas_confirmada_cancha_fecha_hora\"; el INSERT cancelado sí se permite (índice parcial).",
       "estado": "APROBADA",
-      "duracionMs": 909,
+      "duracionMs": 940,
       "resultado": [
         {
           "ok": true,
@@ -1178,7 +1178,7 @@
           "texto": "CREATE UNIQUE INDEX uq_reservas_confirmada_cancha_fecha_hora ON public.reservas USING btree (cancha_id, fecha, hora_inicio) WHERE (estado = 'confirmada'::text)"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:53:08.736Z"
+      "ejecutadaEn": "2026-11-11T18:40:59.884Z"
     },
     {
       "tipo": "Funcional",
@@ -1200,7 +1200,7 @@
       ],
       "esperado": "Un 201 y un 409 con \"El horario ya no está disponible\", sin textos técnicos; una sola fila en la base. Se repite 5 veces con franjas distintas.",
       "estado": "APROBADA",
-      "duracionMs": 1640,
+      "duracionMs": 1649,
       "resultado": [
         {
           "ok": true,
@@ -1220,7 +1220,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:10.377Z"
+      "ejecutadaEn": "2026-11-11T18:41:01.535Z"
     },
     {
       "tipo": "Funcional",
@@ -1249,7 +1249,7 @@
       ],
       "esperado": "Una sola reserva creada (201); los demás envíos responden 409; una sola fila en la base.",
       "estado": "APROBADA",
-      "duracionMs": 366,
+      "duracionMs": 319,
       "resultado": [
         {
           "ok": true,
@@ -1265,7 +1265,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:10.744Z"
+      "ejecutadaEn": "2026-11-11T18:41:01.855Z"
     },
     {
       "tipo": "Funcional",
@@ -1288,7 +1288,7 @@
       ],
       "esperado": "Exactamente 1 respuesta 201 y 24 respuestas 409; 1 sola fila para la franja y ninguna fila parcial.",
       "estado": "APROBADA",
-      "duracionMs": 5774,
+      "duracionMs": 6009,
       "resultado": [
         {
           "ok": true,
@@ -1312,7 +1312,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:16.519Z"
+      "ejecutadaEn": "2026-11-11T18:41:07.864Z"
     },
     {
       "tipo": "Funcional",
@@ -1333,7 +1333,7 @@
       ],
       "esperado": "El total de filas crece solo en 1 (la reserva ganadora).",
       "estado": "APROBADA",
-      "duracionMs": 953,
+      "duracionMs": 925,
       "resultado": [
         {
           "ok": true,
@@ -1345,7 +1345,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:17.473Z"
+      "ejecutadaEn": "2026-11-11T18:41:08.790Z"
     },
     {
       "tipo": "Funcional",
@@ -1365,7 +1365,7 @@
       ],
       "esperado": "La reserva queda asociada al usuario del token; el usuarioId del cuerpo se ignora.",
       "estado": "APROBADA",
-      "duracionMs": 327,
+      "duracionMs": 351,
       "resultado": [
         {
           "ok": true,
@@ -1381,7 +1381,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:17.802Z"
+      "ejecutadaEn": "2026-11-11T18:41:09.142Z"
     },
     {
       "tipo": "Funcional",
@@ -1402,7 +1402,7 @@
       ],
       "esperado": "201 con reserva {id, codigo CY-XXXXXXXX, cancha{id,nombre,direccion}, fecha, horaInicio, horaFin, estado \"confirmada\"}; en la base estado = confirmada.",
       "estado": "APROBADA",
-      "duracionMs": 302,
+      "duracionMs": 304,
       "resultado": [
         {
           "ok": true,
@@ -1410,7 +1410,7 @@
         },
         {
           "ok": true,
-          "texto": "Incluye identificador (UUID) y código legible CY-XXXXXXXX → abb11d63… / CY-ABB11D63"
+          "texto": "Incluye identificador (UUID) y código legible CY-XXXXXXXX → 5bf5ca7a… / CY-5BF5CA7A"
         },
         {
           "ok": true,
@@ -1418,7 +1418,7 @@
         },
         {
           "ok": true,
-          "texto": "Incluye fecha y hora → 2103-10-02 10:00:00–11:00:00"
+          "texto": "Incluye fecha y hora → 2100-07-29 10:00:00–11:00:00"
         },
         {
           "ok": true,
@@ -1430,7 +1430,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:18.105Z"
+      "ejecutadaEn": "2026-11-11T18:41:09.447Z"
     },
     {
       "tipo": "Funcional",
@@ -1450,7 +1450,7 @@
       ],
       "esperado": "Ninguna respuesta de error incluye \"reserva\"; todas traen \"mensaje\" claro sin detalles técnicos.",
       "estado": "APROBADA",
-      "duracionMs": 38,
+      "duracionMs": 32,
       "resultado": [
         {
           "ok": true,
@@ -1470,7 +1470,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:18.144Z"
+      "ejecutadaEn": "2026-11-11T18:41:09.480Z"
     },
     {
       "tipo": "Funcional",
@@ -1490,23 +1490,23 @@
       ],
       "esperado": "Todas las confirmaciones responden en menos de 2000 ms (objetivo del criterio); p95 por debajo de 1000 ms.",
       "estado": "APROBADA",
-      "duracionMs": 707,
+      "duracionMs": 786,
       "resultado": [
         {
           "ok": true,
-          "texto": "El máximo es menor a 2000 ms → 59 ms"
+          "texto": "El máximo es menor a 2000 ms → 110 ms"
         },
         {
           "ok": true,
-          "texto": "El p95 es menor a 1000 ms → 59 ms"
+          "texto": "El p95 es menor a 1000 ms → 110 ms"
         },
         {
           "ok": null,
-          "texto": "15 confirmaciones · promedio 33 ms · mediana 33 ms · mínimo 17 ms · máximo 59 ms"
+          "texto": "15 confirmaciones · promedio 39 ms · mediana 33 ms · mínimo 15 ms · máximo 110 ms"
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:18.853Z"
+      "ejecutadaEn": "2026-11-11T18:41:10.267Z"
     },
     {
       "tipo": "Funcional",
@@ -1528,7 +1528,7 @@
       ],
       "esperado": "A ve ambas, ordenadas de la más reciente a la más antigua, con código, cancha, fecha, hora y estado; B ve lista vacía; la cancelada aparece como \"cancelada\".",
       "estado": "APROBADA",
-      "duracionMs": 485,
+      "duracionMs": 539,
       "resultado": [
         {
           "ok": true,
@@ -1540,7 +1540,7 @@
         },
         {
           "ok": true,
-          "texto": "Cada ítem trae código, cancha y estado \"confirmada\" → CY-B6730318 · Cancha El Bosque"
+          "texto": "Cada ítem trae código, cancha y estado \"confirmada\" → CY-C5E8B0FA · Cancha El Bosque"
         },
         {
           "ok": true,
@@ -1552,7 +1552,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:19.339Z"
+      "ejecutadaEn": "2026-11-11T18:41:10.807Z"
     },
     {
       "tipo": "Funcional",
@@ -1575,7 +1575,7 @@
       "esperado": "Aparece \"[EMAIL] … Confirmación de reserva\" con el mismo resumen. (El caso de fallo del correo se verifica con la prueba unitaria \"si el correo falla, la reserva igual queda confirmada\".)",
       "notaQA": "No se probó el envío contra un servidor SMTP real porque no hay credenciales configuradas; solo el modo simulado y la prueba unitaria del fallo.",
       "estado": "OBSERVACIÓN",
-      "duracionMs": 1355,
+      "duracionMs": 1277,
       "resultado": [
         {
           "ok": true,
@@ -1583,7 +1583,7 @@
         },
         {
           "ok": true,
-          "texto": "El log contiene el correo de confirmación de esa reserva → [EMAIL] SMTP no configurado. Confirmación de reserva (modo desarrollo) para mail.1793926399341.39@qa.local: CY-B9B1B87D · Cancha Los Cerros · 2100-06-13 13:00 - 14:00"
+          "texto": "El log contiene el correo de confirmación de esa reserva → [EMAIL] SMTP no configurado. Confirmación de reserva (modo desarrollo) para mail.1794422470808.39@qa.local: CY-47B7848E · Cancha Los Cerros · 2101-09-15 13:00 - 14:00"
         },
         {
           "ok": true,
@@ -1595,7 +1595,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:20.695Z"
+      "ejecutadaEn": "2026-11-11T18:41:12.085Z"
     },
     {
       "tipo": "Funcional",
@@ -1626,7 +1626,7 @@
       ],
       "esperado": "Después de confirmar no llegan más eventos temporizador:sync y la sesión queda en estado \"completado\".",
       "estado": "APROBADA",
-      "duracionMs": 13098,
+      "duracionMs": 13129,
       "resultado": [
         {
           "ok": true,
@@ -1650,7 +1650,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:33.794Z"
+      "ejecutadaEn": "2026-11-11T18:41:25.216Z"
     },
     {
       "tipo": "Funcional",
@@ -1673,7 +1673,7 @@
       ],
       "esperado": "Las 4 primeras conexiones fallan con \"No autenticado\" o \"Token inválido o expirado\"; la última se acepta.",
       "estado": "APROBADA",
-      "duracionMs": 58,
+      "duracionMs": 42,
       "resultado": [
         {
           "ok": true,
@@ -1697,7 +1697,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:33.853Z"
+      "ejecutadaEn": "2026-11-11T18:41:25.258Z"
     },
     {
       "tipo": "Funcional",
@@ -1719,7 +1719,7 @@
       ],
       "esperado": "temporizador:inicio con expiresAt ≈ ahora + 180 s y estado \"activo\". Sin canchaId: evento temporizador:error y desconexión.",
       "estado": "APROBADA",
-      "duracionMs": 859,
+      "duracionMs": 904,
       "resultado": [
         {
           "ok": true,
@@ -1727,7 +1727,7 @@
         },
         {
           "ok": true,
-          "texto": "expiresAt corresponde a 180 s desde el inicio → 180.0 s restantes (14 ms tras conectar)"
+          "texto": "expiresAt corresponde a 180 s desde el inicio → 180.0 s restantes (44 ms tras conectar)"
         },
         {
           "ok": true,
@@ -1743,7 +1743,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:34.713Z"
+      "ejecutadaEn": "2026-11-11T18:41:26.163Z"
     },
     {
       "tipo": "Funcional",
@@ -1763,7 +1763,7 @@
       ],
       "esperado": "Al menos 3 eventos separados por 5 s (±0,5 s), todos con el mismo expiresAt del inicio.",
       "estado": "APROBADA",
-      "duracionMs": 17235,
+      "duracionMs": 17282,
       "resultado": [
         {
           "ok": true,
@@ -1779,7 +1779,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:51.949Z"
+      "ejecutadaEn": "2026-11-11T18:41:43.451Z"
     },
     {
       "tipo": "Funcional",
@@ -1802,7 +1802,7 @@
       ],
       "esperado": "200 {estado:\"completado\"}; no llegan más temporizador:sync; la sesión queda \"completado\" en la base; el reingreso también responde 200.",
       "estado": "APROBADA",
-      "duracionMs": 7748,
+      "duracionMs": 7639,
       "resultado": [
         {
           "ok": true,
@@ -1822,7 +1822,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:59.699Z"
+      "ejecutadaEn": "2026-11-11T18:41:51.092Z"
     },
     {
       "tipo": "Funcional",
@@ -1841,7 +1841,7 @@
       ],
       "esperado": "409 con \"Tu tiempo para reservar expiró…\" y código SESION_EXPIRADA.",
       "estado": "APROBADA",
-      "duracionMs": 202,
+      "duracionMs": 210,
       "resultado": [
         {
           "ok": true,
@@ -1853,7 +1853,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:53:59.902Z"
+      "ejecutadaEn": "2026-11-11T18:41:51.304Z"
     },
     {
       "tipo": "Funcional",
@@ -1875,11 +1875,11 @@
       ],
       "esperado": "Las dos primeras comparten el mismo expiresAt; la de otra cancha tiene uno distinto; hay 2 filas de sesión.",
       "estado": "APROBADA",
-      "duracionMs": 3556,
+      "duracionMs": 3634,
       "resultado": [
         {
           "ok": true,
-          "texto": "La segunda pestaña recibe el mismo expiresAt → 1793926620116 = 1793926620116"
+          "texto": "La segunda pestaña recibe el mismo expiresAt → 1794422691506 = 1794422691506"
         },
         {
           "ok": true,
@@ -1891,7 +1891,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:54:03.459Z"
+      "ejecutadaEn": "2026-11-11T18:41:54.939Z"
     },
     {
       "tipo": "Funcional",
@@ -1913,7 +1913,7 @@
       ],
       "esperado": "Con una pestaña abierta la sesión sigue; al cerrar la última, durante los primeros segundos aún existe (gracia) y pasados ~10 s se elimina de la base; al volver a entrar se crea una sesión nueva de 180 s.",
       "estado": "APROBADA",
-      "duracionMs": 14506,
+      "duracionMs": 14670,
       "resultado": [
         {
           "ok": true,
@@ -1937,7 +1937,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:54:17.966Z"
+      "ejecutadaEn": "2026-11-11T18:42:09.610Z"
     },
     {
       "tipo": "Funcional",
@@ -1961,11 +1961,11 @@
       ],
       "esperado": "El expiresAt recibido al reconectar es el mismo que antes del corte (se recupera el tiempo restante).",
       "estado": "APROBADA",
-      "duracionMs": 13558,
+      "duracionMs": 13632,
       "resultado": [
         {
           "ok": true,
-          "texto": "Al reconectar se recupera el mismo expiresAt → antes 00:57:18.181 · después 00:57:18.181 (diferencia 0.0 s)"
+          "texto": "Al reconectar se recupera el mismo expiresAt → antes 18:45:09.839 · después 18:45:09.839 (diferencia 0.0 s)"
         },
         {
           "ok": true,
@@ -1973,7 +1973,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:54:31.525Z"
+      "ejecutadaEn": "2026-11-11T18:42:23.243Z"
     },
     {
       "tipo": "Funcional",
@@ -1995,15 +1995,15 @@
       ],
       "esperado": "Ambos eventos traen \"ahora\" (milisegundos) con una diferencia menor a 2 s respecto de la hora actual del equipo de pruebas.",
       "estado": "APROBADA",
-      "duracionMs": 5267,
+      "duracionMs": 5263,
       "resultado": [
         {
           "ok": true,
-          "texto": "temporizador:inicio incluye \"ahora\" → diferencia 0 ms"
+          "texto": "temporizador:inicio incluye \"ahora\" → diferencia -4 ms"
         },
         {
           "ok": true,
-          "texto": "temporizador:sync incluye \"ahora\" → diferencia 0 ms"
+          "texto": "temporizador:sync incluye \"ahora\" → diferencia -5 ms"
         },
         {
           "ok": true,
@@ -2011,7 +2011,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:54:36.793Z"
+      "ejecutadaEn": "2026-11-11T18:42:28.507Z"
     },
     {
       "tipo": "Funcional",
@@ -2032,11 +2032,11 @@
       ],
       "esperado": "El ack trae un nuevo expiresAt (≈ +180 s desde el reinicio) y ambas pestañas reciben temporizador:inicio con ese valor.",
       "estado": "APROBADA",
-      "duracionMs": 4765,
+      "duracionMs": 4587,
       "resultado": [
         {
           "ok": true,
-          "texto": "El ack trae un expiresAt posterior al original → +4.1 s"
+          "texto": "El ack trae un expiresAt posterior al original → +4.0 s"
         },
         {
           "ok": true,
@@ -2048,7 +2048,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:54:41.560Z"
+      "ejecutadaEn": "2026-11-11T18:42:33.095Z"
     },
     {
       "tipo": "Funcional",
@@ -2071,11 +2071,11 @@
       ],
       "esperado": "A recibe ack {ok:true} y retencion:confirmada con expiresAt = vencimiento de su sesión. B recibe disponibilidad:retenida con la franja (sin identificar a A). A no recibe disponibilidad:retenida de su propia retención. Hay 1 fila en retenciones.",
       "estado": "APROBADA",
-      "duracionMs": 893,
+      "duracionMs": 852,
       "resultado": [
         {
           "ok": true,
-          "texto": "A recibe el ack {ok:true} con la retención → {\"ok\":true,\"retencion\":{\"fecha\":\"2100-05-31\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\",\"expiresAt\":1793926661981}}"
+          "texto": "A recibe el ack {ok:true} con la retención → {\"ok\":true,\"retencion\":{\"fecha\":\"2101-11-14\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\",\"expiresAt\":1794422733504}}"
         },
         {
           "ok": true,
@@ -2087,11 +2087,11 @@
         },
         {
           "ok": true,
-          "texto": "B recibe disponibilidad:retenida sin recargar → 1 ms después"
+          "texto": "B recibe disponibilidad:retenida sin recargar → 0 ms después"
         },
         {
           "ok": true,
-          "texto": "El aviso solo trae la franja: no revela quién la retiene → {\"canchaId\":\"37267023-52da-4f50-8369-9f1ac411bb58\",\"fecha\":\"2100-05-31\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\"}"
+          "texto": "El aviso solo trae la franja: no revela quién la retiene → {\"canchaId\":\"a357afc4-4b5f-4b15-8af2-6fac06ae2d92\",\"fecha\":\"2101-11-14\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\"}"
         },
         {
           "ok": true,
@@ -2103,7 +2103,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:54:42.454Z"
+      "ejecutadaEn": "2026-11-11T18:42:33.949Z"
     },
     {
       "tipo": "Funcional",
@@ -2126,7 +2126,7 @@
       ],
       "esperado": "B recibe {ok:false, error:{codigo:\"FRANJA_RETENIDA\", mensaje}}; con otra franja sí puede; en la base la franja tiene un único dueño.",
       "estado": "APROBADA",
-      "duracionMs": 782,
+      "duracionMs": 1195,
       "resultado": [
         {
           "ok": true,
@@ -2146,7 +2146,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:54:43.238Z"
+      "ejecutadaEn": "2026-11-11T18:42:35.145Z"
     },
     {
       "tipo": "Funcional",
@@ -2169,7 +2169,7 @@
       ],
       "esperado": "B recibe disponibilidad:liberada (10:00) y disponibilidad:retenida (11:00); A conserva una sola fila en la base (11:00).",
       "estado": "APROBADA",
-      "duracionMs": 1598,
+      "duracionMs": 1665,
       "resultado": [
         {
           "ok": true,
@@ -2193,7 +2193,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:54:44.837Z"
+      "ejecutadaEn": "2026-11-11T18:42:36.814Z"
     },
     {
       "tipo": "Funcional",
@@ -2214,7 +2214,7 @@
       ],
       "esperado": "Con retencion:liberar B recibe disponibilidad:liberada de inmediato; al salir de la cancha la recibe tras el lapso de gracia (≈ 10 s); en ambos casos la fila desaparece de retenciones.",
       "estado": "APROBADA",
-      "duracionMs": 11320,
+      "duracionMs": 11505,
       "resultado": [
         {
           "ok": true,
@@ -2238,7 +2238,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:54:56.160Z"
+      "ejecutadaEn": "2026-11-11T18:42:48.323Z"
     },
     {
       "tipo": "Funcional",
@@ -2273,7 +2273,7 @@
       ],
       "esperado": "B recibe disponibilidad:reservada (no liberada); la fila de retenciones desaparece; reservas tiene 1 fila \"confirmada\"; B recibe 409.",
       "estado": "APROBADA",
-      "duracionMs": 1561,
+      "duracionMs": 1829,
       "resultado": [
         {
           "ok": true,
@@ -2313,7 +2313,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:54:57.722Z"
+      "ejecutadaEn": "2026-11-11T18:42:50.154Z"
     },
     {
       "tipo": "Funcional",
@@ -2344,7 +2344,7 @@
       ],
       "esperado": "B recibe 409 FRANJA_RETENIDA en ambos; no se crea reserva; /disponibilidad de B incluye la franja en \"retenidos\", la de A no.",
       "estado": "APROBADA",
-      "duracionMs": 1312,
+      "duracionMs": 882,
       "resultado": [
         {
           "ok": true,
@@ -2360,7 +2360,7 @@
         },
         {
           "ok": true,
-          "texto": "La disponibilidad de B lista la franja como retenida → [{\"canchaId\":\"7900a13c-3ce3-42c9-b87c-e40a7423d3af\",\"fecha\":\"2100-12-22\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\"}]"
+          "texto": "La disponibilidad de B lista la franja como retenida → [{\"canchaId\":\"a357afc4-4b5f-4b15-8af2-6fac06ae2d92\",\"fecha\":\"2103-06-18\",\"horaInicio\":\"10:00\",\"horaFin\":\"11:00\"}]"
         },
         {
           "ok": true,
@@ -2372,7 +2372,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T01:10:29.301Z"
+      "ejecutadaEn": "2026-11-11T18:42:51.038Z"
     },
     {
       "tipo": "Funcional",
@@ -2393,7 +2393,7 @@
       ],
       "esperado": "B recibe disponibilidad:reservada al confirmar y disponibilidad:liberada al cancelar.",
       "estado": "APROBADA",
-      "duracionMs": 524,
+      "duracionMs": 559,
       "resultado": [
         {
           "ok": true,
@@ -2405,7 +2405,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:54:58.992Z"
+      "ejecutadaEn": "2026-11-11T18:42:51.599Z"
     },
     {
       "tipo": "Funcional",
@@ -2427,7 +2427,7 @@
       ],
       "esperado": "Respuestas {ok:false, error:{codigo}}: DATOS_INVALIDOS, DATOS_INVALIDOS, HORA_PASADA y FRANJA_OCUPADA.",
       "estado": "APROBADA",
-      "duracionMs": 241,
+      "duracionMs": 376,
       "resultado": [
         {
           "ok": true,
@@ -2447,7 +2447,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:54:59.234Z"
+      "ejecutadaEn": "2026-11-11T18:42:51.977Z"
     },
     {
       "tipo": "Funcional",
@@ -2469,7 +2469,7 @@
       ],
       "esperado": "1 respuesta ok y 9 con FRANJA_RETENIDA; 1 fila en retenciones; los 9 perdedores reciben exactamente un aviso disponibilidad:retenida.",
       "estado": "APROBADA",
-      "duracionMs": 3222,
+      "duracionMs": 3439,
       "resultado": [
         {
           "ok": true,
@@ -2485,7 +2485,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:55:02.458Z"
+      "ejecutadaEn": "2026-11-11T18:42:55.418Z"
     },
     {
       "tipo": "Funcional",
@@ -2505,7 +2505,7 @@
       ],
       "esperado": "Todos los eventos (temporizador:*, retencion:*, disponibilidad:*) y códigos de error están documentados, con payload.",
       "estado": "APROBADA",
-      "duracionMs": 12,
+      "duracionMs": 2,
       "resultado": [
         {
           "ok": true,
@@ -2525,7 +2525,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:55:02.479Z"
+      "ejecutadaEn": "2026-11-11T18:42:55.421Z"
     },
     {
       "tipo": "Funcional",
@@ -2576,7 +2576,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:55:59.152Z"
+      "ejecutadaEn": "2026-11-11T18:43:49.760Z"
     },
     {
       "tipo": "Funcional",
@@ -2601,7 +2601,7 @@
       "resultado": [
         {
           "ok": true,
-          "texto": "B recibió disponibilidad:liberada de la franja de A → -0.01 s después del vencimiento"
+          "texto": "B recibió disponibilidad:liberada de la franja de A → 0.03 s después del vencimiento"
         },
         {
           "ok": true,
@@ -2609,7 +2609,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:55:59.153Z"
+      "ejecutadaEn": "2026-11-11T18:43:49.761Z"
     },
     {
       "tipo": "Funcional",
@@ -2641,7 +2641,7 @@
       ],
       "esperado": "Sesión y retención siguen en la base; A recibe el MISMO expiresAt al reconectar; la franja sigue retenida para B (FRANJA_RETENIDA); el temporizador sigue sincronizando y A puede continuar.",
       "estado": "APROBADA",
-      "duracionMs": 11430,
+      "duracionMs": 11408,
       "resultado": [
         {
           "ok": true,
@@ -2653,7 +2653,7 @@
         },
         {
           "ok": true,
-          "texto": "El backend vuelve a responder tras el reinicio → 5.7 s"
+          "texto": "El backend vuelve a responder tras el reinicio → 5.4 s"
         },
         {
           "ok": true,
@@ -2685,7 +2685,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:10.585Z"
+      "ejecutadaEn": "2026-11-11T18:44:01.171Z"
     },
     {
       "tipo": "Funcional",
@@ -2707,7 +2707,7 @@
       ],
       "esperado": "Las 3 reservas responden 201; las 3 aparecen como \"confirmada\" en ambos listados; en la base hay 3 filas confirmadas del usuario.",
       "estado": "APROBADA",
-      "duracionMs": 692,
+      "duracionMs": 752,
       "resultado": [
         {
           "ok": true,
@@ -2727,7 +2727,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:11.279Z"
+      "ejecutadaEn": "2026-11-11T18:44:01.924Z"
     },
     {
       "tipo": "Funcional",
@@ -2758,7 +2758,7 @@
       ],
       "esperado": "El segundo intento responde 409 \"Ya tienes una reserva en ese horario\" (codigo RESERVA_SOLAPADA) y no se crea la fila; el bloque contiguo responde 201; el otro usuario obtiene 201.",
       "estado": "APROBADA",
-      "duracionMs": 789,
+      "duracionMs": 769,
       "resultado": [
         {
           "ok": true,
@@ -2786,7 +2786,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:12.069Z"
+      "ejecutadaEn": "2026-11-11T18:44:02.694Z"
     },
     {
       "tipo": "Funcional",
@@ -2807,7 +2807,7 @@
       ],
       "esperado": "La cancelación responde 200; en el listado quedan 2 \"confirmada\" y 1 \"cancelada\"; la franja cancelada vuelve a poder reservarse.",
       "estado": "APROBADA",
-      "duracionMs": 599,
+      "duracionMs": 600,
       "resultado": [
         {
           "ok": true,
@@ -2823,7 +2823,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:12.670Z"
+      "ejecutadaEn": "2026-11-11T18:44:03.296Z"
     },
     {
       "tipo": "Funcional",
@@ -2845,7 +2845,7 @@
       ],
       "esperado": "Las 3 primeras responden 201; la cuarta 409 con codigo LIMITE_RESERVAS_ALCANZADO y el mensaje \"Ya tienes 3 reservas activas…\"; tras cancelar una, la cuarta se acepta.",
       "estado": "APROBADA",
-      "duracionMs": 4245,
+      "duracionMs": 5364,
       "resultado": [
         {
           "ok": true,
@@ -2877,7 +2877,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:16.918Z"
+      "ejecutadaEn": "2026-11-11T18:44:08.662Z"
     },
     {
       "tipo": "Funcional",
@@ -2899,7 +2899,7 @@
       ],
       "esperado": "A ve solo sus 3 reservas, de la fecha más cercana a la más lejana, con id, codigo, canchaNombre, canchaDireccion, fecha, horaInicio, horaFin y estado; B ve solo la suya.",
       "estado": "APROBADA",
-      "duracionMs": 585,
+      "duracionMs": 550,
       "resultado": [
         {
           "ok": true,
@@ -2907,11 +2907,11 @@
         },
         {
           "ok": true,
-          "texto": "Orden: de la más cercana a la más lejana → 2102-10-31 < 2102-11-03 < 2102-11-06"
+          "texto": "Orden: de la más cercana a la más lejana → 2100-09-14 < 2100-09-17 < 2100-09-20"
         },
         {
           "ok": true,
-          "texto": "Cada reserva trae id, código, cancha, dirección, hora (HH:mm) y estado → {\"id\":\"0a807565-af0e-4c69-9b38-3d6eed9357bf\",\"codigo\":\"CY-0A807565\",\"canchaId\":\"011062a9-d4e4-491a-91f6-1e4b38276515\",\"canchaNombre\":\"Cancha La Rivera\",\"canchaDireccion\":\"Cra 8 # 12-50, Cali\",\"fecha\":\"2102-10-31\",\"horaInicio\":\"08:00\",\"horaFin\":\"09:00\",\"estado\":\"confirmada\",\"puedeCancelar\":true,\"pago\":null,\"createdAt\":\"2026-11-06T00:56:17.377Z\"}"
+          "texto": "Cada reserva trae id, código, cancha, dirección, hora (HH:mm) y estado → {\"id\":\"5349e4ea-a58c-436f-8086-c21d9e648d03\",\"codigo\":\"CY-5349E4EA\",\"canchaId\":\"3b7d5b04-c22a-4d5a-ba14-aa495f9d2b6e\",\"canchaNombre\":\"Cancha La Rivera\",\"canchaDireccion\":\"Cra 8 # 12-50, Cali\",\"fecha\":\"2100-09-14\",\"horaInicio\":\"08:00\",\"horaFin\":\"09:00\",\"estado\":\"confirmada\",\"puedeCancelar\":true,\"pago\":null,\"motivoCancelacion\":null,\"createdAt\":\"2026-11-11T18:44:09.096Z\"}"
         },
         {
           "ok": true,
@@ -2921,10 +2921,10 @@
       "evidencias": [
         {
           "titulo": "Respuesta de GET /api/reservas (usuario A)",
-          "texto": "{\n \"reservas\": [\n  {\n   \"id\": \"0a807565-af0e-4c69-9b38-3d6eed9357bf\",\n   \"codigo\": \"CY-0A807565\",\n   \"canchaId\": \"011062a9-d4e4-491a-91f6-1e4b38276515\",\n   \"canchaNombre\": \"Cancha La Rivera\",\n   \"canchaDireccion\": \"Cra 8 # 12-50, Cali\",\n   \"fecha\": \"2102-10-31\",\n   \"horaInicio\": \"08:00\",\n   \"horaFin\": \"09:00\",\n   \"estado\": \"confirmada\",\n   \"puedeCancelar\": true,\n   \"pago\": null,\n   \"createdAt\": \"2026-11-06T00:56:17.377Z\"\n  },\n  {\n   \"id\": \"6d4300e6-0f8f-452b-aaee-4989a0919777\",\n   \"codigo\": \"CY-6D4300E6\",\n   \"canchaId\": \"dbbb2bd1-96c2-4e18-914c-dad7f8c96f99\",\n   \"canchaNombre\": \"Cancha El Bosque\",\n   \"canchaDireccion\": \"Av. Roosevelt # 30-10, Cali\",\n   \"fecha\": \"2102-11-03\",\n   \"horaInicio\": \"08:00\",\n   \"horaFin\": \"09:00\",\n   \"estado\": \"confirmada\",\n   \"puedeCancelar\": true,\n   \"pago\": null,\n   \"createdAt\": \"2026-11-06T00:56:17.431Z\"\n  },\n  {\n   \"id\": \"8cef2aa0-3975-44b0-9924-569778ed5599\",\n   \"codigo\": \"CY-8CEF2AA0\",\n   \"canchaId\": \"dbbb2bd1-96c2-4e18-914c-dad7f8c96f99\",\n   \"canchaNombre\": \"Cancha El Bosque\",\n   \"canchaDireccion\": \"Av. Roosevelt # 30-10, Cali\",\n   \"fecha\": \"2102-11-06\",\n   \"horaInicio\": \"08:00\",\n   \"horaFin\": \"09:00\",\n   \"estado\": \"confirmada\",\n   \"puedeCancelar\": true,\n   \"pago\": null,\n   \"createdAt\": \"2026-11-06T00:56:17.360Z\"\n  }\n ],\n \"paginacion\": {\n  \"pagina\": 1,\n  \"limite\": 10,\n  \"total\": 3,\n  \"totalPaginas\": 1\n }\n}"
+          "texto": "{\n \"reservas\": [\n  {\n   \"id\": \"5349e4ea-a58c-436f-8086-c21d9e648d03\",\n   \"codigo\": \"CY-5349E4EA\",\n   \"canchaId\": \"3b7d5b04-c22a-4d5a-ba14-aa495f9d2b6e\",\n   \"canchaNombre\": \"Cancha La Rivera\",\n   \"canchaDireccion\": \"Cra 8 # 12-50, Cali\",\n   \"fecha\": \"2100-09-14\",\n   \"horaInicio\": \"08:00\",\n   \"horaFin\": \"09:00\",\n   \"estado\": \"confirmada\",\n   \"puedeCancelar\": true,\n   \"pago\": null,\n   \"motivoCancelacion\": null,\n   \"createdAt\": \"2026-11-11T18:44:09.096Z\"\n  },\n  {\n   \"id\": \"30de93bb-989d-4190-b91e-41cc62218148\",\n   \"codigo\": \"CY-30DE93BB\",\n   \"canchaId\": \"0698f9d6-3224-4372-b05a-5e267915d7fe\",\n   \"canchaNombre\": \"Cancha El Bosque\",\n   \"canchaDireccion\": \"Av. Roosevelt # 30-10, Cali\",\n   \"fecha\": \"2100-09-17\",\n   \"horaInicio\": \"08:00\",\n   \"horaFin\": \"09:00\",\n   \"estado\": \"confirmada\",\n   \"puedeCancelar\": true,\n   \"pago\": null,\n   \"motivoCancelacion\": null,\n   \"createdAt\": \"2026-11-11T18:44:09.159Z\"\n  },\n  {\n   \"id\": \"4a1b8dd5-8e9c-4e06-87cf-91b1d37b7541\",\n   \"codigo\": \"CY-4A1B8DD5\",\n   \"canchaId\": \"0698f9d6-3224-4372-b05a-5e267915d7fe\",\n   \"canchaNombre\": \"Cancha El Bosque\",\n   \"canchaDireccion\": \"Av. Roosevelt # 30-10, Cali\",\n   \"fecha\": \"2100-09-20\",\n   \"horaInicio\": \"08:00\",\n   \"horaFin\": \"09:00\",\n   \"estado\": \"confirmada\",\n   \"puedeCancelar\": true,\n   \"pago\": null,\n   \"motivoCancelacion\": null,\n   \"createdAt\": \"2026-11-11T18:44:09.081Z\"\n  }\n ],\n \"paginacion\": {\n  \"pagina\": 1,\n  \"limite\": 10,\n  \"total\": 3,\n  \"totalPaginas\": 1\n }\n}"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:56:17.504Z"
+      "ejecutadaEn": "2026-11-11T18:44:09.214Z"
     },
     {
       "tipo": "Funcional",
@@ -2947,7 +2947,7 @@
       ],
       "esperado": "Pasadas: la más reciente primero, la confirmada como \"completada\" y la cancelada como \"cancelada\"; el filtro devuelve solo ese estado; las próximas no incluyen las pasadas.",
       "estado": "APROBADA",
-      "duracionMs": 984,
+      "duracionMs": 1027,
       "resultado": [
         {
           "ok": true,
@@ -2959,7 +2959,7 @@
         },
         {
           "ok": true,
-          "texto": "La confirmada ya jugada se muestra \"completada\" y va primero (la más reciente) → 2026-11-02 completada · 2026-10-26 cancelada"
+          "texto": "La confirmada ya jugada se muestra \"completada\" y va primero (la más reciente) → 2026-11-08 completada · 2026-11-01 cancelada"
         },
         {
           "ok": true,
@@ -2991,7 +2991,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:18.489Z"
+      "ejecutadaEn": "2026-11-11T18:44:10.243Z"
     },
     {
       "tipo": "Funcional",
@@ -3013,7 +3013,7 @@
       ],
       "esperado": "Página 1: 10 reservas, total 12, totalPaginas 2; página 2: 2 reservas; limite=5 pagina=3: 2 reservas; limite=500 responde 400.",
       "estado": "APROBADA",
-      "duracionMs": 4104,
+      "duracionMs": 3948,
       "resultado": [
         {
           "ok": true,
@@ -3037,7 +3037,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:22.594Z"
+      "ejecutadaEn": "2026-11-11T18:44:14.193Z"
     },
     {
       "tipo": "Funcional",
@@ -3059,7 +3059,7 @@
       ],
       "esperado": "Vacío: 200 con reservas [] y total 0, totalPaginas 1; sin token 401; parámetros inválidos 400 con el campo señalado.",
       "estado": "APROBADA",
-      "duracionMs": 231,
+      "duracionMs": 219,
       "resultado": [
         {
           "ok": true,
@@ -3091,7 +3091,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:22.827Z"
+      "ejecutadaEn": "2026-11-11T18:44:14.413Z"
     },
     {
       "tipo": "Funcional",
@@ -3113,7 +3113,7 @@
       ],
       "esperado": "200 con reserva.estado \"cancelada\"; en la base estado = cancelada; la franja ya no figura como ocupada y otro usuario puede reservarla (201).",
       "estado": "APROBADA",
-      "duracionMs": 810,
+      "duracionMs": 852,
       "resultado": [
         {
           "ok": true,
@@ -3143,10 +3143,10 @@
       "evidencias": [
         {
           "titulo": "Respuesta de PATCH /api/reservas/:id/cancelar",
-          "texto": "{\n \"reserva\": {\n  \"id\": \"2a26b922-d8ee-4a9c-befa-ae0e9548d50c\",\n  \"codigo\": \"CY-2A26B922\",\n  \"canchaId\": \"dbbb2bd1-96c2-4e18-914c-dad7f8c96f99\",\n  \"usuarioId\": \"6535c63b-c910-400f-9876-a460200ba848\",\n  \"fecha\": \"2102-07-16\",\n  \"horaInicio\": \"10:00:00\",\n  \"horaFin\": \"11:00:00\",\n  \"estado\": \"cancelada\",\n  \"usadaAt\": null,\n  \"createdAt\": \"2026-11-06T00:56:23.243Z\"\n },\n \"reembolso\": null\n}"
+          "texto": "{\n \"reserva\": {\n  \"id\": \"4a85a77f-90ce-4e88-bbea-dda34a26c626\",\n  \"codigo\": \"CY-4A85A77F\",\n  \"canchaId\": \"0698f9d6-3224-4372-b05a-5e267915d7fe\",\n  \"usuarioId\": \"adef7019-9bd5-4bcf-b53d-7ba71fbf727c\",\n  \"fecha\": \"2104-04-11\",\n  \"horaInicio\": \"10:00:00\",\n  \"horaFin\": \"11:00:00\",\n  \"estado\": \"cancelada\",\n  \"usadaAt\": null,\n  \"createdAt\": \"2026-11-11T18:44:14.881Z\"\n },\n \"reembolso\": null\n}"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:56:23.639Z"
+      "ejecutadaEn": "2026-11-11T18:44:15.266Z"
     },
     {
       "tipo": "Funcional",
@@ -3168,7 +3168,7 @@
       ],
       "esperado": "La de 90 min: 409 CANCELACION_FUERA_DE_PLAZO con mensaje que menciona 2 horas, sigue confirmada, el historial indica puedeCancelar=false. La de 180 min: 200.",
       "estado": "APROBADA",
-      "duracionMs": 1102,
+      "duracionMs": 1215,
       "resultado": [
         {
           "ok": true,
@@ -3192,7 +3192,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:24.742Z"
+      "ejecutadaEn": "2026-11-11T18:44:16.483Z"
     },
     {
       "tipo": "Funcional",
@@ -3214,7 +3214,7 @@
       ],
       "esperado": "B: 403 y la reserva sigue confirmada; sin token 401; id inválido 400; inexistente 404; la segunda cancelación de A responde 409.",
       "estado": "APROBADA",
-      "duracionMs": 757,
+      "duracionMs": 737,
       "resultado": [
         {
           "ok": true,
@@ -3246,7 +3246,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:25.500Z"
+      "ejecutadaEn": "2026-11-11T18:44:17.223Z"
     },
     {
       "tipo": "Funcional",
@@ -3266,7 +3266,7 @@
       ],
       "esperado": "El log contiene el correo del usuario, el código, la cancha y el horario de la reserva cancelada.",
       "estado": "APROBADA",
-      "duracionMs": 1325,
+      "duracionMs": 1347,
       "resultado": [
         {
           "ok": true,
@@ -3284,10 +3284,10 @@
       "evidencias": [
         {
           "titulo": "Línea del log (correo de cancelación)",
-          "texto": "backend-1  | [EMAIL] SMTP no configurado. Cancelación de reserva (modo desarrollo) para correo.1793926585503.93@qa.local: CY-E98ACD12 · Cancha El Bosque · 2101-02-05 12:00 - 13:00"
+          "texto": "backend-1  | [EMAIL] SMTP no configurado. Cancelación de reserva (modo desarrollo) para correo.1794422657224.93@qa.local: CY-C7D1D544 · Cancha El Bosque · 2103-01-29 12:00 - 13:00"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:56:26.828Z"
+      "ejecutadaEn": "2026-11-11T18:44:18.571Z"
     },
     {
       "tipo": "Funcional",
@@ -3318,7 +3318,7 @@
       ],
       "esperado": "La respuesta trae reembolso {estado \"reembolsado\", monto, marca, ultimos4}; el pago pasa a \"reembolsado\" con referencia ref_sim_; la reserva sin pago devuelve reembolso null.",
       "estado": "APROBADA",
-      "duracionMs": 674,
+      "duracionMs": 745,
       "resultado": [
         {
           "ok": true,
@@ -3330,7 +3330,7 @@
         },
         {
           "ok": true,
-          "texto": "En la tabla pagos queda \"reembolsado\" con referencia → reembolsado|ref_sim_0cb662d2cfa628b1"
+          "texto": "En la tabla pagos queda \"reembolsado\" con referencia → reembolsado|ref_sim_91a9ef9cfbb510b3"
         },
         {
           "ok": true,
@@ -3338,7 +3338,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:27.504Z"
+      "ejecutadaEn": "2026-11-11T18:44:19.317Z"
     },
     {
       "tipo": "Funcional",
@@ -3358,7 +3358,7 @@
       ],
       "esperado": "200 con nombre, correo, teléfono y rol \"usuario\" correctos; sin contraseña ni hash.",
       "estado": "APROBADA",
-      "duracionMs": 207,
+      "duracionMs": 199,
       "resultado": [
         {
           "ok": true,
@@ -3366,7 +3366,7 @@
         },
         {
           "ok": true,
-          "texto": "Trae nombre, correo y teléfono actuales → {\"id\":\"9de73782-5a75-41b8-b822-5dca73eba10c\",\"nombre\":\"PERFIL Usuario 95\",\"correo\":\"perfil.1793926587505.95@qa.local\",\"telefono\":\"3001234567\",\"rol\":\"usuario\",\"correoPendiente\":null}"
+          "texto": "Trae nombre, correo y teléfono actuales → {\"id\":\"7a7da3c0-53d8-4bca-a0c1-83a4e14443c4\",\"nombre\":\"PERFIL Usuario 95\",\"correo\":\"perfil.1794422659319.95@qa.local\",\"telefono\":\"3001234567\",\"rol\":\"usuario\",\"correoPendiente\":null}"
         },
         {
           "ok": true,
@@ -3380,10 +3380,10 @@
       "evidencias": [
         {
           "titulo": "Respuesta de GET /api/usuarios/:id",
-          "texto": "{\n \"usuario\": {\n  \"id\": \"9de73782-5a75-41b8-b822-5dca73eba10c\",\n  \"nombre\": \"PERFIL Usuario 95\",\n  \"correo\": \"perfil.1793926587505.95@qa.local\",\n  \"telefono\": \"3001234567\",\n  \"rol\": \"usuario\",\n  \"correoPendiente\": null\n }\n}"
+          "texto": "{\n \"usuario\": {\n  \"id\": \"7a7da3c0-53d8-4bca-a0c1-83a4e14443c4\",\n  \"nombre\": \"PERFIL Usuario 95\",\n  \"correo\": \"perfil.1794422659319.95@qa.local\",\n  \"telefono\": \"3001234567\",\n  \"rol\": \"usuario\",\n  \"correoPendiente\": null\n }\n}"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:56:27.712Z"
+      "ejecutadaEn": "2026-11-11T18:44:19.518Z"
     },
     {
       "tipo": "Funcional",
@@ -3403,11 +3403,11 @@
       ],
       "esperado": "200 con el mensaje de confirmación y los datos nuevos; la base y el GET posterior los reflejan.",
       "estado": "APROBADA",
-      "duracionMs": 506,
+      "duracionMs": 550,
       "resultado": [
         {
           "ok": true,
-          "texto": "Responde 200 con los datos nuevos (teléfono normalizado) → HTTP 200 {\"id\":\"88a86bb0-cb65-44da-908a-9c85c66c753c\",\"nombre\":\"Ana María Pérez\",\"correo\":\"editar.1793926587714.96@qa.local\",\"telefono\":\"+573109998888\",\"rol\":\"usuario\"}"
+          "texto": "Responde 200 con los datos nuevos (teléfono normalizado) → HTTP 200 {\"id\":\"4a03d36c-680d-432b-9cf1-b36bc81890f3\",\"nombre\":\"Ana María Pérez\",\"correo\":\"editar.1794422659520.96@qa.local\",\"telefono\":\"+573109998888\",\"rol\":\"usuario\"}"
         },
         {
           "ok": true,
@@ -3423,7 +3423,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:28.220Z"
+      "ejecutadaEn": "2026-11-11T18:44:20.070Z"
     },
     {
       "tipo": "Funcional",
@@ -3444,7 +3444,7 @@
       ],
       "esperado": "400 con la lista de errores por campo (nombre y telefono); la base conserva los datos originales.",
       "estado": "APROBADA",
-      "duracionMs": 769,
+      "duracionMs": 490,
       "resultado": [
         {
           "ok": true,
@@ -3465,7 +3465,7 @@
           "texto": "{\n \"mensaje\": \"Error de validación\",\n \"errores\": [\n  {\n   \"campo\": \"nombre\",\n   \"mensaje\": \"El nombre es obligatorio\"\n  },\n  {\n   \"campo\": \"telefono\",\n   \"mensaje\": \"El teléfono no es válido (de 7 a 15 dígitos, puede iniciar con +)\"\n  }\n ]\n}"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:56:28.991Z"
+      "ejecutadaEn": "2026-11-11T18:44:20.562Z"
     },
     {
       "tipo": "Funcional",
@@ -3489,7 +3489,7 @@
       ],
       "esperado": "Duplicado: 409. Solicitud: 202 y el correo sigue igual hasta verificar; en la base solo está el hash del token. Verificar: 200 y el correo cambia; el enlace no sirve dos veces ni inventado; el login funciona solo con el correo nuevo.",
       "estado": "APROBADA",
-      "duracionMs": 2409,
+      "duracionMs": 2318,
       "resultado": [
         {
           "ok": true,
@@ -3505,7 +3505,7 @@
         },
         {
           "ok": true,
-          "texto": "El perfil muestra el correo pendiente de verificación → nuevo.1793926589452@qa.local"
+          "texto": "El perfil muestra el correo pendiente de verificación → nuevo.1794422661016@qa.local"
         },
         {
           "ok": true,
@@ -3537,7 +3537,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:31.402Z"
+      "ejecutadaEn": "2026-11-11T18:44:22.882Z"
     },
     {
       "tipo": "Funcional",
@@ -3559,7 +3559,7 @@
       ],
       "esperado": "Actual incorrecta: 400 PASSWORD_ACTUAL_INCORRECTA; débil: 400; correcta: 200; login con la nueva 200 y con la anterior 401.",
       "estado": "APROBADA",
-      "duracionMs": 1010,
+      "duracionMs": 1023,
       "resultado": [
         {
           "ok": true,
@@ -3587,7 +3587,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:32.413Z"
+      "ejecutadaEn": "2026-11-11T18:44:23.907Z"
     },
     {
       "tipo": "Funcional",
@@ -3608,7 +3608,7 @@
       ],
       "esperado": "403 en las cuatro rutas, sin datos de B en la respuesta y sin cambios en la base; sin token 401.",
       "estado": "APROBADA",
-      "duracionMs": 826,
+      "duracionMs": 784,
       "resultado": [
         {
           "ok": true,
@@ -3640,7 +3640,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:33.241Z"
+      "ejecutadaEn": "2026-11-11T18:44:24.693Z"
     },
     {
       "tipo": "Funcional",
@@ -3660,7 +3660,7 @@
       ],
       "esperado": "Los 10 primeros responden 400; el 11.º responde 429 DEMASIADOS_INTENTOS aunque la clave sea correcta.",
       "estado": "APROBADA",
-      "duracionMs": 1196,
+      "duracionMs": 1176,
       "resultado": [
         {
           "ok": true,
@@ -3672,7 +3672,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:34.439Z"
+      "ejecutadaEn": "2026-11-11T18:44:25.870Z"
     },
     {
       "tipo": "Funcional",
@@ -3694,11 +3694,11 @@
       ],
       "esperado": "201 con marca \"Visa\", últimos 4 \"4242\" y vencimiento; la fila tiene token tok_sim_… y no contiene el número completo ni existe columna cvv; la API nunca devuelve el token.",
       "estado": "APROBADA",
-      "duracionMs": 846,
+      "duracionMs": 839,
       "resultado": [
         {
           "ok": true,
-          "texto": "Responde 201 con tarjeta enmascarada (Visa ••4242) → {\"id\":\"36d2b38a-7b16-4143-ac42-50437f1fc8ae\",\"marca\":\"Visa\",\"ultimos4\":\"4242\",\"titular\":\"Ana Pérez\",\"vencimiento\":\"12/29\",\"createdAt\":\"2026-11-06T00:56:34.643Z\"}"
+          "texto": "Responde 201 con tarjeta enmascarada (Visa ••4242) → {\"id\":\"ba4a8bb7-6937-489f-a429-77e6b519c789\",\"marca\":\"Visa\",\"ultimos4\":\"4242\",\"titular\":\"Ana Pérez\",\"vencimiento\":\"12/29\",\"createdAt\":\"2026-11-11T18:44:26.100Z\"}"
         },
         {
           "ok": true,
@@ -3706,7 +3706,7 @@
         },
         {
           "ok": true,
-          "texto": "Se guardó el token de la pasarela → \"token\":\"tok_sim_7801d6882abe9f7d"
+          "texto": "Se guardó el token de la pasarela → \"token\":\"tok_sim_d0ad9f02051c4f34"
         },
         {
           "ok": true,
@@ -3724,10 +3724,10 @@
       "evidencias": [
         {
           "titulo": "Fila guardada en metodos_pago",
-          "texto": "{\"id\":\"36d2b38a-7b16-4143-ac42-50437f1fc8ae\",\"usuario_id\":\"b61a750f-893e-491d-a596-1c7298558459\",\"token\":\"tok_sim_7801d6882abe9f7d143ea5da_a\",\"marca\":\"Visa\",\"ultimos4\":\"4242\",\"titular\":\"Ana Pérez\",\"vencimiento_mes\":12,\"vencimiento_anio\":2029,\"created_at\":\"2026-11-06T00:56:34.643164+00:00\"}"
+          "texto": "{\"id\":\"ba4a8bb7-6937-489f-a429-77e6b519c789\",\"usuario_id\":\"1228d664-00c3-4f8d-85bf-ba5fcb5301db\",\"token\":\"tok_sim_d0ad9f02051c4f34d15f88a7_a\",\"marca\":\"Visa\",\"ultimos4\":\"4242\",\"titular\":\"Ana Pérez\",\"vencimiento_mes\":12,\"vencimiento_anio\":2029,\"created_at\":\"2026-11-11T18:44:26.10083+00:00\"}"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:56:35.287Z"
+      "ejecutadaEn": "2026-11-11T18:44:26.711Z"
     },
     {
       "tipo": "Funcional",
@@ -3749,7 +3749,7 @@
       ],
       "esperado": "400 con el campo erróneo (numero, vencimientoAnio, cvv); la respuesta no repite el número ni el CVV; no se guarda ninguna fila.",
       "estado": "APROBADA",
-      "duracionMs": 537,
+      "duracionMs": 529,
       "resultado": [
         {
           "ok": true,
@@ -3785,7 +3785,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:35.826Z"
+      "ejecutadaEn": "2026-11-11T18:44:27.242Z"
     },
     {
       "tipo": "Funcional",
@@ -3807,7 +3807,7 @@
       ],
       "esperado": "201 con reserva.pago {aprobado, monto = costo de la cancha, COP, Visa, 4242}; una fila en pagos; el historial muestra el pago; sin tarjeta 201 con pago null.",
       "estado": "APROBADA",
-      "duracionMs": 911,
+      "duracionMs": 875,
       "resultado": [
         {
           "ok": true,
@@ -3831,7 +3831,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:36.738Z"
+      "ejecutadaEn": "2026-11-11T18:44:28.119Z"
     },
     {
       "tipo": "Funcional",
@@ -3852,7 +3852,7 @@
       ],
       "esperado": "402 PAGO_RECHAZADO con el motivo en el mensaje; no queda reserva ni pago aprobado; la franja se puede reservar después.",
       "estado": "APROBADA",
-      "duracionMs": 918,
+      "duracionMs": 926,
       "resultado": [
         {
           "ok": true,
@@ -3876,7 +3876,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:37.661Z"
+      "ejecutadaEn": "2026-11-11T18:44:29.047Z"
     },
     {
       "tipo": "Funcional",
@@ -3898,7 +3898,7 @@
       ],
       "esperado": "200; la fila (y su token) desaparece de metodos_pago y del listado; la reserva sigue confirmada y su pago aprobado con marca y últimos 4; pagar con la tarjeta eliminada responde 404.",
       "estado": "APROBADA",
-      "duracionMs": 1251,
+      "duracionMs": 1227,
       "resultado": [
         {
           "ok": true,
@@ -3930,7 +3930,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:38.915Z"
+      "ejecutadaEn": "2026-11-11T18:44:30.276Z"
     },
     {
       "tipo": "Funcional",
@@ -3951,7 +3951,7 @@
       ],
       "esperado": "Ver y agregar sobre otro usuario: 403; eliminar la tarjeta de A desde la cuenta de B: 404 y la tarjeta sigue existiendo; pagar con la tarjeta ajena: 404 sin reserva; sin token 401.",
       "estado": "APROBADA",
-      "duracionMs": 1061,
+      "duracionMs": 1051,
       "resultado": [
         {
           "ok": true,
@@ -3983,7 +3983,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:39.978Z"
+      "ejecutadaEn": "2026-11-11T18:44:31.329Z"
     },
     {
       "tipo": "Funcional",
@@ -4004,7 +4004,7 @@
       ],
       "esperado": "Las 5 primeras responden 201; la sexta 409 LIMITE_TARJETAS sin guardarse; tras eliminar una, la nueva se acepta.",
       "estado": "APROBADA",
-      "duracionMs": 746,
+      "duracionMs": 749,
       "resultado": [
         {
           "ok": true,
@@ -4024,7 +4024,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:40.726Z"
+      "ejecutadaEn": "2026-11-11T18:44:32.081Z"
     },
     {
       "tipo": "Funcional",
@@ -4045,7 +4045,7 @@
       ],
       "esperado": "Por HTTP: 426 HTTPS_REQUERIDO en GET, POST y DELETE sin procesar la tarjeta. Con proxy de confianza y X-Forwarded-Proto https: se acepta (201/200). Sin TRUST_PROXY la cabecera se ignora y sigue el 426.",
       "estado": "APROBADA",
-      "duracionMs": 7835,
+      "duracionMs": 8861,
       "resultado": [
         {
           "ok": true,
@@ -4077,7 +4077,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:48.563Z"
+      "ejecutadaEn": "2026-11-11T18:44:40.944Z"
     },
     {
       "tipo": "Funcional",
@@ -4098,11 +4098,11 @@
       ],
       "esperado": "Códigos con formato CY-XXXXXXXX, todos distintos, iguales en confirmación e historial; existe un índice único sobre reservas.codigo.",
       "estado": "APROBADA",
-      "duracionMs": 645,
+      "duracionMs": 697,
       "resultado": [
         {
           "ok": true,
-          "texto": "Todos tienen el formato CY-XXXXXXXX → CY-634DC359, CY-26560A61, CY-1584245B"
+          "texto": "Todos tienen el formato CY-XXXXXXXX → CY-00E97995, CY-16BA62A9, CY-101AA277"
         },
         {
           "ok": true,
@@ -4118,7 +4118,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:49.715Z"
+      "ejecutadaEn": "2026-11-11T18:44:42.170Z"
     },
     {
       "tipo": "Funcional",
@@ -4139,7 +4139,7 @@
       ],
       "esperado": "200 con estado \"vigente\", motivo null y la reserva con código, cancha, fecha, horario y nombre del usuario; sin correo ni teléfono.",
       "estado": "APROBADA",
-      "duracionMs": 254,
+      "duracionMs": 277,
       "resultado": [
         {
           "ok": true,
@@ -4147,7 +4147,7 @@
         },
         {
           "ok": true,
-          "texto": "Muestra cancha, fecha, horario y nombre del usuario → {\"id\":\"51932953-36a0-4bc1-ae1b-2f55352947f5\",\"codigo\":\"CY-51932953\",\"cancha\":{\"nombre\":\"Cancha El Bosque\",\"direccion\":\"Av. Roosevelt # 30-10, Cali\"},\"fecha\":\"2101-10-09\",\"horaInicio\":\"09:00\",\"horaFin\":\"10:00\",\"usuario\":{\"nombre\":\"VIGENTE Usuario 115\"},\"usadaAt\":null}"
+          "texto": "Muestra cancha, fecha, horario y nombre del usuario → {\"id\":\"3ae3c5eb-7070-4bad-9e26-322674de1013\",\"codigo\":\"CY-3AE3C5EB\",\"cancha\":{\"nombre\":\"Cancha El Bosque\",\"direccion\":\"Av. Roosevelt # 30-10, Cali\"},\"fecha\":\"2101-10-13\",\"horaInicio\":\"09:00\",\"horaFin\":\"10:00\",\"usuario\":{\"nombre\":\"VIGENTE Usuario 115\"},\"usadaAt\":null}"
         },
         {
           "ok": true,
@@ -4157,10 +4157,10 @@
       "evidencias": [
         {
           "titulo": "Respuesta de POST /api/admin/reservas/verificar",
-          "texto": "{\n \"estado\": \"vigente\",\n \"motivo\": null,\n \"reserva\": {\n  \"id\": \"51932953-36a0-4bc1-ae1b-2f55352947f5\",\n  \"codigo\": \"CY-51932953\",\n  \"cancha\": {\n   \"nombre\": \"Cancha El Bosque\",\n   \"direccion\": \"Av. Roosevelt # 30-10, Cali\"\n  },\n  \"fecha\": \"2101-10-09\",\n  \"horaInicio\": \"09:00\",\n  \"horaFin\": \"10:00\",\n  \"usuario\": {\n   \"nombre\": \"VIGENTE Usuario 115\"\n  },\n  \"usadaAt\": null\n }\n}"
+          "texto": "{\n \"estado\": \"vigente\",\n \"motivo\": null,\n \"reserva\": {\n  \"id\": \"3ae3c5eb-7070-4bad-9e26-322674de1013\",\n  \"codigo\": \"CY-3AE3C5EB\",\n  \"cancha\": {\n   \"nombre\": \"Cancha El Bosque\",\n   \"direccion\": \"Av. Roosevelt # 30-10, Cali\"\n  },\n  \"fecha\": \"2101-10-13\",\n  \"horaInicio\": \"09:00\",\n  \"horaFin\": \"10:00\",\n  \"usuario\": {\n   \"nombre\": \"VIGENTE Usuario 115\"\n  },\n  \"usadaAt\": null\n }\n}"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:56:49.971Z"
+      "ejecutadaEn": "2026-11-11T18:44:42.449Z"
     },
     {
       "tipo": "Funcional",
@@ -4181,7 +4181,7 @@
       ],
       "esperado": "estado \"no_vigente\" con motivo \"cancelada\", \"vencida\" y \"usada\" respectivamente.",
       "estado": "APROBADA",
-      "duracionMs": 886,
+      "duracionMs": 731,
       "resultado": [
         {
           "ok": true,
@@ -4197,7 +4197,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:50.859Z"
+      "ejecutadaEn": "2026-11-11T18:44:43.182Z"
     },
     {
       "tipo": "Funcional",
@@ -4217,7 +4217,7 @@
       ],
       "esperado": "404 con {mensaje: \"Código no encontrado\", codigo: \"CODIGO_NO_ENCONTRADO\"} idéntico en todos los casos.",
       "estado": "APROBADA",
-      "duracionMs": 184,
+      "duracionMs": 145,
       "resultado": [
         {
           "ok": true,
@@ -4245,7 +4245,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:51.045Z"
+      "ejecutadaEn": "2026-11-11T18:44:43.329Z"
     },
     {
       "tipo": "Funcional",
@@ -4267,7 +4267,7 @@
       ],
       "esperado": "Primero \"vigente\"; al marcar 200 y luego \"no_vigente/usada\"; marcar otra vez 409 RESERVA_NO_VIGENTE; con dos simultáneos exactamente uno obtiene 200 y el otro 409.",
       "estado": "APROBADA",
-      "duracionMs": 485,
+      "duracionMs": 465,
       "resultado": [
         {
           "ok": true,
@@ -4291,7 +4291,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:51.537Z"
+      "ejecutadaEn": "2026-11-11T18:44:43.796Z"
     },
     {
       "tipo": "Funcional",
@@ -4313,7 +4313,7 @@
       ],
       "esperado": "403 en verificar, usar y verificaciones (la reserva no se modifica); sin token 401; un administrador degradado pierde el acceso de inmediato; el registro siempre crea rol \"usuario\".",
       "estado": "APROBADA",
-      "duracionMs": 1741,
+      "duracionMs": 1756,
       "resultado": [
         {
           "ok": true,
@@ -4341,7 +4341,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:53.280Z"
+      "ejecutadaEn": "2026-11-11T18:44:45.555Z"
     },
     {
       "tipo": "Funcional",
@@ -4362,7 +4362,7 @@
       ],
       "esperado": "Tres registros con resultados vigente, marcada_usada y no_encontrado, con el administrador y la fecha; el listado devuelve primero el más reciente.",
       "estado": "APROBADA",
-      "duracionMs": 1419,
+      "duracionMs": 1610,
       "resultado": [
         {
           "ok": true,
@@ -4374,16 +4374,639 @@
         },
         {
           "ok": true,
-          "texto": "El listado muestra primero la más reciente con el nombre del administrador → {\"id\":\"abf51417-c607-4d38-84e1-0748ef3fb93e\",\"administrador\":\"AUDITOR Usuario 120\",\"codigo\":\"CY-FFFFFFFF\",\"resultado\":\"no_encontrado\",\"reservaCodigo\":null,\"createdAt\":\"2026-11-06T00:56:54.090Z\"}"
+          "texto": "El listado muestra primero la más reciente con el nombre del administrador → {\"id\":\"68082007-e286-4520-b617-8122aa441b8f\",\"administrador\":\"AUDITOR Usuario 120\",\"codigo\":\"CY-FFFFFFFF\",\"resultado\":\"no_encontrado\",\"reservaCodigo\":null,\"createdAt\":\"2026-11-11T18:44:46.459Z\"}"
         }
       ],
       "evidencias": [
         {
           "titulo": "Respuesta de GET /api/admin/verificaciones",
-          "texto": "[\n {\n  \"id\": \"abf51417-c607-4d38-84e1-0748ef3fb93e\",\n  \"administrador\": \"AUDITOR Usuario 120\",\n  \"codigo\": \"CY-FFFFFFFF\",\n  \"resultado\": \"no_encontrado\",\n  \"reservaCodigo\": null,\n  \"createdAt\": \"2026-11-06T00:56:54.090Z\"\n },\n {\n  \"id\": \"732bc28c-cedf-4fa4-a60d-c80db2efc281\",\n  \"administrador\": \"AUDITOR Usuario 120\",\n  \"codigo\": \"CY-0D02DAEA\",\n  \"resultado\": \"marcada_usada\",\n  \"reservaCodigo\": \"CY-0D02DAEA\",\n  \"createdAt\": \"2026-11-06T00:56:54.080Z\"\n },\n {\n  \"id\": \"c688b9be-ff1e-4503-8e1a-3432dc588b61\",\n  \"administrador\": \"AUDITOR Usuario 120\",\n  \"codigo\": \"CY-0D02DAEA\",\n  \"resultado\": \"vigente\",\n  \"reservaCodigo\": \"CY-0D02DAEA\",\n  \"createdAt\": \"2026-11-06T00:56:54.033Z\"\n }\n]"
+          "texto": "[\n {\n  \"id\": \"68082007-e286-4520-b617-8122aa441b8f\",\n  \"administrador\": \"AUDITOR Usuario 120\",\n  \"codigo\": \"CY-FFFFFFFF\",\n  \"resultado\": \"no_encontrado\",\n  \"reservaCodigo\": null,\n  \"createdAt\": \"2026-11-11T18:44:46.459Z\"\n },\n {\n  \"id\": \"f6c2bd30-a45c-4c35-9b79-c6c8c0e41c10\",\n  \"administrador\": \"AUDITOR Usuario 120\",\n  \"codigo\": \"CY-43AA707D\",\n  \"resultado\": \"marcada_usada\",\n  \"reservaCodigo\": \"CY-43AA707D\",\n  \"createdAt\": \"2026-11-11T18:44:46.447Z\"\n },\n {\n  \"id\": \"269b0299-822f-4c15-95ee-3d9f04d5e7e8\",\n  \"administrador\": \"AUDITOR Usuario 120\",\n  \"codigo\": \"CY-43AA707D\",\n  \"resultado\": \"vigente\",\n  \"reservaCodigo\": \"CY-43AA707D\",\n  \"createdAt\": \"2026-11-11T18:44:46.389Z\"\n }\n]"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:56:54.702Z"
+      "ejecutadaEn": "2026-11-11T18:44:47.167Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-15-01",
+      "hu": "US-15",
+      "ca": [
+        1
+      ],
+      "grupo": "US-15",
+      "titulo": "Crear una cancha con datos válidos: aparece en el catálogo público",
+      "objetivo": "Verificar la creación de una cancha con su horario y que el catálogo la muestra.",
+      "pasos": [
+        "POST /api/admin/canchas con nombre, dirección, precio y horarios válidos.",
+        "GET /api/canchas y GET /api/canchas/:id como un usuario normal."
+      ],
+      "esperado": "201 con la cancha activa y sus horarios; aparece en el catálogo y su detalle trae los 7 horarios.",
+      "estado": "APROBADA",
+      "duracionMs": 566,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Responde 201 con la cancha activa → HTTP 201"
+        },
+        {
+          "ok": true,
+          "texto": "Devuelve sus 7 horarios y el precio → 7 horarios"
+        },
+        {
+          "ok": true,
+          "texto": "Aparece en el catálogo público (GET /api/canchas)"
+        },
+        {
+          "ok": true,
+          "texto": "Su detalle público trae precio y horarios"
+        },
+        {
+          "ok": true,
+          "texto": "En la base queda activa con 7 horarios"
+        },
+        {
+          "ok": true,
+          "texto": "Se puede reservar en la cancha nueva (201) → HTTP 201"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-11-11T18:44:48.217Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-15-02",
+      "hu": "US-15",
+      "ca": [
+        2
+      ],
+      "grupo": "US-15",
+      "titulo": "Editar una cancha: el catálogo refleja los cambios y las reservas confirmadas no se alteran",
+      "objetivo": "Verificar la edición de datos y horarios con una reserva ya confirmada.",
+      "pasos": [
+        "Crear una cancha y una reserva confirmada.",
+        "PUT /api/admin/canchas/:id cambiando nombre, precio y horario (la reserva queda fuera del nuevo horario).",
+        "Consultar el catálogo y la reserva."
+      ],
+      "esperado": "200; el catálogo muestra el nombre y el precio nuevos; la reserva sigue confirmada con la misma fecha y hora y cuenta como reserva futura.",
+      "estado": "APROBADA",
+      "duracionMs": 716,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Preparación: reserva confirmada de las 09:00 → HTTP 201"
+        },
+        {
+          "ok": true,
+          "texto": "Responde 200 con los datos nuevos → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "El horario se reemplazó por el nuevo"
+        },
+        {
+          "ok": true,
+          "texto": "El catálogo refleja el nombre y el precio nuevos"
+        },
+        {
+          "ok": true,
+          "texto": "La reserva ya confirmada no se alteró (estado, fecha y hora)"
+        },
+        {
+          "ok": true,
+          "texto": "El panel cuenta 1 reserva futura en la cancha → 1"
+        },
+        {
+          "ok": true,
+          "texto": "Editar una cancha inexistente: 404"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-11-11T18:44:48.935Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-15-03",
+      "hu": "US-15",
+      "ca": [
+        3
+      ],
+      "grupo": "US-15",
+      "titulo": "Desactivar una cancha: sale del listado, no admite reservas y conserva el historial",
+      "objetivo": "Verificar la desactivación lógica y la reactivación.",
+      "pasos": [
+        "Crear una cancha sin reservas y desactivarla.",
+        "Consultar el catálogo, el detalle y reservar.",
+        "Reactivarla."
+      ],
+      "esperado": "Desactivar: 200; deja de estar en el catálogo, su detalle es 404 y reservar responde 409 CANCHA_NO_DISPONIBLE; el administrador la sigue viendo; al activarla todo vuelve a funcionar.",
+      "estado": "APROBADA",
+      "duracionMs": 654,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Sin reservas futuras se desactiva de inmediato: 200 → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "Deja de mostrarse en el listado público"
+        },
+        {
+          "ok": true,
+          "texto": "Su detalle público responde 404"
+        },
+        {
+          "ok": true,
+          "texto": "No admite nuevas reservas: 409 CANCHA_NO_DISPONIBLE → HTTP 409 CANCHA_NO_DISPONIBLE"
+        },
+        {
+          "ok": true,
+          "texto": "La cancha no se borra de la base (desactivación lógica)"
+        },
+        {
+          "ok": true,
+          "texto": "El administrador la sigue viendo, marcada como desactivada"
+        },
+        {
+          "ok": true,
+          "texto": "Desactivarla otra vez: 409"
+        },
+        {
+          "ok": true,
+          "texto": "Al reactivarla vuelve al catálogo"
+        },
+        {
+          "ok": true,
+          "texto": "Y vuelve a admitir reservas (201)"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-11-11T18:44:49.591Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-15-04",
+      "hu": "US-15",
+      "ca": [
+        3,
+        4
+      ],
+      "grupo": "US-15",
+      "titulo": "Desactivar con reservas futuras: advertencia y confirmación explícita",
+      "objetivo": "Verificar que el sistema advierte de las reservas afectadas, no desactiva sin confirmar y conserva las reservas.",
+      "pasos": [
+        "Crear una cancha con 2 reservas futuras de usuarios distintos.",
+        "PATCH desactivar sin confirmar.",
+        "PATCH desactivar con confirmar=true.",
+        "Revisar las reservas y el historial."
+      ],
+      "esperado": "Sin confirmar: 409 CONFIRMACION_REQUERIDA con 2 reservas afectadas y su detalle, cancha aún activa. Con confirmar: 200, desactivada, las 2 reservas siguen confirmadas y visibles para sus usuarios.",
+      "estado": "APROBADA",
+      "duracionMs": 1214,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Preparación: 2 reservas futuras"
+        },
+        {
+          "ok": true,
+          "texto": "Sin confirmar: 409 CONFIRMACION_REQUERIDA con 2 reservas afectadas → HTTP 409 2"
+        },
+        {
+          "ok": true,
+          "texto": "La advertencia lista cada reserva afectada con su código, usuario, fecha y hora → CY-0A53BE4A,CY-A49FCB18"
+        },
+        {
+          "ok": true,
+          "texto": "La cancha sigue activa mientras no se confirma"
+        },
+        {
+          "ok": true,
+          "texto": "confirmar=false tampoco desactiva"
+        },
+        {
+          "ok": true,
+          "texto": "Con confirmación explícita se desactiva: 200 → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "Las 2 reservas se conservan confirmadas"
+        },
+        {
+          "ok": true,
+          "texto": "El historial del usuario las conserva"
+        }
+      ],
+      "evidencias": [
+        {
+          "titulo": "Respuesta 409 de la advertencia",
+          "texto": "{\n \"mensaje\": \"La cancha tiene 2 reserva(s) futura(s) confirmada(s). Confirma para desactivarla: las reservas se conservan, pero no se aceptarán nuevas.\",\n \"codigo\": \"CONFIRMACION_REQUERIDA\",\n \"reservasAfectadas\": 2,\n \"reservas\": [\n  {\n   \"id\": \"0a53be4a-2d0f-4f11-b52c-cf2c74d6ac92\",\n   \"codigo\": \"CY-0A53BE4A\",\n   \"usuarioNombre\": \"AFEC1 Usuario 126\",\n   \"fecha\": \"2102-04-17\",\n   \"horaInicio\": \"08:00\",\n   \"horaFin\": \"09:00\"\n  },\n  {\n   \"id\": \"a49fcb18-6c3d-4c6f-a770-0786c0ffd317\",\n   \"codigo\": \"CY-A49FCB18\",\n   \"usuarioNombre\": \"AFEC2 Usuario 127\",\n   \"fecha\": \"2102-07-07\",\n   \"horaInicio\": \"09:00\",\n   \"horaFin\": \"10:00\"\n  }\n ]\n}"
+        }
+      ],
+      "ejecutadaEn": "2026-11-11T18:44:50.808Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-15-05",
+      "hu": "US-15",
+      "ca": [
+        5
+      ],
+      "grupo": "US-15",
+      "titulo": "Un usuario sin rol de administrador recibe 403 en la gestión de canchas (caso de error)",
+      "objetivo": "Verificar el control de rol en las 6 rutas y que no se crea ni cambia nada.",
+      "pasos": [
+        "Con un usuario normal: GET, POST, PUT, desactivar y activar.",
+        "Repetir sin token."
+      ],
+      "esperado": "403 con un usuario normal y 401 sin sesión en todas las rutas; la base no cambia.",
+      "estado": "APROBADA",
+      "duracionMs": 1472,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "GET /admin/canchas: 403 con usuario normal y 401 sin sesión → 403 / 401"
+        },
+        {
+          "ok": true,
+          "texto": "GET /admin/canchas/:id: 403 con usuario normal y 401 sin sesión → 403 / 401"
+        },
+        {
+          "ok": true,
+          "texto": "POST /admin/canchas: 403 con usuario normal y 401 sin sesión → 403 / 401"
+        },
+        {
+          "ok": true,
+          "texto": "PUT /admin/canchas/:id: 403 con usuario normal y 401 sin sesión → 403 / 401"
+        },
+        {
+          "ok": true,
+          "texto": "PATCH /admin/canchas/:id/desactivar: 403 con usuario normal y 401 sin sesión → 403 / 401"
+        },
+        {
+          "ok": true,
+          "texto": "PATCH /admin/canchas/:id/activar: 403 con usuario normal y 401 sin sesión → 403 / 401"
+        },
+        {
+          "ok": true,
+          "texto": "No se creó ni modificó ninguna cancha"
+        },
+        {
+          "ok": true,
+          "texto": "La cancha del intento no existe"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-11-11T18:44:52.282Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-15-06",
+      "hu": "US-15",
+      "ca": [
+        6
+      ],
+      "grupo": "US-15",
+      "titulo": "Validaciones de la cancha: campos obligatorios y rangos, con mensajes por campo (caso de error)",
+      "objetivo": "Verificar precio > 0, cierre posterior a la apertura, horarios y datos obligatorios.",
+      "pasos": [
+        "POST con precio 0 y negativo, nombre y dirección vacíos, tipo inválido.",
+        "POST con cierre anterior o igual a la apertura, hora inválida, día repetido y sin horarios.",
+        "PUT con datos inválidos."
+      ],
+      "esperado": "400 en todos con el campo señalado (costoHora, nombre, direccion, tipo, horarios); no se guarda nada.",
+      "estado": "APROBADA",
+      "duracionMs": 905,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "precio 0: 400 señalando \"costoHora\" → HTTP 400 El precio por hora debe ser un número mayor que 0"
+        },
+        {
+          "ok": true,
+          "texto": "precio negativo: 400 señalando \"costoHora\" → HTTP 400 El precio por hora debe ser un número mayor que 0"
+        },
+        {
+          "ok": true,
+          "texto": "precio no numérico: 400 señalando \"costoHora\" → HTTP 400 El precio por hora debe ser un número mayor que 0"
+        },
+        {
+          "ok": true,
+          "texto": "nombre vacío: 400 señalando \"nombre\" → HTTP 400 El nombre es obligatorio"
+        },
+        {
+          "ok": true,
+          "texto": "dirección vacía: 400 señalando \"direccion\" → HTTP 400 La dirección es obligatoria"
+        },
+        {
+          "ok": true,
+          "texto": "tipo desconocido: 400 señalando \"tipo\" → HTTP 400 El tipo debe ser uno de: Fútbol 5, Fútbol 6, Fútbol 7, Fútbol 8, Fútbol 11"
+        },
+        {
+          "ok": true,
+          "texto": "cierre anterior a la apertura: 400 señalando \"horarios\" → HTTP 400 Horario 1: la hora de cierre debe ser posterior a la de apertura"
+        },
+        {
+          "ok": true,
+          "texto": "cierre igual a la apertura: 400 señalando \"horarios\" → HTTP 400 Horario 1: la hora de cierre debe ser posterior a la de apertura"
+        },
+        {
+          "ok": true,
+          "texto": "hora con formato inválido: 400 señalando \"horarios\" → HTTP 400 Horario 1: las horas de apertura y cierre deben tener el formato HH:mm"
+        },
+        {
+          "ok": true,
+          "texto": "día repetido: 400 señalando \"horarios\" → HTTP 400 Horario 2: el día 2 está repetido"
+        },
+        {
+          "ok": true,
+          "texto": "sin horarios: 400 señalando \"horarios\" → HTTP 400 Define al menos un horario de atención"
+        },
+        {
+          "ok": true,
+          "texto": "Cuerpo vacío: señala todos los campos obligatorios"
+        },
+        {
+          "ok": true,
+          "texto": "Editar con datos inválidos: 400 y la cancha no cambia"
+        },
+        {
+          "ok": true,
+          "texto": "Solo se creó la cancha válida de la preparación"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-11-11T18:44:53.188Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-16-01",
+      "hu": "US-16",
+      "ca": [
+        1
+      ],
+      "grupo": "US-16",
+      "titulo": "Buscar reservas futuras por cancha, fecha o usuario",
+      "objetivo": "Verificar la búsqueda de reservas del administrador y que solo trae las futuras.",
+      "pasos": [
+        "Crear reservas de dos usuarios en dos canchas y una reserva pasada.",
+        "GET /api/admin/reservas con filtros de cancha, fecha y usuario (nombre y correo).",
+        "Probar parámetros inválidos y un usuario normal."
+      ],
+      "esperado": "Cada filtro devuelve solo lo que corresponde, sin reservas pasadas; parámetros inválidos 400; usuario normal 403.",
+      "estado": "APROBADA",
+      "duracionMs": 845,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Preparación: 2 reservas futuras y 1 pasada"
+        },
+        {
+          "ok": true,
+          "texto": "Filtro por cancha y fecha: solo la de esa cancha → 1 resultados"
+        },
+        {
+          "ok": true,
+          "texto": "Filtro por usuario (nombre): solo sus reservas"
+        },
+        {
+          "ok": true,
+          "texto": "Filtro por correo y fecha: solo esa reserva"
+        },
+        {
+          "ok": true,
+          "texto": "Cada reserva trae el usuario titular, la cancha y el código → {\"id\":\"08263d2a-dadb-43b9-b6f5-fdb23c4f205a\",\"codigo\":\"CY-08263D2A\",\"canchaId\":\"3b7d5b04-c22a-4d5a-ba14-aa495f9d2b6e\",\"canchaNombre\":\"Cancha"
+        },
+        {
+          "ok": true,
+          "texto": "Las reservas pasadas no aparecen"
+        },
+        {
+          "ok": true,
+          "texto": "Parámetros inválidos: 400"
+        },
+        {
+          "ok": true,
+          "texto": "Un usuario normal: 403"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-11-11T18:44:54.924Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-16-02",
+      "hu": "US-16",
+      "ca": [
+        2,
+        5
+      ],
+      "grupo": "US-16",
+      "titulo": "Cancelar con motivo y más de 2 horas: \"Cancelada administrativamente\", franja libre y auditoría",
+      "objetivo": "Verificar la cancelación administrativa completa y su registro de auditoría.",
+      "pasos": [
+        "Crear una reserva futura.",
+        "PATCH /api/admin/reservas/:id/cancelar con motivo.",
+        "Revisar estado, disponibilidad, historial del usuario y la tabla de auditoría."
+      ],
+      "esperado": "200 con estado cancelada_administrativamente; la franja queda libre; el usuario ve el motivo en su historial; cancelaciones_administrativas guarda administrador, motivo y fecha.",
+      "estado": "APROBADA",
+      "duracionMs": 1627,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Responde 200 con estado \"cancelada_administrativamente\" → HTTP 200 cancelada_administrativamente"
+        },
+        {
+          "ok": true,
+          "texto": "En la base la reserva quedó cancelada administrativamente"
+        },
+        {
+          "ok": true,
+          "texto": "La franja quedó libre"
+        },
+        {
+          "ok": true,
+          "texto": "Otro usuario puede reservarla (201)"
+        },
+        {
+          "ok": true,
+          "texto": "El usuario ve el estado y el motivo en su historial → {\"e\":\"cancelada_administrativamente\",\"m\":\"La cancha estará en mantenimiento\"}"
+        },
+        {
+          "ok": true,
+          "texto": "Queda registrada la cancelación: administrador, motivo y fecha → true|La cancha estará en mantenimiento|true"
+        },
+        {
+          "ok": true,
+          "texto": "No se puede cancelar de nuevo (409), ni por el usuario ni por el administrador"
+        }
+      ],
+      "evidencias": [
+        {
+          "titulo": "Fila de auditoría",
+          "texto": "{\"id\":\"b07c781f-7958-47b8-a460-2a2d51b0b667\",\"reserva_id\":\"8d852989-dc0a-47be-8c8e-519a5132ddfe\",\"administrador_id\":\"7a19d0a5-c955-4b16-b7c2-661898e996f9\",\"motivo\":\"La cancha estará en mantenimiento\",\"created_at\":\"2026-11-11T18:44:55.355028+00:00\"}"
+        }
+      ],
+      "ejecutadaEn": "2026-11-11T18:44:56.554Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-16-03",
+      "hu": "US-16",
+      "ca": [
+        2,
+        3
+      ],
+      "grupo": "US-16",
+      "titulo": "Motivo obligatorio y bloqueo con menos de 2 horas (caso de error)",
+      "objetivo": "Verificar el motivo obligatorio y la regla de las 2 horas de anticipación.",
+      "pasos": [
+        "Cancelar sin motivo, con motivo vacío y con motivo demasiado largo.",
+        "Cancelar una reserva que empieza en 90 minutos.",
+        "Cancelar una reserva inexistente y con id inválido."
+      ],
+      "esperado": "Sin motivo (o vacío, o de más de 500 caracteres): 400 con el error del campo motivo y la reserva sigue confirmada; con menos de 2 horas: 409 CANCELACION_FUERA_DE_PLAZO y nada cambia; inexistente 404; id inválido 400.",
+      "estado": "APROBADA",
+      "duracionMs": 1735,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "sin motivo: 400 con el error del campo \"motivo\" → HTTP 400 El motivo de la cancelación es obligatorio"
+        },
+        {
+          "ok": true,
+          "texto": "motivo vacío: 400 con el error del campo \"motivo\" → HTTP 400 El motivo de la cancelación es obligatorio"
+        },
+        {
+          "ok": true,
+          "texto": "motivo de 501 caracteres: 400 con el error del campo \"motivo\" → HTTP 400 El motivo no puede superar los 500 caracteres"
+        },
+        {
+          "ok": true,
+          "texto": "La reserva sigue confirmada y no hay registro de auditoría"
+        },
+        {
+          "ok": true,
+          "texto": "Con menos de 2 horas: 409 CANCELACION_FUERA_DE_PLAZO que explica la restricción → HTTP 409 No se puede cancelar: faltan menos de 2 horas para el inicio de la reserva (o ya comenzó)"
+        },
+        {
+          "ok": true,
+          "texto": "La reserva de 90 minutos sigue confirmada"
+        },
+        {
+          "ok": true,
+          "texto": "Reserva inexistente: 404"
+        },
+        {
+          "ok": true,
+          "texto": "Identificador inválido: 400"
+        },
+        {
+          "ok": true,
+          "texto": "Un usuario normal no puede cancelar de forma administrativa: 403"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-11-11T18:44:58.291Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-16-04",
+      "hu": "US-16",
+      "ca": [
+        4
+      ],
+      "grupo": "US-16",
+      "titulo": "El usuario afectado recibe un correo con el motivo",
+      "objetivo": "Verificar la notificación por correo (sin SMTP queda en el log del backend), el escape del HTML del motivo y que un motivo con HTML no se inyecta.",
+      "pasos": [
+        "Cancelar una reserva con un motivo.",
+        "Buscar en los logs del backend el correo de cancelación administrativa."
+      ],
+      "esperado": "El log contiene el correo del usuario, el código y el motivo.",
+      "estado": "APROBADA",
+      "duracionMs": 1310,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "La cancelación responde 200 → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "El backend registró el correo de cancelación administrativa para el usuario"
+        },
+        {
+          "ok": true,
+          "texto": "El correo incluye el código y el motivo"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-11-11T18:44:59.603Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-16-05",
+      "hu": "US-16",
+      "hus": [
+        "US-16",
+        "US-28"
+      ],
+      "ca": {
+        "US-16": [
+          2
+        ],
+        "US-28": [
+          4
+        ]
+      },
+      "grupo": "US-16",
+      "titulo": "Cancelar como administrador una reserva pagada con tarjeta reembolsa el pago",
+      "objetivo": "Verificar que el usuario no pierde su dinero cuando es el administrador quien cancela.",
+      "pasos": [
+        "El usuario guarda una tarjeta y reserva pagando.",
+        "El administrador cancela la reserva con motivo.",
+        "Revisar la tabla de pagos."
+      ],
+      "esperado": "El pago queda \"reembolsado\" con referencia ref_sim_, junto con la cancelación administrativa.",
+      "estado": "APROBADA",
+      "duracionMs": 619,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Preparación: reserva pagada"
+        },
+        {
+          "ok": true,
+          "texto": "El administrador la cancela: 200 → HTTP 200"
+        },
+        {
+          "ok": true,
+          "texto": "El pago quedó reembolsado → reembolsado|ref_sim_05a77353450f50b8"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-11-11T18:45:00.224Z"
     },
     {
       "tipo": "Funcional",
@@ -4406,7 +5029,7 @@
       ],
       "esperado": "Swagger UI responde 200 con HTML; la especificación JSON es openapi 3.x con el esquema bearerAuth (http, bearer, JWT) y el servidor actual como primer servidor; el YAML se puede descargar.",
       "estado": "APROBADA",
-      "duracionMs": 272,
+      "duracionMs": 336,
       "resultado": [
         {
           "ok": true,
@@ -4434,7 +5057,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T00:56:54.977Z"
+      "ejecutadaEn": "2026-11-11T18:45:00.562Z"
     },
     {
       "tipo": "Funcional",
@@ -4460,19 +5083,19 @@
       ],
       "esperado": "Cobertura ≥ 90 % (se espera 100 %, 14/14); cada operación con descripción, 2xx y ejemplos; modelos Usuario, Cancha, Reserva y Error definidos una vez; 409 con duplicada, solapada, límite y retenida; los 11 eventos de socket descritos.",
       "estado": "APROBADA",
-      "duracionMs": 2142,
+      "duracionMs": 2176,
       "resultado": [
         {
           "ok": true,
-          "texto": "La cobertura de endpoints es ≥ 90 % → 100 % (25 de 25)"
+          "texto": "La cobertura de endpoints es ≥ 90 % → 100 % (33 de 33)"
         },
         {
           "ok": true,
-          "texto": "Las 25 operaciones tienen resumen, descripción y respuesta exitosa"
+          "texto": "Las 33 operaciones tienen resumen, descripción y respuesta exitosa"
         },
         {
           "ok": true,
-          "texto": "Las 19 operaciones protegidas documentan el 401"
+          "texto": "Las 27 operaciones protegidas documentan el 401"
         },
         {
           "ok": true,
@@ -4484,7 +5107,7 @@
         },
         {
           "ok": true,
-          "texto": "Los modelos Usuario, Cancha, Reserva y Error están en components/schemas → Error, ErrorValidacion, Mensaje, Usuario, RegistroRequest, LoginRequest, LoginResponse, CanchaResumen, Cancha, HorarioAtencion, FranjaRequest, Reserva, ReservaConfirmada, ReservaHistorial, Paginacion, BloqueOcupado, FranjaRetenida, Disponibilidad, PagoResumen, ReservaRequest, Perfil, PerfilRequest, CambiarPasswordRequest, CambiarCorreoRequest, VerificarCorreoRequest, TarjetaRequest, MetodoPago, VerificarCodigoRequest, ReservaVerificada, ResultadoVerificacion, Verificacion"
+          "texto": "Los modelos Usuario, Cancha, Reserva y Error están en components/schemas → Error, ErrorValidacion, Mensaje, Usuario, RegistroRequest, LoginRequest, LoginResponse, CanchaResumen, Cancha, HorarioAtencion, FranjaRequest, Reserva, ReservaConfirmada, ReservaHistorial, ReservaAdmin, CancelarReservaAdminRequest, Paginacion, BloqueOcupado, FranjaRetenida, Disponibilidad, PagoResumen, ReservaRequest, Perfil, PerfilRequest, CambiarPasswordRequest, CambiarCorreoRequest, VerificarCorreoRequest, TarjetaRequest, MetodoPago, VerificarCodigoRequest, ReservaVerificada, ResultadoVerificacion, Verificacion, CanchaAdminRequest, CanchaAdmin, CanchaAdminRespuesta, ConfirmacionDesactivacion"
         },
         {
           "ok": true,
@@ -4506,10 +5129,10 @@
       "evidencias": [
         {
           "titulo": "Endpoints implementados contra documentados",
-          "texto": "> canchaya-backend@1.0.0 docs:cobertura\n> node scripts/coberturaDocumentacion.js\n\nSI  POST   /api/admin/reservas/{codigo}/usar\nSI  POST   /api/admin/reservas/verificar\nSI  GET    /api/admin/verificaciones\nSI  POST   /api/auth/login\nSI  POST   /api/auth/olvide-password\nSI  POST   /api/auth/registro\nSI  POST   /api/auth/restablecer-password\nSI  POST   /api/auth/verificar-correo\nSI  GET    /api/canchas\nSI  GET    /api/canchas/{id}\nSI  GET    /api/canchas/{id}/disponibilidad\nSI  GET    /api/canchas/{id}/reservas\nSI  POST   /api/canchas/{id}/reservas\nSI  POST   /api/canchas/{id}/temporizador/completar\nSI  GET    /api/health\nSI  GET    /api/reservas\nSI  PATCH  /api/reservas/{id}/cancelar\nSI  GET    /api/reservas/mias\nSI  GET    /api/usuarios/{id}\nSI  PATCH  /api/usuarios/{id}\nSI  POST   /api/usuarios/{id}/correo\nSI  GET    /api/usuarios/{id}/metodos-pago\nSI  POST   /api/usuarios/{id}/metodos-pago\nSI  DELETE /api/usuarios/{id}/metodos-pago/{metodoId}\nSI  PATCH  /api/usuarios/{id}/password\n\nEndpoints implementados: 25\nEndpoints documentados:  25\nCobertura: 100 %"
+          "texto": "> canchaya-backend@1.0.0 docs:cobertura\n> node scripts/coberturaDocumentacion.js\n\nSI  GET    /api/admin/canchas\nSI  POST   /api/admin/canchas\nSI  GET    /api/admin/canchas/{id}\nSI  PUT    /api/admin/canchas/{id}\nSI  PATCH  /api/admin/canchas/{id}/activar\nSI  PATCH  /api/admin/canchas/{id}/desactivar\nSI  GET    /api/admin/reservas\nSI  POST   /api/admin/reservas/{codigo}/usar\nSI  PATCH  /api/admin/reservas/{id}/cancelar\nSI  POST   /api/admin/reservas/verificar\nSI  GET    /api/admin/verificaciones\nSI  POST   /api/auth/login\nSI  POST   /api/auth/olvide-password\nSI  POST   /api/auth/registro\nSI  POST   /api/auth/restablecer-password\nSI  POST   /api/auth/verificar-correo\nSI  GET    /api/canchas\nSI  GET    /api/canchas/{id}\nSI  GET    /api/canchas/{id}/disponibilidad\nSI  GET    /api/canchas/{id}/reservas\nSI  POST   /api/canchas/{id}/reservas\nSI  POST   /api/canchas/{id}/temporizador/completar\nSI  GET    /api/health\nSI  GET    /api/reservas\nSI  PATCH  /api/reservas/{id}/cancelar\nSI  GET    /api/reservas/mias\nSI  GET    /api/usuarios/{id}\nSI  PATCH  /api/usuarios/{id}\nSI  POST   /api/usuarios/{id}/correo\nSI  GET    /api/usuarios/{id}/metodos-pago\nSI  POST   /api/usuarios/{id}/metodos-pago\nSI  DELETE /api/usuarios/{id}/metodos-pago/{metodoId}\nSI  PATCH  /api/usuarios/{id}/password\n\nEndpoints implementados: 33\nEndpoints documentados:  33\nCobertura: 100 %"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:56:57.121Z"
+      "ejecutadaEn": "2026-11-11T18:45:02.740Z"
     },
     {
       "tipo": "Funcional",
@@ -4533,7 +5156,7 @@
       ],
       "esperado": "Spectral sin errores ni advertencias; todos los códigos de respuesta obtenidos están documentados; el flujo con los ejemplos funciona; el README enlaza /api/docs y explica cómo actualizar.",
       "estado": "APROBADA",
-      "duracionMs": 7737,
+      "duracionMs": 4806,
       "resultado": [
         {
           "ok": true,
@@ -4594,7 +5217,233 @@
           "texto": "> canchaya-backend@1.0.0 docs:lint\n> spectral lint openapi/openapi.yaml --ruleset .spectral.yaml --fail-severity=warn\n\nNo results with a severity of 'warn' or higher found!"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:57:04.860Z"
+      "ejecutadaEn": "2026-11-11T18:45:07.548Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-DOC-04",
+      "hu": "PIG1-24",
+      "ca": [
+        1,
+        2,
+        3
+      ],
+      "grupo": "PIG1-24",
+      "titulo": "Manual de usuario, documentación técnica final y evidencias existen, están enlazados y sus enlaces funcionan",
+      "objetivo": "Verificar que los tres documentos de la entrega final existen, que el README los enlaza y que todos sus enlaces internos apuntan a archivos reales.",
+      "pasos": [
+        "Comprobar que existen docs/manual-usuario.md, docs/documentacion-tecnica-final.md y docs/evidencias-pipeline-cicd.md.",
+        "Comprobar que el README los enlaza.",
+        "Revisar los enlaces relativos y las imágenes de cada documento."
+      ],
+      "esperado": "Los tres existen, el README los enlaza y ningún enlace relativo apunta a un archivo inexistente.",
+      "estado": "APROBADA",
+      "duracionMs": 16,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Existe docs/manual-usuario.md y tiene contenido"
+        },
+        {
+          "ok": true,
+          "texto": "El README enlaza docs/manual-usuario.md"
+        },
+        {
+          "ok": true,
+          "texto": "Existe docs/documentacion-tecnica-final.md y tiene contenido"
+        },
+        {
+          "ok": true,
+          "texto": "El README enlaza docs/documentacion-tecnica-final.md"
+        },
+        {
+          "ok": true,
+          "texto": "Existe docs/evidencias-pipeline-cicd.md y tiene contenido"
+        },
+        {
+          "ok": true,
+          "texto": "El README enlaza docs/evidencias-pipeline-cicd.md"
+        },
+        {
+          "ok": true,
+          "texto": "docs/manual-usuario.md: 0 enlaces internos, ninguno roto → "
+        },
+        {
+          "ok": true,
+          "texto": "docs/documentacion-tecnica-final.md: 5 enlaces internos, ninguno roto → "
+        },
+        {
+          "ok": true,
+          "texto": "docs/evidencias-pipeline-cicd.md: 5 enlaces internos, ninguno roto → "
+        },
+        {
+          "ok": true,
+          "texto": "README.md: 42 enlaces internos, ninguno roto → "
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-11-11T19:33:07.457Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-DOC-05",
+      "hu": "PIG1-24",
+      "ca": [
+        2
+      ],
+      "grupo": "PIG1-24",
+      "titulo": "El manual de usuario describe las pantallas y botones reales de la aplicación",
+      "objetivo": "Verificar que cada botón, menú y mensaje que nombra el manual existe en la interfaz y que las funciones del Sprint 5 (incluida la gestión de canchas) están explicadas.",
+      "pasos": [
+        "Extraer del manual los textos en negrita (botones y opciones).",
+        "Buscar cada uno en el código del frontend.",
+        "Comprobar que cubre las funciones de cada historia."
+      ],
+      "esperado": "Todos los textos en negrita del manual existen en el frontend, y el manual cubre reservar, cancelar, perfil, tarjetas, verificar códigos, cancelar como administrador y gestionar canchas.",
+      "estado": "APROBADA",
+      "duracionMs": 67,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "El manual nombra 28 botones y opciones en negrita"
+        },
+        {
+          "ok": true,
+          "texto": "Todos existen en el código del frontend → "
+        },
+        {
+          "ok": true,
+          "texto": "\"Nueva cancha\" está en el manual y en la interfaz"
+        },
+        {
+          "ok": true,
+          "texto": "\"Crear cancha\" está en el manual y en la interfaz"
+        },
+        {
+          "ok": true,
+          "texto": "\"Guardar cambios\" está en el manual y en la interfaz"
+        },
+        {
+          "ok": true,
+          "texto": "\"Desactivar\" está en el manual y en la interfaz"
+        },
+        {
+          "ok": true,
+          "texto": "\"Activar\" está en el manual y en la interfaz"
+        },
+        {
+          "ok": true,
+          "texto": "\"Sí, desactivar de todos modos\" está en el manual y en la interfaz"
+        },
+        {
+          "ok": true,
+          "texto": "\"Gestionar canchas\" está en el manual y en la interfaz"
+        },
+        {
+          "ok": true,
+          "texto": "\"Marcar como utilizada\" está en el manual y en la interfaz"
+        },
+        {
+          "ok": true,
+          "texto": "\"Cancelar reserva\" está en el manual y en la interfaz"
+        },
+        {
+          "ok": true,
+          "texto": "\"Confirmar reserva\" está en el manual y en la interfaz"
+        },
+        {
+          "ok": true,
+          "texto": "\"Iniciar reserva\" está en el manual y en la interfaz"
+        },
+        {
+          "ok": true,
+          "texto": "El manual explica reservar"
+        },
+        {
+          "ok": true,
+          "texto": "El manual explica cancelar reservas"
+        },
+        {
+          "ok": true,
+          "texto": "El manual explica perfil y tarjetas"
+        },
+        {
+          "ok": true,
+          "texto": "El manual explica verificar códigos"
+        },
+        {
+          "ok": true,
+          "texto": "El manual explica cancelación administrativa"
+        },
+        {
+          "ok": true,
+          "texto": "El manual explica gestión de canchas"
+        },
+        {
+          "ok": true,
+          "texto": "El manual ya no dice que la gestión de canchas no está disponible"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-11-11T18:45:07.632Z"
+    },
+    {
+      "tipo": "Funcional",
+      "nivel": "API REST",
+      "prioridad": "Alta",
+      "id": "F-DOC-06",
+      "hu": "PIG1-24",
+      "ca": [
+        1,
+        3
+      ],
+      "grupo": "PIG1-24",
+      "titulo": "La documentación técnica y el pipeline son coherentes con el código",
+      "objetivo": "Verificar que las variables, comandos y endpoints de la documentación técnica existen de verdad y que el workflow despliega desde la rama correcta.",
+      "pasos": [
+        "Comprobar las variables de entorno del documento en backend/.env.example y en el código.",
+        "Comprobar los scripts de npm y los endpoints de gestión de canchas mencionados.",
+        "Revisar ramas, secretos y jobs del workflow."
+      ],
+      "esperado": "Todo lo que el documento menciona existe; el workflow despliega solo en push a sprint_5 y nunca en pull_request.",
+      "estado": "APROBADA",
+      "duracionMs": 51,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Las 10 variables del documento existen en la configuración → "
+        },
+        {
+          "ok": true,
+          "texto": "Los comandos npm del documento existen en backend/package.json (7) → "
+        },
+        {
+          "ok": true,
+          "texto": "Los 6 endpoints de gestión de canchas del documento están en la especificación OpenAPI → "
+        },
+        {
+          "ok": true,
+          "texto": "El despliegue solo corre en push a sprint_5 (nunca en pull_request)"
+        },
+        {
+          "ok": true,
+          "texto": "Los secretos se leen de GitHub (secrets), no están en el repositorio"
+        },
+        {
+          "ok": true,
+          "texto": "El workflow también corre en las ramas de las historias y de la entrega final"
+        },
+        {
+          "ok": true,
+          "texto": "Las 4 capturas de evidencia del pipeline existen"
+        }
+      ],
+      "evidencias": [],
+      "ejecutadaEn": "2026-11-11T18:45:07.686Z"
     }
   ]
 }

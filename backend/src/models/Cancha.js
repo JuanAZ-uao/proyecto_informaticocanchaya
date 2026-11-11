@@ -20,4 +20,11 @@ function aDominio(fila) {
   };
 }
 
-module.exports = { TABLA, aDominio };
+// US-15: vista del administrador, con el estado de la cancha y cuántas reservas futuras confirmadas tiene.
+function aAdmin(fila) {
+  if (!fila) return null;
+
+  return { ...aDominio(fila), reservasFuturas: Number(fila.reservas_futuras ?? 0) };
+}
+
+module.exports = { TABLA, aDominio, aAdmin };

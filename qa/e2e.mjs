@@ -926,7 +926,7 @@ await S.caso(
     await page.waitForSelector('.swagger-ui .opblock');
     c.verifica(/CanchaYa API/.test(await page.locator('.swagger-ui .info .title').innerText()), 'El título de la documentación es "CanchaYa API"');
     const operaciones = await page.locator('.swagger-ui .opblock').count();
-    c.verifica(operaciones === 25, 'Swagger UI lista las 25 operaciones', `${operaciones}`);
+    c.verifica(operaciones === 33, 'Swagger UI lista las 33 operaciones', `${operaciones}`);
     const etiquetas = await page.locator('.swagger-ui .opblock-tag').allInnerTexts();
     c.verifica(['Sistema', 'Autenticación', 'Canchas', 'Reservas', 'Temporizador', 'Socket.IO (tiempo real)'].every((e) => etiquetas.some((t) => t.includes(e))), 'Están las etiquetas, incluida "Socket.IO (tiempo real)"', etiquetas.map((t) => t.split('\n')[0]).join(' · '));
     await c.captura(page, 'Swagger UI: vista general de la documentación');
@@ -974,6 +974,21 @@ const rangoDesdeAhora = (minutos) => {
   const fin = colombiaEn(minutos + 15);
   return { fecha: inicio.fecha, inicio: inicio.hora, fin: fin.fecha === inicio.fecha ? fin.hora : '23:59' };
 };
+// Inserta una reserva que empieza pronto en la primera cancha y el primer minuto libres (la restricción de solape es
+// por cancha y otras pruebas pudieron reservar minutos antes). Devuelve [id, código].
+function insertarProntoLibre(usuario, canchasLista, minutosBase = 60, margen = 50) {
+  for (let desfase = 0; desfase < margen; desfase += 3) {
+    for (const cancha of canchasLista) {
+      const r = rangoDesdeAhora(minutosBase + desfase);
+      try {
+        return sqlq(`INSERT INTO reservas (cancha_id, usuario_id, fecha, hora_inicio, hora_fin) VALUES ('${cancha.id}', '${usuario.id}', '${r.fecha}', '${r.inicio}', '${r.fin}') RETURNING id || '|' || codigo`).split(/\r?\n/)[0].split('|');
+      } catch {
+        // franja ocupada en esa cancha: se prueba otra
+      }
+    }
+  }
+  throw new Error('No se encontró una franja libre para la reserva próxima');
+}
 const reservaApi = (usuario, cancha, fecha, hora) =>
   api('POST', `/canchas/${cancha.id}/reservas`, { fecha, horaInicio: `${hora}:00`, horaFin: `${String(Number(hora) + 1).padStart(2, '0')}:00` }, usuario.token);
 const sinScrollHorizontal = (page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
@@ -995,8 +1010,7 @@ await S.caso(
     const dia = diaLejano();
     const r1 = await reservaApi(U, K0, dia, '08');
     const r2 = await reservaApi(U, K0, dia, '09');
-    const pronto = rangoDesdeAhora(60 + Math.floor(Math.random() * 50));
-    const [idPronto, codigoPronto] = sqlq(`INSERT INTO reservas (cancha_id, usuario_id, fecha, hora_inicio, hora_fin) VALUES ('${[K1, K2, K3, K4][Math.floor(Math.random() * 4)].id}', '${U.id}', '${pronto.fecha}', '${pronto.inicio}', '${pronto.fin}') RETURNING id || '|' || codigo`).split(/\r?\n/)[0].split('|');
+    const [idPronto, codigoPronto] = insertarProntoLibre(U, [K1, K2, K3, K4]);
     c.verifica(r1.status === 201 && r2.status === 201 && Boolean(idPronto), 'Preparación: 2 reservas futuras y 1 que empieza en 90 minutos');
     const codigo1 = r1.datos.reserva.codigo;
 
@@ -1280,8 +1294,186 @@ await S.caso(
   }
 );
 
+const diaHabilLejano = () => {
+  let fecha = diaLejano();
+  while ([0, 6].includes(new Date(`${fecha}T00:00:00`).getDay())) fecha = diaLejano();
+  return fecha;
+};
+
 await S.caso(
-  { ...base, id: 'E2E-30', hu: 'US-27', hus: ['US-27', 'US-28', 'US-29', 'US-14'], ca: {}, grupo: 'Transversal', prioridad: 'Media', titulo: 'Sin errores de JavaScript inesperados en los flujos del Sprint 5', objetivo: 'Verificar que cancelación, perfil, tarjetas y panel de administración no provocaron errores no controlados en el navegador.', pasos: ['Revisar los errores de consola y de página acumulados en E2E-26 a E2E-29.'], esperado: 'Ningún error de JavaScript inesperado; solo los mensajes de red 4xx provocados a propósito (validaciones, rechazos, 403, 404, 402).' },
+  { ...base, id: 'E2E-31', hu: 'US-15', ca: [1, 2, 3, 4, 5, 6], grupo: 'Administración', titulo: 'Gestión de canchas: crear, editar, desactivar con advertencia de reservas y reactivar', objetivo: 'Recorrer en el navegador la gestión de canchas del administrador y su efecto en el catálogo que ve un usuario.', pasos: ['Un usuario normal intenta abrir /admin/canchas.', 'El administrador intenta crear una cancha con precio 0 y con cierre anterior a la apertura, y luego con datos válidos.', 'Edita el precio de una cancha con una reserva confirmada.', 'Intenta desactivarla: el sistema advierte de la reserva y pide confirmación explícita.', 'La reactiva.'], esperado: 'El usuario normal vuelve al catálogo; los datos inválidos muestran errores y no guardan; la cancha nueva aparece en el catálogo; editar no altera la reserva; al desactivar se muestran las reservas afectadas, se exige confirmar y la cancha desaparece del catálogo y de su detalle; al reactivar vuelve.' },
+  async (c) => {
+    const usuario = await crearUsuario('e2ecat');
+    const admin = await crearAdministradorE2E('e2eadmcat');
+    const nombre = `E2E Cancha ${Date.now() % 100000}`;
+
+    const su = await abrirSesion(usuario);
+    await su.page.goto(`${CFG.WEB}/canchas`);
+    await su.page.waitForSelector('nav[aria-label="Principal"]');
+    await su.page.goto(`${CFG.WEB}/admin/canchas`);
+    await su.page.waitForURL(`${CFG.WEB}/canchas`);
+    c.verifica((await su.page.locator('a[aria-label="Administración"]').count()) === 0 && (await su.page.getByText('Gestión de canchas').count()) === 0, 'Un usuario normal no ve las opciones de gestión y vuelve al catálogo');
+
+    const sa = await abrirSesion(admin);
+    const pagina = sa.page;
+    await pagina.goto(`${CFG.WEB}/admin/canchas`);
+    await pagina.waitForSelector('.lista-canchas-admin');
+    c.verifica((await pagina.locator('.admin-nav-enlace', { hasText: 'Gestionar canchas' }).count()) === 1, 'El administrador ve "Gestionar canchas" en el menú de administración');
+    await c.captura(pagina, 'Gestión de canchas: listado con estado y reservas futuras');
+
+    await pagina.click('button:has-text("Nueva cancha")');
+    await pagina.fill('input[name="nombre"]', nombre);
+    await pagina.fill('input[name="direccion"]', 'Calle 50 # 10-20, Cali');
+    await pagina.fill('input[name="zona"]', 'Norte');
+    await pagina.fill('input[name="costoHora"]', '0');
+    await pagina.click('button:has-text("Crear cancha")');
+    await pagina.locator('.formulario-cancha .campo-error').first().waitFor();
+    const errorPrecio = await pagina.locator('.formulario-cancha .campo-error').allInnerTexts();
+    c.verifica(errorPrecio.some((e) => /mayor que 0/.test(e)), 'Con precio 0 se muestra el error del precio y no se crea la cancha', errorPrecio.join(' | '));
+    c.verifica(sqlq(`SELECT count(*) FROM canchas WHERE nombre='${nombre}'`) === '0', 'No se guardó la cancha con precio inválido');
+    await c.captura(pagina, 'Error de precio en el formulario de nueva cancha', '.formulario-cancha');
+
+    await pagina.fill('input[name="costoHora"]', '80000');
+    await pagina.fill('input[aria-label="Apertura del lunes"]', '20:00');
+    await pagina.fill('input[aria-label="Cierre del lunes"]', '08:00');
+    await pagina.click('button:has-text("Crear cancha")');
+    await pagina.locator('.horarios-cancha .campo-error').waitFor();
+    c.verifica(/cierre debe ser posterior/.test(await pagina.locator('.horarios-cancha .campo-error').innerText()), 'Con el cierre antes de la apertura se explica el error del horario');
+    c.verifica(sqlq(`SELECT count(*) FROM canchas WHERE nombre='${nombre}'`) === '0', 'Tampoco se guardó con el horario inválido');
+
+    await pagina.fill('input[aria-label="Apertura del lunes"]', '08:00');
+    await pagina.fill('input[aria-label="Cierre del lunes"]', '20:00');
+    await pagina.click('button:has-text("Crear cancha")');
+    await pagina.waitForSelector('.mensaje-exito');
+    c.verifica(/se creó y ya aparece en el catálogo/.test(await pagina.locator('.mensaje-exito').first().innerText()), 'Con datos válidos la cancha se crea y se avisa');
+    const fila = pagina.locator('.cancha-admin', { hasText: nombre });
+    c.verifica((await fila.count()) === 1 && /Activa/.test(await fila.innerText()), 'La cancha aparece en el listado de administración como Activa');
+    const idCancha = sqlq(`SELECT id FROM canchas WHERE nombre='${nombre}'`);
+
+    await su.page.goto(`${CFG.WEB}/canchas`);
+    await su.page.waitForSelector('a.tarjeta-cancha');
+    c.verifica((await su.page.locator('a.tarjeta-cancha', { hasText: nombre }).count()) === 1, 'El usuario ve la cancha nueva en el catálogo');
+    await c.captura(su.page, 'El catálogo del usuario muestra la cancha creada');
+
+    const fechaReserva = diaHabilLejano();
+    const reserva = await api('POST', `/canchas/${idCancha}/reservas`, { fecha: fechaReserva, horaInicio: '10:00', horaFin: '11:00' }, usuario.token);
+    c.verifica(reserva.status === 201, 'Preparación: el usuario reserva una franja de la cancha nueva');
+
+    await fila.locator('button:has-text("Editar")').click();
+    await pagina.waitForSelector('input[name="costoHora"]');
+    c.verifica((await pagina.locator('input[name="nombre"]').inputValue()) === nombre, 'Editar carga los datos actuales de la cancha');
+    await pagina.fill('input[name="costoHora"]', '91000');
+    await pagina.click('button:has-text("Guardar cambios")');
+    await pagina.waitForSelector('.mensaje-exito:has-text("Las reservas ya confirmadas no se modificaron")');
+    await su.page.goto(`${CFG.WEB}/canchas`);
+    await su.page.waitForSelector('a.tarjeta-cancha');
+    c.verifica(/91\.000/.test(await su.page.locator('a.tarjeta-cancha', { hasText: nombre }).innerText()), 'El catálogo refleja el precio nuevo ($ 91.000)');
+    c.verifica(sqlq(`SELECT estado || '|' || fecha::text || '|' || hora_inicio::text FROM reservas WHERE id='${reserva.datos.reserva.id}'`) === `confirmada|${fechaReserva}|10:00:00`, 'La reserva ya confirmada no se alteró');
+
+    await pagina.locator('.cancha-admin', { hasText: nombre }).locator('button:has-text("Desactivar")').click();
+    await pagina.waitForSelector('[role="dialog"]');
+    await pagina.click('button:has-text("Sí, desactivar")');
+    await pagina.waitForSelector('[role="dialog"] :text("Esta cancha tiene reservas futuras")');
+    const advertencia = await pagina.locator('[role="dialog"]').innerText();
+    c.verifica(advertencia.includes(reserva.datos.reserva.codigo) && /1 reserva futura confirmada/.test(advertencia), 'Al desactivar, el sistema advierte de la reserva futura afectada y muestra su código', advertencia.replace(/\n+/g, ' · ').slice(0, 150));
+    c.verifica(sqlq(`SELECT disponible FROM canchas WHERE id='${idCancha}'`) === 't', 'Mientras no se confirma, la cancha sigue activa');
+    await c.captura(pagina, 'Advertencia de reservas futuras antes de desactivar', '[role="dialog"]');
+    await pagina.click('button:has-text("Sí, desactivar de todos modos")');
+    await pagina.waitForSelector('.mensaje-exito:has-text("se desactivó")');
+    c.verifica(sqlq(`SELECT disponible FROM canchas WHERE id='${idCancha}'`) === 'f' && sqlq(`SELECT estado FROM reservas WHERE id='${reserva.datos.reserva.id}'`) === 'confirmada', 'Con la confirmación explícita se desactiva y la reserva se conserva confirmada');
+    c.verifica(/Desactivada/.test(await pagina.locator('.cancha-admin', { hasText: nombre }).innerText()), 'El listado de administración la marca como Desactivada');
+    await c.captura(pagina, 'Cancha desactivada en el listado de administración');
+
+    await su.page.goto(`${CFG.WEB}/canchas`);
+    await su.page.waitForSelector('a.tarjeta-cancha');
+    c.verifica((await su.page.locator('a.tarjeta-cancha', { hasText: nombre }).count()) === 0, 'Desactivada, deja de mostrarse en el catálogo público');
+    await su.page.goto(`${CFG.WEB}/canchas/${idCancha}`);
+    await su.page.waitForSelector('.mensaje-error');
+    c.verifica(/No encontramos esta cancha|no encontrada/i.test(await su.page.locator('.mensaje-error').first().innerText()), 'Su detalle público ya no existe');
+    const bloqueada = await api('POST', `/canchas/${idCancha}/reservas`, { fecha: fechaReserva, horaInicio: '12:00', horaFin: '13:00' }, usuario.token);
+    c.verifica(bloqueada.status === 409 && bloqueada.datos.codigo === 'CANCHA_NO_DISPONIBLE', 'No admite nuevas reservas: 409 CANCHA_NO_DISPONIBLE');
+    await su.page.goto(`${CFG.WEB}/mis-reservas`);
+    await su.page.waitForSelector('.reserva-item');
+    c.verifica(/Confirmada/.test(await su.page.locator('.reserva-item', { hasText: reserva.datos.reserva.codigo }).innerText()), 'El historial del usuario conserva su reserva confirmada');
+
+    await pagina.locator('.cancha-admin', { hasText: nombre }).locator('button:has-text("Activar")').click();
+    await pagina.waitForSelector('.mensaje-exito:has-text("se reactivó")');
+    await su.page.goto(`${CFG.WEB}/canchas`);
+    await su.page.waitForSelector('a.tarjeta-cancha');
+    c.verifica((await su.page.locator('a.tarjeta-cancha', { hasText: nombre }).count()) === 1, 'Al reactivarla vuelve al catálogo');
+    await su.context.close();
+    await sa.context.close();
+  }
+);
+
+// La cancha de prueba se elimina (con su reserva) para dejar el catálogo como estaba, aunque el caso haya fallado a mitad.
+sqlq("DELETE FROM canchas WHERE nombre LIKE 'E2E Cancha %'");
+
+await S.caso(
+  { ...base, id: 'E2E-32', hu: 'US-16', ca: [1, 2, 3, 4, 5], grupo: 'Administración', titulo: 'Cancelación administrativa: buscar, exigir motivo, bloquear con menos de 2 horas y notificar al usuario', objetivo: 'Recorrer en el navegador la cancelación de reservas por un administrador y lo que ve el usuario afectado.', pasos: ['El administrador busca por usuario la reserva de otra persona.', 'Intenta cancelar sin motivo y luego con motivo.', 'Intenta cancelar una reserva que empieza en menos de 2 horas.', 'El usuario revisa "Mis reservas".'], esperado: 'La búsqueda encuentra la reserva; sin motivo se muestra el error; con motivo la reserva pasa a "Cancelada administrativamente" y queda auditada; con menos de 2 horas se bloquea explicando la restricción; el usuario ve el estado y el motivo.' },
+  async (c) => {
+    const usuario = await crearUsuario('e2eafectado');
+    const otro = await crearUsuario('e2epronto');
+    const admin = await crearAdministradorE2E('e2eadm16');
+    const dia = diaHabilLejano();
+    const reserva = (await reservaApi(usuario, K0, dia, '11')).datos.reserva;
+    const [idPronto, codigoPronto] = insertarProntoLibre(otro, [K1, K2, K3, K4]);
+    c.verifica(Boolean(reserva?.codigo) && Boolean(idPronto), 'Preparación: una reserva futura y otra que empieza en menos de 2 horas');
+
+    const sa = await abrirSesion(admin);
+    const p = sa.page;
+    await p.goto(`${CFG.WEB}/admin/reservas`);
+    await p.waitForSelector('.admin-filtros');
+    await p.fill('#filtro-usuario', usuario.correo);
+    await p.click('button:has-text("Buscar")');
+    await p.waitForSelector(`.reserva-item:has-text("${reserva.codigo}")`);
+    c.verifica((await p.locator('.reserva-item').count()) === 1 && (await p.locator('.reserva-item').innerText()).includes(usuario.nombre), 'Buscar por usuario encuentra su reserva futura, con el nombre del titular');
+    await c.captura(p, 'Administración de reservas: búsqueda por usuario');
+
+    await p.click(`button[aria-label="Cancelar reserva ${reserva.codigo}"]`);
+    await p.waitForSelector('[role="dialog"]');
+    await p.fill('#motivo-cancelacion', '   ');
+    await p.click('button:has-text("Confirmar cancelación")');
+    await p.locator('[role="dialog"] .mensaje-error').waitFor();
+    c.verifica(/motivo de la cancelación es obligatorio/i.test(await p.locator('[role="dialog"] .mensaje-error').innerText()) && sqlq(`SELECT estado FROM reservas WHERE id='${reserva.id}'`) === 'confirmada', 'Con un motivo en blanco se muestra el error y la reserva sigue confirmada');
+    await c.captura(p, 'Motivo obligatorio al cancelar', '[role="dialog"]');
+    await p.fill('#motivo-cancelacion', 'La cancha estará en mantenimiento');
+    await p.click('button:has-text("Confirmar cancelación")');
+    await p.waitForSelector('.mensaje-exito');
+    c.verifica(/fue cancelada\. Se notificó al usuario por correo/.test(await p.locator('.mensaje-exito').first().innerText()), 'Con motivo se cancela y se informa al administrador que se notificó al usuario');
+    c.verifica(sqlq(`SELECT estado FROM reservas WHERE id='${reserva.id}'`) === 'cancelada_administrativamente', 'La reserva queda "cancelada administrativamente"');
+    c.verifica(sqlq(`SELECT (administrador_id = '${admin.id}')::text || '|' || motivo FROM cancelaciones_administrativas WHERE reserva_id='${reserva.id}'`) === 'true|La cancha estará en mantenimiento', 'Queda registrada la auditoría: administrador y motivo');
+    c.verifica(!(await api('GET', `/canchas/${K0.id}/disponibilidad?fecha=${dia}`, undefined, usuario.token)).datos.ocupados.some((o) => String(o.horaInicio).startsWith('11:00')), 'La franja quedó disponible');
+    await c.captura(p, 'Cancelación administrativa realizada');
+
+    await p.fill('#filtro-usuario', otro.correo);
+    await p.click('button:has-text("Buscar")');
+    await p.waitForSelector(`.reserva-item:has-text("${codigoPronto}")`);
+    await p.click(`button[aria-label="Cancelar reserva ${codigoPronto}"]`);
+    await p.waitForSelector('[role="dialog"]');
+    await p.fill('#motivo-cancelacion', 'Imprevisto operativo');
+    await p.click('button:has-text("Confirmar cancelación")');
+    await p.locator('[role="dialog"] .mensaje-error').waitFor();
+    const bloqueo = await p.locator('[role="dialog"] .mensaje-error').innerText();
+    c.verifica(/2 horas/.test(bloqueo) && sqlq(`SELECT estado FROM reservas WHERE id='${idPronto}'`) === 'confirmada', 'Con menos de 2 horas se bloquea explicando la restricción y la reserva sigue confirmada', bloqueo.replace(/\n+/g, ' '));
+    await c.captura(p, 'Cancelación bloqueada por faltar menos de 2 horas', '[role="dialog"]');
+    await sa.context.close();
+
+    const su = await abrirSesion(usuario);
+    await su.page.goto(`${CFG.WEB}/mis-reservas`);
+    await su.page.waitForSelector('.reserva-item');
+    const visto = await su.page.locator('.reserva-item', { hasText: reserva.codigo }).innerText();
+    c.verifica(/Cancelada administrativamente/.test(visto) && visto.includes('La cancha estará en mantenimiento') && (await su.page.locator('.reserva-item', { hasText: reserva.codigo }).locator('button:has-text("Cancelar reserva")').count()) === 0, 'El usuario ve "Cancelada administrativamente" y el motivo, sin opción de cancelar', visto.replace(/\n+/g, ' · ').slice(0, 170));
+    await c.captura(su.page, 'Mis reservas: reserva cancelada administrativamente con su motivo');
+    await esperar(300);
+    const correo = logsBackend('5m').split('\n').find((l) => l.includes('Cancelación administrativa') && l.includes(usuario.correo));
+    c.verifica(Boolean(correo) && correo.includes('La cancha estará en mantenimiento'), 'El usuario afectado recibió el correo con el motivo (registro del backend sin SMTP)');
+    await su.context.close();
+  }
+);
+
+await S.caso(
+  { ...base, id: 'E2E-30', hu: 'US-27', hus: ['US-27', 'US-28', 'US-29', 'US-14', 'US-15', 'US-16'], ca: {}, grupo: 'Transversal', prioridad: 'Media', titulo: 'Sin errores de JavaScript inesperados en los flujos del Sprint 5', objetivo: 'Verificar que cancelación, perfil, tarjetas, gestión de canchas, cancelación administrativa y panel de administración no provocaron errores no controlados en el navegador.', pasos: ['Revisar los errores de consola y de página acumulados en E2E-26 a E2E-32.'], esperado: 'Ningún error de JavaScript inesperado; solo los mensajes de red 4xx provocados a propósito (validaciones, rechazos, 403, 404, 402).' },
   async (c) => {
     const esperados = /status of (400|401|402|403|404|409|426|429|500)|Failed to load resource/;
     const inesperados = erroresConsola.filter((e) => !esperados.test(e));

@@ -68,7 +68,16 @@ Un código inexistente o mal escrito aparece como **Código no encontrado**. Rev
 
 En **Cancelar reservas**, filtra las reservas futuras, abre la acción de cancelación y escribe un motivo. Revisa los datos antes de confirmar: el sistema notifica al usuario y registra la operación. Se aplican las restricciones horarias del sistema.
 
-La administración de canchas de US-15 no está disponible en esta interfaz. Consulta la nota de integración en la [documentación técnica](documentacion-tecnica-final.md); no intentes usar rutas que no estén habilitadas en la aplicación.
+### Gestionar las canchas del catálogo
+
+En **Gestionar canchas** (menú de administración) ves todas las canchas, también las desactivadas, con su precio y cuántas reservas futuras tienen.
+
+- **Nueva cancha:** pulsa **Nueva cancha**, completa nombre, dirección, precio por hora y el horario de atención (marca los días en que abre y su hora de apertura y cierre) y pulsa **Crear cancha**. La cancha aparece de inmediato en el catálogo. El precio debe ser mayor que 0 y la hora de cierre posterior a la de apertura; los errores se muestran junto a cada campo.
+- **Editar:** pulsa **Editar**, cambia los datos y pulsa **Guardar cambios**. El catálogo muestra los cambios al instante; las reservas ya confirmadas no se modifican.
+- **Desactivar:** pulsa **Desactivar** y confirma. La cancha deja de mostrarse en el catálogo y no admite nuevas reservas, pero su historial se conserva. Si tiene reservas futuras, el sistema te muestra cuáles son y exige una confirmación explícita (**Sí, desactivar de todos modos**); esas reservas se conservan.
+- **Activar:** en una cancha desactivada, pulsa **Activar** para volver a mostrarla y admitir reservas.
+
+Un usuario sin rol de administrador no ve estas opciones y, si intenta abrir la ruta, vuelve al catálogo.
 
 ## 6. Ayuda y problemas comunes
 

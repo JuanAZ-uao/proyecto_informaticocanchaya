@@ -28,3 +28,29 @@ export function obtenerReservasAdmin({ canchaId, fecha, usuario, pagina = 1, lim
 export function cancelarReservaAdmin(id, motivo) {
   return axiosClient.patch(`/admin/reservas/${id}/cancelar`, { motivo });
 }
+
+// US-15: gestión de canchas (crear, editar, desactivar y reactivar).
+export function listarCanchasAdmin() {
+  return axiosClient.get('/admin/canchas');
+}
+
+export function obtenerCanchaAdmin(id) {
+  return axiosClient.get(`/admin/canchas/${id}`);
+}
+
+export function crearCanchaAdmin(datos) {
+  return axiosClient.post('/admin/canchas', datos);
+}
+
+export function editarCanchaAdmin(id, datos) {
+  return axiosClient.put(`/admin/canchas/${id}`, datos);
+}
+
+// Con reservas futuras el servidor responde 409 CONFIRMACION_REQUERIDA hasta que se envía confirmar: true.
+export function desactivarCanchaAdmin(id, confirmar = false) {
+  return axiosClient.patch(`/admin/canchas/${id}/desactivar`, { confirmar });
+}
+
+export function activarCanchaAdmin(id) {
+  return axiosClient.patch(`/admin/canchas/${id}/activar`);
+}

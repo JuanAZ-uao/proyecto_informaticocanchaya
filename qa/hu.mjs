@@ -179,6 +179,31 @@ export const HU = {
       'Cuando la cancelación se completa, recibo una notificación en pantalla y por correo con el detalle de la reserva cancelada.',
     ],
   },
+  'US-15': {
+    titulo: 'Gestión de canchas (administrador)',
+    sprint: 5,
+    historia: 'Como administrador, quiero crear, editar y desactivar canchas (dirección, horarios y precio), para mantener actualizada la oferta disponible.',
+    criterios: [
+      'Como administrador autenticado, al completar el formulario de nueva cancha (nombre, dirección, horarios, precio por hora) con datos válidos, la cancha se crea y aparece en el catálogo.',
+      'Al editar una cancha existente y guardar, el catálogo refleja los nuevos datos y las reservas ya confirmadas no se alteran.',
+      'Al desactivar una cancha, deja de mostrarse en el listado público y no admite nuevas reservas, conservando su historial.',
+      'Al intentar desactivar una cancha con reservas futuras, el sistema advierte de las reservas afectadas y requiere confirmación explícita.',
+      'Si un usuario sin rol de administrador intenta acceder a estas funciones, el sistema responde 403 y oculta las opciones de gestión.',
+      'Los campos obligatorios y rangos (precio > 0, hora de cierre posterior a apertura) se validan y muestran mensajes de error claros.',
+    ],
+  },
+  'US-16': {
+    titulo: 'Cancelación administrativa',
+    sprint: 5,
+    historia: 'Como administrador, quiero cancelar cualquier reserva con al menos 2 horas de anticipación, para gestionar excepciones o imprevistos operativos.',
+    criterios: [
+      'Como administrador, al buscar una reserva por cancha, fecha o usuario puedo seleccionar cualquier reserva futura para cancelarla.',
+      'Si faltan al menos 2 horas para el inicio y la cancelo indicando un motivo obligatorio, pasa a estado "Cancelada administrativamente" y la franja queda disponible.',
+      'Si faltan menos de 2 horas, el sistema bloquea la acción y muestra el motivo de la restricción.',
+      'Al cancelar una reserva, el usuario afectado recibe una notificación por correo con el motivo de la cancelación.',
+      'Cada cancelación administrativa queda registrada (administrador, fecha y hora, motivo) para auditoría.',
+    ],
+  },
   'US-17': {
     titulo: 'Temporizador de sesión de reserva (Socket)',
     sprint: 3,
@@ -310,6 +335,16 @@ export const HU = {
       'La especificación no tiene errores al validarla con una herramienta (Spectral), idealmente como etapa del pipeline (US-20).',
       'Los ejemplos de "Try it out" funcionan contra el backend.',
       'El README enlaza la documentación y explica cómo actualizarla.',
+    ],
+  },
+  'PIG1-24': {
+    titulo: 'Pipeline CI/CD, manual de usuario y documentación final',
+    sprint: 5,
+    historia: 'Evidenciar el pipeline CI/CD funcionando y completar el manual de usuario y la documentación técnica final antes del despliegue.',
+    criterios: [
+      'Se evidencia el pipeline CI/CD funcionando: el workflow define los jobs y el despliegue solo corre en la rama de despliegue, con capturas de ejecuciones reales.',
+      'El manual de usuario explica cómo usar la aplicación (cuenta, reservas, cancelaciones, perfil, tarjetas y funciones de administración) con los nombres reales de la interfaz.',
+      'La documentación técnica final cubre arquitectura, ejecución local, configuración, API y base de datos, pipeline y preparación del despliegue, de forma coherente con el código.',
     ],
   },
 };

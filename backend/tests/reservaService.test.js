@@ -32,7 +32,7 @@ const HORARIO_DIARIO = [0, 1, 2, 3, 4, 5, 6].map((diaSemana) => ({ diaSemana, ho
 describe('reservaService.crearReserva', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    canchaRepository.obtenerPorId.mockResolvedValue({ id: CANCHA_ID, nombre: 'Cancha 1', direccion: 'Calle 1' });
+    canchaRepository.obtenerPorId.mockResolvedValue({ id: CANCHA_ID, nombre: 'Cancha 1', direccion: 'Calle 1', disponible: true });
     usuarioRepository.buscarPorId.mockResolvedValue({ id: USUARIO_ID, nombre: 'Ana', correo: 'ana@test.local' });
     emailService.enviarCorreoConfirmacionReserva.mockResolvedValue({ simulado: true });
     retencionService.verificarDisponibleParaReservar.mockResolvedValue(undefined);
@@ -272,7 +272,7 @@ describe('reservaService.cancelarReserva (US-14)', () => {
     jest.resetAllMocks();
     pagoRepository.obtenerPorReserva.mockResolvedValue(null);
     usuarioRepository.buscarPorId.mockResolvedValue({ id: USUARIO_ID, nombre: 'Ana', correo: 'ana@test.local' });
-    canchaRepository.obtenerPorId.mockResolvedValue({ id: CANCHA_ID, nombre: 'Cancha 1', direccion: 'Calle 1' });
+    canchaRepository.obtenerPorId.mockResolvedValue({ id: CANCHA_ID, nombre: 'Cancha 1', direccion: 'Calle 1', disponible: true });
     emailService.enviarCorreoCancelacionReserva.mockResolvedValue({ simulado: true });
   });
 
@@ -416,7 +416,7 @@ describe('reservaService.crearReserva con pago con tarjeta (US-28)', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    canchaRepository.obtenerPorId.mockResolvedValue({ id: CANCHA_ID, nombre: 'Cancha 1', direccion: 'Calle 1', costoHora: 60000 });
+    canchaRepository.obtenerPorId.mockResolvedValue({ id: CANCHA_ID, nombre: 'Cancha 1', direccion: 'Calle 1', costoHora: 60000, disponible: true });
     usuarioRepository.buscarPorId.mockResolvedValue({ id: USUARIO_ID, nombre: 'Ana', correo: 'ana@test.local' });
     emailService.enviarCorreoConfirmacionReserva.mockResolvedValue({ simulado: true });
     retencionService.verificarDisponibleParaReservar.mockResolvedValue(undefined);

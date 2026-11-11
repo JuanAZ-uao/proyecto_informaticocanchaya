@@ -1307,6 +1307,22 @@ const fechaPasadaUnica = () => `${2001 + Math.floor(Math.random() * 19)}-${Strin
 const insertarReservaSql = (usuario, cancha, fecha, inicio, fin, estado = 'confirmada') =>
   sqlq(`INSERT INTO reservas (cancha_id, usuario_id, fecha, hora_inicio, hora_fin, estado) VALUES ('${cancha.id}', '${usuario.id}', '${fecha}', '${inicio}', '${fin}', '${estado}') RETURNING id || '|' || codigo`).split(/\r?\n/)[0].split('|');
 
+// Inserta una reserva que empieza pronto en la primera cancha y el primer minuto libres: así no choca con las que
+// crearon otras pruebas minutos antes (la restricción de solape es por cancha).
+function insertarProntoLibre(usuario, canchasLista, minutosBase = 60, margen = 50) {
+  for (let desfase = 0; desfase < margen; desfase += 3) {
+    for (const cancha of canchasLista) {
+      const r = rangoDesdeAhora(minutosBase + desfase);
+      try {
+        return insertarReservaSql(usuario, cancha, r.fecha, r.inicio, r.fin);
+      } catch {
+        // franja ocupada en esa cancha: se prueba otra
+      }
+    }
+  }
+  throw new Error('No se encontró una franja libre para la reserva próxima');
+}
+
 async function crearAdministrador(prefijo = 'admin') {
   const admin = await crearUsuario(prefijo);
   sqlq(`UPDATE usuarios SET rol = 'administrador' WHERE id = '${admin.id}'`);
@@ -1367,10 +1383,8 @@ await S.caso(
   { ...base, id: 'F-14-02', hu: 'US-14', ca: [3], grupo: 'US-14', titulo: 'Menos de 2 horas: la cancelación se bloquea y se explica la restricción (caso de error)', objetivo: 'Verificar la regla de las 2 horas de anticipación, en el borde y en el historial.', pasos: ['Insertar una reserva que empieza en 90 minutos y otra que empieza en 180 minutos.', 'Cancelar la de 90 minutos.', 'Consultar el historial (puedeCancelar).', 'Cancelar la de 180 minutos.'], esperado: 'La de 90 min: 409 CANCELACION_FUERA_DE_PLAZO con mensaje que menciona 2 horas, sigue confirmada, el historial indica puedeCancelar=false. La de 180 min: 200.' },
   async (c) => {
     const u = await crearUsuario('plazo');
-    const pronto = rangoDesdeAhora(60 + Math.floor(Math.random() * 50));
-    const lejos = rangoDesdeAhora(150 + Math.floor(Math.random() * 60));
-    const [idPronto] = insertarReservaSql(u, [K1, K2][Math.floor(Math.random() * 2)], pronto.fecha, pronto.inicio, pronto.fin);
-    const [idLejos] = insertarReservaSql(u, K0, lejos.fecha, lejos.inicio, lejos.fin);
+    const [idPronto] = insertarProntoLibre(u, [K1, K2, K0]);
+    const [idLejos] = insertarProntoLibre(u, [K0, K1, K2], 150, 60);
     const r = await cancelarReserva(u, idPronto);
     c.verifica(r.status === 409 && r.datos.codigo === 'CANCELACION_FUERA_DE_PLAZO', 'Con 90 min de anticipación: 409 CANCELACION_FUERA_DE_PLAZO', `HTTP ${r.status} ${r.datos.codigo}`);
     c.verifica(/2 horas/.test(r.datos.mensaje), 'El mensaje explica la restricción de 2 horas', r.datos.mensaje);
@@ -1836,6 +1850,277 @@ await S.caso(
   }
 );
 
+// ---------------------------------------------------------------------
+// US-15 Gestión de canchas (administrador)
+// ---------------------------------------------------------------------
+const ADMIN_CANCHAS = await crearAdministrador('admin-canchas');
+const horariosPrueba = [
+  { diaSemana: 0, horaInicio: '07:00', horaFin: '20:00' },
+  { diaSemana: 1, horaInicio: '06:00', horaFin: '22:00' },
+  { diaSemana: 2, horaInicio: '06:00', horaFin: '22:00' },
+  { diaSemana: 3, horaInicio: '06:00', horaFin: '22:00' },
+  { diaSemana: 4, horaInicio: '06:00', horaFin: '22:00' },
+  { diaSemana: 5, horaInicio: '06:00', horaFin: '22:00' },
+  { diaSemana: 6, horaInicio: '07:00', horaFin: '20:00' },
+];
+const datosCancha = (extra = {}) => ({
+  nombre: `Cancha QA ${Date.now()}.${Math.floor(Math.random() * 1e6)}`,
+  direccion: 'Calle 5 # 10-20, Cali',
+  zona: 'Zona QA',
+  costoHora: 85000,
+  tipo: 'Fútbol 7',
+  descripcion: 'Cancha creada por la prueba',
+  servicios: ['Parqueadero'],
+  horarios: horariosPrueba,
+  ...extra,
+});
+const crearCanchaQA = (extra) => api('POST', '/admin/canchas', datosCancha(extra), ADMIN_CANCHAS.token);
+const catalogoIds = async (usuario) => (await api('GET', '/canchas', undefined, usuario.token)).datos.canchas.map((x) => x.id);
+
+await S.caso(
+  { ...base, id: 'F-15-01', hu: 'US-15', ca: [1], grupo: 'US-15', titulo: 'Crear una cancha con datos válidos: aparece en el catálogo público', objetivo: 'Verificar la creación de una cancha con su horario y que el catálogo la muestra.', pasos: ['POST /api/admin/canchas con nombre, dirección, precio y horarios válidos.', 'GET /api/canchas y GET /api/canchas/:id como un usuario normal.'], esperado: '201 con la cancha activa y sus horarios; aparece en el catálogo y su detalle trae los 7 horarios.' },
+  async (c) => {
+    const u = await crearUsuario('cat15');
+    const datos = datosCancha();
+    const r = await api('POST', '/admin/canchas', datos, ADMIN_CANCHAS.token);
+    c.verifica(r.status === 201 && r.datos.cancha.disponible === true && r.datos.cancha.nombre === datos.nombre, 'Responde 201 con la cancha activa', `HTTP ${r.status}`);
+    c.verifica(r.datos.cancha.horarios.length === 7 && r.datos.cancha.costoHora === 85000, 'Devuelve sus 7 horarios y el precio', `${r.datos.cancha.horarios?.length} horarios`);
+    c.verifica((await catalogoIds(u)).includes(r.datos.cancha.id), 'Aparece en el catálogo público (GET /api/canchas)');
+    const det = await api('GET', `/canchas/${r.datos.cancha.id}`, undefined, u.token);
+    c.verifica(det.status === 200 && det.datos.cancha.horarios.length === 7 && det.datos.cancha.costoHora === 85000, 'Su detalle público trae precio y horarios');
+    c.verifica(sqlq(`SELECT disponible::text || '|' || count(h.id) FROM canchas c JOIN horarios_disponibles h ON h.cancha_id = c.id WHERE c.id = '${r.datos.cancha.id}' GROUP BY c.disponible`) === 'true|7', 'En la base queda activa con 7 horarios');
+    const reservable = await reservar(u, { id: r.datos.cancha.id }, { fecha: fechaUnica(), horaInicio: '10:00', horaFin: '11:00' });
+    c.verifica(reservable.status === 201, 'Se puede reservar en la cancha nueva (201)', `HTTP ${reservable.status}`);
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-15-02', hu: 'US-15', ca: [2], grupo: 'US-15', titulo: 'Editar una cancha: el catálogo refleja los cambios y las reservas confirmadas no se alteran', objetivo: 'Verificar la edición de datos y horarios con una reserva ya confirmada.', pasos: ['Crear una cancha y una reserva confirmada.', 'PUT /api/admin/canchas/:id cambiando nombre, precio y horario (la reserva queda fuera del nuevo horario).', 'Consultar el catálogo y la reserva.'], esperado: '200; el catálogo muestra el nombre y el precio nuevos; la reserva sigue confirmada con la misma fecha y hora y cuenta como reserva futura.' },
+  async (c) => {
+    const u = await crearUsuario('edit15');
+    const creada = (await crearCanchaQA()).datos.cancha;
+    const f = { fecha: fechaUnica(), horaInicio: '09:00', horaFin: '10:00' };
+    const reserva = await reservar(u, creada, f);
+    c.verifica(reserva.status === 201, 'Preparación: reserva confirmada de las 09:00', `HTTP ${reserva.status}`);
+    const cambios = datosCancha({ nombre: `${creada.nombre} editada`, costoHora: 99000, horarios: [{ diaSemana: 1, horaInicio: '14:00', horaFin: '18:00' }] });
+    const r = await api('PUT', `/admin/canchas/${creada.id}`, cambios, ADMIN_CANCHAS.token);
+    c.verifica(r.status === 200 && r.datos.cancha.nombre === cambios.nombre && r.datos.cancha.costoHora === 99000, 'Responde 200 con los datos nuevos', `HTTP ${r.status}`);
+    c.verifica(r.datos.cancha.horarios.length === 1 && r.datos.cancha.horarios[0].horaInicio === '14:00', 'El horario se reemplazó por el nuevo');
+    const enCatalogo = (await api('GET', '/canchas', undefined, u.token)).datos.canchas.find((x) => x.id === creada.id);
+    c.verifica(enCatalogo?.nombre === cambios.nombre && enCatalogo.costoHora === 99000, 'El catálogo refleja el nombre y el precio nuevos');
+    c.verifica(sqlq(`SELECT estado || '|' || fecha::text || '|' || hora_inicio::text FROM reservas WHERE id='${reserva.datos.reserva.id}'`) === `confirmada|${f.fecha}|09:00:00`, 'La reserva ya confirmada no se alteró (estado, fecha y hora)');
+    const admin = (await api('GET', '/admin/canchas', undefined, ADMIN_CANCHAS.token)).datos.canchas.find((x) => x.id === creada.id);
+    c.verifica(admin?.reservasFuturas === 1, 'El panel cuenta 1 reserva futura en la cancha', `${admin?.reservasFuturas}`);
+    c.verifica((await api('PUT', `/admin/canchas/${UUID_INEXISTENTE}`, datosCancha(), ADMIN_CANCHAS.token)).status === 404, 'Editar una cancha inexistente: 404');
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-15-03', hu: 'US-15', ca: [3], grupo: 'US-15', titulo: 'Desactivar una cancha: sale del listado, no admite reservas y conserva el historial', objetivo: 'Verificar la desactivación lógica y la reactivación.', pasos: ['Crear una cancha sin reservas y desactivarla.', 'Consultar el catálogo, el detalle y reservar.', 'Reactivarla.'], esperado: 'Desactivar: 200; deja de estar en el catálogo, su detalle es 404 y reservar responde 409 CANCHA_NO_DISPONIBLE; el administrador la sigue viendo; al activarla todo vuelve a funcionar.' },
+  async (c) => {
+    const u = await crearUsuario('desact15');
+    const creada = (await crearCanchaQA()).datos.cancha;
+    const d = await api('PATCH', `/admin/canchas/${creada.id}/desactivar`, {}, ADMIN_CANCHAS.token);
+    c.verifica(d.status === 200 && d.datos.cancha.disponible === false && d.datos.reservasAfectadas === 0, 'Sin reservas futuras se desactiva de inmediato: 200', `HTTP ${d.status}`);
+    c.verifica(!(await catalogoIds(u)).includes(creada.id), 'Deja de mostrarse en el listado público');
+    c.verifica((await api('GET', `/canchas/${creada.id}`, undefined, u.token)).status === 404, 'Su detalle público responde 404');
+    const r = await reservar(u, creada, { fecha: fechaUnica(), horaInicio: '10:00', horaFin: '11:00' });
+    c.verifica(r.status === 409 && r.datos.codigo === 'CANCHA_NO_DISPONIBLE', 'No admite nuevas reservas: 409 CANCHA_NO_DISPONIBLE', `HTTP ${r.status} ${r.datos.codigo}`);
+    c.verifica(sqlq(`SELECT count(*) FROM canchas WHERE id='${creada.id}'`) === '1', 'La cancha no se borra de la base (desactivación lógica)');
+    const lista = (await api('GET', '/admin/canchas', undefined, ADMIN_CANCHAS.token)).datos.canchas.find((x) => x.id === creada.id);
+    c.verifica(lista?.disponible === false, 'El administrador la sigue viendo, marcada como desactivada');
+    c.verifica((await api('PATCH', `/admin/canchas/${creada.id}/desactivar`, {}, ADMIN_CANCHAS.token)).status === 409, 'Desactivarla otra vez: 409');
+    const a = await api('PATCH', `/admin/canchas/${creada.id}/activar`, undefined, ADMIN_CANCHAS.token);
+    c.verifica(a.status === 200 && (await catalogoIds(u)).includes(creada.id), 'Al reactivarla vuelve al catálogo');
+    c.verifica((await reservar(u, creada, { fecha: fechaUnica(), horaInicio: '10:00', horaFin: '11:00' })).status === 201, 'Y vuelve a admitir reservas (201)');
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-15-04', hu: 'US-15', ca: [3, 4], grupo: 'US-15', titulo: 'Desactivar con reservas futuras: advertencia y confirmación explícita', objetivo: 'Verificar que el sistema advierte de las reservas afectadas, no desactiva sin confirmar y conserva las reservas.', pasos: ['Crear una cancha con 2 reservas futuras de usuarios distintos.', 'PATCH desactivar sin confirmar.', 'PATCH desactivar con confirmar=true.', 'Revisar las reservas y el historial.'], esperado: 'Sin confirmar: 409 CONFIRMACION_REQUERIDA con 2 reservas afectadas y su detalle, cancha aún activa. Con confirmar: 200, desactivada, las 2 reservas siguen confirmadas y visibles para sus usuarios.' },
+  async (c) => {
+    const A = await crearUsuario('afec1');
+    const B = await crearUsuario('afec2');
+    const creada = (await crearCanchaQA()).datos.cancha;
+    const ra = await reservar(A, creada, { fecha: fechaUnica(), horaInicio: '08:00', horaFin: '09:00' });
+    const rb = await reservar(B, creada, { fecha: fechaUnica(), horaInicio: '09:00', horaFin: '10:00' });
+    c.verifica(ra.status === 201 && rb.status === 201, 'Preparación: 2 reservas futuras');
+    const aviso = await api('PATCH', `/admin/canchas/${creada.id}/desactivar`, {}, ADMIN_CANCHAS.token);
+    c.verifica(aviso.status === 409 && aviso.datos.codigo === 'CONFIRMACION_REQUERIDA' && aviso.datos.reservasAfectadas === 2, 'Sin confirmar: 409 CONFIRMACION_REQUERIDA con 2 reservas afectadas', `HTTP ${aviso.status} ${aviso.datos.reservasAfectadas}`);
+    const codigos = aviso.datos.reservas?.map((x) => x.codigo).sort().join(',');
+    c.verifica(codigos === [ra.datos.reserva.codigo, rb.datos.reserva.codigo].sort().join(',') && aviso.datos.reservas.every((x) => x.usuarioNombre && x.fecha && x.horaInicio), 'La advertencia lista cada reserva afectada con su código, usuario, fecha y hora', codigos);
+    c.verifica(sqlq(`SELECT disponible FROM canchas WHERE id='${creada.id}'`) === 't', 'La cancha sigue activa mientras no se confirma');
+    c.verifica((await api('PATCH', `/admin/canchas/${creada.id}/desactivar`, { confirmar: false }, ADMIN_CANCHAS.token)).status === 409, 'confirmar=false tampoco desactiva');
+    const ok = await api('PATCH', `/admin/canchas/${creada.id}/desactivar`, { confirmar: true }, ADMIN_CANCHAS.token);
+    c.verifica(ok.status === 200 && ok.datos.reservasAfectadas === 2 && ok.datos.cancha.disponible === false, 'Con confirmación explícita se desactiva: 200', `HTTP ${ok.status}`);
+    c.verifica(sqlq(`SELECT count(*) FROM reservas WHERE cancha_id='${creada.id}' AND estado='confirmada'`) === '2', 'Las 2 reservas se conservan confirmadas');
+    const h = await api('GET', '/reservas?limite=50', undefined, A.token);
+    c.verifica(h.datos.reservas.some((x) => x.id === ra.datos.reserva.id && x.estado === 'confirmada'), 'El historial del usuario las conserva');
+    c.evidenciaTexto('Respuesta 409 de la advertencia', JSON.stringify(aviso.datos, null, 1));
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-15-05', hu: 'US-15', ca: [5], grupo: 'US-15', titulo: 'Un usuario sin rol de administrador recibe 403 en la gestión de canchas (caso de error)', objetivo: 'Verificar el control de rol en las 6 rutas y que no se crea ni cambia nada.', pasos: ['Con un usuario normal: GET, POST, PUT, desactivar y activar.', 'Repetir sin token.'], esperado: '403 con un usuario normal y 401 sin sesión en todas las rutas; la base no cambia.' },
+  async (c) => {
+    const u = await crearUsuario('noadmin15');
+    const creada = (await crearCanchaQA()).datos.cancha;
+    const antes = sqlq('SELECT count(*) FROM canchas');
+    const rutas = [
+      ['GET', '/admin/canchas', undefined],
+      ['GET', `/admin/canchas/${creada.id}`, undefined],
+      ['POST', '/admin/canchas', datosCancha({ nombre: 'No debe existir QA' })],
+      ['PUT', `/admin/canchas/${creada.id}`, datosCancha({ nombre: 'Hackeada' })],
+      ['PATCH', `/admin/canchas/${creada.id}/desactivar`, { confirmar: true }],
+      ['PATCH', `/admin/canchas/${creada.id}/activar`, undefined],
+    ];
+    for (const [metodo, ruta, cuerpo] of rutas) {
+      const normal = await api(metodo, ruta, cuerpo, u.token);
+      const sinToken = await api(metodo, ruta, cuerpo);
+      c.verifica(normal.status === 403 && sinToken.status === 401, `${metodo} ${ruta.replace(creada.id, ':id')}: 403 con usuario normal y 401 sin sesión`, `${normal.status} / ${sinToken.status}`);
+    }
+    c.verifica(sqlq('SELECT count(*) FROM canchas') === antes && sqlq(`SELECT nombre || '|' || disponible FROM canchas WHERE id='${creada.id}'`) === `${creada.nombre}|true`, 'No se creó ni modificó ninguna cancha');
+    c.verifica(sqlq("SELECT count(*) FROM canchas WHERE nombre='No debe existir QA'") === '0', 'La cancha del intento no existe');
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-15-06', hu: 'US-15', ca: [6], grupo: 'US-15', titulo: 'Validaciones de la cancha: campos obligatorios y rangos, con mensajes por campo (caso de error)', objetivo: 'Verificar precio > 0, cierre posterior a la apertura, horarios y datos obligatorios.', pasos: ['POST con precio 0 y negativo, nombre y dirección vacíos, tipo inválido.', 'POST con cierre anterior o igual a la apertura, hora inválida, día repetido y sin horarios.', 'PUT con datos inválidos.'], esperado: '400 en todos con el campo señalado (costoHora, nombre, direccion, tipo, horarios); no se guarda nada.' },
+  async (c) => {
+    const antes = sqlq('SELECT count(*) FROM canchas');
+    const casos = [
+      ['precio 0', { costoHora: 0 }, 'costoHora'],
+      ['precio negativo', { costoHora: -1000 }, 'costoHora'],
+      ['precio no numérico', { costoHora: 'gratis' }, 'costoHora'],
+      ['nombre vacío', { nombre: '   ' }, 'nombre'],
+      ['dirección vacía', { direccion: '' }, 'direccion'],
+      ['tipo desconocido', { tipo: 'Fútbol 3' }, 'tipo'],
+      ['cierre anterior a la apertura', { horarios: [{ diaSemana: 1, horaInicio: '20:00', horaFin: '08:00' }] }, 'horarios'],
+      ['cierre igual a la apertura', { horarios: [{ diaSemana: 1, horaInicio: '10:00', horaFin: '10:00' }] }, 'horarios'],
+      ['hora con formato inválido', { horarios: [{ diaSemana: 1, horaInicio: '25:61', horaFin: '26:00' }] }, 'horarios'],
+      ['día repetido', { horarios: [{ diaSemana: 2, horaInicio: '08:00', horaFin: '10:00' }, { diaSemana: 2, horaInicio: '12:00', horaFin: '14:00' }] }, 'horarios'],
+      ['sin horarios', { horarios: [] }, 'horarios'],
+    ];
+    for (const [nombre, extra, campo] of casos) {
+      const r = await api('POST', '/admin/canchas', datosCancha(extra), ADMIN_CANCHAS.token);
+      c.verifica(r.status === 400 && r.datos.errores?.some((e) => e.campo === campo && e.mensaje), `${nombre}: 400 señalando "${campo}"`, `HTTP ${r.status} ${r.datos.errores?.map((e) => e.mensaje).join(' | ')}`);
+    }
+    const vacio = await api('POST', '/admin/canchas', {}, ADMIN_CANCHAS.token);
+    c.verifica(vacio.status === 400 && ['nombre', 'direccion', 'costoHora', 'horarios'].every((k) => vacio.datos.errores.some((e) => e.campo === k)), 'Cuerpo vacío: señala todos los campos obligatorios');
+    const creada = (await crearCanchaQA()).datos.cancha;
+    const edit = await api('PUT', `/admin/canchas/${creada.id}`, datosCancha({ costoHora: -5 }), ADMIN_CANCHAS.token);
+    c.verifica(edit.status === 400 && sqlq(`SELECT costo_hora::int FROM canchas WHERE id='${creada.id}'`) === '85000', 'Editar con datos inválidos: 400 y la cancha no cambia');
+    c.verifica(Number(sqlq('SELECT count(*) FROM canchas')) === Number(antes) + 1, 'Solo se creó la cancha válida de la preparación');
+  }
+);
+
+// Las canchas de prueba de US-15 se eliminan (con sus reservas): el catálogo debe quedar como estaba para las demás pruebas.
+sqlq("DELETE FROM canchas WHERE nombre LIKE 'Cancha QA %'");
+
+// ---------------------------------------------------------------------
+// US-16 Cancelación administrativa
+// ---------------------------------------------------------------------
+const ADMIN_16 = await crearAdministrador('admin-16');
+const cancelarAdmin = (id, motivo) => api('PATCH', `/admin/reservas/${id}/cancelar`, motivo === undefined ? {} : { motivo }, ADMIN_16.token);
+
+await S.caso(
+  { ...base, id: 'F-16-01', hu: 'US-16', ca: [1], grupo: 'US-16', titulo: 'Buscar reservas futuras por cancha, fecha o usuario', objetivo: 'Verificar la búsqueda de reservas del administrador y que solo trae las futuras.', pasos: ['Crear reservas de dos usuarios en dos canchas y una reserva pasada.', 'GET /api/admin/reservas con filtros de cancha, fecha y usuario (nombre y correo).', 'Probar parámetros inválidos y un usuario normal.'], esperado: 'Cada filtro devuelve solo lo que corresponde, sin reservas pasadas; parámetros inválidos 400; usuario normal 403.' },
+  async (c) => {
+    const A = await crearUsuario('busca16a');
+    const B = await crearUsuario('busca16b');
+    const dia = fechaUnica();
+    const ra = await reservar(A, K0, { fecha: dia, horaInicio: '08:00', horaFin: '09:00' });
+    const rb = await reservar(B, K1, { fecha: dia, horaInicio: '08:00', horaFin: '09:00' });
+    insertarReservaSql(A, K2, fechaPasadaUnica(), '10:00', '11:00');
+    c.verifica(ra.status === 201 && rb.status === 201, 'Preparación: 2 reservas futuras y 1 pasada');
+    const ids = (r) => r.datos.reservas.map((x) => x.id);
+    const porCancha = await api('GET', `/admin/reservas?canchaId=${K1.id}&fecha=${dia}`, undefined, ADMIN_16.token);
+    c.verifica(porCancha.status === 200 && ids(porCancha).includes(rb.datos.reserva.id) && !ids(porCancha).includes(ra.datos.reserva.id), 'Filtro por cancha y fecha: solo la de esa cancha', `${porCancha.datos.reservas?.length} resultados`);
+    const porNombre = await api('GET', `/admin/reservas?usuario=${encodeURIComponent(A.nombre)}`, undefined, ADMIN_16.token);
+    c.verifica(ids(porNombre).includes(ra.datos.reserva.id) && !ids(porNombre).includes(rb.datos.reserva.id), 'Filtro por usuario (nombre): solo sus reservas');
+    const porCorreo = await api('GET', `/admin/reservas?usuario=${encodeURIComponent(B.correo)}&fecha=${dia}`, undefined, ADMIN_16.token);
+    c.verifica(ids(porCorreo).join() === rb.datos.reserva.id, 'Filtro por correo y fecha: solo esa reserva');
+    const x = porCancha.datos.reservas.find((y) => y.id === rb.datos.reserva.id);
+    c.verifica(x.usuarioNombre === B.nombre && x.canchaNombre === K1.nombre && /^CY-/.test(x.codigo), 'Cada reserva trae el usuario titular, la cancha y el código', JSON.stringify(x).slice(0, 140));
+    c.verifica(!(await api('GET', `/admin/reservas?fecha=2000-01-01`, undefined, ADMIN_16.token)).datos.reservas.length, 'Las reservas pasadas no aparecen');
+    c.verifica((await api('GET', '/admin/reservas?canchaId=xx&limite=999', undefined, ADMIN_16.token)).status === 400, 'Parámetros inválidos: 400');
+    c.verifica((await api('GET', '/admin/reservas', undefined, A.token)).status === 403, 'Un usuario normal: 403');
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-16-02', hu: 'US-16', ca: [2, 5], grupo: 'US-16', titulo: 'Cancelar con motivo y más de 2 horas: "Cancelada administrativamente", franja libre y auditoría', objetivo: 'Verificar la cancelación administrativa completa y su registro de auditoría.', pasos: ['Crear una reserva futura.', 'PATCH /api/admin/reservas/:id/cancelar con motivo.', 'Revisar estado, disponibilidad, historial del usuario y la tabla de auditoría.'], esperado: '200 con estado cancelada_administrativamente; la franja queda libre; el usuario ve el motivo en su historial; cancelaciones_administrativas guarda administrador, motivo y fecha.' },
+  async (c) => {
+    const u = await crearUsuario('cancelada16');
+    const otro = await crearUsuario('otro16');
+    const f = { fecha: fechaUnica(), horaInicio: '11:00', horaFin: '12:00' };
+    const creada = await reservar(u, K0, f);
+    const id = creada.datos.reserva.id;
+    const r = await cancelarAdmin(id, 'La cancha estará en mantenimiento');
+    c.verifica(r.status === 200 && r.datos.reserva.estado === 'cancelada_administrativamente', 'Responde 200 con estado "cancelada_administrativamente"', `HTTP ${r.status} ${r.datos.reserva?.estado}`);
+    c.verifica(sqlq(`SELECT estado FROM reservas WHERE id='${id}'`) === 'cancelada_administrativamente', 'En la base la reserva quedó cancelada administrativamente');
+    c.verifica(!(await disponibilidad(otro, K0, f.fecha)).datos.ocupados.some((o) => String(o.horaInicio).startsWith('11:00')), 'La franja quedó libre');
+    c.verifica((await reservar(otro, K0, f)).status === 201, 'Otro usuario puede reservarla (201)');
+    const h = await api('GET', '/reservas?limite=50', undefined, u.token);
+    const visto = h.datos.reservas.find((x) => x.id === id);
+    c.verifica(visto?.estado === 'cancelada_administrativamente' && visto.motivoCancelacion === 'La cancha estará en mantenimiento' && visto.puedeCancelar === false, 'El usuario ve el estado y el motivo en su historial', JSON.stringify({ e: visto?.estado, m: visto?.motivoCancelacion }));
+    const fila = sqlq(`SELECT (administrador_id = '${ADMIN_16.id}')::text || '|' || motivo || '|' || (created_at IS NOT NULL)::text FROM cancelaciones_administrativas WHERE reserva_id='${id}'`);
+    c.verifica(fila === 'true|La cancha estará en mantenimiento|true', 'Queda registrada la cancelación: administrador, motivo y fecha', fila);
+    c.verifica((await cancelarReserva(u, id)).status === 409 && (await cancelarAdmin(id, 'otra vez')).status === 409, 'No se puede cancelar de nuevo (409), ni por el usuario ni por el administrador');
+    c.evidenciaTexto('Fila de auditoría', sqlq(`SELECT row_to_json(c) FROM cancelaciones_administrativas c WHERE reserva_id='${id}'`));
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-16-03', hu: 'US-16', ca: [2, 3], grupo: 'US-16', titulo: 'Motivo obligatorio y bloqueo con menos de 2 horas (caso de error)', objetivo: 'Verificar el motivo obligatorio y la regla de las 2 horas de anticipación.', pasos: ['Cancelar sin motivo, con motivo vacío y con motivo demasiado largo.', 'Cancelar una reserva que empieza en 90 minutos.', 'Cancelar una reserva inexistente y con id inválido.'], esperado: 'Sin motivo (o vacío, o de más de 500 caracteres): 400 con el error del campo motivo y la reserva sigue confirmada; con menos de 2 horas: 409 CANCELACION_FUERA_DE_PLAZO y nada cambia; inexistente 404; id inválido 400.' },
+  async (c) => {
+    const u = await crearUsuario('plazo16');
+    const creada = await reservar(u, K0, franja(13));
+    const id = creada.datos.reserva.id;
+    for (const [nombre, motivo] of [['sin motivo', undefined], ['motivo vacío', '   '], ['motivo de 501 caracteres', 'x'.repeat(501)]]) {
+      const r = await cancelarAdmin(id, motivo);
+      c.verifica(r.status === 400 && r.datos.errores?.some((e) => e.campo === 'motivo' && e.mensaje), `${nombre}: 400 con el error del campo "motivo"`, `HTTP ${r.status} ${r.datos.errores?.map((e) => e.mensaje).join(' | ')}`);
+    }
+    c.verifica(sqlq(`SELECT estado FROM reservas WHERE id='${id}'`) === 'confirmada' && sqlq(`SELECT count(*) FROM cancelaciones_administrativas WHERE reserva_id='${id}'`) === '0', 'La reserva sigue confirmada y no hay registro de auditoría');
+    const [idPronto] = insertarProntoLibre(u, [K1, K2, K0]);
+    const fuera = await cancelarAdmin(idPronto, 'Imprevisto operativo');
+    c.verifica(fuera.status === 409 && fuera.datos.codigo === 'CANCELACION_FUERA_DE_PLAZO' && /2 horas/.test(fuera.datos.mensaje), 'Con menos de 2 horas: 409 CANCELACION_FUERA_DE_PLAZO que explica la restricción', `HTTP ${fuera.status} ${fuera.datos.mensaje}`);
+    c.verifica(sqlq(`SELECT estado FROM reservas WHERE id='${idPronto}'`) === 'confirmada', 'La reserva de 90 minutos sigue confirmada');
+    c.verifica((await cancelarAdmin(UUID_INEXISTENTE, 'x')).status === 404, 'Reserva inexistente: 404');
+    c.verifica((await cancelarAdmin('no-es-uuid', 'x')).status === 400, 'Identificador inválido: 400');
+    c.verifica((await api('PATCH', `/admin/reservas/${id}/cancelar`, { motivo: 'x' }, u.token)).status === 403, 'Un usuario normal no puede cancelar de forma administrativa: 403');
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-16-04', hu: 'US-16', ca: [4], grupo: 'US-16', titulo: 'El usuario afectado recibe un correo con el motivo', objetivo: 'Verificar la notificación por correo (sin SMTP queda en el log del backend), el escape del HTML del motivo y que un motivo con HTML no se inyecta.', pasos: ['Cancelar una reserva con un motivo.', 'Buscar en los logs del backend el correo de cancelación administrativa.'], esperado: 'El log contiene el correo del usuario, el código y el motivo.' },
+  async (c) => {
+    const u = await crearUsuario('correo16');
+    const creada = await reservar(u, K0, franja(14));
+    const r = await cancelarAdmin(creada.datos.reserva.id, 'Torneo privado ese día');
+    c.verifica(r.status === 200, 'La cancelación responde 200', `HTTP ${r.status}`);
+    await esperar(800);
+    const linea = logsBackend('5m').split('\n').find((l) => l.includes('Cancelación administrativa') && l.includes(u.correo));
+    c.verifica(Boolean(linea), 'El backend registró el correo de cancelación administrativa para el usuario');
+    c.verifica(linea?.includes(creada.datos.reserva.codigo) && linea.includes('Torneo privado ese día'), 'El correo incluye el código y el motivo', linea?.split('): ')[1]);
+  }
+);
+
+await S.caso(
+  { ...base, id: 'F-16-05', hu: 'US-16', hus: ['US-16', 'US-28'], ca: { 'US-16': [2], 'US-28': [4] }, grupo: 'US-16', titulo: 'Cancelar como administrador una reserva pagada con tarjeta reembolsa el pago', objetivo: 'Verificar que el usuario no pierde su dinero cuando es el administrador quien cancela.', pasos: ['El usuario guarda una tarjeta y reserva pagando.', 'El administrador cancela la reserva con motivo.', 'Revisar la tabla de pagos.'], esperado: 'El pago queda "reembolsado" con referencia ref_sim_, junto con la cancelación administrativa.' },
+  async (c) => {
+    const u = await crearUsuario('paga16');
+    const tj = (await guardarTarjeta(u)).datos.metodoPago;
+    const pagada = await reservarHora(u, K0, fechaUnica(), '15', tj.id);
+    c.verifica(pagada.status === 201 && pagada.datos.reserva.pago?.estado === 'aprobado', 'Preparación: reserva pagada');
+    const r = await cancelarAdmin(pagada.datos.reserva.id, 'Cancha cerrada por lluvia');
+    c.verifica(r.status === 200, 'El administrador la cancela: 200', `HTTP ${r.status}`);
+    const fila = sqlq(`SELECT estado || '|' || coalesce(reembolso_referencia, '') FROM pagos WHERE reserva_id='${pagada.datos.reserva.id}'`);
+    c.verifica(/^reembolsado\|ref_sim_/.test(fila), 'El pago quedó reembolsado', fila);
+  }
+);
+
+
 // =====================================================================
 // PIG1-23 Documentación técnica de la API (OpenAPI / Swagger)
 // =====================================================================
@@ -1917,6 +2202,77 @@ await S.caso(
     c.verifica(sinToken.status === 401 && documentado('/api/canchas', 'get', 401), 'Sin token: 401 documentado', `HTTP ${sinToken.status}`);
     const readme = fs.readFileSync(`${ROOT}/README.md`, 'utf8');
     c.verifica(/\/api\/docs/.test(readme) && /Cómo actualizar la documentación/.test(readme) && /backend\/openapi\/openapi\.yaml/.test(readme), 'El README enlaza /api/docs y explica cómo actualizar la documentación');
+  }
+);
+
+// =====================================================================
+// PIG1-24 Pipeline CI/CD, manual de usuario y documentación final
+// =====================================================================
+const leerDoc = (ruta) => fs.readFileSync(`${ROOT}/${ruta}`, 'utf8');
+const existeArchivo = (ruta) => fs.existsSync(`${ROOT}/${ruta}`);
+
+await S.caso(
+  { ...baseDoc, id: 'F-DOC-04', hu: 'PIG1-24', ca: [1, 2, 3], grupo: 'PIG1-24', titulo: 'Manual de usuario, documentación técnica final y evidencias existen, están enlazados y sus enlaces funcionan', objetivo: 'Verificar que los tres documentos de la entrega final existen, que el README los enlaza y que todos sus enlaces internos apuntan a archivos reales.', pasos: ['Comprobar que existen docs/manual-usuario.md, docs/documentacion-tecnica-final.md y docs/evidencias-pipeline-cicd.md.', 'Comprobar que el README los enlaza.', 'Revisar los enlaces relativos y las imágenes de cada documento.'], esperado: 'Los tres existen, el README los enlaza y ningún enlace relativo apunta a un archivo inexistente.' },
+  async (c) => {
+    const docs = ['docs/manual-usuario.md', 'docs/documentacion-tecnica-final.md', 'docs/evidencias-pipeline-cicd.md'];
+    const readme = leerDoc('README.md');
+    for (const d of docs) {
+      c.verifica(existeArchivo(d) && leerDoc(d).length > 500, `Existe ${d} y tiene contenido`);
+      c.verifica(readme.includes(`(${d})`), `El README enlaza ${d}`);
+    }
+    for (const d of [...docs, 'README.md']) {
+      const carpeta = d.includes('/') ? d.slice(0, d.lastIndexOf('/')) : '';
+      const enlaces = [...leerDoc(d).matchAll(/!?\[[^\]]*\]\((?!https?:|#|mailto:)([^)\s#]+)(?:#[^)]*)?\)/g)].map((m) => decodeURIComponent(m[1]));
+      const rotos = enlaces.filter((e) => !fs.existsSync(`${ROOT}/${carpeta ? `${carpeta}/` : ''}${e}`.replace(/\/\.\//g, '/')) && !fs.existsSync(`${ROOT}/${e}`));
+      c.verifica(rotos.length === 0, `${d}: ${enlaces.length} enlaces internos, ninguno roto`, rotos.join(', '));
+    }
+  }
+);
+
+await S.caso(
+  { ...baseDoc, id: 'F-DOC-05', hu: 'PIG1-24', ca: [2], grupo: 'PIG1-24', titulo: 'El manual de usuario describe las pantallas y botones reales de la aplicación', objetivo: 'Verificar que cada botón, menú y mensaje que nombra el manual existe en la interfaz y que las funciones del Sprint 5 (incluida la gestión de canchas) están explicadas.', pasos: ['Extraer del manual los textos en negrita (botones y opciones).', 'Buscar cada uno en el código del frontend.', 'Comprobar que cubre las funciones de cada historia.'], esperado: 'Todos los textos en negrita del manual existen en el frontend, y el manual cubre reservar, cancelar, perfil, tarjetas, verificar códigos, cancelar como administrador y gestionar canchas.' },
+  async (c) => {
+    const manual = leerDoc('docs/manual-usuario.md');
+    const fuentes = sh('git ls-files --cached --others --exclude-standard frontend/src', { cwd: ROOT }).stdout.split(/\r?\n/).filter((f) => /\.(jsx|js)$/.test(f)).map((f) => fs.readFileSync(`${ROOT}/${f}`, 'utf8')).join('\n');
+    const negritas = [...new Set([...manual.matchAll(/\*\*([^*]{3,60})\*\*/g)].map((m) => m[1].replace(/[:.]$/, '').trim()))];
+    // textos que no son botones de la interfaz (encabezados de ayuda, nombres de campos o conceptos)
+    const conceptos = /^(Versión|Aplicación|Dirección local|Pagar en la cancha|Código no encontrado|Verificar|Nueva cancha|Crear cancha|Editar|Desactivar|Activar|Guardar cambios)/;
+    const faltan = negritas.filter((t) => !fuentes.includes(t) && !conceptos.test(t));
+    c.verifica(negritas.length >= 15, `El manual nombra ${negritas.length} botones y opciones en negrita`);
+    c.verifica(faltan.length === 0, 'Todos existen en el código del frontend', faltan.join(' | '));
+    for (const t of ['Nueva cancha', 'Crear cancha', 'Guardar cambios', 'Desactivar', 'Activar', 'Sí, desactivar de todos modos', 'Gestionar canchas', 'Marcar como utilizada', 'Cancelar reserva', 'Confirmar reserva', 'Iniciar reserva']) {
+      c.verifica(manual.includes(t) && fuentes.includes(t), `"${t}" está en el manual y en la interfaz`);
+    }
+    for (const [tema, patron] of [['reservar', /Buscar una cancha y reservar/], ['cancelar reservas', /Consultar y cancelar reservas/], ['perfil y tarjetas', /Actualizar el perfil y las tarjetas/], ['verificar códigos', /Verificar el código de una reserva/], ['cancelación administrativa', /Cancelar una reserva como administrador/], ['gestión de canchas', /Gestionar las canchas del catálogo/]]) {
+      c.verifica(patron.test(manual), `El manual explica ${tema}`);
+    }
+    c.verifica(!/no está disponible en esta interfaz/i.test(manual), 'El manual ya no dice que la gestión de canchas no está disponible');
+  }
+);
+
+await S.caso(
+  { ...baseDoc, id: 'F-DOC-06', hu: 'PIG1-24', ca: [1, 3], grupo: 'PIG1-24', titulo: 'La documentación técnica y el pipeline son coherentes con el código', objetivo: 'Verificar que las variables, comandos y endpoints de la documentación técnica existen de verdad y que el workflow despliega desde la rama correcta.', pasos: ['Comprobar las variables de entorno del documento en backend/.env.example y en el código.', 'Comprobar los scripts de npm y los endpoints de gestión de canchas mencionados.', 'Revisar ramas, secretos y jobs del workflow.'], esperado: 'Todo lo que el documento menciona existe; el workflow despliega solo en push a sprint_5 y nunca en pull_request.' },
+  async (c) => {
+    const tecnica = leerDoc('docs/documentacion-tecnica-final.md');
+    const entorno = leerDoc('backend/.env.example') + leerDoc('.env.example') + leerDoc('backend/src/config/env.js');
+    const variables = ['JWT_SECRET', 'POSTGRES_PASSWORD', 'DATABASE_URL', 'CORS_ORIGIN', 'SMTP_HOST', 'PASARELA_PAGO', 'EXIGIR_HTTPS_PAGOS', 'TRUST_PROXY', 'HORAS_MIN_CANCELACION', 'MAX_RESERVAS_ACTIVAS_USUARIO'];
+    const sinDefinir = variables.filter((v) => !tecnica.includes(v) || !entorno.includes(v));
+    c.verifica(sinDefinir.length === 0, `Las ${variables.length} variables del documento existen en la configuración`, sinDefinir.join(', '));
+    const scripts = JSON.parse(leerDoc('backend/package.json')).scripts;
+    const comandos = [...tecnica.matchAll(/npm run ([a-z:-]+)/g)].map((m) => m[1]).filter((n) => !['dev', 'build', 'lint'].includes(n));
+    const inexistentes = [...new Set(comandos)].filter((n) => !scripts[n]);
+    c.verifica(inexistentes.length === 0, `Los comandos npm del documento existen en backend/package.json (${new Set(comandos).size})`, inexistentes.join(', '));
+    const rutas = [...tecnica.matchAll(/`(GET|POST|PUT|PATCH) (\/api\/admin\/canchas[^`]*)`/g)].map((m) => [m[1].toLowerCase(), m[2].replace(/\{id\}/g, '{id}')]);
+    const openapi = createRequire(import.meta.url)('js-yaml').load(leerDoc('backend/openapi/openapi.yaml'));
+    const sinDocumentar = rutas.filter(([metodo, ruta]) => !openapi.paths[ruta]?.[metodo]);
+    c.verifica(rutas.length >= 6 && sinDocumentar.length === 0, `Los ${rutas.length} endpoints de gestión de canchas del documento están en la especificación OpenAPI`, sinDocumentar.join(', '));
+    const flujo = leerDoc('.github/workflows/ci-cd.yml');
+    c.verifica(/github\.event_name == 'push' && github\.ref == 'refs\/heads\/sprint_5'/.test(flujo) && !/pull_request[^\n]*deploy/i.test(flujo), 'El despliegue solo corre en push a sprint_5 (nunca en pull_request)');
+    c.verifica(['JWT_SECRET', 'POSTGRES_PASSWORD'].every((s) => flujo.includes(`secrets.${s}`)), 'Los secretos se leen de GitHub (secrets), no están en el repositorio');
+    c.verifica(/Pipeline-CI\/\*\*/.test(flujo) && /"US-\*\*"/.test(flujo), 'El workflow también corre en las ramas de las historias y de la entrega final');
+    const evidencias = leerDoc('docs/evidencias-pipeline-cicd.md');
+    const imagenes = [...evidencias.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map((m) => m[1]);
+    c.verifica(imagenes.length >= 2 && imagenes.every((i) => fs.existsSync(`${ROOT}/docs/${i}`) || fs.existsSync(`${ROOT}/${i}`)), `Las ${imagenes.length} capturas de evidencia del pipeline existen`);
   }
 );
 

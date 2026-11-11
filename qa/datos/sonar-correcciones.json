@@ -28,5 +28,11 @@
     "archivo": "frontend/src/components/common/ConfirmarDialogo.jsx:37",
     "problema": "El fondo del diálogo de confirmación cierra el diálogo al hacer clic fuera de él con un manejador de ratón sobre un div, que la regla considera un elemento interactivo no nativo.",
     "correccion": "Se declaró el fondo con role=\"presentation\" (es solo un atajo de ratón; el teclado ya cierra el diálogo con Escape y con el botón \"Volver\"). Las 238 pruebas del frontend siguen pasando."
+  },
+  {
+    "regla": "javascript:S2699 (code smell, bloqueante)",
+    "archivo": "backend/tests/cancelacionAdministrativa.test.js:271 y :287",
+    "problema": "Dos pruebas de la ruta de cancelación administrativa solo verificaban el código de estado con `.expect(400)` de supertest, que SonarQube no reconoce como aserción, y las marcó como pruebas sin aserciones.",
+    "correccion": "Se guarda la respuesta y se verifica con `expect(respuesta.status).toBe(400)` (y que no se llamó al repositorio). Mismo comportamiento probado, ahora con aserciones explícitas."
   }
 ]

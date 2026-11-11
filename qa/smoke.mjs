@@ -90,13 +90,13 @@ if (fase === '1') {
   );
 
   await S.caso(
-    { ...base, id: 'SD-06', hu: 'US-19', ca: [3], titulo: 'El esquema de la base se aplica solo al arrancar el backend', objetivo: 'Verificar que no hace falta ejecutar migraciones a mano: al iniciar, el backend crea tablas, índices únicos y restricciones.', pasos: ['Leer los logs del backend.', 'Consultar las tablas del esquema public en el Postgres del contenedor.', 'Consultar los índices únicos de reservas y retenciones.'], esperado: 'Logs con "[MIGRATE] Esquema aplicado correctamente"; existen las 11 tablas y los índices únicos de US-09, US-18 y US-29.' },
+    { ...base, id: 'SD-06', hu: 'US-19', ca: [3], titulo: 'El esquema de la base se aplica solo al arrancar el backend', objetivo: 'Verificar que no hace falta ejecutar migraciones a mano: al iniciar, el backend crea tablas, índices únicos y restricciones.', pasos: ['Leer los logs del backend.', 'Consultar las tablas del esquema public en el Postgres del contenedor.', 'Consultar los índices únicos de reservas y retenciones.'], esperado: 'Logs con "[MIGRATE] Esquema aplicado correctamente"; existen las 12 tablas y los índices únicos de US-09, US-18 y US-29.' },
     async (c) => {
       const logs = logsBackend('30m');
       c.verifica(/\[MIGRATE\] Esquema aplicado correctamente/.test(logs), 'El log muestra que el esquema se aplicó automáticamente');
       const tablas = sql("SELECT string_agg(tablename, ',' ORDER BY tablename) FROM pg_tables WHERE schemaname='public'");
-      const esperadas = ['cambios_correo', 'canchas', 'horarios_disponibles', 'metodos_pago', 'pagos', 'password_reset_tokens', 'reservas', 'retenciones', 'sesiones_reserva', 'usuarios', 'verificaciones_reserva'];
-      c.verifica(JSON.stringify(tablas.split(',')) === JSON.stringify(esperadas), 'Existen las 11 tablas del modelo (7 de los sprints 1 a 4 y 4 del Sprint 5)', tablas);
+      const esperadas = ['cambios_correo', 'cancelaciones_administrativas', 'canchas', 'horarios_disponibles', 'metodos_pago', 'pagos', 'password_reset_tokens', 'reservas', 'retenciones', 'sesiones_reserva', 'usuarios', 'verificaciones_reserva'];
+      c.verifica(JSON.stringify(tablas.split(',')) === JSON.stringify(esperadas), 'Existen las 12 tablas del modelo (7 de los sprints 1 a 4, 4 de las historias del Sprint 5 y la auditoría de US-16)', tablas);
       const idx = sql("SELECT string_agg(indexname, ', ' ORDER BY indexname) FROM pg_indexes WHERE schemaname='public' AND indexname LIKE 'uq_%'");
       c.verifica(/uq_reservas_confirmada_cancha_fecha_hora/.test(idx), 'Índice único parcial de reservas confirmadas (US-09)', idx);
       c.verifica(/uq_reservas_codigo/.test(idx), 'Índice único del código de reserva (US-29)', idx);
@@ -211,7 +211,7 @@ if (fase === '1') {
   );
 
   await S.caso(
-    { ...base, id: 'SD-15', hu: 'US-20', ca: [1, 3, 4], titulo: 'Análisis estático del workflow de CI/CD (ci-cd.yml)', objetivo: 'Verificar la estructura del pipeline: jobs, dependencias, condición de despliegue y manejo de secretos.', pasos: ['Cargar .github/workflows/ci-cd.yml.', 'Revisar jobs, "needs", la condición "if" del despliegue y el origen de los secretos.', 'Confirmar que no hay archivos .env versionados.'], esperado: 'Jobs backend, frontend, quality-gate, docker y deploy-local; el despliegue solo corre en push a sprint_4 con runner self-hosted; los secretos vienen de "secrets.*"; no hay .env en el repositorio.' },
+    { ...base, id: 'SD-15', hu: 'US-20', ca: [1, 3, 4], titulo: 'Análisis estático del workflow de CI/CD (ci-cd.yml)', objetivo: 'Verificar la estructura del pipeline: jobs, dependencias, condición de despliegue y manejo de secretos.', pasos: ['Cargar .github/workflows/ci-cd.yml.', 'Revisar jobs, "needs", la condición "if" del despliegue y el origen de los secretos.', 'Confirmar que no hay archivos .env versionados.'], esperado: 'Jobs backend, frontend, quality-gate, docker y deploy-local; el despliegue solo corre en push a sprint_5 con runner self-hosted; los secretos vienen de "secrets.*"; no hay .env en el repositorio.' },
     async (c) => {
       const wf = cargarYaml(fs.readFileSync(`${ROOT}/.github/workflows/ci-cd.yml`, 'utf8'));
       const jobs = Object.keys(wf.jobs);
@@ -220,7 +220,7 @@ if (fase === '1') {
       c.verifica(JSON.stringify(wf.jobs.docker.needs) === JSON.stringify(['backend', 'frontend', 'quality-gate']), 'El job docker espera a backend, frontend y el Quality Gate de SonarQube', JSON.stringify(wf.jobs.docker.needs));
       const d = wf.jobs['deploy-local'];
       c.verifica(d.needs === 'docker', 'El despliegue espera al job docker');
-      c.verifica(/github\.event_name == 'push'/.test(d.if) && /refs\/heads\/sprint_4/.test(d.if), 'El despliegue solo corre en push a sprint_4 (nunca en pull_request)', d.if);
+      c.verifica(/github\.event_name == 'push'/.test(d.if) && /refs\/heads\/sprint_5/.test(d.if), 'El despliegue solo corre en push a sprint_5 (nunca en pull_request)', d.if);
       c.verifica(d['runs-on'] === 'self-hosted', 'El despliegue usa el runner self-hosted');
       c.verifica(/secrets\.JWT_SECRET/.test(JSON.stringify(d.env)) && /secrets\.POSTGRES_PASSWORD/.test(JSON.stringify(d.env)), 'JWT_SECRET y POSTGRES_PASSWORD se leen de secretos de GitHub');
       const usos = JSON.stringify(wf).match(/actions\/(checkout|setup-node)@v\d+/g) ?? [];
@@ -268,7 +268,7 @@ if (fase === '1') {
       c.verifica(ui.status === 200 && /swagger-ui/.test(await ui.text()), 'GET /api/docs/ responde 200 con Swagger UI en el contenedor', `HTTP ${ui.status}`);
       const json = await fetch(`${CFG.SOCKET}/api/docs/openapi.json`).then((r) => r.json());
       const operaciones = Object.values(json.paths).flatMap((o) => ['get', 'post', 'patch', 'put', 'delete'].filter((m) => o[m]));
-      c.verifica(/^3\./.test(json.openapi) && Object.keys(json.paths).length === 22 && operaciones.length === 25, 'La imagen incluye la especificación OpenAPI (22 rutas, 25 operaciones)', `${json.openapi}, ${Object.keys(json.paths).length} rutas, ${operaciones.length} operaciones`);
+      c.verifica(/^3\./.test(json.openapi) && Object.keys(json.paths).length === 28 && operaciones.length === 33, 'La imagen incluye la especificación OpenAPI (28 rutas, 33 operaciones)', `${json.openapi}, ${Object.keys(json.paths).length} rutas, ${operaciones.length} operaciones`);
       const propio = await fetch(`${CFG.SOCKET}/api/health`, { headers: { Origin: CFG.SOCKET } });
       c.verifica(propio.status === 200, 'Una llamada con Origin igual al del propio backend (Try it out) no es bloqueada', `HTTP ${propio.status}`);
       const ajeno = await fetch(`${CFG.SOCKET}/api/health`, { headers: { Origin: 'http://sitio-malicioso.example' } });
@@ -382,7 +382,7 @@ if (fase === '2') {
   );
 
   await S.caso(
-    { ...base, id: 'SD-22', hu: 'US-19', ca: [3, 4], titulo: 'Entorno limpio: "down -v" borra los datos y el esquema se recrea solo', objetivo: 'Verificar que eliminar el volumen deja la base vacía y que al volver a levantar el esquema se aplica automáticamente.', pasos: ['Ejecutar "docker compose down -v".', 'Ejecutar "up -d --wait".', 'Contar usuarios y verificar las tablas.'], esperado: 'Base vacía (0 usuarios) con las 11 tablas creadas automáticamente.' },
+    { ...base, id: 'SD-22', hu: 'US-19', ca: [3, 4], titulo: 'Entorno limpio: "down -v" borra los datos y el esquema se recrea solo', objetivo: 'Verificar que eliminar el volumen deja la base vacía y que al volver a levantar el esquema se aplica automáticamente.', pasos: ['Ejecutar "docker compose down -v".', 'Ejecutar "up -d --wait".', 'Contar usuarios y verificar las tablas.'], esperado: 'Base vacía (0 usuarios) con las 12 tablas creadas automáticamente.' },
     async (c) => {
       const down = dc('down -v', { timeout: 180000 });
       c.verifica(down.code === 0, 'docker compose down -v termina sin errores');
@@ -391,7 +391,7 @@ if (fase === '2') {
       const up = dc('up -d --wait --wait-timeout 300', { timeout: 420000 });
       c.verifica(up.code === 0, 'El entorno vuelve a levantar desde cero', up.out.trim().split(/\r?\n/).slice(-3).join(' | '));
       c.verifica(sql('SELECT count(*) FROM usuarios') === '0', 'La base quedó vacía (0 usuarios)');
-      c.verifica(sql("SELECT count(*) FROM pg_tables WHERE schemaname='public'") === '11', 'El esquema se aplicó automáticamente (11 tablas)');
+      c.verifica(sql("SELECT count(*) FROM pg_tables WHERE schemaname='public'") === '12', 'El esquema se aplicó automáticamente (12 tablas)');
       void id;
     }
   );

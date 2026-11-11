@@ -250,7 +250,7 @@ export default function AdminReservasPage() {
                     type="button"
                     className="boton-secundario boton-compacto"
                     onClick={() => abrirCancelacion(reserva)}
-                    aria-label={`Cancelar la reserva ${reserva.codigo}`}
+                    aria-label={`Cancelar reserva ${reserva.codigo}`}
                   >
                     Cancelar reserva
                   </button>

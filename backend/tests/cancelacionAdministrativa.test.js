@@ -269,8 +269,11 @@ describe('Rutas /api/admin/reservas (US-16)', () => {
   });
 
   it('valida los filtros del listado', async () => {
-    await request(app).get('/api/admin/reservas?canchaId=no-uuid').set('Authorization', tokenUsuario(ADMIN_ID)).expect(400);
-    await request(app).get('/api/admin/reservas?fecha=ayer').set('Authorization', tokenUsuario(ADMIN_ID)).expect(400);
+    const canchaInvalida = await request(app).get('/api/admin/reservas?canchaId=no-uuid').set('Authorization', tokenUsuario(ADMIN_ID));
+    const fechaInvalida = await request(app).get('/api/admin/reservas?fecha=ayer').set('Authorization', tokenUsuario(ADMIN_ID));
+
+    expect(canchaInvalida.status).toBe(400);
+    expect(fechaInvalida.status).toBe(400);
   });
 
   it('exige el motivo al cancelar (400) y no cancela', async () => {
@@ -285,11 +288,13 @@ describe('Rutas /api/admin/reservas (US-16)', () => {
   });
 
   it('rechaza un id de reserva que no es UUID', async () => {
-    await request(app)
+    const respuesta = await request(app)
       .patch('/api/admin/reservas/123/cancelar')
       .set('Authorization', tokenUsuario(ADMIN_ID))
-      .send({ motivo: 'Mantenimiento' })
-      .expect(400);
+      .send({ motivo: 'Mantenimiento' });
+
+    expect(respuesta.status).toBe(400);
+    expect(reservaRepository.cancelarAdministrativamente).not.toHaveBeenCalled();
   });
 
   it('un administrador cancela una reserva futura y queda registrado quién la canceló', async () => {
