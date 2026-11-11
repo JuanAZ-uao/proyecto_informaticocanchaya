@@ -1,13 +1,13 @@
 name: Respaldo de la base de datos
 
-# US-23. Respaldo diario de la base de PostgreSQL de Railway con pg_dump. En cada ejecución, además, se RESTAURA el
+# US-23. Respaldo diario de la base de PostgreSQL de producción (Neon, o Railway si se usa) con pg_dump. En cada ejecución, además, se RESTAURA el
 # respaldo en una base temporal y se comparan las tablas con la original: así la restauración queda probada a diario
 # y no solo el día que se necesita.
 #
 # Secretos del repositorio:
-#   BACKUP_DATABASE_URL  URL PÚBLICA (proxy TCP) del PostgreSQL de producción en Railway (variable DATABASE_PUBLIC_URL).
+#   BACKUP_DATABASE_URL  cadena de conexión DIRECTA (sin -pooler) del PostgreSQL de producción. En Railway: DATABASE_PUBLIC_URL.
 #   BACKUP_PASSPHRASE    clave para cifrar el archivo (el respaldo tiene datos personales). Guardarla en un gestor de claves.
-# Variable del repositorio: DESPLIEGUE_NUBE=true y, opcional, PG_VERSION (por defecto 17, igual que el servidor).
+# Variable del repositorio: DESPLIEGUE_NUBE=true y PG_VERSION = versión mayor de PostgreSQL del servidor (Neon: 18).
 on:
   schedule:
     - cron: "0 8 * * *" # 03:00 en Colombia
@@ -27,7 +27,8 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:17-alpine
+        # Misma versión mayor que el servidor de Neon: un respaldo de una versión más nueva no se restaura en una más vieja.
+        image: postgres:${{ vars.PG_VERSION || '18' }}-alpine
         env:
           POSTGRES_DB: restauracion
           POSTGRES_USER: canchaya
@@ -41,7 +42,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     env:
-      PG_VERSION: ${{ vars.PG_VERSION || '17' }}
+      PG_VERSION: ${{ vars.PG_VERSION || '18' }}
       ORIGEN_URL: ${{ secrets.BACKUP_DATABASE_URL }}
       DESTINO_URL: postgresql://canchaya:resp-${{ github.run_id }}-${{ github.run_attempt }}@localhost:5432/restauracion
       BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
