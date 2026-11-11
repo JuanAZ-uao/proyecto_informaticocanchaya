@@ -346,7 +346,7 @@ EVIDENCIA_ARCHIVO=../docs/evidencias-despliegue/humo-produccion.md npm run smoke
 ```
 Verifica: frontend y recarga en una ruta interna, HTTPS, `/api/health`, CORS (permite el frontend y rechaza un origen ajeno), **registro**, **login**, **listado de canchas**, **temporizador del socket (WSS)**, **validación de disponibilidad** (franja fuera de horario y hora inválida), **creación de reserva** y **bloqueo de reserva duplicada** (otro usuario y el mismo). Cancela la reserva que creó; deja solo dos cuentas `humo.*@canchaya-humo.test`. Se ejecuta automáticamente en el job `verificar-produccion` y deja el resultado como artefacto `humo-produccion`.
 
-Resultado de referencia en un entorno Docker local equivalente (HTTP, sin HTTPS): **19/19** verificaciones aprobadas.
+Resultado de referencia en un entorno Docker local equivalente (HTTP, sin HTTPS): **20/20** verificaciones aprobadas.
 
 ### 12.2 Prueba de carga básica de reservas
 ```bash

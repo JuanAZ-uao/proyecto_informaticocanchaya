@@ -10,6 +10,7 @@
 // al terminar. Sale con código 1 si alguna verificación falla.
 const fs = require('fs');
 const { io } = require('socket.io-client');
+const { franjaDeUnaHora, elegirCancha } = require('./franjasDeCancha');
 
 function leerUrl(nombre, valor) {
   if (!valor) throw new Error(`Define ${nombre} (por ejemplo ${nombre}=https://...)`);
@@ -131,27 +132,37 @@ async function principal() {
   verificar(`Socket (${SOCKET_URL.startsWith('https') ? 'WSS' : 'WS'}): llega temporizador:inicio con vencimiento`, Boolean(datos?.expiresAt) && vigente, error || `expiresAt=${datos?.expiresAt}`);
   socket.disconnect();
 
-  // 6. Disponibilidad
-  const fecha = fechaFutura();
-  const disponibilidad = await llamar('GET', `/canchas/${cancha.id}/disponibilidad?fecha=${fecha}`, null, ana.token);
+  // 6. Disponibilidad. Se elige una cancha y una fecha cuyo horario de atención permita una franja de 1 hora:
+  // en producción las canchas tienen horarios distintos y una hora fija podría quedar fuera de horario.
+  const fechaBase = fechaFutura();
+  let fecha = fechaBase;
+  let elegida = null;
+  for (let dia = 0; dia < 7 && !elegida; dia += 1) {
+    fecha = new Date(new Date(`${fechaBase}T12:00:00Z`).getTime() + dia * 86400000).toISOString().slice(0, 10);
+    elegida = await elegirCancha(llamar, ana.token, lista.datos.canchas, (horarios) => franjaDeUnaHora(horarios, fecha) !== null);
+  }
+  verificar('Hay una cancha con horario de atención para reservar una franja de 1 hora', Boolean(elegida), elegida ? `${elegida.cancha.nombre} · ${fecha}` : 'ninguna cancha tiene horario');
+  if (!elegida) return;
+  const canchaReserva = elegida.cancha;
+  const disponibilidad = await llamar('GET', `/canchas/${canchaReserva.id}/disponibilidad?fecha=${fecha}`, null, ana.token);
   verificar('Disponibilidad: consulta de una fecha', disponibilidad.status === 200 && Array.isArray(disponibilidad.datos.ocupados), `HTTP ${disponibilidad.status}`);
-  const fueraDeHorario = await llamar('POST', `/canchas/${cancha.id}/reservas`, { fecha, horaInicio: '03:00', horaFin: '04:00' }, ana.token);
+  const fueraDeHorario = await llamar('POST', `/canchas/${canchaReserva.id}/reservas`, { fecha, horaInicio: '03:00', horaFin: '04:00' }, ana.token);
   verificar('Disponibilidad: rechaza una franja fuera del horario de atención', fueraDeHorario.status >= 400 && fueraDeHorario.status < 500, `HTTP ${fueraDeHorario.status}`);
-  const horaInvalida = await llamar('POST', `/canchas/${cancha.id}/reservas`, { fecha, horaInicio: '25:00', horaFin: '26:00' }, ana.token);
+  const horaInvalida = await llamar('POST', `/canchas/${canchaReserva.id}/reservas`, { fecha, horaInicio: '25:00', horaFin: '26:00' }, ana.token);
   verificar('Disponibilidad: valida el formato de la hora (400)', horaInvalida.status === 400, `HTTP ${horaInvalida.status}`);
 
   // 6b. Reserva y bloqueo de duplicada
-  const franja = { fecha, horaInicio: '07:00', horaFin: '08:00' };
-  const reserva = await llamar('POST', `/canchas/${cancha.id}/reservas`, franja, ana.token);
-  verificar('Creación de reserva (201 con código)', reserva.status === 201 && Boolean(reserva.datos.reserva?.codigo), `HTTP ${reserva.status} ${reserva.datos.reserva?.codigo ?? ''}`);
+  const franja = franjaDeUnaHora(elegida.horarios, fecha);
+  const reserva = await llamar('POST', `/canchas/${canchaReserva.id}/reservas`, franja, ana.token);
+  verificar('Creación de reserva (201 con código)', reserva.status === 201 && Boolean(reserva.datos.reserva?.codigo), `HTTP ${reserva.status} ${reserva.datos.reserva?.codigo ?? reserva.datos.mensaje ?? ''} · franja ${franja.horaInicio}-${franja.horaFin}`);
 
   const luis = await crearCuenta('b');
-  const duplicadaOtro = await llamar('POST', `/canchas/${cancha.id}/reservas`, franja, luis.token);
+  const duplicadaOtro = await llamar('POST', `/canchas/${canchaReserva.id}/reservas`, franja, luis.token);
   verificar('Reserva duplicada por otro usuario: bloqueada (409)', duplicadaOtro.status === 409, `HTTP ${duplicadaOtro.status}`);
-  const duplicadaMismo = await llamar('POST', `/canchas/${cancha.id}/reservas`, franja, ana.token);
+  const duplicadaMismo = await llamar('POST', `/canchas/${canchaReserva.id}/reservas`, franja, ana.token);
   verificar('Reserva duplicada por el mismo usuario: bloqueada (409)', duplicadaMismo.status === 409, `HTTP ${duplicadaMismo.status}`);
-  const ocupadas = await llamar('GET', `/canchas/${cancha.id}/disponibilidad?fecha=${fecha}`, null, luis.token);
-  const unica = (ocupadas.datos.ocupados || []).filter((o) => String(o.horaInicio).startsWith('07:00')).length;
+  const ocupadas = await llamar('GET', `/canchas/${canchaReserva.id}/disponibilidad?fecha=${fecha}`, null, luis.token);
+  const unica = (ocupadas.datos.ocupados || []).filter((o) => String(o.horaInicio).startsWith(franja.horaInicio)).length;
   verificar('Solo existe una reserva para la franja', unica === 1, `${unica} reserva(s)`);
 
   // 7. Limpieza: se cancela la reserva de prueba

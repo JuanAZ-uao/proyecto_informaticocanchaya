@@ -10,6 +10,7 @@
 // Sale con código 1 si alguna verificación falla. Crea cuentas "carga.<fecha>.<n>@canchaya-humo.test".
 const fs = require('fs');
 const path = require('path');
+const { franjaDeUnaHora, elegirCancha } = require('./franjasDeCancha');
 
 function leerUrlApi(valor) {
   if (!valor) throw new Error('Define API_URL (por ejemplo https://api.ejemplo.com/api)');
@@ -98,14 +99,17 @@ async function principal() {
   verificar(`${USUARIOS} usuarios registrados e iniciaron sesión`, tokens.length === USUARIOS);
 
   const lista = await llamar('GET', '/canchas', null, tokens[0]);
-  const cancha = lista.datos.canchas?.[0];
-  if (!cancha) throw new Error('No hay canchas: carga el catálogo inicial (npm run seed:inicial)');
+  // Se necesita una cancha que atienda los 7 días de la semana: las franjas de la prueba caen en fechas distintas y,
+  // en producción, cada cancha tiene su propio horario.
+  const elegida = await elegirCancha(llamar, tokens[0], lista.datos.canchas ?? [], (horarios) => new Set(horarios.map((h) => h.diaSemana)).size === 7);
+  const cancha = elegida?.cancha;
+  if (!cancha) throw new Error('No hay una cancha con horario de atención los 7 días (¿falta el catálogo inicial? npm run seed:inicial)');
 
   const base = Math.floor(Math.random() * 3000);
   const creadas = [];
 
   // Fase 1: todos por la misma franja
-  const franjaCompartida = { fecha: fechaDia(base, 0), horaInicio: '07:00', horaFin: '08:00' };
+  const franjaCompartida = franjaDeUnaHora(elegida.horarios, fechaDia(base, 0));
   const compitiendo = await Promise.all(tokens.map((token) => llamar('POST', `/canchas/${cancha.id}/reservas`, franjaCompartida, token)));
   const ganadoras = compitiendo.filter((r) => r.status === 201);
   const conflictos = compitiendo.filter((r) => r.status === 409).length;
@@ -119,7 +123,7 @@ async function principal() {
 
   // Fase 2: cada uno su propia franja
   const propias = await Promise.all(
-    tokens.map((token, i) => llamar('POST', `/canchas/${cancha.id}/reservas`, { fecha: fechaDia(base, 1 + i), horaInicio: '09:00', horaFin: '10:00' }, token))
+    tokens.map((token, i) => llamar('POST', `/canchas/${cancha.id}/reservas`, franjaDeUnaHora(elegida.horarios, fechaDia(base, 1 + i)), token))
   );
   const exitosas = propias.filter((r) => r.status === 201);
   const errores5xx2 = propias.filter((r) => r.status >= 500).length;
