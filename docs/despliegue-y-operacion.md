@@ -181,10 +181,7 @@ Si el correo ya está registrado, solo se promueve a administrador y no hace fal
 
    Si falta `VITE_API_URL` o no empieza por `https://`, **el build de Vercel falla** (lo valida `frontend/vite.config.js`), en vez de publicar una app que llame a `localhost` o cause contenido mixto. En el código no hay direcciones de desarrollo (`frontend/src/config.js` solo las usa en `npm run dev` y pruebas).
 4. **Previews.** La integración Git de Vercel genera un despliegue de preview con URL propia por cada Pull Request y por cada rama distinta de `sprint_5`.
-5. **Producción solo con el pipeline en verde.** `frontend/vercel.json` desactiva el despliegue automático de Vercel para `sprint_5`; el job `desplegar-frontend` de `ci-cd.yml` publica con la CLI de Vercel únicamente cuando backend, frontend, SonarQube (Quality Gate) y Docker pasaron. Hace falta:
-   - Crear un *token* en *Account Settings → Tokens* (alcance solo de este equipo).
-   - Guardar en GitHub (*Settings → Secrets and variables → Actions*): secretos `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` (los dos últimos están en `frontend/.vercel/project.json` tras ejecutar `npx vercel link`, o en *Project → Settings*).
-   - Crear el *environment* `production` de GitHub (opcional: exigir aprobación de un revisor antes de publicar).
+5. **Producción y el pipeline.** Por defecto la integración Git de Vercel publica `sprint_5` al fusionar (modo directo). Para cumplir con rigor "el despliegue a producción solo ocurre si los chequeos están aprobados" existe el **modo pipeline**: (a) añadir a `frontend/vercel.json` el bloque `"git": { "deploymentEnabled": { "sprint_5": false } }`, que apaga el despliegue automático de esa rama; (b) crear la variable de GitHub `DESPLIEGUE_VERCEL_POR_PIPELINE=true`; (c) crear los secretos `VERCEL_TOKEN`, `VERCEL_ORG_ID` y `VERCEL_PROJECT_ID` (token en *Account Settings → Tokens*; los IDs en *Project → Settings* y *Team → Settings*). Entonces el job `desplegar-frontend` publica con la CLI únicamente cuando backend, frontend, SonarQube (Quality Gate) y Docker pasaron. **Importante:** apagar el despliegue automático sin tener el modo pipeline listo deja a la rama sin publicar (el frontend se queda con la versión anterior y las rutas internas dan 404).
 6. **Dominio.** *Project → Settings → Domains → Add.* Sin dominio propio sirve `https://<proyecto>.vercel.app`; con dominio propio se crea el registro DNS que Vercel muestre. El certificado HTTPS es automático. Actualizar `CORS_ORIGIN` en Railway con el dominio final.
 7. **Historial de despliegues.** *Project → Deployments* muestra cada despliegue con su commit, fecha y autor; la versión que corre el backend se ve en `GET /api/health` (campo `version`, el commit de 7 caracteres).
 
@@ -194,7 +191,8 @@ Si el correo ya está registrado, solo se promueve a administrador y no hace fal
 | --- | --- | --- |
 | Variable | `DESPLIEGUE_NUBE` | `true` activa los jobs de nube (`desplegar-frontend`, `verificar-produccion`, monitoreo y respaldo). Mientras no exista, el pipeline sigue como antes. |
 | Variable | `PROD_WEB_URL`, `PROD_API_URL` | `https://<frontend>` y `https://<backend>/api`. |
-| Secreto | `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` | Publicar el frontend. |
+| Variable (opcional) | `DESPLIEGUE_VERCEL_POR_PIPELINE` | `true` activa el modo pipeline de la sección 5.5. |
+| Secreto (solo modo pipeline) | `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` | Publicar el frontend con la CLI. |
 | Secreto | `BACKUP_DATABASE_URL`, `BACKUP_PASSPHRASE` | Respaldo diario (sección 8): cadena de conexión de Neon (o la URL pública de Railway) y clave de cifrado. |
 | Secreto (opcional) | `ALERTAS_WEBHOOK_URL` | Webhook entrante de Slack o Discord para las alertas. |
 | Existentes | `SONAR_TOKEN`, `JWT_SECRET`, `POSTGRES_PASSWORD`; variable `SONAR_HOST_URL` | Pipeline actual (Sprint 4). |

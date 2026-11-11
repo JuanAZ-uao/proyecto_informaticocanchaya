@@ -230,41 +230,23 @@ jobs:
         if: always()
         run: docker compose down -v
 
-  deploy-local:
-    name: Desplegar en entorno local
-    needs: docker
-    # Rama de despliegue actual: sprint_5.
-    # Solo en push, nunca en pull_request, para que código de un PR no se ejecute
-    # en la máquina del runner.
-    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/sprint_5'
-    runs-on: self-hosted
-    env:
-      JWT_SECRET: ${{ secrets.JWT_SECRET }}
-      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-    steps:
-      - uses: actions/checkout@v5
-
-      - name: Desplegar con Docker Compose
-        run: docker compose up -d --build --wait --wait-timeout 180
-
-      - name: Limpiar imágenes antiguas
-        run: docker image prune -f
-
   # ---------------------------------------------------------------------------------------------------------------
   # Despliegue en la nube (US-22 a US-26). Se activa creando la variable de repositorio DESPLIEGUE_NUBE=true cuando
   # Vercel y Railway ya están configurados; mientras tanto estos jobs no corren.
   #
   # Producción = rama sprint_5. Solo se llega aquí si backend, frontend, Quality Gate y Docker pasaron (needs).
-  #  - Frontend: este job despliega a Vercel con la CLI (la integración Git de Vercel está desactivada para sprint_5
-  #    en frontend/vercel.json, para que Vercel NO publique antes de que pasen los chequeos).
+  #  - Frontend: por defecto lo publica la integración Git de Vercel al fusionar en sprint_5. Para que Vercel NO
+  #    publique antes de que pasen los chequeos, activar el modo pipeline: añadir a frontend/vercel.json
+  #    "git": {"deploymentEnabled": {"sprint_5": false}}, crear la variable DESPLIEGUE_VERCEL_POR_PIPELINE=true y los
+  #    secretos de Vercel; entonces este job despliega con la CLI solo si todo está en verde.
   #  - Backend: Render (o Railway) despliega desde GitHub con "After CI Checks Pass" (Railway: "Wait for CI"), que
   #    espera a que este mismo workflow termine en verde.
   # Los PR y las demás ramas generan previews en Vercel mediante su integración Git.
   # ---------------------------------------------------------------------------------------------------------------
   desplegar-frontend:
-    name: Vercel - despliegue de producción
+    name: Vercel - despliegue de producción (modo pipeline)
     needs: [backend, frontend, quality-gate, docker]
-    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/sprint_5' && vars.DESPLIEGUE_NUBE == 'true'
+    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/sprint_5' && vars.DESPLIEGUE_NUBE == 'true' && vars.DESPLIEGUE_VERCEL_POR_PIPELINE == 'true'
     runs-on: ubuntu-latest
     environment: production
     env:
@@ -293,7 +275,7 @@ jobs:
 
   verificar-produccion:
     name: Pruebas de humo en producción
-    needs: desplegar-frontend
+    needs: [backend, frontend, quality-gate, docker]
     if: success() && github.event_name == 'push' && github.ref == 'refs/heads/sprint_5' && vars.DESPLIEGUE_NUBE == 'true'
     runs-on: ubuntu-latest
     defaults:
@@ -325,6 +307,19 @@ jobs:
             sleep 15
           done
           echo "::error title=El backend no desplegó este commit::Tras 15 minutos la API no informa la versión $esperado. Revisa el despliegue en Render/Railway."
+          exit 1
+
+      # Con el despliegue directo de Vercel, la reescritura de rutas nueva tarda un momento en estar en línea: una ruta
+      # interna que responde 200 indica que ya está publicada la versión con vercel.json.
+      - name: Esperar a que Vercel sirva la versión nueva del frontend
+        run: |
+          for intento in $(seq 1 40); do
+            codigo="$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$WEB_URL/ruta-de-comprobacion" || true)"
+            echo "Intento $intento: ruta interna -> HTTP $codigo"
+            [ "$codigo" = "200" ] && exit 0
+            sleep 15
+          done
+          echo "::error title=Vercel no publicó la reescritura de rutas::Una ruta interna sigue dando 404 tras 10 minutos. Revisa el despliegue en Vercel."
           exit 1
 
       - name: Pruebas de humo (registro, login, canchas, socket, disponibilidad, reserva y duplicada)

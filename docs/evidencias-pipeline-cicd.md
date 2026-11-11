@@ -20,7 +20,7 @@ La ejecución del job Docker muestra completados el build/arranque, smoke test, 
 
 ### Configuración de runner y secretos
 
-Las siguientes capturas documentan el runner self-hosted conectado y la configuración de secretos del repositorio. Los valores secretos no se exponen.
+Evidencia histórica: el despliegue local con runner propio se retiró en la entrega final y hoy todos los jobs corren en los runners de GitHub. Las siguientes capturas documentan el runner self-hosted conectado y la configuración de secretos del repositorio. Los valores secretos no se exponen.
 
 ![Runner self-hosted conectado](img/runner-self-hosted.png)
 
@@ -32,7 +32,7 @@ Las siguientes capturas documentan el runner self-hosted conectado y la configur
 - Frontend: ESLint, build Vite y pruebas Vitest con cobertura.
 - Docker: build y arranque de los tres servicios, smoke test HTTP y carga Socket.IO.
 - SonarQube: Quality Gate si hay servidor disponible y secretos configurados.
-- Despliegue: ejecución en el runner self-hosted después de pasar los jobs, únicamente con push exitoso a `sprint_5`.
+- Despliegue: (histórico) ejecución en el runner self-hosted después de pasar los jobs; retirado. El despliegue actual es en la nube (ver el manual de despliegue y operación).
 
 ## Renovar la evidencia para la entrega
 

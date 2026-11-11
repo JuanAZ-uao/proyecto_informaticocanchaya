@@ -37,6 +37,8 @@ jobs:
       SIMULAR: ${{ inputs.simular_caida }}
       WEBHOOK: ${{ secrets.ALERTAS_WEBHOOK_URL }}
       GH_TOKEN: ${{ github.token }}
+      # Este job no descarga el código: se le indica a la CLI de GitHub en qué repositorio actuar.
+      GH_REPO: ${{ github.repository }}
     steps:
       - name: Revisar disponibilidad
         id: revisar
@@ -113,7 +115,7 @@ jobs:
           fi
 
       - name: Marcar la ejecución como fallida
-        if: steps.revisar.outputs.hay_fallas == 'true'
+        if: always() && steps.revisar.outputs.hay_fallas == 'true'
         env:
           DETALLE: ${{ steps.revisar.outputs.detalle }}
         run: |

@@ -4,11 +4,6 @@
   "installCommand": "npm ci --ignore-scripts",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "git": {
-    "deploymentEnabled": {
-      "sprint_5": false
-    }
-  },
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ],
