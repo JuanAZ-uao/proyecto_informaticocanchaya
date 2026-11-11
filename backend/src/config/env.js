@@ -18,7 +18,11 @@ const env = {
   exigirHttpsPagos: process.env.EXIGIR_HTTPS_PAGOS === 'true',
   // Detrás de un proxy con TLS, confiar en X-Forwarded-Proto para saber si la conexión original era HTTPS.
   confiarEnProxy: process.env.TRUST_PROXY === 'true',
+  // Uno o varios orígenes separados por comas (producción y staging); ver config/corsOrigin.js.
   corsOrigin: process.env.CORS_ORIGIN || '*',
+  // Sin SMTP, imprimir en el log el contenido de los correos (enlaces con token incluidos). Por defecto solo fuera de
+  // producción: en producción los logs no deben llevar tokens ni datos personales (US-22/US-25).
+  logCorreoDetalle: process.env.LOG_CORREO_DETALLE ? process.env.LOG_CORREO_DETALLE === 'true' : (process.env.NODE_ENV || 'development') !== 'production',
   smtp: {
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT || 587),

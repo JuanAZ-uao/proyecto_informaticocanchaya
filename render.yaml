@@ -1,0 +1,45 @@
+# Blueprint de Render para el backend de CanchaYa (opción sin costo: Render + Neon). Ver docs/despliegue-y-operacion.md.
+# Render crea el servicio al conectar el repositorio (New > Blueprint). Las variables con "sync: false" las pide el
+# panel y NO se guardan en el repositorio.
+services:
+  - type: web
+    name: canchaya-backend
+    runtime: docker
+    plan: free
+    branch: sprint_5
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/health
+    # Despliega solo cuando el workflow CI/CD del commit termina en verde.
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false # cadena de conexión de Neon (proyecto de producción, distinto del de desarrollo)
+      - key: JWT_SECRET
+        generateValue: true # Render lo genera; no existe en ningún archivo
+      - key: CORS_ORIGIN
+        sync: false # https://<dominio-del-frontend-en-vercel>
+      - key: TRUST_PROXY
+        value: "true"
+      - key: EXIGIR_HTTPS_PAGOS
+        value: "true"
+      - key: API_DOCS_HABILITADA
+        value: "false"
+      - key: PASARELA_PAGO
+        value: simulada
+      - key: SEED_INICIAL
+        value: "true" # carga el catálogo de canchas solo si la tabla está vacía
+      - key: LOG_CORREO_DETALLE
+        value: "false"
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false

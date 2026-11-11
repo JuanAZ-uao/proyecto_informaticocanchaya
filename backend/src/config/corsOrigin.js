@@ -12,11 +12,38 @@ function esMismoOrigen(origin, host) {
   }
 }
 
+// CORS_ORIGIN admite uno o varios orígenes separados por comas. En cada uno, "*" reemplaza un tramo del nombre
+// de host (letras, números y guiones), p. ej. https://canchaya-*.vercel.app para las previews de un PR (staging).
+// Un comodín debe ir precedido de texto propio y dejar un dominio real: "*", "https://*" o "https://*.vercel.app"
+// se ignoran, porque permitirían cualquier sitio.
+const escaparRegex = (texto) => texto.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');
+
+function convertirAPatron(entrada) {
+  const limpia = entrada.trim().replace(/\/+$/, '');
+  if (!limpia) return null;
+  if (!limpia.includes('*')) return (origin) => origin === limpia;
+
+  const inicioHost = limpia.indexOf('://') + 3;
+  const comodinSinPrefijo = limpia.indexOf('*') <= inicioHost;
+  const sinDominio = !/[a-z0-9-]\.[a-z]{2,}/i.test(limpia.replace(/\*/g, ''));
+  if (inicioHost < 3 || comodinSinPrefijo || sinDominio) return null;
+
+  const regex = new RegExp(`^${limpia.split('*').map(escaparRegex).join('[a-z0-9-]+')}$`, 'i');
+  return (origin) => regex.test(origin);
+}
+
+function origenesPermitidos() {
+  return String(env.corsOrigin || '')
+    .split(',')
+    .map(convertirAPatron)
+    .filter(Boolean);
+}
+
 function origenPermitido(origin) {
   // Sin origin (ej. Postman/curl) o cualquier puerto de localhost en desarrollo.
   if (!origin) return true;
   if (env.nodeEnv !== 'production' && LOCALHOST_ORIGIN_REGEX.test(origin)) return true;
-  return origin === env.corsOrigin;
+  return origenesPermitidos().some((coincide) => coincide(origin));
 }
 
 // Para las librerías cors y Socket.IO: un origen ajeno simplemente no recibe cabeceras CORS.

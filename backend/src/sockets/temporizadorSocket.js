@@ -133,7 +133,12 @@ function registrarTemporizadorSocket(io) {
   reenviar('liberada', 'disponibilidad:liberada');
   reenviar('reservada', 'disponibilidad:reservada');
 
+  // Sin nadie conectado no hay retenciones nuevas que vencer: se consulta la base solo cada 20 barridos (≈ 5 min).
+  // Así una base serverless (Neon) puede suspenderse cuando no hay tráfico y no gasta horas de cómputo.
+  let barridos = 0;
   const barrido = setInterval(() => {
+    barridos += 1;
+    if (io.engine?.clientsCount === 0 && barridos % 20 !== 0) return;
     retencionService
       .barrerVencidas()
       .catch((error) => console.error('[SOCKET] Error al barrer retenciones vencidas:', error.message));

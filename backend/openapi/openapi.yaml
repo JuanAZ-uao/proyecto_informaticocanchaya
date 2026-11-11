@@ -111,6 +111,10 @@ paths:
                   estado:
                     type: string
                     example: ok
+                  version:
+                    type: string
+                    description: Primeros 7 caracteres del commit desplegado (solo en Railway, o si se define APP_VERSION).
+                    example: a1b2c3d
         '500':
           $ref: '#/components/responses/ErrorInterno'
 

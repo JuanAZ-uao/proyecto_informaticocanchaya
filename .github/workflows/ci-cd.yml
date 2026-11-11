@@ -249,3 +249,93 @@ jobs:
 
       - name: Limpiar imágenes antiguas
         run: docker image prune -f
+
+  # ---------------------------------------------------------------------------------------------------------------
+  # Despliegue en la nube (US-22 a US-26). Se activa creando la variable de repositorio DESPLIEGUE_NUBE=true cuando
+  # Vercel y Railway ya están configurados; mientras tanto estos jobs no corren.
+  #
+  # Producción = rama sprint_5. Solo se llega aquí si backend, frontend, Quality Gate y Docker pasaron (needs).
+  #  - Frontend: este job despliega a Vercel con la CLI (la integración Git de Vercel está desactivada para sprint_5
+  #    en frontend/vercel.json, para que Vercel NO publique antes de que pasen los chequeos).
+  #  - Backend: Render (o Railway) despliega desde GitHub con "After CI Checks Pass" (Railway: "Wait for CI"), que
+  #    espera a que este mismo workflow termine en verde.
+  # Los PR y las demás ramas generan previews en Vercel mediante su integración Git.
+  # ---------------------------------------------------------------------------------------------------------------
+  desplegar-frontend:
+    name: Vercel - despliegue de producción
+    needs: [backend, frontend, quality-gate, docker]
+    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/sprint_5' && vars.DESPLIEGUE_NUBE == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+
+      # Las variables de entorno de producción (VITE_API_URL, ...) las guarda Vercel; no están en el repositorio.
+      - name: Traer la configuración del proyecto de Vercel
+        run: npx --yes vercel@41 pull --yes --environment=production
+
+      - name: Compilar con el comando de producción
+        run: npx --yes vercel@41 build --prod
+
+      - name: Publicar en producción
+        run: |
+          url="$(npx --yes vercel@41 deploy --prebuilt --prod)"
+          echo "### Frontend desplegado" >> "$GITHUB_STEP_SUMMARY"
+          echo "Commit ${GITHUB_SHA::7}: $url" >> "$GITHUB_STEP_SUMMARY"
+
+  verificar-produccion:
+    name: Pruebas de humo en producción
+    needs: desplegar-frontend
+    if: success() && github.event_name == 'push' && github.ref == 'refs/heads/sprint_5' && vars.DESPLIEGUE_NUBE == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      API_URL: ${{ vars.PROD_API_URL }}
+      WEB_URL: ${{ vars.PROD_WEB_URL }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - run: npm ci --ignore-scripts
+
+      # El backend tarda unos minutos en construirse y reemplazarse (y, en Render gratuito, en despertar): se espera a que /api/health informe
+      # el commit de este push (campo "version") antes de probar, para no probar la versión anterior.
+      - name: Esperar a que el backend sirva este commit
+        run: |
+          esperado="${GITHUB_SHA::7}"
+          for intento in $(seq 1 60); do
+            version="$(curl -fsS --max-time 10 "$API_URL/health" 2>/dev/null | sed -n 's/.*"version":"\([^"]*\)".*/\1/p' || true)"
+            echo "Intento $intento: la API informa la versión '${version:-?}' y se espera '$esperado'"
+            [ "$version" = "$esperado" ] && exit 0
+            sleep 15
+          done
+          echo "::error title=El backend no desplegó este commit::Tras 15 minutos la API no informa la versión $esperado. Revisa el despliegue en Render/Railway."
+          exit 1
+
+      - name: Pruebas de humo (registro, login, canchas, socket, disponibilidad, reserva y duplicada)
+        env:
+          EVIDENCIA_ARCHIVO: ${{ github.workspace }}/evidencia/humo-produccion.md
+        run: npm run smoke:produccion
+
+      - name: Publicar la evidencia
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: humo-produccion
+          path: evidencia/
+          if-no-files-found: ignore

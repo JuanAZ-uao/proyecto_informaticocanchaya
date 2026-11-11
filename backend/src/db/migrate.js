@@ -6,6 +6,8 @@ async function migrar() {
   const rutaSchema = path.join(__dirname, 'schema.sql');
   const sql = fs.readFileSync(rutaSchema, 'utf8');
 
+  await pool.listo;
+
   await pool.query(sql);
   console.log('[MIGRATE] Esquema aplicado correctamente');
 

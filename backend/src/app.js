@@ -19,8 +19,11 @@ app.use(rechazarOrigenNoPermitido);
 app.use(cors({ origin: verificarOrigen }));
 app.use(express.json());
 
+// Render y Railway exponen el commit desplegado: así el pipeline y el equipo saben qué versión está respondiendo.
+const versionDesplegada = (process.env.RENDER_GIT_COMMIT || process.env.RAILWAY_GIT_COMMIT_SHA || process.env.APP_VERSION || '').slice(0, 7);
+
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ estado: 'ok' });
+  res.status(200).json({ estado: 'ok', ...(versionDesplegada ? { version: versionDesplegada } : {}) });
 });
 
 // Documentación OpenAPI / Swagger UI (RNF-07): desarrollo y staging; en producción solo si se habilita.

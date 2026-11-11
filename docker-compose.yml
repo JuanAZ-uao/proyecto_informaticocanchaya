@@ -37,6 +37,8 @@ services:
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
+      # Este entorno es local/staging: sin SMTP imprime los enlaces de los correos en el log (los usa el plan de QA).
+      LOG_CORREO_DETALLE: ${LOG_CORREO_DETALLE:-true}
     depends_on:
       db:
         condition: service_healthy

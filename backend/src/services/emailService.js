@@ -21,6 +21,16 @@ function paraLog(valor) {
   return String(valor).replace(/[\r\n\t]+/g, ' ');
 }
 
+// Sin SMTP el correo no se envía. Con LOG_CORREO_DETALLE=true (desarrollo, pruebas y Docker local) el log trae el
+// contenido para poder probar los flujos; en producción solo deja constancia, sin correos ni enlaces con tokens.
+function registrarSimulado(resumen, lineasDetalle) {
+  if (env.logCorreoDetalle) {
+    lineasDetalle.forEach((linea) => console.log(linea));
+    return;
+  }
+  console.log(`[EMAIL] SMTP no configurado: ${resumen} no enviado`);
+}
+
 // Los datos escritos por el usuario (nombre, cancha) se insertan en HTML: se escapan para que no puedan inyectar etiquetas.
 function escaparHtml(valor) {
   return String(valor).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -38,8 +48,10 @@ async function enviarCorreoRecuperacion({ para, enlaceRestablecimiento }) {
   `;
 
   if (!transportador) {
-    console.log('[EMAIL] SMTP no configurado. Enlace de recuperación (modo desarrollo):');
-    console.log(`[EMAIL] Para: ${paraLog(para)} -> ${paraLog(enlaceRestablecimiento)}`);
+    registrarSimulado('correo de recuperación de contraseña', [
+      '[EMAIL] SMTP no configurado. Enlace de recuperación (modo desarrollo):',
+      `[EMAIL] Para: ${paraLog(para)} -> ${paraLog(enlaceRestablecimiento)}`,
+    ]);
     return { simulado: true };
   }
 
@@ -67,7 +79,9 @@ async function enviarCorreoConfirmacionReserva({ para, nombre, reserva }) {
   `;
 
   if (!transportador) {
-    console.log(`[EMAIL] SMTP no configurado. Confirmación de reserva (modo desarrollo) para ${paraLog(para)}: ${reserva.codigo} · ${paraLog(reserva.cancha.nombre)} · ${reserva.fecha} ${horario}`);
+    registrarSimulado('correo de confirmación de reserva', [
+      `[EMAIL] SMTP no configurado. Confirmación de reserva (modo desarrollo) para ${paraLog(para)}: ${reserva.codigo} · ${paraLog(reserva.cancha.nombre)} · ${reserva.fecha} ${horario}`,
+    ]);
     return { simulado: true };
   }
 
@@ -99,7 +113,9 @@ async function enviarCorreoCancelacionReserva({ para, nombre, reserva, reembolso
   `;
 
   if (!transportador) {
-    console.log(`[EMAIL] SMTP no configurado. Cancelación de reserva (modo desarrollo) para ${paraLog(para)}: ${reserva.codigo} · ${paraLog(reserva.cancha.nombre)} · ${reserva.fecha} ${horario}`);
+    registrarSimulado('correo de cancelación de reserva', [
+      `[EMAIL] SMTP no configurado. Cancelación de reserva (modo desarrollo) para ${paraLog(para)}: ${reserva.codigo} · ${paraLog(reserva.cancha.nombre)} · ${reserva.fecha} ${horario}`,
+    ]);
     return { simulado: true };
   }
 
@@ -117,8 +133,10 @@ async function enviarCorreoVerificacionCorreo({ para, nombre, enlaceVerificacion
   `;
 
   if (!transportador) {
-    console.log('[EMAIL] SMTP no configurado. Enlace de verificación de correo (modo desarrollo):');
-    console.log(`[EMAIL] Para: ${paraLog(para)} -> ${paraLog(enlaceVerificacion)}`);
+    registrarSimulado('correo de verificación de correo', [
+      '[EMAIL] SMTP no configurado. Enlace de verificación de correo (modo desarrollo):',
+      `[EMAIL] Para: ${paraLog(para)} -> ${paraLog(enlaceVerificacion)}`,
+    ]);
     return { simulado: true };
   }
 
@@ -143,7 +161,9 @@ async function enviarCorreoCancelacionAdministrativa({ para, nombre, reserva, mo
   `;
 
   if (!transportador) {
-    console.log(`[EMAIL] SMTP no configurado. Cancelación administrativa (modo desarrollo) para ${paraLog(para)}: ${paraLog(reserva.codigo)} · motivo: ${paraLog(motivo)}`);
+    registrarSimulado('correo de cancelación administrativa', [
+      `[EMAIL] SMTP no configurado. Cancelación administrativa (modo desarrollo) para ${paraLog(para)}: ${paraLog(reserva.codigo)} · motivo: ${paraLog(motivo)}`,
+    ]);
     return { simulado: true };
   }
 

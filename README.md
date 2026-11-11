@@ -16,6 +16,8 @@ Proyecto Informático 1 — Universidad Autónoma de Occidente, Facultad de Inge
 - [Manual de usuario](docs/manual-usuario.md)
 - [Documentación técnica final y despliegue](docs/documentacion-tecnica-final.md)
 - [Evidencias del pipeline CI/CD](docs/evidencias-pipeline-cicd.md)
+- [Manual de despliegue y operación (Vercel + Railway, respaldos, monitoreo, rollback)](docs/despliegue-y-operacion.md)
+- [Notas de la versión v1.0.0](docs/notas-version-v1.0.0.md)
 
 ---
 
@@ -687,3 +689,19 @@ Un administrador puede cancelar cualquier reserva futura con al menos 2 horas de
 - Variables nuevas (ver [backend/.env.example](backend/.env.example)): `HORAS_MIN_CANCELACION`, `EMAIL_CHANGE_TOKEN_EXPIRES_MIN`, `PASARELA_PAGO`, `EXIGIR_HTTPS_PAGOS` y `TRUST_PROXY`.
 - La API documentada en Swagger (`/api/docs`) incluye los endpoints nuevos: perfil, métodos de pago y administración.
 - **Más canchas de ejemplo en Cali:** `npm run seed:mas-canchas` (en `backend/`) agrega 59 canchas en las zonas Norte, Sur, Oeste, Oriente y Centro, con tipos, precios, servicios y horarios variados. **Solo agrega**: no borra nada y se puede repetir sin duplicar (a diferencia de `seed:canchas`, que reemplaza todo el catálogo y, por la cascada, también las reservas). En Docker: `docker compose exec backend node src/seed/seedMasCanchas.js`. Los nombres y direcciones son inventados, y las fotos reutilizan las 5 del catálogo base.
+
+## Despliegue en la nube (US-22 a US-26)
+
+Producción se despliega desde la rama **`sprint_5`**: frontend en **Vercel**, backend en **Render** (plan gratuito) y PostgreSQL en **Neon** (plan gratuito), con HTTPS/WSS automáticos. Railway (de pago) queda documentado como alternativa. La guía completa (cuentas y 2FA, variables por entorno, dominio, respaldos, monitoreo, rollback, planes, límites y costos) está en el [manual de despliegue y operación](docs/despliegue-y-operacion.md), con un checklist por historia.
+
+| Qué | Dónde |
+|---|---|
+| Configuración de Render (blueprint: Docker, healthcheck, variables) | [render.yaml](render.yaml) |
+| Alternativa Railway (Dockerfile, healthcheck, migración y carga inicial en *pre-deploy*) | [backend/railway.json](backend/railway.json) |
+| Configuración de Vercel (build, reescritura SPA, cabeceras) | [frontend/vercel.json](frontend/vercel.json) |
+| Despliegue condicionado al pipeline (pruebas + SonarQube + Docker) y pruebas de humo en producción | [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml) |
+| Respaldo diario con restauración probada | [.github/workflows/respaldo-bd.yml](.github/workflows/respaldo-bd.yml), [scripts/respaldo/](scripts/respaldo/) |
+| Monitoreo y alertas | [.github/workflows/monitoreo.yml](.github/workflows/monitoreo.yml) |
+| Pruebas de humo y de carga | `npm run smoke:produccion` y `npm run test:carga-reservas` en `backend/` |
+
+Los jobs de nube se activan con la variable de repositorio `DESPLIEGUE_NUBE=true` (cuando Vercel y Railway ya estén configurados); mientras tanto el pipeline funciona como antes.

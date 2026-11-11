@@ -2,7 +2,9 @@ function errorHandler(err, req, res, next) { // eslint-disable-line no-unused-va
   const statusCode = err.statusCode || 500;
 
   if (statusCode === 500) {
-    console.error('[ERROR]', err);
+    // Solo método, ruta (sin query string), mensaje y pila: el objeto completo de un error de pg puede traer
+    // valores de la fila (correos, etc.) y no debe llegar a los logs.
+    console.error('[ERROR]', req.method, (req.originalUrl || req.url || '').split('?')[0], err.code || '', err.stack || err.message);
   }
 
   res.status(statusCode).json({
