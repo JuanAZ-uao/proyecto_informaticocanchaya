@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
+import { SOCKET_URL } from '../config';
 
-const SOCKET_URL = (import.meta.env.VITE_API_URL || 'http://localhost:4000/api').replace(/\/api\/?$/, '');
 const ESPERA_RESPUESTA_MS = 8000;
 const EVENTOS_DISPONIBILIDAD = {
   'disponibilidad:retenida': 'retenida',

@@ -119,3 +119,42 @@ describe('con SMTP configurado', () => {
     expect(html).toContain('ignora este correo');
   });
 });
+
+describe('sin SMTP en producción (US-22: los logs no llevan tokens ni datos personales)', () => {
+  let registro;
+
+  beforeEach(() => {
+    registro = jest.spyOn(console, 'log').mockImplementation(() => {});
+    delete process.env.LOG_CORREO_DETALLE;
+    process.env.NODE_ENV = 'production';
+  });
+
+  afterEach(() => {
+    registro.mockRestore();
+    process.env.NODE_ENV = 'test';
+    delete process.env.LOG_CORREO_DETALLE;
+  });
+
+  it('no imprime el enlace con el token ni el correo del destinatario', async () => {
+    const { servicio, sendMail } = cargarServicio({ conSmtp: false });
+
+    const recuperacion = await servicio.enviarCorreoRecuperacion({ para: 'ana@correo.com', enlaceRestablecimiento: 'https://canchaya.app/restablecer?token=SECRETO' });
+    const verificacion = await servicio.enviarCorreoVerificacionCorreo({ para: 'nueva@correo.com', nombre: 'Ana', enlaceVerificacion: 'https://canchaya.app/verificar-correo?token=SECRETO2' });
+    const confirmacion = await servicio.enviarCorreoConfirmacionReserva({ para: 'ana@correo.com', nombre: 'Ana', reserva });
+
+    expect([recuperacion, verificacion, confirmacion]).toEqual([{ simulado: true }, { simulado: true }, { simulado: true }]);
+    expect(sendMail).not.toHaveBeenCalled();
+    const texto = registro.mock.calls.map((c) => c[0]).join(' ');
+    expect(texto).toContain('SMTP no configurado');
+    expect(texto).not.toMatch(/SECRETO|ana@correo|nueva@correo|token=/);
+  });
+
+  it('LOG_CORREO_DETALLE=true lo reactiva de forma explícita (por ejemplo, el entorno Docker local)', async () => {
+    process.env.LOG_CORREO_DETALLE = 'true';
+    const { servicio } = cargarServicio({ conSmtp: false });
+
+    await servicio.enviarCorreoVerificacionCorreo({ para: 'nueva@correo.com', nombre: 'Ana', enlaceVerificacion: 'https://canchaya.app/verificar-correo?token=abc' });
+
+    expect(registro.mock.calls.map((c) => c[0]).join(' ')).toContain('token=abc');
+  });
+});

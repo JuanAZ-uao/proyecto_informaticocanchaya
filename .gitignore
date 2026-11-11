@@ -22,3 +22,7 @@ Thumbs.db
 .scannerwork/
 report-task.txt
 .sonar_lock
+
+# Respaldos de la base de datos (contienen datos personales)
+*.dump
+*.dump.enc

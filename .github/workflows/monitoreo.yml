@@ -1,0 +1,122 @@
+name: Monitoreo de disponibilidad
+
+# US-25. Revisa cada hora el frontend (Vercel) y /api/health (Railway). Si algo falla (tras 3 intentos):
+#   1. avisa al webhook del equipo (Slack/Discord), si existe el secreto ALERTAS_WEBHOOK_URL;
+#   2. abre un issue "Alerta de producción" (GitHub notifica por correo a quienes siguen el repositorio);
+#   3. marca el workflow como fallido (GitHub envía correo por ejecuciones programadas fallidas).
+# Es un complemento del monitoreo externo (UptimeRobot) descrito en docs/despliegue-y-operacion.md.
+#
+# Para simular una alerta: Actions > Monitoreo de disponibilidad > Run workflow > simular_caida = true.
+on:
+  schedule:
+    - cron: "7 * * * *"
+  workflow_dispatch:
+    inputs:
+      simular_caida:
+        description: "Simular una caída para comprobar que las alertas llegan"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: monitoreo
+  cancel-in-progress: false
+
+jobs:
+  disponibilidad:
+    name: Revisar frontend y API
+    # Las ejecuciones programadas solo corren cuando el despliegue en la nube ya está activo.
+    if: vars.DESPLIEGUE_NUBE == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      WEB_URL: ${{ vars.PROD_WEB_URL }}
+      API_URL: ${{ vars.PROD_API_URL }}
+      SIMULAR: ${{ inputs.simular_caida }}
+      WEBHOOK: ${{ secrets.ALERTAS_WEBHOOK_URL }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Revisar disponibilidad
+        id: revisar
+        run: |
+          fallas=""
+          codigo=""
+
+          comprobar() {
+            nombre="$1"; url="$2"; esperado="$3"
+            for intento in 1 2 3; do
+              cuerpo="$(curl -s --max-time 15 -w '\n%{http_code}' "$url" || true)"
+              codigo="$(echo "$cuerpo" | tail -n1)"
+              if [ "$codigo" = "200" ] && echo "$cuerpo" | grep -q "$esperado"; then
+                echo "OK  $nombre ($url)"
+                return 0
+              fi
+              sleep 10
+            done
+            fallas="${fallas}- ${nombre} no responde bien (HTTP ${codigo:-sin respuesta}): ${url}"$'\n'
+            echo "FALLO $nombre ($url)"
+          }
+
+          if [ -z "$WEB_URL" ] || [ -z "$API_URL" ]; then
+            echo "::error::Faltan las variables de repositorio PROD_WEB_URL y PROD_API_URL"
+            exit 1
+          fi
+
+          comprobar "Frontend (Vercel)" "$WEB_URL" 'id="root"'
+          comprobar "API (Railway) /api/health" "$API_URL/health" '"estado":"ok"'
+
+          if [ "$SIMULAR" = "true" ]; then
+            fallas="${fallas}- SIMULACIÓN: caída simulada manualmente para probar las alertas"$'\n'
+          fi
+
+          if [ -n "$fallas" ]; then
+            {
+              echo "hay_fallas=true"
+              echo "detalle<<FIN"
+              printf '%s' "$fallas"
+              echo "FIN"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Avisar al canal del equipo
+        if: steps.revisar.outputs.hay_fallas == 'true' && env.WEBHOOK != ''
+        env:
+          DETALLE: ${{ steps.revisar.outputs.detalle }}
+        run: |
+          texto="🚨 CanchaYa: alerta de producción
+          ${DETALLE}
+          Qué hacer: docs/despliegue-y-operacion.md, sección «Qué hacer ante cada alerta». Ejecución: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          # "text" lo lee Slack y "content" lo lee Discord.
+          curl -fsS -X POST -H 'Content-Type: application/json' \
+            -d "$(printf '%s' "$texto" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.stringify({text:s,content:s})))')" \
+            "$WEBHOOK"
+
+      - name: Abrir un issue de alerta
+        if: steps.revisar.outputs.hay_fallas == 'true'
+        env:
+          DETALLE: ${{ steps.revisar.outputs.detalle }}
+        run: |
+          existente="$(gh issue list --label alerta-produccion --state open --limit 1 --json number --jq '.[0].number // empty')"
+          cuerpo="Detectado por el monitoreo automático el $(date -u +'%Y-%m-%d %H:%M UTC').
+
+          ${DETALLE}
+          Ejecución: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+
+          Procedimiento: docs/despliegue-y-operacion.md. Cierra este issue cuando el servicio se recupere."
+          gh label create alerta-produccion --color B60205 --description "Alerta del monitoreo de producción" 2>/dev/null || true
+          if [ -n "$existente" ]; then
+            gh issue comment "$existente" --body "$cuerpo"
+          else
+            gh issue create --title "Alerta de producción: el sitio o la API no responden" --label alerta-produccion --body "$cuerpo"
+          fi
+
+      - name: Marcar la ejecución como fallida
+        if: steps.revisar.outputs.hay_fallas == 'true'
+        env:
+          DETALLE: ${{ steps.revisar.outputs.detalle }}
+        run: |
+          resumen="$(printf '%s' "$DETALLE" | tr '\n' ' ')"
+          echo "::error title=Alerta de producción::${resumen}"
+          exit 1

@@ -103,6 +103,8 @@ El job Docker de GitHub Actions se valida en un runner con Docker Compose; los c
 
 ## 7. Preparación del despliegue
 
+> El despliegue en la nube (Vercel + Railway), los respaldos, el monitoreo, el rollback y las pruebas de humo y de carga están en el [manual de despliegue y operación](despliegue-y-operacion.md) (US-22 a US-26). Lo siguiente resume los puntos previos.
+
 Antes de habilitar un entorno público:
 
 1. Definir dominio HTTPS del frontend y URL pública de API; revisar `CORS_ORIGIN` y `VITE_API_URL`.
