@@ -252,15 +252,15 @@ Complemento: *Postgres → Backups* de Railway (copias de volumen programadas di
 
 ### 8.3 Respaldo manual
 ```bash
-DATABASE_URL="<DATABASE_PUBLIC_URL>" ./scripts/respaldo/respaldar.sh      # crea respaldo-canchaya-<fecha>.dump
+DATABASE_URL="<DATABASE_PUBLIC_URL>" bash ./scripts/respaldo/respaldar.sh      # crea respaldo-canchaya-<fecha>.dump
 ```
 
 ### 8.4 Restaurar un respaldo
 1. Descargar el artefacto `respaldo-bd` del workflow y descifrarlo:
    `openssl enc -d -aes-256-cbc -pbkdf2 -in respaldo-AAAAMMDD.dump.enc -out respaldo.dump` (pide `BACKUP_PASSPHRASE`).
 2. **Ensayo (recomendado primero):** crear una base vacía (otro servicio `Postgres` en un entorno de pruebas o Docker local) y ejecutar
-   `DATABASE_URL="<destino>" ./scripts/respaldo/restaurar.sh respaldo.dump` y luego
-   `ORIGEN_URL="<producción>" DESTINO_URL="<destino>" ./scripts/respaldo/verificar-restauracion.sh`.
+   `DATABASE_URL="<destino>" bash ./scripts/respaldo/restaurar.sh respaldo.dump` y luego
+   `ORIGEN_URL="<producción>" DESTINO_URL="<destino>" bash ./scripts/respaldo/verificar-restauracion.sh`.
 3. **Restauración real en producción** (pérdida o corrupción de datos): avisar al equipo, detener escrituras (poner el servicio `backend` en pausa: *Settings → Danger → Pause*/escalar a 0), restaurar con `restaurar.sh` sobre la URL pública de producción, ejecutar `verificar-restauracion.sh`, reanudar el backend y correr las pruebas de humo.
 
 Ensayo documentado: en un PostgreSQL local con 32 usuarios, 5 canchas, 35 horarios y 32 reservas, `respaldar.sh` → `restaurar.sh` → `verificar-restauracion.sh` devolvió **«Verificación OK»** con todas las tablas idénticas. La misma verificación corre a diario en el workflow.

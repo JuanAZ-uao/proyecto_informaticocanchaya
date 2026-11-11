@@ -65,14 +65,14 @@ jobs:
       - name: Respaldar
         env:
           DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
-        run: ./scripts/respaldo/respaldar.sh respaldo.dump
+        run: bash ./scripts/respaldo/respaldar.sh respaldo.dump
 
       - name: Probar la restauración en una base temporal
         env:
           DATABASE_URL: postgresql://canchaya:resp-${{ github.run_id }}-${{ github.run_attempt }}@localhost:5432/restauracion
         run: |
-          ./scripts/respaldo/restaurar.sh respaldo.dump
-          ./scripts/respaldo/verificar-restauracion.sh | tee "$GITHUB_STEP_SUMMARY"
+          bash ./scripts/respaldo/restaurar.sh respaldo.dump
+          bash ./scripts/respaldo/verificar-restauracion.sh | tee "$GITHUB_STEP_SUMMARY"
 
       - name: Cifrar el respaldo
         run: openssl enc -aes-256-cbc -pbkdf2 -salt -in respaldo.dump -out "respaldo-$(date -u +%Y%m%d).dump.enc" -pass env:BACKUP_PASSPHRASE
