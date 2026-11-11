@@ -1,8 +1,8 @@
 {
   "clave": "smoke",
   "titulo": "Smoke test de Docker y pipeline",
-  "inicio": "2026-11-06T01:23:12.176Z",
-  "fin": "2026-11-06T01:28:04.152Z",
+  "inicio": "2026-11-11T19:09:43.894Z",
+  "fin": "2026-11-11T19:16:47.244Z",
   "casos": [
     {
       "tipo": "Smoke test",
@@ -21,7 +21,7 @@
       ],
       "esperado": "El comando termina con código 0 y sin mensajes de error.",
       "estado": "APROBADA",
-      "duracionMs": 730,
+      "duracionMs": 748,
       "resultado": [
         {
           "ok": true,
@@ -33,7 +33,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T01:23:12.907Z"
+      "ejecutadaEn": "2026-11-11T19:09:44.643Z"
     },
     {
       "tipo": "Smoke test",
@@ -53,7 +53,7 @@
       ],
       "esperado": "Error (código distinto de 0) con un mensaje que indica que falta JWT_SECRET.",
       "estado": "APROBADA",
-      "duracionMs": 199,
+      "duracionMs": 186,
       "resultado": [
         {
           "ok": true,
@@ -70,7 +70,7 @@
           "texto": "error while interpolating services.backend.environment.JWT_SECRET: required variable JWT_SECRET is missing a value: Define JWT_SECRET en el archivo .env de la raiz o en el entorno"
         }
       ],
-      "ejecutadaEn": "2026-11-06T01:23:13.107Z"
+      "ejecutadaEn": "2026-11-11T19:09:44.830Z"
     },
     {
       "tipo": "Smoke test",
@@ -90,7 +90,7 @@
       ],
       "esperado": "Ambas imágenes se construyen sin errores; el build completo tarda menos de 10 minutos.",
       "estado": "APROBADA",
-      "duracionMs": 59676,
+      "duracionMs": 63086,
       "resultado": [
         {
           "ok": true,
@@ -98,7 +98,7 @@
         },
         {
           "ok": true,
-          "texto": "El build completo tarda menos de 10 minutos → 54.2 s"
+          "texto": "El build completo tarda menos de 10 minutos → 53.2 s"
         },
         {
           "ok": true,
@@ -112,10 +112,10 @@
       "evidencias": [
         {
           "titulo": "Últimas líneas del build",
-          "texto": "#27 DONE 0.0s\n\n#26 [frontend] exporting to image\n#26 unpacking to docker.io/library/canchaya-qa-frontend:latest 3.8s done\n#26 DONE 8.4s\n\n#28 [frontend] resolving provenance for metadata file\n#28 DONE 0.1s\n Image canchaya-qa-frontend Building \n Image canchaya-qa-backend Building \n Image canchaya-qa-backend Built \n Image canchaya-qa-frontend Built"
+          "texto": "#27 DONE 0.0s\n\n#26 [frontend] exporting to image\n#26 unpacking to docker.io/library/canchaya-qa-frontend:latest 3.3s done\n#26 DONE 8.9s\n\n#28 [frontend] resolving provenance for metadata file\n#28 DONE 0.1s\n Image canchaya-qa-backend Building \n Image canchaya-qa-frontend Building \n Image canchaya-qa-frontend Built \n Image canchaya-qa-backend Built"
         }
       ],
-      "ejecutadaEn": "2026-11-06T01:24:12.784Z"
+      "ejecutadaEn": "2026-11-11T19:10:47.916Z"
     },
     {
       "tipo": "Smoke test",
@@ -136,7 +136,7 @@
       ],
       "esperado": "Código 0; db, backend y frontend en estado healthy en menos de 3 minutos.",
       "estado": "APROBADA",
-      "duracionMs": 24267,
+      "duracionMs": 24147,
       "resultado": [
         {
           "ok": true,
@@ -156,7 +156,7 @@
         },
         {
           "ok": true,
-          "texto": "Todo el entorno queda sano en menos de 3 minutos → 23.5 s"
+          "texto": "Todo el entorno queda sano en menos de 3 minutos → 23.4 s"
         }
       ],
       "evidencias": [
@@ -165,7 +165,7 @@
           "texto": "NAME                     IMAGE                  COMMAND                  SERVICE    CREATED          STATUS                    PORTS\ncanchaya-qa-backend-1    canchaya-qa-backend    \"docker-entrypoint.s…\"   backend    23 seconds ago   Up 12 seconds (healthy)   0.0.0.0:4300->4000/tcp, [::]:4300->4000/tcp\ncanchaya-qa-db-1         postgres:16-alpine     \"docker-entrypoint.s…\"   db         24 seconds ago   Up 20 seconds (healthy)   5432/tcp\ncanchaya-qa-frontend-1   canchaya-qa-frontend   \"/docker-entrypoint.…\"   frontend   22 seconds ago   Up 6 seconds (healthy)    0.0.0.0:8380->80/tcp, [::]:8380->80/tcp"
         }
       ],
-      "ejecutadaEn": "2026-11-06T01:24:37.052Z"
+      "ejecutadaEn": "2026-11-11T19:11:12.064Z"
     },
     {
       "tipo": "Smoke test",
@@ -185,15 +185,15 @@
       ],
       "esperado": "db inició antes que backend y backend antes que frontend.",
       "estado": "APROBADA",
-      "duracionMs": 404,
+      "duracionMs": 367,
       "resultado": [
         {
           "ok": true,
-          "texto": "La base de datos inició antes (o al mismo tiempo) que el backend → db→backend 7306 ms"
+          "texto": "La base de datos inició antes (o al mismo tiempo) que el backend → db→backend 7210 ms"
         },
         {
           "ok": true,
-          "texto": "El backend inició antes (o al mismo tiempo) que el frontend → backend→frontend 6201 ms"
+          "texto": "El backend inició antes (o al mismo tiempo) que el frontend → backend→frontend 6144 ms"
         },
         {
           "ok": null,
@@ -201,7 +201,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T01:24:37.457Z"
+      "ejecutadaEn": "2026-11-11T19:11:12.432Z"
     },
     {
       "tipo": "Smoke test",
@@ -220,9 +220,9 @@
         "Consultar las tablas del esquema public en el Postgres del contenedor.",
         "Consultar los índices únicos de reservas y retenciones."
       ],
-      "esperado": "Logs con \"[MIGRATE] Esquema aplicado correctamente\"; existen las 11 tablas y los índices únicos de US-09, US-18 y US-29.",
+      "esperado": "Logs con \"[MIGRATE] Esquema aplicado correctamente\"; existen las 12 tablas y los índices únicos de US-09, US-18 y US-29.",
       "estado": "APROBADA",
-      "duracionMs": 1967,
+      "duracionMs": 1737,
       "resultado": [
         {
           "ok": true,
@@ -230,7 +230,7 @@
         },
         {
           "ok": true,
-          "texto": "Existen las 11 tablas del modelo (7 de los sprints 1 a 4 y 4 del Sprint 5) → cambios_correo,canchas,horarios_disponibles,metodos_pago,pagos,password_reset_tokens,reservas,retenciones,sesiones_reserva,usuarios,verificaciones_reserva"
+          "texto": "Existen las 12 tablas del modelo (7 de los sprints 1 a 4, 4 de las historias del Sprint 5 y la auditoría de US-16) → cambios_correo,cancelaciones_administrativas,canchas,horarios_disponibles,metodos_pago,pagos,password_reset_tokens,reservas,retenciones,sesiones_reserva,usuarios,verificaciones_reserva"
         },
         {
           "ok": true,
@@ -254,7 +254,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T01:24:39.425Z"
+      "ejecutadaEn": "2026-11-11T19:11:14.169Z"
     },
     {
       "tipo": "Smoke test",
@@ -275,7 +275,7 @@
       ],
       "esperado": "API y frontend responden 200; la base de datos no publica puertos en el host.",
       "estado": "APROBADA",
-      "duracionMs": 168,
+      "duracionMs": 167,
       "resultado": [
         {
           "ok": true,
@@ -291,7 +291,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T01:24:39.593Z"
+      "ejecutadaEn": "2026-11-11T19:11:14.337Z"
     },
     {
       "tipo": "Smoke test",
@@ -311,7 +311,7 @@
       ],
       "esperado": "No hay .env, .git ni tests en la imagen; el usuario es \"node\"; el secreto no aparece en la imagen ni en el frontend.",
       "estado": "APROBADA",
-      "duracionMs": 5002,
+      "duracionMs": 5972,
       "resultado": [
         {
           "ok": true,
@@ -331,7 +331,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T01:24:44.596Z"
+      "ejecutadaEn": "2026-11-11T19:11:20.310Z"
     },
     {
       "tipo": "Smoke test",
@@ -350,7 +350,7 @@
       ],
       "esperado": "Pasan las 7 verificaciones: health, frontend, rutas SPA, CORS, 401 sin token, registro/login y listado de canchas, y termina con \"Smoke test OK\".",
       "estado": "APROBADA",
-      "duracionMs": 926,
+      "duracionMs": 867,
       "resultado": [
         {
           "ok": true,
@@ -391,7 +391,7 @@
           "texto": "-> API responde en /api/health\n-> Frontend sirve la app\n-> Rutas de React Router resuelven a index.html (SPA)\n-> CORS permite el origen del frontend\n-> Sin token la API responde 401\n-> Registro e inicio de sesión contra la base de datos\n-> Con token la API lista canchas\nSmoke test OK"
         }
       ],
-      "ejecutadaEn": "2026-11-06T01:24:45.523Z"
+      "ejecutadaEn": "2026-11-11T19:11:21.178Z"
     },
     {
       "tipo": "Smoke test",
@@ -412,7 +412,7 @@
       ],
       "esperado": "Se insertan 5 canchas; cada una tiene foto y el frontend responde 200 con content-type image/jpeg.",
       "estado": "APROBADA",
-      "duracionMs": 1408,
+      "duracionMs": 1345,
       "resultado": [
         {
           "ok": true,
@@ -444,7 +444,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T01:24:46.931Z"
+      "ejecutadaEn": "2026-11-11T19:11:22.524Z"
     },
     {
       "tipo": "Smoke test",
@@ -465,7 +465,7 @@
       ],
       "esperado": "Las rutas SPA responden 200 con index.html; los assets llevan Cache-Control immutable; un asset inexistente responde 404.",
       "estado": "APROBADA",
-      "duracionMs": 17,
+      "duracionMs": 25,
       "resultado": [
         {
           "ok": true,
@@ -489,7 +489,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T01:24:46.948Z"
+      "ejecutadaEn": "2026-11-11T19:11:22.550Z"
     },
     {
       "tipo": "Smoke test",
@@ -508,7 +508,7 @@
       ],
       "esperado": "Los 3 contenedores tienen healthcheck y política de reinicio \"unless-stopped\".",
       "estado": "APROBADA",
-      "duracionMs": 616,
+      "duracionMs": 572,
       "resultado": [
         {
           "ok": true,
@@ -524,7 +524,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T01:24:47.565Z"
+      "ejecutadaEn": "2026-11-11T19:11:23.123Z"
     },
     {
       "tipo": "Smoke test",
@@ -543,28 +543,28 @@
       ],
       "esperado": "Cada contenedor usa menos de 300 MiB de memoria en reposo.",
       "estado": "APROBADA",
-      "duracionMs": 2119,
+      "duracionMs": 2155,
       "resultado": [
         {
           "ok": true,
-          "texto": "db-1: 50.38MiB de memoria, CPU 0.03%"
+          "texto": "db-1: 51.46MiB de memoria, CPU 0.05%"
         },
         {
           "ok": true,
-          "texto": "backend-1: 29.66MiB de memoria, CPU 0.00%"
+          "texto": "backend-1: 29.99MiB de memoria, CPU 0.00%"
         },
         {
           "ok": true,
-          "texto": "frontend-1: 5.41MiB de memoria, CPU 0.00%"
+          "texto": "frontend-1: 4.938MiB de memoria, CPU 0.00%"
         }
       ],
       "evidencias": [
         {
           "titulo": "docker stats",
-          "texto": "canchaya-qa-db-1|50.38MiB / 7.739GiB|0.03%\ncanchaya-qa-backend-1|29.66MiB / 7.739GiB|0.00%\ncanchaya-qa-frontend-1|5.41MiB / 7.739GiB|0.00%"
+          "texto": "canchaya-qa-db-1|51.46MiB / 7.739GiB|0.05%\ncanchaya-qa-backend-1|29.99MiB / 7.739GiB|0.00%\ncanchaya-qa-frontend-1|4.938MiB / 7.739GiB|0.00%"
         }
       ],
-      "ejecutadaEn": "2026-11-06T01:24:49.685Z"
+      "ejecutadaEn": "2026-11-11T19:11:25.278Z"
     },
     {
       "tipo": "Smoke test",
@@ -583,7 +583,7 @@
       ],
       "esperado": "9/9 verificaciones correctas: sin eventos perdidos ni duplicados y una sola reserva ganadora.",
       "estado": "APROBADA",
-      "duracionMs": 36150,
+      "duracionMs": 33730,
       "resultado": [
         {
           "ok": true,
@@ -593,10 +593,10 @@
       "evidencias": [
         {
           "titulo": "Salida de la prueba de carga",
-          "texto": "> node scripts/pruebaCargaSockets.js || echo 'Prueba de carga omitida o archivo no encontrado.'\nPrueba de carga US-18 contra http://localhost:4300/api con 100 clientes\n[OK]    100/100 conexiones simultáneas recibieron su temporizador (961 ms)\n[OK]    El primer cliente retiene la franja A y el servidor lo confirma\n[OK]    Aviso \"franja A en proceso de reserva\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 427 ms)\n[OK]    99 retenciones simultáneas de la franja B: 1 aceptada, 98 rechazadas con FRANJA_RETENIDA\n[OK]    Aviso \"franja B en proceso de reserva\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 314 ms)\n[OK]    99 reservas simultáneas de la franja B: 1 creada (201), 98 rechazadas (409)\n[OK]    En la base quedó 1 reserva para la franja B (sin duplicados)\n[OK]    Aviso \"franja B reservada\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 302 ms)\n[OK]    Aviso \"franja A liberada\" al salir el usuario: 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 10394 ms)\n9/9 verificaciones correctas"
+          "texto": "> node scripts/pruebaCargaSockets.js || echo 'Prueba de carga omitida o archivo no encontrado.'\nPrueba de carga US-18 contra http://localhost:4300/api con 100 clientes\n[OK]    100/100 conexiones simultáneas recibieron su temporizador (698 ms)\n[OK]    El primer cliente retiene la franja A y el servidor lo confirma\n[OK]    Aviso \"franja A en proceso de reserva\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 319 ms)\n[OK]    99 retenciones simultáneas de la franja B: 1 aceptada, 98 rechazadas con FRANJA_RETENIDA\n[OK]    Aviso \"franja B en proceso de reserva\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 308 ms)\n[OK]    99 reservas simultáneas de la franja B: 1 creada (201), 98 rechazadas (409)\n[OK]    En la base quedó 1 reserva para la franja B (sin duplicados)\n[OK]    Aviso \"franja B reservada\": 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 305 ms)\n[OK]    Aviso \"franja A liberada\" al salir el usuario: 99/99 lo recibieron una vez (perdidos 0, duplicados 0, 10417 ms)\n9/9 verificaciones correctas"
         }
       ],
-      "ejecutadaEn": "2026-11-06T01:25:25.835Z"
+      "ejecutadaEn": "2026-11-11T19:11:59.009Z"
     },
     {
       "tipo": "Smoke test",
@@ -617,9 +617,9 @@
         "Revisar jobs, \"needs\", la condición \"if\" del despliegue y el origen de los secretos.",
         "Confirmar que no hay archivos .env versionados."
       ],
-      "esperado": "Jobs backend, frontend, quality-gate, docker y deploy-local; el despliegue solo corre en push a sprint_4 con runner self-hosted; los secretos vienen de \"secrets.*\"; no hay .env en el repositorio.",
+      "esperado": "Jobs backend, frontend, quality-gate, docker y deploy-local; el despliegue solo corre en push a sprint_5 con runner self-hosted; los secretos vienen de \"secrets.*\"; no hay .env en el repositorio.",
       "estado": "APROBADA",
-      "duracionMs": 66,
+      "duracionMs": 82,
       "resultado": [
         {
           "ok": true,
@@ -639,7 +639,7 @@
         },
         {
           "ok": true,
-          "texto": "El despliegue solo corre en push a sprint_4 (nunca en pull_request) → success() && github.event_name == 'push' && github.ref == 'refs/heads/sprint_4'"
+          "texto": "El despliegue solo corre en push a sprint_5 (nunca en pull_request) → success() && github.event_name == 'push' && github.ref == 'refs/heads/sprint_5'"
         },
         {
           "ok": true,
@@ -663,7 +663,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T01:25:25.902Z"
+      "ejecutadaEn": "2026-11-11T19:11:59.092Z"
     },
     {
       "tipo": "Smoke test",
@@ -685,7 +685,7 @@
       ],
       "esperado": "Existe el proyecto \"canchaya\" con 3 contenedores, creado desde la carpeta del runner, y responde en 4100 y 8080.",
       "estado": "APROBADA",
-      "duracionMs": 286,
+      "duracionMs": 382,
       "resultado": [
         {
           "ok": true,
@@ -705,7 +705,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T01:25:26.189Z"
+      "ejecutadaEn": "2026-11-11T19:11:59.475Z"
     },
     {
       "tipo": "Smoke test",
@@ -746,7 +746,7 @@
           "leyenda": "Secretos del repositorio JWT_SECRET y POSTGRES_PASSWORD (captura del equipo)"
         }
       ],
-      "ejecutadaEn": "2026-11-06T01:25:26.195Z"
+      "ejecutadaEn": "2026-11-11T19:11:59.481Z"
     },
     {
       "tipo": "Smoke test",
@@ -770,7 +770,7 @@
       ],
       "esperado": "Swagger UI y la especificación responden 200 en Docker; la llamada con el mismo origen no es rechazada; un origen ajeno recibe 403; con API_DOCS_HABILITADA=false /api/docs responde 404 y la API sigue funcionando.",
       "estado": "APROBADA",
-      "duracionMs": 4167,
+      "duracionMs": 4671,
       "resultado": [
         {
           "ok": true,
@@ -778,7 +778,7 @@
         },
         {
           "ok": true,
-          "texto": "La imagen incluye la especificación OpenAPI (22 rutas, 25 operaciones) → 3.0.3, 22 rutas, 25 operaciones"
+          "texto": "La imagen incluye la especificación OpenAPI (28 rutas, 33 operaciones) → 3.0.3, 28 rutas, 33 operaciones"
         },
         {
           "ok": true,
@@ -794,7 +794,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T01:25:30.362Z"
+      "ejecutadaEn": "2026-11-11T19:12:04.153Z"
     },
     {
       "tipo": "Smoke test",
@@ -825,7 +825,7 @@
       ],
       "esperado": "El job de backend contiene ambos pasos; Spectral no reporta errores ni advertencias; la cobertura es 100 % (14/14) y el comando termina con código 0.",
       "estado": "APROBADA",
-      "duracionMs": 6869,
+      "duracionMs": 6597,
       "resultado": [
         {
           "ok": true,
@@ -843,10 +843,10 @@
       "evidencias": [
         {
           "titulo": "docs:lint y docs:cobertura",
-          "texto": "> canchaya-backend@1.0.0 docs:lint\n> spectral lint openapi/openapi.yaml --ruleset .spectral.yaml --fail-severity=warn\n\nNo results with a severity of 'warn' or higher found!\n\n> canchaya-backend@1.0.0 docs:cobertura\n> node scripts/coberturaDocumentacion.js\n\nSI  POST   /api/admin/reservas/{codigo}/usar\nSI  POST   /api/admin/reservas/verificar\nSI  GET    /api/admin/verificaciones\nSI  POST   /api/auth/login\nSI  POST   /api/auth/olvide-password\nSI  POST   /api/auth/registro\nSI  POST   /api/auth/restablecer-password\nSI  POST   /api/auth/verificar-correo\nSI  GET    /api/canchas\nSI  GET    /api/canchas/{id}\nSI  GET    /api/canchas/{id}/disponibilidad\nSI  GET    /api/canchas/{id}/reservas\nSI  POST   /api/canchas/{id}/reservas\nSI  POST   /api/canchas/{id}/temporizador/completar\nSI  GET    /api/health\nSI  GET    /api/reservas\nSI  PATCH  /api/reservas/{id}/cancelar\nSI  GET    /api/reservas/mias\nSI  GET    /api/usuarios/{id}\nSI  PATCH  /api/usuarios/{id}\nSI  POST   /api/usuarios/{id}/correo\nSI  GET    /api/usuarios/{id}/metodos-pago\nSI  POST   /api/usuarios/{id}/metodos-pago\nSI  DELETE /api/usuarios/{id}/metodos-pago/{metodoId}\nSI  PATCH  /api/usuarios/{id}/password\n\nEndpoints implementados: 25\nEndpoints documentados:  25\nCobertura: 100 %"
+          "texto": "> canchaya-backend@1.0.0 docs:lint\n> spectral lint openapi/openapi.yaml --ruleset .spectral.yaml --fail-severity=warn\n\nNo results with a severity of 'warn' or higher found!\n\n> canchaya-backend@1.0.0 docs:cobertura\n> node scripts/coberturaDocumentacion.js\n\nSI  GET    /api/admin/canchas\nSI  POST   /api/admin/canchas\nSI  GET    /api/admin/canchas/{id}\nSI  PUT    /api/admin/canchas/{id}\nSI  PATCH  /api/admin/canchas/{id}/activar\nSI  PATCH  /api/admin/canchas/{id}/desactivar\nSI  GET    /api/admin/reservas\nSI  POST   /api/admin/reservas/{codigo}/usar\nSI  PATCH  /api/admin/reservas/{id}/cancelar\nSI  POST   /api/admin/reservas/verificar\nSI  GET    /api/admin/verificaciones\nSI  POST   /api/auth/login\nSI  POST   /api/auth/olvide-password\nSI  POST   /api/auth/registro\nSI  POST   /api/auth/restablecer-password\nSI  POST   /api/auth/verificar-correo\nSI  GET    /api/canchas\nSI  GET    /api/canchas/{id}\nSI  GET    /api/canchas/{id}/disponibilidad\nSI  GET    /api/canchas/{id}/reservas\nSI  POST   /api/canchas/{id}/reservas\nSI  POST   /api/canchas/{id}/temporizador/completar\nSI  GET    /api/health\nSI  GET    /api/reservas\nSI  PATCH  /api/reservas/{id}/cancelar\nSI  GET    /api/reservas/mias\nSI  GET    /api/usuarios/{id}\nSI  PATCH  /api/usuarios/{id}\nSI  POST   /api/usuarios/{id}/correo\nSI  GET    /api/usuarios/{id}/metodos-pago\nSI  POST   /api/usuarios/{id}/metodos-pago\nSI  DELETE /api/usuarios/{id}/metodos-pago/{metodoId}\nSI  PATCH  /api/usuarios/{id}/password\n\nEndpoints implementados: 33\nEndpoints documentados:  33\nCobertura: 100 %"
         }
       ],
-      "ejecutadaEn": "2026-11-06T01:25:37.232Z"
+      "ejecutadaEn": "2026-11-11T19:12:10.751Z"
     },
     {
       "tipo": "Smoke test",
@@ -905,7 +905,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T01:25:37.237Z"
+      "ejecutadaEn": "2026-11-11T19:12:10.756Z"
     },
     {
       "tipo": "Smoke test",
@@ -926,7 +926,7 @@
       ],
       "esperado": "El usuario y la reserva siguen existiendo tras recrear los contenedores.",
       "estado": "APROBADA",
-      "duracionMs": 29627,
+      "duracionMs": 29778,
       "resultado": [
         {
           "ok": true,
@@ -946,7 +946,7 @@
         },
         {
           "ok": true,
-          "texto": "Los conteos de usuarios/reservas no cambian → 116/13 → 116/13"
+          "texto": "Los conteos de usuarios/reservas no cambian → 116/4 → 116/4"
         },
         {
           "ok": true,
@@ -958,7 +958,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T01:27:15.713Z"
+      "ejecutadaEn": "2026-11-11T19:15:57.837Z"
     },
     {
       "tipo": "Smoke test",
@@ -978,15 +978,15 @@
       ],
       "esperado": "El backend vuelve a responder en menos de 30 segundos y queda healthy.",
       "estado": "APROBADA",
-      "duracionMs": 9928,
+      "duracionMs": 9961,
       "resultado": [
         {
           "ok": true,
-          "texto": "El backend vuelve a responder /api/health → 5.3 s"
+          "texto": "El backend vuelve a responder /api/health → 5.4 s"
         },
         {
           "ok": true,
-          "texto": "Se recupera en menos de 30 segundos → 5.3 s"
+          "texto": "Se recupera en menos de 30 segundos → 5.4 s"
         },
         {
           "ok": true,
@@ -994,7 +994,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T01:27:25.642Z"
+      "ejecutadaEn": "2026-11-11T19:16:07.799Z"
     },
     {
       "tipo": "Smoke test",
@@ -1014,9 +1014,9 @@
         "Ejecutar \"up -d --wait\".",
         "Contar usuarios y verificar las tablas."
       ],
-      "esperado": "Base vacía (0 usuarios) con las 11 tablas creadas automáticamente.",
+      "esperado": "Base vacía (0 usuarios) con las 12 tablas creadas automáticamente.",
       "estado": "APROBADA",
-      "duracionMs": 30070,
+      "duracionMs": 30281,
       "resultado": [
         {
           "ok": true,
@@ -1028,7 +1028,7 @@
         },
         {
           "ok": true,
-          "texto": "El entorno vuelve a levantar desde cero →  Container canchaya-qa-db-1 Healthy  |  Container canchaya-qa-backend-1 Healthy  |  Container canchaya-qa-frontend-1 Healthy"
+          "texto": "El entorno vuelve a levantar desde cero →  Container canchaya-qa-backend-1 Healthy  |  Container canchaya-qa-db-1 Healthy  |  Container canchaya-qa-frontend-1 Healthy"
         },
         {
           "ok": true,
@@ -1036,11 +1036,11 @@
         },
         {
           "ok": true,
-          "texto": "El esquema se aplicó automáticamente (11 tablas)"
+          "texto": "El esquema se aplicó automáticamente (12 tablas)"
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T01:27:55.713Z"
+      "ejecutadaEn": "2026-11-11T19:16:38.081Z"
     },
     {
       "tipo": "Smoke test",
@@ -1060,7 +1060,7 @@
       ],
       "esperado": "No quedan contenedores ni volúmenes de canchaya-qa; el proyecto \"canchaya\" sigue corriendo.",
       "estado": "APROBADA",
-      "duracionMs": 8438,
+      "duracionMs": 9162,
       "resultado": [
         {
           "ok": true,
@@ -1072,11 +1072,11 @@
         },
         {
           "ok": true,
-          "texto": "El despliegue del pipeline (proyecto canchaya) sigue sano → Up 4 hours (healthy)"
+          "texto": "El despliegue del pipeline (proyecto canchaya) sigue sano → Up About an hour (healthy)"
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T01:28:04.152Z"
+      "ejecutadaEn": "2026-11-11T19:16:47.244Z"
     }
   ]
 }

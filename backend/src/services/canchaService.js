@@ -20,7 +20,8 @@ async function listarCanchasDisponibles(filtros = {}) {
 
 async function obtenerDetalleCancha(id) {
   const cancha = await canchaRepository.obtenerPorId(id);
-  if (!cancha) {
+  // US-15: una cancha desactivada deja de existir para el público.
+  if (!cancha || !cancha.disponible) {
     throw new ErrorDeAplicacion('Cancha no encontrada', 404);
   }
 

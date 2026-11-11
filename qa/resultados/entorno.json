@@ -1,5 +1,5 @@
 {
-  "fecha": "2026-11-06T01:26:45.633Z",
+  "fecha": "2026-11-11T19:15:27.726Z",
   "equipo": {
     "so": "Windows_NT 10.0.19045 (x64)",
     "cpu": "Intel(R) Core(TM) i5-7400 CPU @ 3.00GHz",
@@ -8,9 +8,9 @@
     "zonaHoraria": "America/Bogota"
   },
   "repositorio": {
-    "rama": "qa-documentos-actualizados",
-    "commit": "72b2cb1",
-    "archivosSinCommit": 175
+    "rama": "US-14-27-28-29-merge-sprint5",
+    "commit": "0a25b06",
+    "archivosSinCommit": 95
   },
   "versiones": {
     "Node.js (ejecutor de pruebas)": "v22.19.0",

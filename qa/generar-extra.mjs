@@ -43,12 +43,13 @@ function docSonar() {
   const s3 = leer('sonar-3');
   const s4 = leer('sonar-4');
   const s5 = leer('sonar-5');
-  const analisis = [s1, s2, s3, s4, s5].filter(Boolean);
-  const final = s5 ?? s4 ?? s3 ?? s2 ?? s1;
+  const s6 = leer('sonar-6');
+  const analisis = [s1, s2, s3, s4, s5, s6].filter(Boolean);
+  const final = s6 ?? s5 ?? s4 ?? s3 ?? s2 ?? s1;
   if (!final) return null;
   const correcciones = leerDatos('sonar-correcciones');
   const cob = leerObjeto('sonar-cobertura');
-  const ETIQUETAS = { 1: 'línea base', 2: 'hallazgos corregidos', 3: 'frontend sin pruebas', 4: 'cobertura final', 5: 'Sprint 5' };
+  const ETIQUETAS = { 1: 'línea base', 2: 'hallazgos corregidos', 3: 'frontend sin pruebas', 4: 'cobertura final', 5: 'Sprint 5: US-14, 27, 28 y 29', 6: 'Sprint 5 final' };
   const nombreAnalisis = (s) => `Análisis ${s.etiqueta} (${ETIQUETAS[s.etiqueta] ?? 'intermedio'})`;
   const coberturaNueva = (s) => s?.gate?.conditions?.find((c) => c.metricKey === 'new_coverage');
   const pct = (v) => (v === undefined || v === null ? '—' : `${String(v).replace('.', ',')} %`);
@@ -64,8 +65,9 @@ function docSonar() {
   }[clave]);
 
   const filaMetrica = (nombre, k, formato = num, nota = '') => [nombre, ...analisis.map((s) => formato(medida(s, k))), nota];
-  const anchoAnalisis = analisis.length > 2 ? 1250 : 1500;
-  const columnasMetricas = [analisis.length > 2 ? 2700 : 3300, ...analisis.map(() => anchoAnalisis), 10080 - (analisis.length > 2 ? 2700 : 3300) - anchoAnalisis * analisis.length];
+  const anchoAnalisis = analisis.length > 5 ? 1050 : analisis.length > 2 ? 1250 : 1500;
+  const anchoMetrica = analisis.length > 5 ? 2300 : analisis.length > 2 ? 2700 : 3300;
+  const columnasMetricas = [anchoMetrica, ...analisis.map(() => anchoAnalisis), 10080 - anchoMetrica - anchoAnalisis * analisis.length];
   const encabezadoMetricas = ['Métrica', ...analisis.map(nombreAnalisis), 'Qué mide'];
   const metricas = [
     filaMetrica('Líneas de código (ncloc)', 'ncloc', num, 'Líneas de código analizadas (backend y frontend)'),
@@ -143,7 +145,7 @@ function docSonar() {
     const n2 = coberturaNueva(s2);
     const n3 = coberturaNueva(s3);
     const n4 = coberturaNueva(s4 ?? final);
-    hijos.push(p([{ text: 'Cómo leer estas condiciones. ', bold: true }, `El Quality Gate por defecto de SonarQube (Sonar way) evalúa solo el código nuevo (new_*), es decir, lo cambiado desde la versión de referencia. En el análisis 2 el código nuevo era de solo unas pocas líneas y SonarQube ignoró la condición de cobertura (${pct(n2?.actualValue)}) por la muestra tan pequeña. En el análisis 3 (27 de octubre) había ${cob.lineasNuevas['3']} líneas nuevas por cubrir, todas del frontend, que no tenía ninguna prueba: la cobertura del código nuevo fue ${pct(n3?.actualValue)} frente al mínimo de ${n3?.errorThreshold ?? 80} % y el Quality Gate falló. Tras añadir las pruebas del frontend (análisis 4), la cobertura del código nuevo subió a ${pct(n4?.actualValue)} sobre ${cob.lineasNuevas['4']} líneas nuevas y el Quality Gate se aprobó. ${s5 ? ` En el análisis 5 (Sprint 5: cancelación, perfil, tarjetas y verificación de códigos) la cobertura del código nuevo fue ${pct(coberturaNueva(s5)?.actualValue)} sobre ${cob.lineasNuevas['5']} líneas nuevas.` : ''} La cobertura total del proyecto pasó de ${pct(medida(s3, 'coverage'))} a ${pct(medida(final, 'coverage'))} (sección 3.7).`]));
+    hijos.push(p([{ text: 'Cómo leer estas condiciones. ', bold: true }, `El Quality Gate por defecto de SonarQube (Sonar way) evalúa solo el código nuevo (new_*), es decir, lo cambiado desde la versión de referencia. En el análisis 2 el código nuevo era de solo unas pocas líneas y SonarQube ignoró la condición de cobertura (${pct(n2?.actualValue)}) por la muestra tan pequeña. En el análisis 3 (27 de octubre) había ${cob.lineasNuevas['3']} líneas nuevas por cubrir, todas del frontend, que no tenía ninguna prueba: la cobertura del código nuevo fue ${pct(n3?.actualValue)} frente al mínimo de ${n3?.errorThreshold ?? 80} % y el Quality Gate falló. Tras añadir las pruebas del frontend (análisis 4), la cobertura del código nuevo subió a ${pct(n4?.actualValue)} sobre ${cob.lineasNuevas['4']} líneas nuevas y el Quality Gate se aprobó. ${s5 ? ` En el análisis 5 (Sprint 5: cancelación, perfil, tarjetas y verificación de códigos) la cobertura del código nuevo fue ${pct(coberturaNueva(s5)?.actualValue)} sobre ${cob.lineasNuevas['5']} líneas nuevas.` : ''}${s6 ? ` En el análisis 6 (Sprint 5 final, ya con la gestión de canchas de US-15, la cancelación administrativa de US-16 y las correcciones de la regresión) fue ${pct(coberturaNueva(s6)?.actualValue)} sobre ${cob.lineasNuevas['6']} líneas nuevas.` : ''} La cobertura total del proyecto pasó de ${pct(medida(s3, 'coverage'))} a ${pct(medida(final, 'coverage'))} (sección 3.7).`]));
   } else {
     hijos.push(p([{ text: 'Cómo leer estas condiciones. ', bold: true }, 'El Quality Gate por defecto de SonarQube (Sonar way) evalúa solo el código nuevo (new_*). En un análisis con pocos cambios, SonarQube puede marcar una condición como aprobada aunque su valor sea bajo: en el análisis 2 el código nuevo fue de solo 12 líneas por cubrir y 18 líneas nuevas (ver el tablero en la sección 4), con una cobertura del 8,3 % sobre ellas, y el gate no exige el umbral con una muestra tan pequeña. Por eso este documento reporta también la cobertura global del backend, que es la cifra que sirve para decidir dónde reforzar las pruebas: ' + `${medida(final, 'coverage') ?? '—'} % en total, con el frontend sin pruebas unitarias; se recomienda aumentarla en los próximos sprints.`]));
   }
@@ -312,7 +314,7 @@ function docApi() {
   }
   hijos.push(
     h1('4. Qué contiene la documentación'),
-    viñeta('25 operaciones en 9 grupos: Sistema, Autenticación, Canchas, Reservas, Temporizador, Perfil, Métodos de pago, Administración y Socket.IO (tiempo real).'),
+    viñeta('33 operaciones en 9 grupos: Sistema, Autenticación, Canchas, Reservas, Temporizador, Perfil, Métodos de pago, Administración y Socket.IO (tiempo real).'),
     viñeta('Cada operación: resumen, descripción, parámetros, esquema del cuerpo con ejemplo y respuestas (200/201, 400, 401, 403, 404, 409, 429 y 500 según aplique) con ejemplos.'),
     viñeta('Modelos reutilizables en components/schemas: Usuario, Cancha, Reserva, Error, ErrorValidacion, ReservaConfirmada, ReservaHistorial, Paginacion, entre otros.'),
     viñeta('Autenticación Bearer JWT (bearerAuth) y botón Authorize operativo.'),

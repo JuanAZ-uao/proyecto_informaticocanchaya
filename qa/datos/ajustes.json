@@ -143,5 +143,35 @@
     "caso": "F-18-06",
     "problema": "En una ejecución sobre una base con datos de ejecuciones anteriores, la fecha aleatoria de la prueba coincidió con una reserva ya existente en esa franja (FRANJA_OCUPADA en lugar de FRANJA_RETENIDA).",
     "correccion": "Se repitió el caso de forma aislada y pasó; las fechas se generan al azar entre 1 500 días, por lo que la coincidencia es poco frecuente."
+  },
+  {
+    "caso": "SD-15",
+    "problema": "La prueba esperaba que el despliegue corriera solo en push a sprint_4; el equipo movió la rama de despliegue a sprint_5 (cambio correcto del workflow).",
+    "correccion": "Se actualizó la rama esperada. El pipeline no tenía ningún problema."
+  },
+  {
+    "caso": "F-15-05",
+    "problema": "Comparaba el estado de la cancha con \"t\" cuando la consulta concatenada devuelve \"true\".",
+    "correccion": "Se corrigió el valor esperado. El producto respondía bien: 403 y sin cambios."
+  },
+  {
+    "caso": "F-16-03",
+    "problema": "Esperaba el código MOTIVO_OBLIGATORIO, pero el validador de la ruta responde 400 con el error del campo \"motivo\" antes de llegar al servicio.",
+    "correccion": "La prueba verifica ahora el error por campo. El comportamiento (400 y reserva intacta) era el correcto."
+  },
+  {
+    "caso": "F-DOC-05",
+    "problema": "Buscaba los textos del manual solo en los archivos ya versionados con Git, de modo que los archivos nuevos de US-15 quedaban fuera.",
+    "correccion": "Incluye también los archivos nuevos sin versionar."
+  },
+  {
+    "caso": "F-15-01",
+    "problema": "Las canchas que creaban los casos de US-15 se quedaban en el catálogo y rompían las pruebas posteriores que cuentan \"5 canchas\" (E2E-01, E2E-05, NF-17, NF-18) o toman las primeras canchas por posición (E2E-07, NF-20).",
+    "correccion": "Las canchas de prueba (F-15-* y E2E-31) se eliminan al terminar sus casos, con sus reservas."
+  },
+  {
+    "caso": "E2E-32",
+    "problema": "La reserva que empieza en menos de 2 horas podía chocar con otra de otra prueba en la misma cancha y minuto (restricción de solape por cancha).",
+    "correccion": "Se prueba en cada cancha y minuto hasta encontrar una franja libre. Lo mismo se aplicó a E2E-26, F-14-02 y F-16-03."
   }
 ]

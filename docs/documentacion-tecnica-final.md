@@ -110,12 +110,26 @@ Antes de habilitar un entorno público:
 3. Configurar SMTP y la pasarela real, si se van a enviar correos o cobrar pagos reales. La pasarela actual es simulada.
 4. Activar HTTPS para tarjetas y configurar el proxy seguro correspondiente.
 5. Confirmar que los checks requeridos están verdes y tener un plan de respaldo de PostgreSQL antes de actualizar datos.
-6. Corregir la integración de US-15 descrita abajo y ejecutar las pruebas contra el API resultante.
+6. Ejecutar `npm run migrate` en la base real antes de desplegar (los cambios del Sprint 5 agregan tablas y columnas) y crear al menos un administrador.
 
 El workflow despliega automáticamente al recibir un push exitoso en `sprint_5`; no es necesario ejecutar una acción de despliegue para documentar o revisar esta rama.
 
-## 8. Hallazgo pendiente antes de liberar: US-15
+## 8. Gestión de canchas (US-15)
 
-El módulo de gestión de canchas añadido en `backend/src/routes/canchas.routes.js` y `backend/src/controllers/canchas.controller.js` **no forma parte del router activo**: `backend/src/routes/index.js` monta `canchaRoutes.js`, mientras `canchas.routes.js` no aparece importado. Además, el módulo separado usa sintaxis ES Modules y referencias a Sequelize/modelos que no están presentes en el backend activo, que usa CommonJS y PostgreSQL con `pg`. Por esto, esta documentación no presenta la gestión administrativa de canchas como una función disponible y el manual indica ese límite.
+Un administrador puede crear, editar, desactivar y reactivar canchas desde `/admin/canchas`. Todo está integrado en el backend activo (CommonJS, `pg`, `adminMiddleware` que lee el rol de la base en cada petición).
 
-Antes de publicar US-15, integrar sus rutas y controladores con el router, modelos, autorización y persistencia activos, y añadir cobertura de API/UI. Esta observación procede de la inspección estática del código de Sprint 5; no se modificó el código de aplicación en esta entrega.
+| Método y ruta | Qué hace |
+|---|---|
+| `GET /api/admin/canchas` | Todas las canchas, también las desactivadas, con el número de reservas futuras confirmadas. |
+| `GET /api/admin/canchas/{id}` | Una cancha con su horario de atención. |
+| `POST /api/admin/canchas` | Crea una cancha activa con su horario; aparece en el catálogo público. |
+| `PUT /api/admin/canchas/{id}` | Reemplaza los datos y el horario. Las reservas ya confirmadas no se alteran. |
+| `PATCH /api/admin/canchas/{id}/desactivar` | Desactivación lógica. Con reservas futuras responde `409 CONFIRMACION_REQUERIDA` (con las reservas afectadas) hasta recibir `{ "confirmar": true }`. |
+| `PATCH /api/admin/canchas/{id}/activar` | Vuelve a mostrar la cancha y a admitir reservas. |
+
+**Reglas:**
+- Validaciones (400 con detalle por campo): nombre y dirección obligatorios, precio por hora mayor que 0, al menos un horario, hora de cierre posterior a la de apertura, un horario por día y tipo dentro de la lista.
+- Una cancha desactivada no aparece en `GET /api/canchas`, su detalle responde 404 y crear una reserva responde `409 CANCHA_NO_DISPONIBLE`. La columna usada es `canchas.disponible`; nada se borra.
+- Sin rol de administrador: 403 en todas las rutas (401 sin sesión). La interfaz oculta el acceso y `AdminRoute` devuelve al catálogo.
+
+El módulo separado que se había agregado antes (`canchas.routes.js`, `canchas.controller.js` y `authAdmin.js`, con ES Modules, Sequelize y un rol `ADMIN` que el proyecto no usa, y sin montar en el router) se reemplazó por esta implementación y se eliminó.

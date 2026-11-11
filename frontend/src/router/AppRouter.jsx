@@ -13,6 +13,7 @@ import MisReservasPage from '../pages/MisReservasPage';
 import PerfilPage from '../pages/PerfilPage';
 import VerificarCorreoPage from '../pages/VerificarCorreoPage';
 import AdminPage from '../pages/AdminPage';
+import AdminCanchasPage from '../pages/AdminCanchasPage';
 import AdminReservasPage from '../pages/AdminReservasPage';
 
 export default function AppRouter() {
@@ -72,6 +73,14 @@ export default function AppRouter() {
             element={
               <AdminRoute>
                 <AdminReservasPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/canchas"
+            element={
+              <AdminRoute>
+                <AdminCanchasPage />
               </AdminRoute>
             }
           />

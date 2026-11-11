@@ -583,23 +583,40 @@ El plan de pruebas y los resultados están en [docs/testing/](docs/testing/), co
 | [03_Resultados_Pruebas_No_Funcionales.docx](docs/testing/03_Resultados_Pruebas_No_Funcionales.docx) | 21 casos: rendimiento, carga, seguridad, accesibilidad, compatibilidad, fiabilidad y mantenibilidad |
 | [04_Resultados_Pruebas_E2E.docx](docs/testing/04_Resultados_Pruebas_E2E.docx) | 25 flujos en navegador con capturas |
 | [05_Resultados_Smoke_Docker.docx](docs/testing/05_Resultados_Smoke_Docker.docx) | 24 casos de Docker, smoke test y análisis del pipeline |
-| [06_Informe_Resumen_QA_y_Defectos.docx](docs/testing/06_Informe_Resumen_QA_y_Defectos.docx) | Conclusiones, veredicto frente a los criterios de salida y detalle de los 22 defectos |
+| [06_Informe_Resumen_QA_y_Defectos.docx](docs/testing/06_Informe_Resumen_QA_y_Defectos.docx) | Conclusiones, veredicto frente a los criterios de salida y detalle de los 26 defectos |
 | [07_Resultados_SonarQube.docx](docs/testing/07_Resultados_SonarQube.docx) | Análisis estático con SonarQube (US-21): Quality Gate, métricas, hallazgos y correcciones |
 | [08_Verificacion_Documentacion_API.docx](docs/testing/08_Verificacion_Documentacion_API.docx) | Verificación de la documentación OpenAPI/Swagger (PIG1-23) contra sus criterios de aceptación |
 | [09_Consolidado_de_Pruebas.docx](docs/testing/09_Consolidado_de_Pruebas.docx) | Total de pruebas realizadas y listado completo de todas ellas |
 
-**Resultado de la regresión final (Sprint 5): 649 pruebas, 0 fallidas** (472 de Jest, 99 funcionales, 30 E2E, 24 no funcionales y 24 de Docker/pipeline; 6 casos con una observación de mejora). Incluye las historias US-14, US-27, US-28 y US-29. SonarQube: Quality Gate aprobado, 0 bugs, 0 vulnerabilidades, 0 puntos críticos de seguridad, 0 code smells y 95,9 % de cobertura (98,2 % en el código nuevo).
+**Resultado de la regresión final (Sprint 5): 757 pruebas, 0 fallidas** (564 de Jest, 113 funcionales, 32 E2E, 24 no funcionales y 24 de Docker/pipeline; 6 casos con una observación de mejora). Incluye US-14, US-15, US-16, US-27, US-28, US-29 y la documentación final. SonarQube: Quality Gate aprobado, 0 bugs, 0 vulnerabilidades, 0 puntos críticos de seguridad, 0 code smells y 94,7 % de cobertura en el código nuevo.
 
-La primera ejecución detectó 10 defectos (guardada en [ejecucion-1-inicial](docs/testing/ejecucion-1-inicial/)). Tras unir las historias US-12, US-13 y US-21 aparecieron 5 más (DEF-11 a DEF-15), luego otros 4 (DEF-16 a DEF-19, hallazgos de SonarQube y del historial) y en la regresión del Sprint 5 aparecieron 3 más de interfaz (DEF-20 a DEF-22: desborde del menú del administrador, etiqueta accesible del enlace de perfil y tabla con scroll); los 22 están corregidos y verificados. Cada caso documenta la historia de usuario y el criterio que cubre, los pasos, el resultado esperado, el obtenido (incluidos los errores que el sistema debe devolver) y la evidencia. Los scripts que ejecutan las pruebas están en [qa/](qa/README.md) y corren sobre un entorno Docker aislado, sin tocar la base de Neon.
+La primera ejecución detectó 10 defectos (guardada en [ejecucion-1-inicial](docs/testing/ejecucion-1-inicial/)). Tras unir las historias US-12, US-13 y US-21 aparecieron 5 más (DEF-11 a DEF-15), luego otros 4 (DEF-16 a DEF-19, hallazgos de SonarQube y del historial) y en la regresión del Sprint 5 aparecieron 7 más (DEF-20 a DEF-26): tres de interfaz en perfil y administración (desborde del menú, etiqueta accesible del enlace de perfil y tabla con scroll), US-15 entregada como código inutilizable (DEF-23), el reembolso que faltaba al cancelar como administrador una reserva pagada (DEF-24) y dos de accesibilidad y diseño responsive en "Administración de reservas" (DEF-25 y DEF-26); los 26 están corregidos y verificados. Cada caso documenta la historia de usuario y el criterio que cubre, los pasos, el resultado esperado, el obtenido (incluidos los errores que el sistema debe devolver) y la evidencia. Los scripts que ejecutan las pruebas están en [qa/](qa/README.md) y corren sobre un entorno Docker aislado, sin tocar la base de Neon.
 
 ## Sprint 5
 
-**Historias:** US-14 (cancelación de reserva propia), US-15 (gestión de canchas, pendiente de integración en el backend activo), US-16 (cancelación administrativa), US-27 (perfil de usuario), US-28 (método de pago con tarjeta) y US-29 (verificación de código de reserva por el administrador).
+**Sprint:** Sprint 5, del 28 de octubre al 17 de noviembre de 2026 (7 actividades, 36 puntos, todas en estado «Listo»).
+
+**Objetivo:** cancelaciones y panel de administración (US-14, US-15 y US-16), perfil y pago con tarjeta (US-27 y US-28), verificación de códigos de reserva (US-29), más pipeline CI/CD, manual de usuario, documentación final y buffer previo al despliegue.
+
+![Tablero Jira del Sprint 5](docs/img/sprint-5-backlog.png)
+
+| ID | Historia de usuario | Épica | Pts | Estado |
+|---|---|---|---|---|
+| PIG1-18 · US-14 | Cancelación de reserva propia | EPIC-03: Motor de Reservas | 5 | Listo |
+| PIG1-19 · US-15 | Gestión de canchas (admin) | EPIC-04: Panel de administración | 8 | Listo |
+| PIG1-20 · US-16 | Cancelación administrativa | EPIC-04: Panel de administración | 5 | Listo |
+| PIG1-24 | Pipeline CI/CD, manual de usuario y documentación final | — | — | Listo |
+| PIG1-51 · US-27 | Perfil de usuario | EPIC-01: Gestión de Usuarios y Autenticación | 5 | Listo |
+| PIG1-52 · US-28 | Método de pago con tarjeta | EPIC-03: Motor de Reservas | 8 | Listo |
+| PIG1-53 · US-29 | Verificación de código de reserva (admin) | EPIC-04: Panel de administración | 5 | Listo |
+| | **Total** | | **36 pts** | |
+
+**Historias:** US-14 (cancelación de reserva propia), US-15 (gestión de canchas), US-16 (cancelación administrativa), US-27 (perfil de usuario), US-28 (método de pago con tarjeta) y US-29 (verificación de código de reserva por el administrador).
 
 | ID | Historia de usuario | Qué incluye |
 |---|---|---|
 | US-14 | Cancelación de reserva propia | Botón «Cancelar reserva» con confirmación, regla de **2 horas** de anticipación, correo y aviso en pantalla, reembolso automático si estaba pagada |
-| US-15 | Gestión de canchas | El módulo de rutas agregado no está montado en el router activo; revisar la nota de integración en la [documentación técnica final](docs/documentacion-tecnica-final.md) antes de habilitarlo |
+| US-15 | Gestión de canchas (admin) | Crear, editar, desactivar y reactivar canchas desde `/admin/canchas`; desactivar conserva el historial, advierte de las reservas futuras y bloquea nuevas reservas (ver [documentación técnica final](docs/documentacion-tecnica-final.md)) |
 | US-16 | Cancelación administrativa | Buscar reservas futuras y cancelarlas con motivo; se notifica al usuario y se audita la operación |
 | US-27 | Perfil de usuario | «Mi perfil»: datos personales, cambio de contraseña y cambio de correo con verificación por enlace |
 | US-28 | Método de pago con tarjeta | Tarjetas tokenizadas por una pasarela, pago opcional al reservar y rechazo sin confirmar la reserva |

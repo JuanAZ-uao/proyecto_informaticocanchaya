@@ -7,4 +7,9 @@ module.exports = {
   actualizarPresentacionPorNombre: jest.fn(),
   eliminarTodas: jest.fn(),
   contar: jest.fn(),
+  listarTodasParaAdmin: jest.fn(),
+  obtenerParaAdmin: jest.fn(),
+  crearConHorarios: jest.fn(),
+  actualizarConHorarios: jest.fn(),
+  cambiarDisponibilidad: jest.fn(),
 };

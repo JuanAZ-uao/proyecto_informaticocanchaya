@@ -12,4 +12,5 @@ module.exports = {
   cancelar: jest.fn(),
   listarFuturasParaAdmin: jest.fn(),
   cancelarAdministrativamente: jest.fn(),
+  listarFuturasConfirmadasDeCancha: jest.fn(),
 };

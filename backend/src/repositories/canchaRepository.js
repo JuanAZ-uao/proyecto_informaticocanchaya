@@ -122,7 +122,97 @@ async function contar() {
   return rows[0].total;
 }
 
+// US-15: gestión de canchas por un administrador.
+const RESERVAS_FUTURAS = `(
+  SELECT COUNT(*) FROM reservas r
+  WHERE r.cancha_id = c.id AND r.estado = 'confirmada' AND (r.fecha + r.hora_fin) >= (now() AT TIME ZONE 'America/Bogota')
+)::int`;
+
+async function listarTodasParaAdmin() {
+  const { rows } = await pool.query(
+    `SELECT c.*, ${RESERVAS_FUTURAS} AS reservas_futuras FROM canchas c ORDER BY c.disponible DESC, c.nombre ASC`
+  );
+  return rows.map(Cancha.aAdmin);
+}
+
+async function obtenerParaAdmin(id) {
+  const { rows } = await pool.query(`SELECT c.*, ${RESERVAS_FUTURAS} AS reservas_futuras FROM canchas c WHERE c.id = $1`, [id]);
+  return Cancha.aAdmin(rows[0]);
+}
+
+async function insertarHorarios(cliente, canchaId, horarios) {
+  for (const horario of horarios) {
+    await cliente.query(
+      `INSERT INTO horarios_disponibles (cancha_id, dia_semana, hora_inicio, hora_fin) VALUES ($1, $2, $3, $4)`,
+      [canchaId, horario.diaSemana, horario.horaInicio, horario.horaFin]
+    );
+  }
+}
+
+async function crearConHorarios(datos, horarios) {
+  const cliente = await pool.connect();
+
+  try {
+    await cliente.query('BEGIN');
+    const { rows } = await cliente.query(
+      `INSERT INTO canchas (nombre, direccion, zona, disponible, costo_hora, descripcion, tipo, servicios)
+       VALUES ($1, $2, $3, true, $4, $5, $6, $7)
+       RETURNING *`,
+      [datos.nombre, datos.direccion, datos.zona ?? 'Sin zona', datos.costoHora, datos.descripcion ?? null, datos.tipo ?? null, datos.servicios ?? []]
+    );
+    await insertarHorarios(cliente, rows[0].id, horarios);
+    await cliente.query('COMMIT');
+    return Cancha.aDominio(rows[0]);
+  } catch (error) {
+    await cliente.query('ROLLBACK');
+    throw error;
+  } finally {
+    cliente.release();
+  }
+}
+
+// Reemplaza los datos y los horarios de la cancha. Las reservas ya confirmadas no se tocan.
+async function actualizarConHorarios(id, datos, horarios) {
+  const cliente = await pool.connect();
+
+  try {
+    await cliente.query('BEGIN');
+    const { rows } = await cliente.query(
+      `UPDATE canchas
+       SET nombre = $2, direccion = $3, zona = $4, costo_hora = $5, descripcion = $6, tipo = $7, servicios = $8, updated_at = now()
+       WHERE id = $1
+       RETURNING *`,
+      [id, datos.nombre, datos.direccion, datos.zona ?? 'Sin zona', datos.costoHora, datos.descripcion ?? null, datos.tipo ?? null, datos.servicios ?? []]
+    );
+
+    if (rows.length === 0) {
+      await cliente.query('ROLLBACK');
+      return null;
+    }
+
+    await cliente.query('DELETE FROM horarios_disponibles WHERE cancha_id = $1', [id]);
+    await insertarHorarios(cliente, id, horarios);
+    await cliente.query('COMMIT');
+    return Cancha.aDominio(rows[0]);
+  } catch (error) {
+    await cliente.query('ROLLBACK');
+    throw error;
+  } finally {
+    cliente.release();
+  }
+}
+
+async function cambiarDisponibilidad(id, disponible) {
+  const { rows } = await pool.query('UPDATE canchas SET disponible = $2, updated_at = now() WHERE id = $1 RETURNING *', [id, disponible]);
+  return Cancha.aDominio(rows[0]);
+}
+
 module.exports = {
+  listarTodasParaAdmin,
+  obtenerParaAdmin,
+  crearConHorarios,
+  actualizarConHorarios,
+  cambiarDisponibilidad,
   listarDisponibles,
   obtenerPorId,
   crearMuchas,

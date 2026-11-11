@@ -1,8 +1,8 @@
 {
   "clave": "e2e",
   "titulo": "Pruebas End-to-End (navegador)",
-  "inicio": "2026-11-06T00:57:06.635Z",
-  "fin": "2026-11-06T01:26:02.653Z",
+  "inicio": "2026-11-11T18:45:08.702Z",
+  "fin": "2026-11-11T19:12:18.378Z",
   "casos": [
     {
       "tipo": "End-to-End",
@@ -29,7 +29,7 @@
       "grupo": "Autenticación",
       "titulo": "Registro → inicio de sesión → listado de canchas",
       "objetivo": "Recorrer la puerta de entrada de la aplicación como un visitante nuevo.",
-      "datos": "Laura Pérez QA, e2e.reg.1793926628805@qa.local, teléfono 3105550101.",
+      "datos": "Laura Pérez QA, e2e.reg.1794422709272@qa.local, teléfono 3105550101.",
       "pasos": [
         "Abrir /registro y completar nombre, correo, teléfono y contraseña.",
         "Enviar el formulario.",
@@ -39,7 +39,7 @@
       ],
       "esperado": "La cuenta se crea y redirige a /login con el mensaje \"Cuenta creada correctamente. Ahora inicia sesión.\"; el login lleva a /canchas con 5 canchas, sus fotos cargadas y el nombre del usuario en la barra.",
       "estado": "APROBADA",
-      "duracionMs": 10276,
+      "duracionMs": 9967,
       "resultado": [
         {
           "ok": true,
@@ -80,7 +80,7 @@
           "leyenda": "Listado de canchas tras iniciar sesión"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:57:19.081Z"
+      "ejecutadaEn": "2026-11-11T18:45:19.240Z"
     },
     {
       "tipo": "End-to-End",
@@ -102,7 +102,7 @@
       ],
       "esperado": "El formulario vacío no se envía; la contraseña débil muestra el mensaje de la política; el correo duplicado muestra \"El correo ya está registrado\"; en los tres casos se permanece en /registro.",
       "estado": "APROBADA",
-      "duracionMs": 3133,
+      "duracionMs": 2949,
       "resultado": [
         {
           "ok": true,
@@ -143,7 +143,7 @@
           "leyenda": "Error por correo duplicado"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:57:22.215Z"
+      "ejecutadaEn": "2026-11-11T18:45:22.190Z"
     },
     {
       "tipo": "End-to-End",
@@ -167,7 +167,7 @@
       ],
       "esperado": "Sin sesión se redirige a /login; la contraseña incorrecta muestra \"Correo o contraseña incorrectos\"; la sesión sobrevive a la recarga; tras \"Salir\" se vuelve a pedir login.",
       "estado": "APROBADA",
-      "duracionMs": 1748,
+      "duracionMs": 1710,
       "resultado": [
         {
           "ok": true,
@@ -192,7 +192,7 @@
           "leyenda": "Mensaje genérico de credenciales incorrectas"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:57:23.965Z"
+      "ejecutadaEn": "2026-11-11T18:45:23.903Z"
     },
     {
       "tipo": "End-to-End",
@@ -220,7 +220,7 @@
       ],
       "esperado": "Mensaje neutro idéntico en ambos correos; \"Las contraseñas no coinciden\" con valores distintos; redirige a /login tras el cambio; el login con la nueva funciona; el enlace reutilizado se rechaza.",
       "estado": "APROBADA",
-      "duracionMs": 3766,
+      "duracionMs": 3963,
       "resultado": [
         {
           "ok": true,
@@ -265,7 +265,7 @@
           "leyenda": "Enlace reutilizado rechazado"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:57:27.732Z"
+      "ejecutadaEn": "2026-11-11T18:45:27.866Z"
     },
     {
       "tipo": "End-to-End",
@@ -300,7 +300,7 @@
       ],
       "esperado": "El contador coincide con las tarjetas; cada filtro reduce el listado; sin coincidencias aparece \"No encontramos canchas con esos filtros\"; \"Limpiar\" restaura las 5 canchas.",
       "estado": "APROBADA",
-      "duracionMs": 3825,
+      "duracionMs": 3878,
       "resultado": [
         {
           "ok": true,
@@ -337,7 +337,7 @@
           "leyenda": "Estado vacío del listado"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:57:31.769Z"
+      "ejecutadaEn": "2026-11-11T18:45:31.965Z"
     },
     {
       "tipo": "End-to-End",
@@ -357,7 +357,7 @@
       ],
       "esperado": "La ficha muestra foto (cargada), crédito del autor, precio, descripción, servicios con íconos, horario de los 7 días con el día de hoy resaltado y la tarjeta de reserva.",
       "estado": "APROBADA",
-      "duracionMs": 2315,
+      "duracionMs": 2616,
       "resultado": [
         {
           "ok": true,
@@ -398,7 +398,7 @@
           "leyenda": "Descripción, servicios, horario y tarjeta de reserva"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:57:34.086Z"
+      "ejecutadaEn": "2026-11-11T18:45:34.582Z"
     },
     {
       "tipo": "End-to-End",
@@ -433,7 +433,7 @@
       ],
       "esperado": "16 bloques de 06:00 a 22:00; \"Iniciar reserva\" deshabilitado hasta elegir un bloque; en el día sin horario aparece \"La cancha no tiene horarios disponibles para el día seleccionado.\" y ningún bloque.",
       "estado": "APROBADA",
-      "duracionMs": 4268,
+      "duracionMs": 4076,
       "resultado": [
         {
           "ok": true,
@@ -470,7 +470,7 @@
           "leyenda": "Día sin horario de atención"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:57:38.355Z"
+      "ejecutadaEn": "2026-11-11T18:45:38.662Z"
     },
     {
       "tipo": "End-to-End",
@@ -507,7 +507,7 @@
       ],
       "esperado": "El flujo se completa en 3 pasos y en menos de 2 minutos (objetivo); la ficha no pide nombre ni correo; el resumen muestra cancha, fecha, horario, costo y el usuario de la sesión.",
       "estado": "APROBADA",
-      "duracionMs": 2807,
+      "duracionMs": 2702,
       "resultado": [
         {
           "ok": true,
@@ -519,15 +519,15 @@
         },
         {
           "ok": true,
-          "texto": "El resumen muestra cancha, horario y costo → Resumen de tu selección | Reservando como E2EFLOW Usuario 8 (e2eflow.1793926658357.8@qa.local) | Cancha | Cancha La Rivera | Fecha | Martes, 10 de noviembre de 2026 | Hor"
+          "texto": "El resumen muestra cancha, horario y costo → Resumen de tu selección | Reservando como E2EFLOW Usuario 8 (e2eflow.1794422738664.8@qa.local) | Cancha | Cancha La Rivera | Fecha | Sábado, 14 de noviembre de 2026 | Hor"
         },
         {
           "ok": true,
-          "texto": "El resumen toma nombre y correo de la sesión → E2EFLOW Usuario 8 (e2eflow.1793926658357.8@qa.local)"
+          "texto": "El resumen toma nombre y correo de la sesión → E2EFLOW Usuario 8 (e2eflow.1794422738664.8@qa.local)"
         },
         {
           "ok": true,
-          "texto": "El flujo completo tarda menos de 2 minutos → 1.8 s"
+          "texto": "El flujo completo tarda menos de 2 minutos → 1.7 s"
         },
         {
           "ok": true,
@@ -552,7 +552,7 @@
           "leyenda": "Pantalla de confirmación"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:57:41.163Z"
+      "ejecutadaEn": "2026-11-11T18:45:41.366Z"
     },
     {
       "tipo": "End-to-End",
@@ -574,7 +574,7 @@
       ],
       "esperado": "Tras \"Cambiar horario\" la fecha y el bloque siguen elegidos; tras recargar también (y se vuelve a apartar la franja); el reingreso al resumen funciona.",
       "estado": "APROBADA",
-      "duracionMs": 2585,
+      "duracionMs": 2613,
       "resultado": [
         {
           "ok": true,
@@ -595,7 +595,7 @@
           "leyenda": "Después de \"Cambiar horario\": la selección se conserva"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:57:43.749Z"
+      "ejecutadaEn": "2026-11-11T18:45:43.980Z"
     },
     {
       "tipo": "End-to-End",
@@ -610,7 +610,7 @@
       "grupo": "Flujo de reserva",
       "titulo": "Franjas ocupadas y horas pasadas aparecen \"No disponible\"",
       "objetivo": "Verificar que las franjas ya reservadas y las horas de hoy que ya pasaron no se pueden seleccionar.",
-      "datos": "Hoy es 2026-11-05 y la hora actual en Colombia es 19:57.",
+      "datos": "Hoy es 2026-11-11 y la hora actual en Colombia es 13:45.",
       "pasos": [
         "Otro usuario reserva el bloque 11:00 de mañana (por API).",
         "Abrir esa fecha y revisar el bloque 11:00 y uno libre.",
@@ -618,7 +618,7 @@
       ],
       "esperado": "El bloque reservado se ve tachado con \"No disponible\" y está deshabilitado; los bloques libres se pueden elegir; hoy, los bloques cuya hora ya pasó aparecen \"No disponible\".",
       "estado": "APROBADA",
-      "duracionMs": 3248,
+      "duracionMs": 3364,
       "resultado": [
         {
           "ok": true,
@@ -638,11 +638,11 @@
         },
         {
           "ok": true,
-          "texto": "Hoy: los 13 bloques anteriores a las 19:00 aparecen \"No disponible\" y deshabilitados"
+          "texto": "Hoy: los 7 bloques anteriores a las 13:00 aparecen \"No disponible\" y deshabilitados"
         },
         {
           "ok": true,
-          "texto": "Hoy: los 2 bloques posteriores a la hora actual siguen disponibles"
+          "texto": "Hoy: los 8 bloques posteriores a la hora actual siguen disponibles"
         }
       ],
       "evidencias": [
@@ -655,7 +655,7 @@
           "leyenda": "Fecha de hoy: horas pasadas deshabilitadas"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:57:46.998Z"
+      "ejecutadaEn": "2026-11-11T18:45:47.345Z"
     },
     {
       "tipo": "End-to-End",
@@ -688,7 +688,7 @@
       ],
       "esperado": "En ambos casos aparece \"El horario ya no está disponible\" (mensaje amigable, sin error técnico ni pantalla en blanco), se refrescan las franjas, el bloque queda \"No disponible\" y B puede elegir otra y confirmar.",
       "estado": "APROBADA",
-      "duracionMs": 4366,
+      "duracionMs": 5048,
       "resultado": [
         {
           "ok": true,
@@ -733,7 +733,7 @@
           "leyenda": "Rechazo al confirmar: mensaje claro"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:57:51.365Z"
+      "ejecutadaEn": "2026-11-11T18:45:52.394Z"
     },
     {
       "tipo": "End-to-End",
@@ -770,7 +770,7 @@
       ],
       "esperado": "El botón cambia a \"Verificando...\" y \"Confirmando...\" y queda deshabilitado; el doble clic envía una sola petición y crea una sola reserva; ante el 500 se muestra \"Error interno del servidor\" y nunca la pantalla de éxito.",
       "estado": "APROBADA",
-      "duracionMs": 7685,
+      "duracionMs": 9292,
       "resultado": [
         {
           "ok": true,
@@ -807,7 +807,7 @@
           "leyenda": "Error del servidor: sin pantalla de éxito"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:57:59.050Z"
+      "ejecutadaEn": "2026-11-11T18:46:01.687Z"
     },
     {
       "tipo": "End-to-End",
@@ -834,15 +834,15 @@
       ],
       "esperado": "La confirmación aparece en menos de 2 s con código, cancha, fecha, hora y estado; el temporizador ya no cuenta; \"Ver mis reservas\" lista la reserva con el mismo código y estado \"Confirmada\"; \"Hacer otra reserva\" abre un temporizador nuevo.",
       "estado": "APROBADA",
-      "duracionMs": 3144,
+      "duracionMs": 3026,
       "resultado": [
         {
           "ok": true,
-          "texto": "La confirmación se muestra en menos de 2 segundos → 97 ms"
+          "texto": "La confirmación se muestra en menos de 2 segundos → 84 ms"
         },
         {
           "ok": true,
-          "texto": "Muestra el código de la reserva → CY-89FB32B3"
+          "texto": "Muestra el código de la reserva → CY-BBF78657"
         },
         {
           "ok": true,
@@ -854,7 +854,7 @@
         },
         {
           "ok": true,
-          "texto": "\"Ver mis reservas\" lista la reserva con su código y estado \"Confirmada\" → Cancha La Rivera · Confirmada · Domingo, 15 de noviembre de 2026 · 16:00 – 17:00 · Cra 8 # 12-50, Cali · Reserva CY-89FB32B3 · Cancelar reserva"
+          "texto": "\"Ver mis reservas\" lista la reserva con su código y estado \"Confirmada\" → Cancha La Rivera · Confirmada · Jueves, 19 de noviembre de 2026 · 16:00 – 17:00 · Cra 8 # 12-50, Cali · Reserva CY-BBF78657 · Cancelar reserva"
         },
         {
           "ok": true,
@@ -871,7 +871,7 @@
           "leyenda": "Historial \"Mis reservas\""
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:58:02.196Z"
+      "ejecutadaEn": "2026-11-11T18:46:04.713Z"
     },
     {
       "tipo": "End-to-End",
@@ -895,7 +895,7 @@
       ],
       "esperado": "Se muestra \"Tiempo para reservar: 03:00\" aproximadamente al entrar, con formato mm:ss, que decrece con el tiempo y una barra de progreso.",
       "estado": "APROBADA",
-      "duracionMs": 6206,
+      "duracionMs": 6159,
       "resultado": [
         {
           "ok": true,
@@ -920,7 +920,7 @@
           "leyenda": "Temporizador en marcha"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:58:08.403Z"
+      "ejecutadaEn": "2026-11-11T18:46:10.873Z"
     },
     {
       "tipo": "End-to-End",
@@ -943,7 +943,7 @@
       ],
       "esperado": "El temporizador debe mostrar ≈ 03:00 (hora del servidor) aunque el reloj local esté adelantado; la sincronización de 5 s debe corregir el desfase.",
       "estado": "APROBADA",
-      "duracionMs": 8560,
+      "duracionMs": 8845,
       "resultado": [
         {
           "ok": true,
@@ -956,7 +956,7 @@
           "leyenda": "Temporizador con el reloj local adelantado 2 minutos"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:58:16.964Z"
+      "ejecutadaEn": "2026-11-11T18:46:19.719Z"
     },
     {
       "tipo": "End-to-End",
@@ -979,7 +979,7 @@
       ],
       "esperado": "Ambas pestañas muestran el mismo tiempo (±2 s) en lugar de 03:00 en la nueva; al cerrar una, la otra sigue contando.",
       "estado": "APROBADA",
-      "duracionMs": 12151,
+      "duracionMs": 12072,
       "resultado": [
         {
           "ok": true,
@@ -996,7 +996,7 @@
           "leyenda": "Segunda pestaña: tiempo compartido"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:58:29.116Z"
+      "ejecutadaEn": "2026-11-11T18:46:31.796Z"
     },
     {
       "tipo": "End-to-End",
@@ -1024,7 +1024,7 @@
       ],
       "esperado": "B ve 09:00 \"En proceso de reserva\" (deshabilitado); al cambiar A, B ve 09:00 libre y 10:00 en proceso; al confirmar, B ve 10:00 \"No disponible\"; al cancelarse, B lo ve libre; la retención de B se libera para A al cancelar.",
       "estado": "APROBADA",
-      "duracionMs": 5603,
+      "duracionMs": 5791,
       "resultado": [
         {
           "ok": true,
@@ -1061,7 +1061,7 @@
           "leyenda": "Pantalla de B tras confirmar A: 10:00 \"No disponible\""
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:58:34.721Z"
+      "ejecutadaEn": "2026-11-11T18:46:37.588Z"
     },
     {
       "tipo": "End-to-End",
@@ -1084,11 +1084,11 @@
       ],
       "esperado": "La aplicación redirige a /login?redirect=/canchas/:id; tras iniciar sesión vuelve a la misma cancha con la fecha y el bloque que había elegido.",
       "estado": "APROBADA",
-      "duracionMs": 2768,
+      "duracionMs": 2737,
       "resultado": [
         {
           "ok": true,
-          "texto": "Con la sesión vencida redirige a /login con el destino a retomar → /login?redirect=/canchas/011062a9-d4e4-491a-91f6-1e4b38276515"
+          "texto": "Con la sesión vencida redirige a /login con el destino a retomar → /login?redirect=/canchas/3b7d5b04-c22a-4d5a-ba14-aa495f9d2b6e"
         },
         {
           "ok": true,
@@ -1096,7 +1096,7 @@
         },
         {
           "ok": true,
-          "texto": "Recupera la fecha elegida → 2026-11-20"
+          "texto": "Recupera la fecha elegida → 2026-11-24"
         },
         {
           "ok": true,
@@ -1113,7 +1113,7 @@
           "leyenda": "Flujo retomado tras volver a iniciar sesión"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:58:37.490Z"
+      "ejecutadaEn": "2026-11-11T18:46:40.327Z"
     },
     {
       "tipo": "End-to-End",
@@ -1135,11 +1135,11 @@
       ],
       "esperado": "El flujo se completa sin gestos especiales, la tarjeta de reserva aparece antes que la información en pantallas angostas y no hay scroll horizontal.",
       "estado": "APROBADA",
-      "duracionMs": 3141,
+      "duracionMs": 2873,
       "resultado": [
         {
           "ok": true,
-          "texto": "En pantallas angostas la tarjeta de reserva queda antes que la información → reserva a 429 px, información a 1354 px"
+          "texto": "En pantallas angostas la tarjeta de reserva queda antes que la información → reserva a 429 px, información a 1319 px"
         },
         {
           "ok": true,
@@ -1164,7 +1164,7 @@
           "leyenda": "Confirmación en celular"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:58:40.635Z"
+      "ejecutadaEn": "2026-11-11T18:46:43.202Z"
     },
     {
       "tipo": "End-to-End",
@@ -1193,7 +1193,7 @@
       ],
       "esperado": "Para una cancha inexistente se muestra \"Cancha no encontrada\" con enlace para volver; si falla la disponibilidad se muestra un aviso y la página sigue utilizable.",
       "estado": "APROBADA",
-      "duracionMs": 1769,
+      "duracionMs": 1495,
       "resultado": [
         {
           "ok": true,
@@ -1222,7 +1222,7 @@
           "leyenda": "Fallo de la API de disponibilidad"
         }
       ],
-      "ejecutadaEn": "2026-11-06T00:58:42.407Z"
+      "ejecutadaEn": "2026-11-11T18:46:44.698Z"
     },
     {
       "tipo": "End-to-End",
@@ -1267,7 +1267,7 @@
         },
         {
           "ok": true,
-          "texto": "Aparece el aviso visual cuando quedan ≈ 30 s → se mostró con 29 s restantes (148 s tras elegir)"
+          "texto": "Aparece el aviso visual cuando quedan ≈ 30 s → se mostró con 29 s restantes (147 s tras elegir)"
         },
         {
           "ok": true,
@@ -1320,7 +1320,7 @@
           "leyenda": "A: tras reiniciar, nueva sesión de 3 minutos"
         }
       ],
-      "ejecutadaEn": "2026-11-06T01:00:18.926Z"
+      "ejecutadaEn": "2026-11-11T18:48:18.822Z"
     },
     {
       "tipo": "End-to-End",
@@ -1352,7 +1352,7 @@
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T01:00:18.927Z"
+      "ejecutadaEn": "2026-11-11T18:48:18.824Z"
     },
     {
       "tipo": "End-to-End",
@@ -1391,7 +1391,7 @@
       ],
       "esperado": "Próximas muestra solo las 2 futuras con su estado; Pasadas muestra 10 por página con \"Completada\" y un control de página 1 de 2 que avanza a la página 2; el filtro deja solo las canceladas; el filtro \"Completada\" cambia solo a la pestaña Pasadas y muestra las completadas; un filtro sin resultados muestra \"No hay reservas con ese estado\"; el usuario sin reservas ve \"Aún no tienes reservas\" con el botón \"Reservar una cancha\".",
       "estado": "APROBADA",
-      "duracionMs": 5922,
+      "duracionMs": 5961,
       "resultado": [
         {
           "ok": true,
@@ -1407,7 +1407,7 @@
         },
         {
           "ok": true,
-          "texto": "Cada reserva muestra el código y la cancha → Cancha El Bosque · Confirmada · Domingo, 22 de noviembre de 2026 · 08:00 – 09:00 · Av. Roosevelt # 30-10, Cali · Reserva CY-0D9FCE27 · Cancelar reserva"
+          "texto": "Cada reserva muestra el código y la cancha → Cancha El Bosque · Confirmada · Jueves, 26 de noviembre de 2026 · 08:00 – 09:00 · Av. Roosevelt # 30-10, Cali · Reserva CY-04BF8211 · Cancelar reserva"
         },
         {
           "ok": true,
@@ -1460,7 +1460,7 @@
           "leyenda": "Estado vacío de Mis reservas"
         }
       ],
-      "ejecutadaEn": "2026-11-06T01:00:24.850Z"
+      "ejecutadaEn": "2026-11-11T18:48:24.786Z"
     },
     {
       "tipo": "End-to-End",
@@ -1497,7 +1497,7 @@
       ],
       "esperado": "Las dos primeras reservas se confirman; la tercera muestra \"Ya tienes una reserva en ese horario\" y no se informa éxito; \"Mis reservas\" lista exactamente las dos confirmadas.",
       "estado": "APROBADA",
-      "duracionMs": 5666,
+      "duracionMs": 5601,
       "resultado": [
         {
           "ok": true,
@@ -1534,7 +1534,7 @@
           "leyenda": "Mis reservas con las dos reservas simultáneas"
         }
       ],
-      "ejecutadaEn": "2026-11-06T01:00:30.518Z"
+      "ejecutadaEn": "2026-11-11T18:48:30.388Z"
     },
     {
       "tipo": "End-to-End",
@@ -1559,7 +1559,7 @@
       ],
       "esperado": "La página carga con el título CanchaYa API y las 14 operaciones; sin autorizar, GET /api/canchas responde 401 \"No autenticado\"; tras Authorize con el token responde 200 con la lista de canchas.",
       "estado": "APROBADA",
-      "duracionMs": 3224,
+      "duracionMs": 3471,
       "resultado": [
         {
           "ok": true,
@@ -1567,11 +1567,11 @@
         },
         {
           "ok": true,
-          "texto": "Swagger UI lista las 25 operaciones → 25"
+          "texto": "Swagger UI lista las 33 operaciones → 33"
         },
         {
           "ok": true,
-          "texto": "Están las etiquetas, incluida \"Socket.IO (tiempo real)\" → Sistema · Autenticación · Canchas · Reservas · Temporizador · Perfil · Métodos de pago · Administración · Socket.IO (tiempo real)"
+          "texto": "Están las etiquetas, incluida \"Socket.IO (tiempo real)\" → Sistema · Autenticación · Canchas · Reservas · Administración · Temporizador · Perfil · Métodos de pago · Socket.IO (tiempo real)"
         },
         {
           "ok": true,
@@ -1604,7 +1604,7 @@
           "leyenda": "Try it out con el token: 200 y lista de canchas"
         }
       ],
-      "ejecutadaEn": "2026-11-06T01:00:33.744Z"
+      "ejecutadaEn": "2026-11-11T18:48:33.860Z"
     },
     {
       "tipo": "End-to-End",
@@ -1629,7 +1629,7 @@
       ],
       "esperado": "Aparece un diálogo de confirmación; conservarla no cambia nada; confirmar muestra un aviso, la reserva queda \"Cancelada\" sin botón y su franja vuelve a estar libre; la de 90 minutos muestra el mensaje de la restricción de 2 horas y sigue confirmada.",
       "estado": "APROBADA",
-      "duracionMs": 2917,
+      "duracionMs": 3153,
       "resultado": [
         {
           "ok": true,
@@ -1637,7 +1637,7 @@
         },
         {
           "ok": true,
-          "texto": "Al pulsar \"Cancelar reserva\" se pide confirmar, mostrando cancha y código → ¿Cancelar esta reserva? · Cancha El Bosque · Viernes, 31 de mayo de 2030 · 08:00 – 09:00 · Código CY-3F8A161F · La franj"
+          "texto": "Al pulsar \"Cancelar reserva\" se pide confirmar, mostrando cancha y código → ¿Cancelar esta reserva? · Cancha El Bosque · Lunes, 1 de enero de 2029 · 08:00 – 09:00 · Código CY-289BA9EC · La franja "
         },
         {
           "ok": true,
@@ -1645,7 +1645,7 @@
         },
         {
           "ok": true,
-          "texto": "Se muestra un aviso en pantalla de que la reserva fue cancelada → Reserva CY-3F8A161F cancelada. Te enviamos un correo con el detalle y el horario ya quedó disponible."
+          "texto": "Se muestra un aviso en pantalla de que la reserva fue cancelada → Reserva CY-289BA9EC cancelada. Te enviamos un correo con el detalle y el horario ya quedó disponible."
         },
         {
           "ok": true,
@@ -1682,7 +1682,7 @@
           "leyenda": "Cancelación bloqueada: faltan menos de 2 horas"
         }
       ],
-      "ejecutadaEn": "2026-11-06T01:25:42.182Z"
+      "ejecutadaEn": "2026-11-11T18:48:37.016Z"
     },
     {
       "tipo": "End-to-End",
@@ -1710,7 +1710,7 @@
       ],
       "esperado": "El perfil trae los datos actuales; los válidos se guardan con confirmación; los inválidos muestran errores por campo; el correo cambia solo tras abrir el enlace; la contraseña exige la actual; no hay scroll horizontal en ningún ancho.",
       "estado": "APROBADA",
-      "duracionMs": 5796,
+      "duracionMs": 5379,
       "resultado": [
         {
           "ok": true,
@@ -1795,7 +1795,7 @@
           "leyenda": "Mi perfil a 1920 px"
         }
       ],
-      "ejecutadaEn": "2026-11-06T01:25:47.981Z"
+      "ejecutadaEn": "2026-11-11T18:48:42.398Z"
     },
     {
       "tipo": "End-to-End",
@@ -1831,7 +1831,7 @@
       ],
       "esperado": "La inválida muestra errores sin guardarse; la válida aparece como \"Visa ···· 4242\" sin número completo; el pago aprobado se ve en la confirmación; el rechazo no confirma y permite reintentar; eliminar la tarjeta no altera la reserva pagada.",
       "estado": "APROBADA",
-      "duracionMs": 10622,
+      "duracionMs": 8318,
       "resultado": [
         {
           "ok": true,
@@ -1863,7 +1863,7 @@
         },
         {
           "ok": true,
-          "texto": "La confirmación muestra el pago aprobado con la tarjeta → ¡Reserva confirmada! · Tu reserva quedó registrada y nadie más podrá tomar esta franja. · Código de reserva · CY-3E6FF9F0 · Cancha · Cancha El Bosque · Fecha · "
+          "texto": "La confirmación muestra el pago aprobado con la tarjeta → ¡Reserva confirmada! · Tu reserva quedó registrada y nadie más podrá tomar esta franja. · Código de reserva · CY-DEF9978D · Cancha · Cancha El Bosque · Fecha · "
         },
         {
           "ok": true,
@@ -1891,7 +1891,7 @@
         },
         {
           "ok": true,
-          "texto": "La reserva ya pagada sigue confirmada y conserva su pago → Cancha El Bosque · Confirmada · Lunes, 13 de junio de 2033 · 10:00 – 11:00 · Av. Roosevelt # 30-10, Cali · Pagada · Visa ···· 4242 · $ 70.000 · Reserva CY-3E6FF"
+          "texto": "La reserva ya pagada sigue confirmada y conserva su pago → Cancha El Bosque · Confirmada · Jueves, 1 de diciembre de 2033 · 10:00 – 11:00 · Av. Roosevelt # 30-10, Cali · Pagada · Visa ···· 4242 · $ 70.000 · Reserva CY-D"
         },
         {
           "ok": true,
@@ -1932,7 +1932,7 @@
           "leyenda": "Cancelación de una reserva pagada con aviso de reembolso"
         }
       ],
-      "ejecutadaEn": "2026-11-06T01:25:58.604Z"
+      "ejecutadaEn": "2026-11-11T18:48:50.719Z"
     },
     {
       "tipo": "End-to-End",
@@ -1961,7 +1961,7 @@
       ],
       "esperado": "El usuario normal no ve la sección y /admin lo devuelve a las canchas; el administrador ve \"Vigente\" con cancha, fecha, horario y usuario; tras marcarla queda \"No vigente\" (usada); cancelada y vencida son \"No vigente\" con su motivo; el inexistente es \"Código no encontrado\"; todo queda en la tabla.",
       "estado": "APROBADA",
-      "duracionMs": 4044,
+      "duracionMs": 4230,
       "resultado": [
         {
           "ok": true,
@@ -1977,11 +1977,11 @@
         },
         {
           "ok": true,
-          "texto": "Código vigente: \"Vigente\" con cancha, horario y nombre del usuario → Vigente · Código · CY-3ACD79A6 · Cancha · Cancha El Bosque · Fecha · Domingo, 24 de diciembre de 2028 · Horario · 08:00 - 09:00 · Usuario · E2EJUGADOR Usuario 8 · Marcar "
+          "texto": "Código vigente: \"Vigente\" con cancha, horario y nombre del usuario → Vigente · Código · CY-3117B7A0 · Cancha · Cancha El Bosque · Fecha · Sábado, 11 de diciembre de 2027 · Horario · 08:00 - 09:00 · Usuario · E2EJUGADOR Usuario 33 · Marcar "
         },
         {
           "ok": true,
-          "texto": "Marcada como utilizada: pasa a \"No vigente\" por \"usada\" → No vigente · Motivo: Usada · La Reserva Ya Fue Utilizada · Código · CY-3ACD79A6 · Cancha · Cancha El Bosque · Fecha · Do"
+          "texto": "Marcada como utilizada: pasa a \"No vigente\" por \"usada\" → No vigente · Motivo: Usada · La Reserva Ya Fue Utilizada · Código · CY-3117B7A0 · Cancha · Cancha El Bosque · Fecha · Sá"
         },
         {
           "ok": true,
@@ -2009,7 +2009,7 @@
         },
         {
           "ok": true,
-          "texto": "La tabla de auditoría registra las verificaciones con administrador y código → 7 filas"
+          "texto": "La tabla de auditoría registra las verificaciones con administrador y código → 20 filas"
         },
         {
           "ok": true,
@@ -2038,7 +2038,239 @@
           "leyenda": "Panel de administración a 360 px"
         }
       ],
-      "ejecutadaEn": "2026-11-06T01:26:02.651Z"
+      "ejecutadaEn": "2026-11-11T18:48:54.950Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-31",
+      "hu": "US-15",
+      "ca": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "grupo": "Administración",
+      "titulo": "Gestión de canchas: crear, editar, desactivar con advertencia de reservas y reactivar",
+      "objetivo": "Recorrer en el navegador la gestión de canchas del administrador y su efecto en el catálogo que ve un usuario.",
+      "pasos": [
+        "Un usuario normal intenta abrir /admin/canchas.",
+        "El administrador intenta crear una cancha con precio 0 y con cierre anterior a la apertura, y luego con datos válidos.",
+        "Edita el precio de una cancha con una reserva confirmada.",
+        "Intenta desactivarla: el sistema advierte de la reserva y pide confirmación explícita.",
+        "La reactiva."
+      ],
+      "esperado": "El usuario normal vuelve al catálogo; los datos inválidos muestran errores y no guardan; la cancha nueva aparece en el catálogo; editar no altera la reserva; al desactivar se muestran las reservas afectadas, se exige confirmar y la cancha desaparece del catálogo y de su detalle; al reactivar vuelve.",
+      "estado": "APROBADA",
+      "duracionMs": 6572,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Un usuario normal no ve las opciones de gestión y vuelve al catálogo"
+        },
+        {
+          "ok": true,
+          "texto": "El administrador ve \"Gestionar canchas\" en el menú de administración"
+        },
+        {
+          "ok": true,
+          "texto": "Con precio 0 se muestra el error del precio y no se crea la cancha → El precio por hora debe ser un número mayor que 0"
+        },
+        {
+          "ok": true,
+          "texto": "No se guardó la cancha con precio inválido"
+        },
+        {
+          "ok": true,
+          "texto": "Con el cierre antes de la apertura se explica el error del horario"
+        },
+        {
+          "ok": true,
+          "texto": "Tampoco se guardó con el horario inválido"
+        },
+        {
+          "ok": true,
+          "texto": "Con datos válidos la cancha se crea y se avisa"
+        },
+        {
+          "ok": true,
+          "texto": "La cancha aparece en el listado de administración como Activa"
+        },
+        {
+          "ok": true,
+          "texto": "El usuario ve la cancha nueva en el catálogo"
+        },
+        {
+          "ok": true,
+          "texto": "Preparación: el usuario reserva una franja de la cancha nueva"
+        },
+        {
+          "ok": true,
+          "texto": "Editar carga los datos actuales de la cancha"
+        },
+        {
+          "ok": true,
+          "texto": "El catálogo refleja el precio nuevo ($ 91.000)"
+        },
+        {
+          "ok": true,
+          "texto": "La reserva ya confirmada no se alteró"
+        },
+        {
+          "ok": true,
+          "texto": "Al desactivar, el sistema advierte de la reserva futura afectada y muestra su código → Esta cancha tiene reservas futuras · E2E Cancha 35847 tiene 1 reserva futura confirmada. Si la desactivas, esas reservas se conservan, pero no se acep"
+        },
+        {
+          "ok": true,
+          "texto": "Mientras no se confirma, la cancha sigue activa"
+        },
+        {
+          "ok": true,
+          "texto": "Con la confirmación explícita se desactiva y la reserva se conserva confirmada"
+        },
+        {
+          "ok": true,
+          "texto": "El listado de administración la marca como Desactivada"
+        },
+        {
+          "ok": true,
+          "texto": "Desactivada, deja de mostrarse en el catálogo público"
+        },
+        {
+          "ok": true,
+          "texto": "Su detalle público ya no existe"
+        },
+        {
+          "ok": true,
+          "texto": "No admite nuevas reservas: 409 CANCHA_NO_DISPONIBLE"
+        },
+        {
+          "ok": true,
+          "texto": "El historial del usuario conserva su reserva confirmada"
+        },
+        {
+          "ok": true,
+          "texto": "Al reactivarla vuelve al catálogo"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-31-1.jpg",
+          "leyenda": "Gestión de canchas: listado con estado y reservas futuras"
+        },
+        {
+          "archivo": "E2E-31-2.jpg",
+          "leyenda": "Error de precio en el formulario de nueva cancha"
+        },
+        {
+          "archivo": "E2E-31-3.jpg",
+          "leyenda": "El catálogo del usuario muestra la cancha creada"
+        },
+        {
+          "archivo": "E2E-31-4.jpg",
+          "leyenda": "Advertencia de reservas futuras antes de desactivar"
+        },
+        {
+          "archivo": "E2E-31-5.jpg",
+          "leyenda": "Cancha desactivada en el listado de administración"
+        }
+      ],
+      "ejecutadaEn": "2026-11-11T18:49:01.524Z"
+    },
+    {
+      "tipo": "End-to-End",
+      "nivel": "UI (Chromium)",
+      "prioridad": "Alta",
+      "id": "E2E-32",
+      "hu": "US-16",
+      "ca": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "grupo": "Administración",
+      "titulo": "Cancelación administrativa: buscar, exigir motivo, bloquear con menos de 2 horas y notificar al usuario",
+      "objetivo": "Recorrer en el navegador la cancelación de reservas por un administrador y lo que ve el usuario afectado.",
+      "pasos": [
+        "El administrador busca por usuario la reserva de otra persona.",
+        "Intenta cancelar sin motivo y luego con motivo.",
+        "Intenta cancelar una reserva que empieza en menos de 2 horas.",
+        "El usuario revisa \"Mis reservas\"."
+      ],
+      "esperado": "La búsqueda encuentra la reserva; sin motivo se muestra el error; con motivo la reserva pasa a \"Cancelada administrativamente\" y queda auditada; con menos de 2 horas se bloquea explicando la restricción; el usuario ve el estado y el motivo.",
+      "estado": "APROBADA",
+      "duracionMs": 5614,
+      "resultado": [
+        {
+          "ok": true,
+          "texto": "Preparación: una reserva futura y otra que empieza en menos de 2 horas"
+        },
+        {
+          "ok": true,
+          "texto": "Buscar por usuario encuentra su reserva futura, con el nombre del titular"
+        },
+        {
+          "ok": true,
+          "texto": "Con un motivo en blanco se muestra el error y la reserva sigue confirmada"
+        },
+        {
+          "ok": true,
+          "texto": "Con motivo se cancela y se informa al administrador que se notificó al usuario"
+        },
+        {
+          "ok": true,
+          "texto": "La reserva queda \"cancelada administrativamente\""
+        },
+        {
+          "ok": true,
+          "texto": "Queda registrada la auditoría: administrador y motivo"
+        },
+        {
+          "ok": true,
+          "texto": "La franja quedó disponible"
+        },
+        {
+          "ok": true,
+          "texto": "Con menos de 2 horas se bloquea explicando la restricción y la reserva sigue confirmada → No se puede cancelar: faltan menos de 2 horas para el inicio de la reserva (o ya comenzó)"
+        },
+        {
+          "ok": true,
+          "texto": "El usuario ve \"Cancelada administrativamente\" y el motivo, sin opción de cancelar → Cancha El Bosque · Cancelada administrativamente · Martes, 17 de junio de 2031 · 11:00 – 12:00 · Av. Roosevelt # 30-10, Cali · Motivo de la cancelación: La cancha estará "
+        },
+        {
+          "ok": true,
+          "texto": "El usuario afectado recibió el correo con el motivo (registro del backend sin SMTP)"
+        }
+      ],
+      "evidencias": [
+        {
+          "archivo": "E2E-32-1.jpg",
+          "leyenda": "Administración de reservas: búsqueda por usuario"
+        },
+        {
+          "archivo": "E2E-32-2.jpg",
+          "leyenda": "Motivo obligatorio al cancelar"
+        },
+        {
+          "archivo": "E2E-32-3.jpg",
+          "leyenda": "Cancelación administrativa realizada"
+        },
+        {
+          "archivo": "E2E-32-4.jpg",
+          "leyenda": "Cancelación bloqueada por faltar menos de 2 horas"
+        },
+        {
+          "archivo": "E2E-32-5.jpg",
+          "leyenda": "Mis reservas: reserva cancelada administrativamente con su motivo"
+        }
+      ],
+      "ejecutadaEn": "2026-11-11T19:12:18.378Z"
     },
     {
       "tipo": "End-to-End",
@@ -2050,14 +2282,16 @@
         "US-27",
         "US-28",
         "US-29",
-        "US-14"
+        "US-14",
+        "US-15",
+        "US-16"
       ],
       "ca": {},
       "grupo": "Transversal",
       "titulo": "Sin errores de JavaScript inesperados en los flujos del Sprint 5",
-      "objetivo": "Verificar que cancelación, perfil, tarjetas y panel de administración no provocaron errores no controlados en el navegador.",
+      "objetivo": "Verificar que cancelación, perfil, tarjetas, gestión de canchas, cancelación administrativa y panel de administración no provocaron errores no controlados en el navegador.",
       "pasos": [
-        "Revisar los errores de consola y de página acumulados en E2E-26 a E2E-29."
+        "Revisar los errores de consola y de página acumulados en E2E-26 a E2E-32."
       ],
       "esperado": "Ningún error de JavaScript inesperado; solo los mensajes de red 4xx provocados a propósito (validaciones, rechazos, 403, 404, 402).",
       "estado": "APROBADA",
@@ -2065,11 +2299,11 @@
       "resultado": [
         {
           "ok": true,
-          "texto": "No hubo errores de JavaScript inesperados → 7 mensajes de red esperados (4xx provocados por las pruebas)"
+          "texto": "No hubo errores de JavaScript inesperados → 21 mensajes de red esperados (4xx provocados por las pruebas)"
         }
       ],
       "evidencias": [],
-      "ejecutadaEn": "2026-11-06T01:26:02.653Z"
+      "ejecutadaEn": "2026-11-11T18:49:34.970Z"
     }
   ]
 }

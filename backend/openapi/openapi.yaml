@@ -1611,6 +1611,397 @@ paths:
         '500':
           $ref: '#/components/responses/ErrorInterno'
 
+  /api/admin/canchas:
+    get:
+      tags: [Administración]
+      operationId: listarCanchasAdmin
+      summary: Listar todas las canchas (administrador)
+      description: |
+        US-15. Devuelve **todas** las canchas, también las desactivadas, con el número de reservas futuras confirmadas de cada una.
+        A diferencia de `GET /api/canchas` (catálogo público, solo canchas activas). Solo para administradores.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Canchas del catálogo, las activas primero.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [canchas]
+                properties:
+                  canchas:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CanchaAdmin'
+              example:
+                canchas:
+                  - id: b67c4d88-a1fb-45de-830e-dd3bf416a472
+                    nombre: Cancha La Pradera
+                    direccion: Calle 10 # 5-20, Cali
+                    zona: Sur
+                    costoHora: 80000
+                    tipo: Fútbol 7
+                    descripcion: null
+                    servicios: []
+                    imagenUrl: null
+                    disponible: true
+                    reservasFuturas: 3
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SoloAdministradores'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+    post:
+      tags: [Administración]
+      operationId: crearCanchaAdmin
+      summary: Crear una cancha (administrador)
+      description: |
+        US-15. Crea una cancha **activa** con su horario de atención y aparece de inmediato en el catálogo público.
+
+        **Validaciones** (400 con el detalle por campo): nombre y dirección obligatorios; precio por hora mayor que 0; al menos un horario; cada horario con día de 0 (domingo) a 6 (sábado), horas `HH:mm` y **cierre posterior a la apertura**; un solo horario por día; tipo dentro de la lista.
+        Solo para administradores.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CanchaAdminRequest'
+            example:
+              nombre: Cancha La Pradera
+              direccion: Calle 10 # 5-20, Cali
+              zona: Sur
+              costoHora: 80000
+              tipo: Fútbol 7
+              descripcion: Cancha sintética con iluminación.
+              servicios: [Parqueadero, Iluminación LED]
+              horarios:
+                - diaSemana: 1
+                  horaInicio: '06:00'
+                  horaFin: '22:00'
+                - diaSemana: 6
+                  horaInicio: '07:00'
+                  horaFin: '20:00'
+      responses:
+        '201':
+          description: Cancha creada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CanchaAdminRespuesta'
+              example:
+                mensaje: Cancha creada correctamente
+                cancha:
+                    id: b67c4d88-a1fb-45de-830e-dd3bf416a472
+                    nombre: Cancha La Pradera
+                    direccion: Calle 10 # 5-20, Cali
+                    zona: Sur
+                    costoHora: 80000
+                    tipo: Fútbol 7
+                    descripcion: Cancha sintética con iluminación.
+                    servicios: [Parqueadero, Iluminación LED]
+                    imagenUrl: null
+                    disponible: true
+                    reservasFuturas: 0
+                    horarios:
+                      - diaSemana: 1
+                        horaInicio: '06:00'
+                        horaFin: '22:00'
+                      - diaSemana: 6
+                        horaInicio: '07:00'
+                        horaFin: '20:00'
+        '400':
+          $ref: '#/components/responses/ErrorValidacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SoloAdministradores'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/admin/canchas/{id}:
+    get:
+      tags: [Administración]
+      operationId: obtenerCanchaAdmin
+      summary: Consultar una cancha con sus horarios (administrador)
+      description: US-15. Devuelve una cancha, activa o no, con su horario de atención, para editarla. Solo para administradores.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CanchaId'
+      responses:
+        '200':
+          description: La cancha con sus horarios.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [cancha]
+                properties:
+                  cancha:
+                    $ref: '#/components/schemas/CanchaAdmin'
+              example:
+                cancha:
+                    id: b67c4d88-a1fb-45de-830e-dd3bf416a472
+                    nombre: Cancha La Pradera
+                    direccion: Calle 10 # 5-20, Cali
+                    zona: Sur
+                    costoHora: 80000
+                    tipo: Fútbol 7
+                    descripcion: Cancha sintética con iluminación.
+                    servicios: [Parqueadero, Iluminación LED]
+                    imagenUrl: null
+                    disponible: true
+                    reservasFuturas: 0
+                    horarios:
+                      - diaSemana: 1
+                        horaInicio: '06:00'
+                        horaFin: '22:00'
+                      - diaSemana: 6
+                        horaInicio: '07:00'
+                        horaFin: '20:00'
+        '400':
+          $ref: '#/components/responses/ErrorValidacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SoloAdministradores'
+        '404':
+          $ref: '#/components/responses/CanchaNoEncontrada'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+    put:
+      tags: [Administración]
+      operationId: editarCanchaAdmin
+      summary: Editar una cancha (administrador)
+      description: |
+        US-15. Reemplaza los datos y el horario de atención de la cancha (se envía el formulario completo). El catálogo refleja los cambios de inmediato.
+        Las **reservas ya confirmadas no se alteran**: conservan su fecha, su hora y el precio que se pagó. Mismas validaciones que al crearla.
+        Solo para administradores.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CanchaId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CanchaAdminRequest'
+            example:
+              nombre: Cancha La Pradera
+              direccion: Calle 10 # 5-20, Cali
+              zona: Sur
+              costoHora: 90000
+              tipo: Fútbol 7
+              servicios: [Parqueadero]
+              horarios:
+                - diaSemana: 1
+                  horaInicio: '06:00'
+                  horaFin: '22:00'
+      responses:
+        '200':
+          description: Cancha actualizada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CanchaAdminRespuesta'
+              example:
+                mensaje: Cancha actualizada correctamente
+                cancha:
+                    id: b67c4d88-a1fb-45de-830e-dd3bf416a472
+                    nombre: Cancha La Pradera
+                    direccion: Calle 10 # 5-20, Cali
+                    zona: Sur
+                    costoHora: 80000
+                    tipo: Fútbol 7
+                    descripcion: Cancha sintética con iluminación.
+                    servicios: [Parqueadero, Iluminación LED]
+                    imagenUrl: null
+                    disponible: true
+                    reservasFuturas: 0
+                    horarios:
+                      - diaSemana: 1
+                        horaInicio: '06:00'
+                        horaFin: '22:00'
+                      - diaSemana: 6
+                        horaInicio: '07:00'
+                        horaFin: '20:00'
+        '400':
+          $ref: '#/components/responses/ErrorValidacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SoloAdministradores'
+        '404':
+          $ref: '#/components/responses/CanchaNoEncontrada'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/admin/canchas/{id}/desactivar:
+    patch:
+      tags: [Administración]
+      operationId: desactivarCanchaAdmin
+      summary: Desactivar una cancha (administrador)
+      description: |
+        US-15. Desactivación lógica: la cancha **deja de mostrarse en el catálogo público y no admite nuevas reservas**, pero se conserva todo su historial (nada se borra).
+
+        Si tiene **reservas futuras confirmadas**, la primera llamada responde `409 CONFIRMACION_REQUERIDA` con el número de reservas afectadas y su detalle, **sin desactivar nada**. Para continuar se repite con `{ "confirmar": true }`; las reservas existentes se conservan.
+        Solo para administradores.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CanchaId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                confirmar:
+                  type: boolean
+                  description: '`true` para confirmar de forma explícita la desactivación cuando hay reservas futuras.'
+            example:
+              confirmar: true
+      responses:
+        '200':
+          description: Cancha desactivada.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [mensaje, reservasAfectadas, cancha]
+                properties:
+                  mensaje:
+                    type: string
+                  reservasAfectadas:
+                    type: integer
+                    description: Reservas futuras confirmadas que la cancha tenía (se conservan).
+                  cancha:
+                    $ref: '#/components/schemas/CanchaAdmin'
+              example:
+                mensaje: Cancha desactivada correctamente
+                reservasAfectadas: 2
+                cancha:
+                    id: b67c4d88-a1fb-45de-830e-dd3bf416a472
+                    nombre: Cancha La Pradera
+                    direccion: Calle 10 # 5-20, Cali
+                    zona: Sur
+                    costoHora: 80000
+                    tipo: Fútbol 7
+                    descripcion: Cancha sintética con iluminación.
+                    servicios: [Parqueadero, Iluminación LED]
+                    imagenUrl: null
+                    disponible: false
+                    reservasFuturas: 0
+                    horarios:
+                      - diaSemana: 1
+                        horaInicio: '06:00'
+                        horaFin: '22:00'
+                      - diaSemana: 6
+                        horaInicio: '07:00'
+                        horaFin: '20:00'
+        '400':
+          $ref: '#/components/responses/ErrorValidacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SoloAdministradores'
+        '404':
+          $ref: '#/components/responses/CanchaNoEncontrada'
+        '409':
+          description: La cancha tiene reservas futuras y falta la confirmación explícita, o ya estaba desactivada.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/ConfirmacionDesactivacion'
+                  - $ref: '#/components/schemas/Error'
+              examples:
+                confirmacionRequerida:
+                  summary: Hay reservas futuras
+                  value:
+                    mensaje: La cancha tiene 2 reserva(s) futura(s) confirmada(s). Confirma para desactivarla; las reservas se conservan, pero no se aceptarán nuevas.
+                    codigo: CONFIRMACION_REQUERIDA
+                    reservasAfectadas: 2
+                    reservas:
+                      - id: d1ad1c79-85f3-4d01-a0f0-0a7186c8417a
+                        codigo: CY-D1AD1C79
+                        usuarioNombre: Ana Pérez
+                        fecha: '2026-11-20'
+                        horaInicio: '10:00'
+                        horaFin: '11:00'
+                yaDesactivada:
+                  summary: Ya estaba desactivada
+                  value:
+                    mensaje: La cancha ya estaba desactivada
+                    codigo: CANCHA_YA_DESACTIVADA
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+  /api/admin/canchas/{id}/activar:
+    patch:
+      tags: [Administración]
+      operationId: activarCanchaAdmin
+      summary: Reactivar una cancha (administrador)
+      description: US-15. Vuelve a mostrar en el catálogo público una cancha desactivada y a admitir reservas. Solo para administradores.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CanchaId'
+      responses:
+        '200':
+          description: Cancha activada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CanchaAdminRespuesta'
+              example:
+                mensaje: Cancha activada correctamente
+                cancha:
+                    id: b67c4d88-a1fb-45de-830e-dd3bf416a472
+                    nombre: Cancha La Pradera
+                    direccion: Calle 10 # 5-20, Cali
+                    zona: Sur
+                    costoHora: 80000
+                    tipo: Fútbol 7
+                    descripcion: Cancha sintética con iluminación.
+                    servicios: [Parqueadero, Iluminación LED]
+                    imagenUrl: null
+                    disponible: true
+                    reservasFuturas: 0
+                    horarios:
+                      - diaSemana: 1
+                        horaInicio: '06:00'
+                        horaFin: '22:00'
+                      - diaSemana: 6
+                        horaInicio: '07:00'
+                        horaFin: '20:00'
+        '400':
+          $ref: '#/components/responses/ErrorValidacion'
+        '401':
+          $ref: '#/components/responses/NoAutenticado'
+        '403':
+          $ref: '#/components/responses/SoloAdministradores'
+        '404':
+          $ref: '#/components/responses/CanchaNoEncontrada'
+        '409':
+          description: La cancha ya estaba activa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                mensaje: La cancha ya estaba activa
+                codigo: CANCHA_YA_ACTIVA
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1810,6 +2201,10 @@ components:
             - CODIGO_NO_ENCONTRADO
             - RESERVA_NO_VIGENTE
             - MOTIVO_OBLIGATORIO
+            - CONFIRMACION_REQUERIDA
+            - CANCHA_NO_DISPONIBLE
+            - CANCHA_YA_DESACTIVADA
+            - CANCHA_YA_ACTIVA
     ErrorValidacion:
       type: object
       description: Error 400 de validación, con el detalle por campo.
@@ -2435,3 +2830,123 @@ components:
         createdAt:
           type: string
           format: date-time
+    CanchaAdminRequest:
+      type: object
+      required: [nombre, direccion, costoHora, horarios]
+      properties:
+        nombre:
+          type: string
+          maxLength: 120
+          example: Cancha La Pradera
+        direccion:
+          type: string
+          maxLength: 200
+          example: Calle 10 # 5-20, Cali
+        zona:
+          type: string
+          maxLength: 60
+          example: Sur
+        costoHora:
+          type: number
+          exclusiveMinimum: true
+          minimum: 0
+          description: Precio por hora en pesos colombianos; mayor que 0.
+          example: 80000
+        tipo:
+          type: string
+          enum: [Fútbol 5, Fútbol 6, Fútbol 7, Fútbol 8, Fútbol 11]
+          example: Fútbol 7
+        descripcion:
+          type: string
+          maxLength: 1000
+          example: Cancha sintética con iluminación.
+        servicios:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+          example: [Parqueadero, Iluminación LED]
+        horarios:
+          type: array
+          minItems: 1
+          description: Horario de atención por día (un solo horario por día).
+          items:
+            $ref: '#/components/schemas/HorarioAtencion'
+    CanchaAdmin:
+      type: object
+      required: [id, nombre, direccion, costoHora, disponible, reservasFuturas]
+      properties:
+        id:
+          type: string
+          format: uuid
+        nombre:
+          type: string
+        direccion:
+          type: string
+        zona:
+          type: string
+        costoHora:
+          type: number
+        tipo:
+          type: string
+          nullable: true
+        descripcion:
+          type: string
+          nullable: true
+        servicios:
+          type: array
+          items:
+            type: string
+        imagenUrl:
+          type: string
+          nullable: true
+        disponible:
+          type: boolean
+          description: '`false` si la cancha está desactivada (no aparece en el catálogo público ni admite reservas).'
+        reservasFuturas:
+          type: integer
+          description: Reservas confirmadas que todavía no terminan.
+        horarios:
+          type: array
+          description: Solo en la consulta de una cancha.
+          items:
+            $ref: '#/components/schemas/HorarioAtencion'
+    CanchaAdminRespuesta:
+      type: object
+      required: [mensaje, cancha]
+      properties:
+        mensaje:
+          type: string
+        cancha:
+          $ref: '#/components/schemas/CanchaAdmin'
+    ConfirmacionDesactivacion:
+      type: object
+      required: [mensaje, codigo, reservasAfectadas, reservas]
+      properties:
+        mensaje:
+          type: string
+        codigo:
+          type: string
+          enum: [CONFIRMACION_REQUERIDA]
+        reservasAfectadas:
+          type: integer
+        reservas:
+          type: array
+          description: Reservas futuras afectadas (hasta 20).
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              codigo:
+                type: string
+              usuarioNombre:
+                type: string
+              fecha:
+                type: string
+                format: date
+              horaInicio:
+                type: string
+              horaFin:
+                type: string
