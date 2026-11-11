@@ -75,9 +75,9 @@ La definición está en [.github/workflows/ci-cd.yml](../.github/workflows/ci-cd
 | Frontend — lint y build | ESLint, build de producción de Vite y pruebas con cobertura; publica LCOV. |
 | SonarQube Quality Gate | Se ejecuta cuando backend y frontend pasan. `SONAR_HOST_URL` y `SONAR_TOKEN` habilitan el análisis; si faltan o el servidor no responde, registra aviso y continúa. Si el servidor responde, un Quality Gate fallido detiene los jobs dependientes. |
 | Docker — build y smoke test | Construye y levanta PostgreSQL, API y frontend; ejecuta `scripts/smoke-test.sh`, luego la prueba de 100 conexiones Socket.IO y baja el entorno temporal. |
-| Desplegar en entorno local | Solo push exitoso a `sprint_5`, en un runner `self-hosted`: `docker compose up -d --build --wait --wait-timeout 180`; limpia imágenes antiguas al final. |
+| Despliegue en la nube y pruebas de humo | Solo en push a `sprint_5` y con la variable `DESPLIEGUE_NUBE=true`; ver el [manual de despliegue y operación](despliegue-y-operacion.md). |
 
-El job de despliegue requiere un runner self-hosted conectado y los secretos `JWT_SECRET` y `POSTGRES_PASSWORD`. El análisis de SonarQube usa la variable de repositorio `SONAR_HOST_URL` y el secreto `SONAR_TOKEN`. Ningún valor sensible debe escribirse en los archivos versionados.
+El pipeline ya no usa un runner self-hosted (el despliegue local fue retirado); todos los jobs corren en los runners de GitHub. El análisis de SonarQube usa la variable de repositorio `SONAR_HOST_URL` y el secreto `SONAR_TOKEN`. Ningún valor sensible debe escribirse en los archivos versionados.
 
 ## 6. Evidencia y cómo repetir la validación
 
@@ -108,7 +108,7 @@ El job Docker de GitHub Actions se valida en un runner con Docker Compose; los c
 Antes de habilitar un entorno público:
 
 1. Definir dominio HTTPS del frontend y URL pública de API; revisar `CORS_ORIGIN` y `VITE_API_URL`.
-2. Cargar secretos nuevos en GitHub y verificar que runner self-hosted y Docker Compose estén disponibles.
+2. Cargar los secretos y variables de GitHub que indica el manual de despliegue (sección 6).
 3. Configurar SMTP y la pasarela real, si se van a enviar correos o cobrar pagos reales. La pasarela actual es simulada.
 4. Activar HTTPS para tarjetas y configurar el proxy seguro correspondiente.
 5. Confirmar que los checks requeridos están verdes y tener un plan de respaldo de PostgreSQL antes de actualizar datos.

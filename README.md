@@ -32,7 +32,7 @@ Proyecto Informático 1 — Universidad Autónoma de Occidente, Facultad de Inge
 | Base de datos | PostgreSQL 16 (Neon en desarrollo, contenedor en Docker) |
 | Pruebas | Jest, Supertest, Playwright, axe-core, Spectral |
 | Calidad | ESLint, SonarQube |
-| Contenedores y CI/CD | Docker Compose, GitHub Actions, runner self-hosted |
+| Contenedores y CI/CD | Docker Compose, GitHub Actions |
 | Documentación de la API | OpenAPI 3 y Swagger UI |
 
 ---
@@ -551,11 +551,11 @@ El pipeline está en [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml).
 | Frontend - lint y build | `npm ci`, `npm run lint` (ESLint sobre `.js` y `.jsx`) y `npm run build`. |
 | Docker - build y smoke test | Construye las imágenes, levanta todo con `docker compose` y ejecuta [scripts/smoke-test.sh](scripts/smoke-test.sh): health, frontend, rutas SPA, CORS, 401 sin token, registro, login y listado de canchas. Después corre la prueba de carga de sockets con 100 conexiones (US-18). |
 | SonarQube Quality Gate | Analiza backend y frontend con la cobertura de Jest y espera el resultado del Quality Gate. Necesita la variable `SONAR_HOST_URL` y el secreto `SONAR_TOKEN`. Si el servidor no responde (por ejemplo, un túnel de ngrok apagado) o faltan esos datos, el análisis se omite con un aviso y el pipeline continúa. |
-| Desplegar en entorno local | Solo en push a `sprint_5`, en un self-hosted runner: `docker compose up -d --build --wait --wait-timeout 180`. |
+| Despliegue en la nube y pruebas de humo | Solo en push a `sprint_5` y con `DESPLIEGUE_NUBE=true` (ver [manual de despliegue](docs/despliegue-y-operacion.md)). El despliegue local con runner self-hosted se retiró. |
 
 ### Evidencias
 
-**Self-hosted runner** registrado en el equipo de despliegue y escuchando trabajos de GitHub Actions:
+**Self-hosted runner** (evidencia histórica del Sprint 4: el despliegue local con runner propio se retiró en la entrega final, y hoy todos los jobs corren en los runners de GitHub):
 
 ![Runner self-hosted conectado a GitHub](docs/img/runner-self-hosted.png)
 

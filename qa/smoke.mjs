@@ -211,18 +211,19 @@ if (fase === '1') {
   );
 
   await S.caso(
-    { ...base, id: 'SD-15', hu: 'US-20', ca: [1, 3, 4], titulo: 'Análisis estático del workflow de CI/CD (ci-cd.yml)', objetivo: 'Verificar la estructura del pipeline: jobs, dependencias, condición de despliegue y manejo de secretos.', pasos: ['Cargar .github/workflows/ci-cd.yml.', 'Revisar jobs, "needs", la condición "if" del despliegue y el origen de los secretos.', 'Confirmar que no hay archivos .env versionados.'], esperado: 'Jobs backend, frontend, quality-gate, docker y deploy-local; el despliegue solo corre en push a sprint_5 con runner self-hosted; los secretos vienen de "secrets.*"; no hay .env en el repositorio.' },
+    { ...base, id: 'SD-15', hu: 'US-20', ca: [1, 3, 4], titulo: 'Análisis estático del workflow de CI/CD (ci-cd.yml)', objetivo: 'Verificar la estructura del pipeline: jobs, dependencias, condición de despliegue y manejo de secretos.', pasos: ['Cargar .github/workflows/ci-cd.yml.', 'Revisar jobs, "needs", las condiciones "if" de los jobs de despliegue en la nube y el origen de los secretos.', 'Confirmar que no hay archivos .env versionados.'], esperado: 'Jobs backend, frontend, quality-gate y docker; los jobs de despliegue en la nube solo corren en push a sprint_5 y con DESPLIEGUE_NUBE=true (nunca en pull_request); los secretos vienen de "secrets.*"; no hay .env en el repositorio.' },
     async (c) => {
       const wf = cargarYaml(fs.readFileSync(`${ROOT}/.github/workflows/ci-cd.yml`, 'utf8'));
       const jobs = Object.keys(wf.jobs);
-      c.verifica(['backend', 'frontend', 'quality-gate', 'docker', 'deploy-local'].every((j) => jobs.includes(j)), 'Define los 5 jobs: backend, frontend, quality-gate (SonarQube), docker y deploy-local', jobs.join(', '));
+      c.verifica(['backend', 'frontend', 'quality-gate', 'docker', 'verificar-produccion'].every((j) => jobs.includes(j)), 'Define los jobs backend, frontend, quality-gate (SonarQube), docker y verificar-produccion', jobs.join(', '));
       c.verifica(wf.on.pull_request && wf.on.push, 'Se dispara en pull_request y en push');
       c.verifica(JSON.stringify(wf.jobs.docker.needs) === JSON.stringify(['backend', 'frontend', 'quality-gate']), 'El job docker espera a backend, frontend y el Quality Gate de SonarQube', JSON.stringify(wf.jobs.docker.needs));
-      const d = wf.jobs['deploy-local'];
-      c.verifica(d.needs === 'docker', 'El despliegue espera al job docker');
-      c.verifica(/github\.event_name == 'push'/.test(d.if) && /refs\/heads\/sprint_5/.test(d.if), 'El despliegue solo corre en push a sprint_5 (nunca en pull_request)', d.if);
-      c.verifica(d['runs-on'] === 'self-hosted', 'El despliegue usa el runner self-hosted');
-      c.verifica(/secrets\.JWT_SECRET/.test(JSON.stringify(d.env)) && /secrets\.POSTGRES_PASSWORD/.test(JSON.stringify(d.env)), 'JWT_SECRET y POSTGRES_PASSWORD se leen de secretos de GitHub');
+      const d = wf.jobs['verificar-produccion'];
+      c.verifica(!jobs.includes('deploy-local'), 'El despliegue en un runner self-hosted fue retirado del pipeline');
+      c.verifica(['backend', 'frontend', 'quality-gate', 'docker'].every((j) => d.needs.includes(j)), 'Las pruebas en producción esperan a backend, frontend, el Quality Gate y Docker', JSON.stringify(d.needs));
+      c.verifica(/github\.event_name == 'push'/.test(d.if) && /refs\/heads\/sprint_5/.test(d.if) && /DESPLIEGUE_NUBE/.test(d.if), 'El despliegue en la nube solo corre en push a sprint_5 con DESPLIEGUE_NUBE (nunca en pull_request)', d.if);
+      const dv = wf.jobs['desplegar-frontend'];
+      c.verifica(/secrets\.VERCEL_TOKEN/.test(JSON.stringify(dv.env)), 'El token de Vercel se lee de un secreto de GitHub, no del repositorio');
       const usos = JSON.stringify(wf).match(/actions\/(checkout|setup-node)@v\d+/g) ?? [];
       c.verifica(usos.every((u) => /@v5$/.test(u)), 'Las acciones usan v5 (runtime Node 24, sin avisos de obsolescencia)', [...new Set(usos)].join(', '));
       const env = sh('git ls-files', { cwd: ROOT }).stdout.split('\n').filter((f) => /(^|\/)\.env$/.test(f));
@@ -232,20 +233,18 @@ if (fase === '1') {
   );
 
   await S.caso(
-    { ...base, id: 'SD-16', hu: 'US-20', ca: [1, 3], titulo: 'Despliegue real mediante el self-hosted runner', objetivo: 'Comprobar que el job de despliegue ya levantó la aplicación en este equipo a través del runner de GitHub Actions.', pasos: ['Listar los proyectos de Docker Compose.', 'Verificar que el proyecto "canchaya" fue creado desde el espacio de trabajo del runner.', 'Consultar la API y el frontend desplegados.'], esperado: 'Existe el proyecto "canchaya" con 3 contenedores, creado desde la carpeta del runner, y responde en 4100 y 8080.' },
+    { ...base, id: 'SD-16', hu: 'US-20', ca: [1, 3], titulo: 'El pipeline ya no depende de un runner self-hosted', objetivo: 'Comprobar que ningún job exige un runner propio (el despliegue local fue retirado) y que el entorno local de Docker Compose sigue pudiendo levantarse a mano.', pasos: ['Revisar "runs-on" de todos los jobs de ci-cd.yml, monitoreo.yml y respaldo-bd.yml.', 'Confirmar que el docker-compose.yml sigue definiendo los 3 servicios.'], esperado: 'Todos los jobs usan ubuntu-latest (runners de GitHub); docker-compose.yml define db, backend y frontend.' },
     async (c) => {
-      const ls = sh('docker compose ls -a --format json').stdout;
-      const proyectos = JSON.parse(ls || '[]');
-      const desplegado = proyectos.find((x) => x.Name === 'canchaya');
-      c.verifica(Boolean(desplegado), 'Existe el proyecto de despliegue "canchaya"', desplegado?.Status);
-      c.verifica(/actions-runner/.test(desplegado?.ConfigFiles ?? ''), 'Fue creado desde el espacio de trabajo del runner (actions-runner\\_work)', (desplegado?.ConfigFiles ?? '').split(',')[0]);
-      const h = await fetch('http://localhost:4100/api/health').catch(() => null);
-      c.verifica(h?.status === 200, 'La API desplegada por el pipeline responde en http://localhost:4100/api/health', h ? `HTTP ${h.status}` : 'sin respuesta');
-      const w = await fetch('http://localhost:8080').catch(() => null);
-      c.verifica(w?.status === 200, 'El frontend desplegado por el pipeline responde en http://localhost:8080', w ? `HTTP ${w.status}` : 'sin respuesta');
+      const flujos = ['ci-cd.yml', 'monitoreo.yml', 'respaldo-bd.yml'];
+      for (const archivo of flujos) {
+        const wf = cargarYaml(fs.readFileSync(`${ROOT}/.github/workflows/${archivo}`, 'utf8'));
+        const ajenos = Object.entries(wf.jobs).filter(([, job]) => job['runs-on'] !== 'ubuntu-latest').map(([nombre]) => nombre);
+        c.verifica(ajenos.length === 0, `${archivo}: todos los jobs usan runners de GitHub (ubuntu-latest)`, ajenos.join(', ') || 'ninguno usa un runner propio');
+      }
+      const compose = cargarYaml(fs.readFileSync(`${ROOT}/docker-compose.yml`, 'utf8'));
+      c.verifica(['db', 'backend', 'frontend'].every((x) => compose.services[x]), 'docker-compose.yml sigue definiendo db, backend y frontend para el entorno local', Object.keys(compose.services).join(', '));
     }
   );
-
   await S.caso(
     { ...base, id: 'SD-17', hu: 'US-20', ca: [1, 4], prioridad: 'Media', titulo: 'Evidencia de la ejecución del pipeline en GitHub Actions (aportada por el equipo)', objetivo: 'Dejar constancia de la ejecución real del pipeline en GitHub. Esta prueba NO la ejecuta QA localmente: GitHub Actions solo corre en los servidores de GitHub.', pasos: ['Revisar las capturas aportadas por el equipo del run del pipeline, del runner self-hosted y de los secretos.'], esperado: 'Los jobs Backend, Frontend y Docker en verde; runner conectado y escuchando; secretos JWT_SECRET y POSTGRES_PASSWORD creados.' },
     async (c) => {
