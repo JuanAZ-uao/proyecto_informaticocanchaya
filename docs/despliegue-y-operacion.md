@@ -105,7 +105,7 @@ Un servicio gratuito de Render se **suspende tras 15 minutos sin tráfico entran
 Neon también se suspende solo. `/api/health` no consulta la base, y el barrido de retenciones de reserva solo consulta la base cada ≈ 5 minutos cuando no hay nadie conectado, así que un monitor externo no consume horas de cómputo de Neon; las usan los usuarios reales.
 
 ### 4A.5 Respaldo
-El workflow `respaldo-bd.yml` y los scripts de `scripts/respaldo/` funcionan igual: el secreto `BACKUP_DATABASE_URL` es la cadena de conexión de Neon, y la variable `PG_VERSION` debe coincidir con la versión de PostgreSQL del proyecto de Neon (por defecto 17).
+El workflow `respaldo-bd.yml` y los scripts de `scripts/respaldo/` funcionan igual: el secreto `BACKUP_DATABASE_URL` es la cadena de conexión de Neon, y la variable `PG_VERSION` debe coincidir con la versión mayor de PostgreSQL del proyecto de Neon (se ve en el *Overview* del proyecto; hoy 18, que es también el valor por defecto del workflow).
 
 ## 4B. Alternativa de pago: Railway (USD 5 al mes) — US-22 y US-23 tal como están redactadas
 
