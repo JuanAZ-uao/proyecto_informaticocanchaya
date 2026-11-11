@@ -1,10 +1,10 @@
 # Prueba de carga básica de reservas
 
-- **Fecha:** 2026-11-11T19:57:50.257Z
+- **Fecha:** 2026-11-11T21:35:02.240Z
 - **API:** http://localhost:4310/api
 - **Usuarios concurrentes:** 30
-- **Peticiones HTTP:** 183 · latencia p50 187 ms · p95 1287 ms · máxima 1989 ms
-- **Duración total:** 7.2 s
+- **Peticiones HTTP:** 188 · latencia p50 224 ms · p95 1282 ms · máxima 1391 ms
+- **Duración total:** 7.1 s
 - **Resultado:** 5/5 verificaciones aprobadas
 
 | Resultado | Verificación | Detalle |
